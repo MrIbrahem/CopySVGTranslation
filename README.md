@@ -28,7 +28,7 @@ dependencies is available via `pip install svg-translate`.
 
 ```python
 from pathlib import Path
-from svg_translate import svg_extract_and_inject
+from SvgTanslate import svg_extract_and_inject
 
 tree = svg_extract_and_inject(
     extract_file=Path("examples/source_multilingual.svg"),
@@ -40,18 +40,18 @@ if tree is not None:
     print("Injection completed!")
 ```
 
-The helper stores the extracted phrases under `svg_translate/data/` and,
+The helper stores the extracted phrases under `SvgTanslate/data/` and,
 when `save_result=True`, writes the translated SVG to
-`svg_translate/translated/`. If you also need statistics about how many
+`SvgTanslate/translated/`. If you also need statistics about how many
 translations were inserted, call the lower level injector with
 `return_stats=True`:
 
 ```python
-from svg_translate.injection import inject
+from SvgTanslate.injection import inject
 
 tree, stats = inject(
     inject_file="examples/target_missing_translations.svg",
-    mapping_files=["svg_translate/data/source_multilingual.svg.json"],
+    mapping_files=["SvgTanslate/data/source_multilingual.svg.json"],
     save_result=True,
     return_stats=True,
 )
@@ -68,7 +68,7 @@ files are written.
 
 ```python
 from pathlib import Path
-from svg_translate import svg_extract_and_injects
+from SvgTanslate import svg_extract_and_injects
 
 translations = {
     "new": {
