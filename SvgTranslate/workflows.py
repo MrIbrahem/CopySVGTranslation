@@ -7,8 +7,8 @@ import logging
 from pathlib import Path
 from typing import Mapping
 
-from CopySvgTranslate.extraction import extract
-from CopySvgTranslate.injection import inject
+from .extraction import extract
+from .injection import inject
 
 logger = logging.getLogger(__name__)
 
