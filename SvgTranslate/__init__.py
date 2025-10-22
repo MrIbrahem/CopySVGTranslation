@@ -1,9 +1,9 @@
-"""Public API for the svg_translate package."""
+"""Public API for the SvgTranslate package."""
 
-from svg_translate.extraction import extract
-from svg_translate.injection import generate_unique_id, inject, start_injects
-from svg_translate.text_utils import normalize_text
-from svg_translate.workflows import svg_extract_and_inject, svg_extract_and_injects
+from SvgTranslate.extraction import extract
+from SvgTranslate.injection import generate_unique_id, inject, start_injects
+from SvgTranslate.text_utils import normalize_text
+from SvgTranslate.workflows import svg_extract_and_inject, svg_extract_and_injects
 
 __all__ = [
     "extract",

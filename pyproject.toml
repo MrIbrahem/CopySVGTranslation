@@ -17,12 +17,12 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/MrIbrahem/svg_translate_py"
-Repository = "https://github.com/MrIbrahem/svg_translate_py"
-Issues = "https://github.com/MrIbrahem/svg_translate_py/issues"
+Homepage = "https://github.com/MrIbrahem/SvgTranslate"
+Repository = "https://github.com/MrIbrahem/SvgTranslate"
+Issues = "https://github.com/MrIbrahem/SvgTranslate/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["svg_translate"]
+packages = ["SvgTranslate"]
 
 
 [tool.black]

@@ -9,7 +9,7 @@ from typing import Iterable, Mapping
 
 from lxml import etree
 
-from svg_translate.text_utils import extract_text_from_node, normalize_text
+from SvgTranslate.text_utils import extract_text_from_node, normalize_text
 from .preparation import SvgStructureException, make_translation_ready
 
 logger = logging.getLogger(__name__)

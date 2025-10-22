@@ -1,4 +1,4 @@
-"""Extraction phase helpers for svg_translate."""
+"""Extraction phase helpers for SvgTranslate."""
 
 from .extractor import extract
 

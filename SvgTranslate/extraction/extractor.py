@@ -5,7 +5,7 @@ import logging
 
 from lxml import etree
 
-from svg_translate.text_utils import normalize_text
+from SvgTranslate.text_utils import normalize_text
 
 logger = logging.getLogger(__name__)
 
