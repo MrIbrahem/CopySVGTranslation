@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <switch>
+    <text id="label" xml:space="preserve">
+      <tspan id="label">Population 2020</tspan>
+    </text>
+    <text id="label-ar" systemLanguage="ar" xml:space="preserve">
+      <tspan id="label-ar">السكان 2020</tspan>
+    </text>
+    <text id="label-fr" systemLanguage="fr" xml:space="preserve">
+      <tspan id="label-fr">Population 2020 FR</tspan>
+    </text>
+  </switch>
+</svg>
