@@ -22,29 +22,96 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Extracting Translations
-
-To extract translations from an SVG file:
+### Extracting and injecting in a single step
 
 ```python
+from pathlib import Path
+from svg_translate import svg_extract_and_inject
 
-result = svg_extract_and_inject(extract_file, inject_file, output_file=None, data_output_file=None, save_result=False)
+tree = svg_extract_and_inject(
+    extract_file=Path("examples/source_multilingual.svg"),
+    inject_file=Path("examples/target_missing_translations.svg"),
+    save_result=True,
+)
 
+if tree is not None:
+    print("Injection completed!")
+```
+
+The helper stores the extracted phrases under `svg_translate/svgpy/data/` and,
+when `save_result=True`, writes the translated SVG to
+`svg_translate/svgpy/translated/`. If you also need statistics about how many
+translations were inserted, call the lower level injector with
+`return_stats=True`:
+
+```python
+from svg_translate.svgpy.bots.inject_bot import inject
+
+tree, stats = inject(
+    inject_file="examples/target_missing_translations.svg",
+    mapping_files=["svg_translate/svgpy/data/source_multilingual.svg.json"],
+    save_result=True,
+    return_stats=True,
+)
+
+print(stats)
+```
+
+### Injecting with pre-translated data
+
+When you already have the translation JSON, load it and use
+`svg_extract_and_injects` directly. Important parameters include `overwrite`
+to update existing translations and `output_dir` to control where translated
+files are written.
+
+```python
+from pathlib import Path
+from svg_translate import svg_extract_and_injects
+
+translations = {
+    "new": {
+        "Hello": {"ar": "مرحبًا", "fr": "Bonjour"},
+    }
+}
+
+tree, stats = svg_extract_and_injects(
+    translations=translations,
+    inject_file=Path("examples/target_missing_translations.svg"),
+    save_result=True,
+    overwrite=True,
+    output_dir=Path("./translated"),
+    return_stats=True,
+)
+
+print("Saved to", Path("./translated/target_missing_translations.svg"))
+print(stats)
 ```
 
 ## Data Model
 
-The translation data is stored in JSON format with the following structure:
+The extractor writes a JSON document rooted under the `"new"` key. Each entry
+maps normalized English text to a dictionary of language codes and
+translations. Metadata such as `"default_tspans_by_id"` is used internally to
+reconstruct the SVG structure during injection. An example of the modern
+format:
 
 ```json
 {
-  "english source string (trimmed)": {
-    "ar": "Arabic text",
-    "fr": "French text",
-    ...
+  "new": {
+    "default_tspans_by_id": {
+      "text2213": "but are connected in anti-phase"
+    },
+    "but are connected in anti-phase": {
+      "ar": "لكنها موصولة بمرحلتين متعاكستين."
+    }
   }
 }
 ```
+
+Older exports may omit the wrapper and look like
+`{"english": {"ar": "…"}}`. The injector transparently accepts both
+structures, but the recommended format is the nested `"new"` layout shown
+above.
 
 ## Example
 
@@ -69,8 +136,13 @@ The translation data is stored in JSON format with the following structure:
 
 ```json
 {
-  "but are connected in anti-phase": {
-    "ar": "لكنها موصولة بمرحلتين متعاكستين."
+  "new": {
+    "default_tspans_by_id": {
+      "text2213": "but are connected in anti-phase"
+    },
+    "but are connected in anti-phase": {
+      "ar": "لكنها موصولة بمرحلتين متعاكستين."
+    }
   }
 }
 ```
@@ -97,7 +169,7 @@ The translation data is stored in JSON format with the following structure:
 Run the unit tests:
 
 ```bash
-python -m pytest test_svgtranslate.py -v
+python -m pytest tests -v
 ```
 
 ## Implementation Details
