@@ -4,11 +4,16 @@ Unit tests for the SVG translation tool.
 """
 
 import json
-import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+
+from lxml import etree
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from svg_translate import extract, inject, normalize_text, generate_unique_id
 
@@ -71,13 +76,39 @@ class TestSVGTranslate(unittest.TestCase):
     </g>
 </svg>'''
 
+        self.expected_arabic_texts = [
+            "السماعات الخلفية تنقل الإشارة نفسها،",
+            "لكنها موصولة بمرحلتين متعاكستين.",
+        ]
+
         self.expected_translations = {
-            "Rear speakers carry same signal,": {
-                "ar": "السماعات الخلفية تنقل الإشارة نفسها،"
+            "new": {
+                "default_tspans_by_id": {
+                    "tspan2207": "Rear speakers carry same signal,",
+                    "tspan2215": "but are connected in anti-phase",
+                },
+                "rear speakers carry same signal,": {
+                    "ar": "السماعات الخلفية تنقل الإشارة نفسها،",
+                },
+                "but are connected in anti-phase": {
+                    "ar": "لكنها موصولة بمرحلتين متعاكستين.",
+                },
             },
-            "but are connected in anti-phase": {
-                "ar": "لكنها موصولة بمرحلتين متعاكستين."
-            }
+            "old_way": {
+                "rear speakers carry same signal,": {
+                    "_texts": ["rear speakers carry same signal,"],
+                    "_translations": {
+                        "ar": ["السماعات الخلفية تنقل الإشارة نفسها،"],
+                    },
+                },
+                "but are connected in anti-phase": {
+                    "_texts": ["but are connected in anti-phase"],
+                    "_translations": {
+                        "ar": ["لكنها موصولة بمرحلتين متعاكستين."],
+                    },
+                },
+            },
+            "title": {},
         }
 
     def tearDown(self):
@@ -86,6 +117,15 @@ class TestSVGTranslate(unittest.TestCase):
         for file in self.test_dir.glob('*'):
             file.unlink()
         self.test_dir.rmdir()
+
+    def assertTreeHasTranslations(self, tree, expected_texts=None):
+        """Verify that the injected tree contains the expected Arabic texts."""
+        self.assertIsInstance(tree, etree._ElementTree)
+        ns = {"svg": "http://www.w3.org/2000/svg"}
+        found_texts = tree.xpath("//svg:text[@systemLanguage='ar']/svg:tspan/text()", namespaces=ns)
+        texts_to_check = expected_texts or self.expected_arabic_texts
+        for expected in texts_to_check:
+            self.assertIn(expected, found_texts)
 
     def test_normalize_text(self):
         """Test text normalization."""
@@ -120,20 +160,16 @@ class TestSVGTranslate(unittest.TestCase):
             f.write(self.arabic_svg_content)
 
         # Extract translations
-        output_path = self.test_dir / "arabic.svg.json"
-        translations = extract(arabic_svg_path, output_path)
+        translations = extract(arabic_svg_path)
 
         # Verify translations
         self.assertIsNotNone(translations)
-        self.assertEqual(translations, self.expected_translations)
-
-        # Verify output file was created
-        self.assertTrue(output_path.exists())
-
-        # Verify output file contents
-        with open(output_path, 'r', encoding='utf-8') as f:
-            saved_translations = json.load(f)
-        self.assertEqual(saved_translations, self.expected_translations)
+        self.assertIn("new", translations)
+        self.assertIn("old_way", translations)
+        self.assertIn("title", translations)
+        self.assertEqual(translations["new"], self.expected_translations["new"])
+        self.assertEqual(translations["old_way"], self.expected_translations["old_way"])
+        self.assertEqual(translations["title"], self.expected_translations["title"])
 
     def test_extract_case_insensitive(self):
         """Test extraction with case insensitive matching."""
@@ -143,20 +179,14 @@ class TestSVGTranslate(unittest.TestCase):
             f.write(self.arabic_svg_content)
 
         # Extract translations with case insensitive option
-        output_path = self.test_dir / "arabic.svg.json"
-        translations = extract(arabic_svg_path, output_path, case_insensitive=True)
+        translations = extract(arabic_svg_path, case_insensitive=True)
 
         # Verify translations (keys should be lowercase)
-        expected_lower = {
-            "rear speakers carry same signal,": {
-                "ar": "السماعات الخلفية تنقل الإشارة نفسها،"
-            },
-            "but are connected in anti-phase": {
-                "ar": "لكنها موصولة بمرحلتين متعاكستين."
-            }
-        }
         self.assertIsNotNone(translations)
-        self.assertEqual(translations, expected_lower)
+        self.assertIn("new", translations)
+        self.assertEqual(translations["new"], self.expected_translations["new"])
+        self.assertEqual(translations["old_way"], self.expected_translations["old_way"])
+        self.assertEqual(translations["title"], self.expected_translations["title"])
 
     def test_extract_nonexistent_file(self):
         """Test extraction with non-existent file."""
@@ -181,18 +211,24 @@ class TestSVGTranslate(unittest.TestCase):
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         # Inject translations
-        stats = inject(no_translations_path, [mapping_path])
+        tree, stats = inject(
+            no_translations_path,
+            [mapping_path],
+            return_stats=True,
+            save_result=True,
+            output_file=no_translations_path,
+        )
 
         # Verify stats
+        self.assertIsNotNone(tree)
         self.assertIsNotNone(stats)
         self.assertEqual(stats['processed_switches'], 2)
         self.assertEqual(stats['inserted_translations'], 2)
         self.assertEqual(stats['updated_translations'], 0)
         self.assertEqual(stats['skipped_translations'], 0)
 
-        # Verify backup was created
-        backup_path = no_translations_path.with_suffix('.svg.bak')
-        self.assertTrue(backup_path.exists())
+        # Verify the in-memory tree has the translations
+        self.assertTreeHasTranslations(tree)
 
         # Verify modified SVG contains translations
         with open(no_translations_path, 'r', encoding='utf-8') as f:
@@ -223,9 +259,10 @@ class TestSVGTranslate(unittest.TestCase):
             original_content = f.read()
 
         # Inject translations in dry-run mode
-        stats = inject(no_translations_path, [mapping_path], dry_run=True)
+        tree, stats = inject(no_translations_path, [mapping_path], return_stats=True)
 
         # Verify stats
+        self.assertIsNotNone(tree)
         self.assertIsNotNone(stats)
         self.assertEqual(stats['processed_switches'], 2)
         self.assertEqual(stats['inserted_translations'], 2)
@@ -236,9 +273,8 @@ class TestSVGTranslate(unittest.TestCase):
 
         self.assertEqual(original_content, current_content)
 
-        # Verify backup was not created
-        backup_path = no_translations_path.with_suffix('.svg.bak')
-        self.assertFalse(backup_path.exists())
+        # Verify the in-memory tree has the translations
+        self.assertTreeHasTranslations(tree)
 
     def test_inject_overwrite(self):
         """Test injection with overwrite option."""
@@ -273,14 +309,25 @@ class TestSVGTranslate(unittest.TestCase):
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         # Inject translations with overwrite
-        stats = inject(svg_path, [mapping_path], overwrite=True)
+        tree, stats = inject(
+            svg_path,
+            [mapping_path],
+            overwrite=True,
+            return_stats=True,
+            save_result=True,
+            output_file=svg_path,
+        )
 
         # Verify stats
+        self.assertIsNotNone(tree)
         self.assertIsNotNone(stats)
         self.assertEqual(stats['processed_switches'], 1)
         self.assertEqual(stats['inserted_translations'], 0)
         self.assertEqual(stats['updated_translations'], 1)
         self.assertEqual(stats['skipped_translations'], 0)
+
+        # Verify the in-memory tree has the translations
+        self.assertTreeHasTranslations(tree, [self.expected_arabic_texts[0]])
 
         # Verify translation was updated
         with open(svg_path, 'r', encoding='utf-8') as f:
@@ -297,8 +344,8 @@ class TestSVGTranslate(unittest.TestCase):
         with open(mapping_path, 'w', encoding='utf-8') as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
-        stats = inject(nonexistent_path, [mapping_path])
-        self.assertIsNone(stats)
+        result = inject(nonexistent_path, [mapping_path])
+        self.assertIsNone(result)
 
     def test_inject_nonexistent_mapping(self):
         """Test injection with non-existent mapping file."""
@@ -308,8 +355,8 @@ class TestSVGTranslate(unittest.TestCase):
         with open(svg_path, 'w', encoding='utf-8') as f:
             f.write(self.no_translations_svg_content)
 
-        stats = inject(svg_path, [nonexistent_mapping])
-        self.assertIsNone(stats)
+        result = inject(svg_path, [nonexistent_mapping])
+        self.assertIsNone(result)
 
 
 if __name__ == '__main__':
