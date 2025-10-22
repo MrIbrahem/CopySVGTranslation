@@ -3,13 +3,13 @@ requires = ["hatchling>=1.17"]
 build-backend = "hatchling.build"
 
 [project]
-name = "svg-translate"
+name = "SvgTanslate"
 version = "0.1.0"
 description = "Utilities for extracting and applying translations to multilingual SVG files."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-  { name = "SVG Translate Team" }
+  { name = "MrIbrahem" }
 ]
 license = { text = "MIT" }
 dependencies = [
@@ -17,9 +17,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/MrIbrahem/SvgTanslate_py"
-Repository = "https://github.com/MrIbrahem/SvgTanslate_py"
-Issues = "https://github.com/MrIbrahem/SvgTanslate_py/issues"
+Homepage = "https://github.com/MrIbrahem/SvgTanslate"
+Repository = "https://github.com/MrIbrahem/SvgTanslate"
+Issues = "https://github.com/MrIbrahem/SvgTanslate/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["SvgTanslate"]
