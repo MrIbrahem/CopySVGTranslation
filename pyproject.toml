@@ -3,13 +3,13 @@ requires = ["hatchling>=1.17"]
 build-backend = "hatchling.build"
 
 [project]
-name = "svg-translate"
+name = "SvgTranslate"
 version = "0.1.0"
 description = "Utilities for extracting and applying translations to multilingual SVG files."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-  { name = "SVG Translate Team" }
+  { name = "Ibrahim Qasim" }
 ]
 license = { text = "MIT" }
 dependencies = [
