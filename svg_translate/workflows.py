@@ -40,7 +40,7 @@ def svg_extract_and_inject(
     logger.debug("Saved translations to %s", data_output_file)
 
     if not output_file:
-        output_dir = Path(__file__).parent / "translated"
+        output_dir = Path.cwd() / "translated"
         output_dir.mkdir(parents=True, exist_ok=True)
         output_file = output_dir / inject_path.name
 
