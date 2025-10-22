@@ -14,7 +14,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from SvgTanslate import extract, inject, normalize_text, generate_unique_id
+from CopySvgTanslate import extract, inject, normalize_text, generate_unique_id
 
 
 class TestSVGTranslate(unittest.TestCase):
@@ -422,13 +422,13 @@ if __name__ == '__main__':
         <text id="text3"><tspan>English text 3</tspan></text>
     </switch>
 </svg>'''
-        
+
         svg_path = self.test_dir / "multi_switch.svg"
         with open(svg_path, 'w', encoding='utf-8') as f:
             f.write(multi_switch_svg)
-        
+
         translations = extract(svg_path)
-        
+
         self.assertIsNotNone(translations)
         self.assertIn("new", translations)
         # Should have extracted multiple translations
@@ -453,7 +453,7 @@ if __name__ == '__main__':
         }
         with open(mapping1_path, 'w', encoding='utf-8') as f:
             json.dump(mapping1, f, ensure_ascii=False)
-        
+
         # Create second mapping file
         mapping2_path = self.test_dir / "mapping2.json"
         mapping2 = {
@@ -466,7 +466,7 @@ if __name__ == '__main__':
         }
         with open(mapping2_path, 'w', encoding='utf-8') as f:
             json.dump(mapping2, f, ensure_ascii=False)
-        
+
         # Create target SVG
         target_svg = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg">
@@ -477,18 +477,18 @@ if __name__ == '__main__':
         <text id="text2"><tspan id="tspan2215">Text 2</tspan></text>
     </switch>
 </svg>'''
-        
+
         target_path = self.test_dir / "target.svg"
         with open(target_path, 'w', encoding='utf-8') as f:
             f.write(target_svg)
-        
+
         # Inject with both mapping files
         tree, stats = inject(
             target_path,
             [mapping1_path, mapping2_path],
             return_stats=True,
         )
-        
+
         self.assertIsNotNone(tree)
         self.assertIsNotNone(stats)
         # Should have processed translations from both files
@@ -499,21 +499,21 @@ if __name__ == '__main__':
         mapping_path = self.test_dir / "mapping.json"
         with open(mapping_path, 'w', encoding='utf-8') as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
-        
+
         target_path = self.test_dir / "target.svg"
         with open(target_path, 'w', encoding='utf-8') as f:
             f.write(self.no_translations_svg_content)
-        
+
         output_dir = self.test_dir / "output"
         output_dir.mkdir()
-        
+
         tree = inject(
             target_path,
             [mapping_path],
             output_dir=output_dir,
             save_result=True,
         )
-        
+
         self.assertIsNotNone(tree)
         # Check that file was saved in output directory
         expected_output = output_dir / target_path.name
@@ -524,13 +524,13 @@ if __name__ == '__main__':
         mapping_path = self.test_dir / "mapping.json"
         with open(mapping_path, 'w', encoding='utf-8') as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
-        
+
         target_path = self.test_dir / "target.svg"
         with open(target_path, 'w', encoding='utf-8') as f:
             f.write(self.no_translations_svg_content)
-        
+
         tree = inject(target_path, [mapping_path])
-        
+
         self.assertIsNotNone(tree)
         # Original elements should still be present
         tree_str = etree.tostring(tree.getroot(), encoding='unicode')
@@ -551,15 +551,15 @@ if __name__ == '__main__':
         </text>
     </switch>
 </svg>'''
-        
+
         svg_path = self.test_dir / "existing.svg"
         with open(svg_path, 'w', encoding='utf-8') as f:
             f.write(svg_with_existing)
-        
+
         mapping_path = self.test_dir / "mapping.json"
         with open(mapping_path, 'w', encoding='utf-8') as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
-        
+
         # Inject without overwrite
         tree, stats = inject(
             svg_path,
@@ -569,12 +569,12 @@ if __name__ == '__main__':
             save_result=True,
             output_file=svg_path,
         )
-        
+
         self.assertIsNotNone(tree)
         # Should have skipped the existing translation
         self.assertEqual(stats['inserted_translations'], 0)
         self.assertEqual(stats['skipped_translations'], 1)
-        
+
         # Verify original text is preserved
         with open(svg_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -593,13 +593,13 @@ if __name__ == '__main__':
         </text>
     </switch>
 </svg>'''
-        
+
         svg_path = self.test_dir / "whitespace.svg"
         with open(svg_path, 'w', encoding='utf-8') as f:
             f.write(svg_with_whitespace)
-        
+
         translations = extract(svg_path)
-        
+
         self.assertIsNotNone(translations)
         # Whitespace should be normalized
         if "new" in translations:
@@ -625,15 +625,15 @@ if __name__ == '__main__':
         <text id="text3"><tspan>Unmatched text</tspan></text>
     </switch>
 </svg>'''
-        
+
         svg_path = self.test_dir / "complex.svg"
         with open(svg_path, 'w', encoding='utf-8') as f:
             f.write(complex_svg)
-        
+
         mapping_path = self.test_dir / "mapping.json"
         with open(mapping_path, 'w', encoding='utf-8') as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
-        
+
         # Test with overwrite=True
         tree, stats = inject(
             svg_path,
@@ -641,7 +641,7 @@ if __name__ == '__main__':
             overwrite=True,
             return_stats=True,
         )
-        
+
         self.assertIsNotNone(tree)
         # Verify stats are present and reasonable
         self.assertIn('processed_switches', stats)
@@ -655,31 +655,31 @@ if __name__ == '__main__':
         arabic_svg_path = self.test_dir / "arabic.svg"
         with open(arabic_svg_path, 'w', encoding='utf-8') as f:
             f.write(self.arabic_svg_content)
-        
+
         # Extract translations
         translations = extract(arabic_svg_path)
         self.assertIsNotNone(translations)
-        
+
         # Save to JSON
         mapping_path = self.test_dir / "roundtrip.json"
         with open(mapping_path, 'w', encoding='utf-8') as f:
             json.dump(translations, f, ensure_ascii=False)
-        
+
         # Create target without translations
         target_path = self.test_dir / "target.svg"
         with open(target_path, 'w', encoding='utf-8') as f:
             f.write(self.no_translations_svg_content)
-        
+
         # Inject translations
         tree, stats = inject(
             target_path,
             [mapping_path],
             return_stats=True,
         )
-        
+
         self.assertIsNotNone(tree)
         self.assertGreater(stats['inserted_translations'], 0)
-        
+
         # Verify the translated content
         self.assertTreeHasTranslations(tree)
 
@@ -689,13 +689,13 @@ if __name__ == '__main__':
         mapping_path = self.test_dir / "empty_mapping.json"
         with open(mapping_path, 'w', encoding='utf-8') as f:
             json.dump(empty_mapping, f)
-        
+
         target_path = self.test_dir / "target.svg"
         with open(target_path, 'w', encoding='utf-8') as f:
             f.write(self.no_translations_svg_content)
-        
+
         tree, stats = inject(target_path, [mapping_path], return_stats=True)
-        
+
         # Should complete without error, but with no translations
         self.assertIsNotNone(tree)
         self.assertEqual(stats['inserted_translations'], 0)
@@ -705,11 +705,11 @@ if __name__ == '__main__':
         mapping_path = self.test_dir / "invalid.json"
         with open(mapping_path, 'w', encoding='utf-8') as f:
             f.write("{invalid json content")
-        
+
         target_path = self.test_dir / "target.svg"
         with open(target_path, 'w', encoding='utf-8') as f:
             f.write(self.no_translations_svg_content)
-        
+
         result = inject(target_path, [mapping_path])
         self.assertIsNone(result)
 
@@ -725,7 +725,7 @@ if __name__ == '__main__':
             ("a b y", "a b y"),
             ("你好世界", "你好世界"),
         ]
-        
+
         for input_text, expected in test_cases:
             result = normalize_text(input_text)
             self.assertEqual(result, expected, f"Failed for input: {input_text}")
