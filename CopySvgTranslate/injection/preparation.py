@@ -92,6 +92,7 @@ def reorder_texts(root: etree._Element):
 
 def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tuple[etree._ElementTree, etree._Element]:
     """Prepare an SVG file for translation and return its tree and root."""
+    svg_file_path = Path(str(svg_file_path))
     if not svg_file_path.exists():
         raise FileNotFoundError(f"SVG file not found: {svg_file_path}")
 
