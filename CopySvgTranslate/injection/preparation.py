@@ -49,7 +49,7 @@ def normalize_lang(lang: str) -> str:
     """
     if not lang:
         return lang
-    pieces = re.split(r'[_\s]+', lang.strip())
+    pieces = re.split(r'[_\-\s]+', lang.strip())
     primary = pieces[0].lower()
     if len(pieces) > 1:
         rest = "-".join(p.upper() if len(p) == 2 else p.title() for p in pieces[1:])
