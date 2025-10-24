@@ -10,35 +10,6 @@ from ..text_utils import normalize_text
 logger = logging.getLogger(__name__)
 
 
-def get_english_default_texts(text_elements, case_insensitive):
-    new_keys = []
-    default_tspans_by_id = {}
-
-    for text_elem in text_elements:
-        system_lang = text_elem.get('systemLanguage')
-        if system_lang:
-            continue
-
-        tspans = text_elem.xpath('./svg:tspan', namespaces={'svg': 'http://www.w3.org/2000/svg'})
-        if tspans:
-            tspans_by_id = {
-                tspan.get('id'): tspan.text.strip()
-                for tspan in tspans
-                if tspan.text and tspan.get('id') and tspan.text.strip()
-            }
-            default_tspans_by_id.update(tspans_by_id)
-            text_contents = [tspan.text.strip() if tspan.text else "" for tspan in tspans]
-        else:
-            text_contents = [text_elem.text.strip()] if text_elem.text else [""]
-
-        default_texts = [normalize_text(text, case_insensitive) for text in text_contents]
-        for text in default_texts:
-            key = text.lower() if case_insensitive else text
-            new_keys.append(key)
-
-    return new_keys, default_tspans_by_id
-
-
 def make_title_translations(new):
     translations_title = {}
 
@@ -49,6 +20,37 @@ def make_title_translations(new):
                 translations_title[key[:-4]] = {lang: text[:-4] for lang, text in mapping.items()}
 
     return translations_title
+
+
+def get_english_default_texts(text_elements, case_insensitive):
+    new_keys = []
+    default_tspans_by_id = {}
+
+    for text_elem in text_elements:
+        system_lang = text_elem.get('systemLanguage')
+        if system_lang:
+            continue
+
+        tspans = text_elem.xpath('./svg:tspan', namespaces={'svg': 'http://www.w3.org/2000/svg'})
+        text_contents = []
+        # ---
+        if tspans:
+            tspans_by_id = {
+                tspan.get('id'): tspan.text.strip()
+                for tspan in tspans
+                if tspan.text and tspan.get('id') and tspan.text.strip()
+            }
+            default_tspans_by_id.update(tspans_by_id)
+            text_contents = [tspan.text.strip() for tspan in tspans if tspan.text]
+            # ---
+        # else:
+        # text_contents = [text_elem.text.strip()] if text_elem.text else [""]
+
+        default_texts = [normalize_text(text, case_insensitive) for text in text_contents]
+        # for text in default_texts: key = text.lower() if case_insensitive else text
+        new_keys.extend(default_texts)
+
+    return new_keys, default_tspans_by_id
 
 
 def extract(svg_file_path, case_insensitive: bool = True):
@@ -135,6 +137,6 @@ def extract(svg_file_path, case_insensitive: bool = True):
                 if store_key in translations["new"]:
                     translations["new"][store_key][system_lang] = normalized_translation
 
-    translations["title"] = make_title_translations(translations["new"])
+    # translations["title"] = make_title_translations(translations["new"])
 
     return translations

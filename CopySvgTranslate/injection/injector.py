@@ -14,6 +14,7 @@ from .preparation import SvgStructureException, make_translation_ready
 
 logger = logging.getLogger(__name__)
 
+
 def get_target_path(
     output_file: Path | str | None,
     output_dir: Path | str | None,
@@ -21,14 +22,14 @@ def get_target_path(
 ) -> Path:
     """
     Determine the filesystem path where the modified SVG should be written.
-    
+
     If `output_file` is provided, it is used as the target path. Otherwise the path is constructed by combining `output_dir` (if given) or the source file's directory with the source file's name. In all cases the parent directories for the resolved path are created if they do not exist.
-    
+
     Parameters:
         output_file (Path | str | None): Explicit output file path to use.
         output_dir (Path | str | None): Directory to place the output file when `output_file` is not provided.
         svg_path (Path): Path to the original SVG file; its name is used when constructing a target path.
-    
+
     Returns:
         Path: The resolved filesystem path for the output SVG file.
     """
@@ -41,6 +42,7 @@ def get_target_path(
         target_path.parent.mkdir(parents=True, exist_ok=True)
 
     return target_path
+
 
 def generate_unique_id(base_id: str, lang: str, existing_ids: set[str]) -> str:
     """Generate a unique identifier by appending the language and a counter."""
@@ -149,7 +151,7 @@ def work_on_switches(
             if key in all_mappings:
                 available_translations[key] = all_mappings[key]
             else:
-                logger.warning(f"No mapping for '{key}'")
+                logger.debug(f"No mapping for '{key}'")
 
         if not available_translations:
             continue
