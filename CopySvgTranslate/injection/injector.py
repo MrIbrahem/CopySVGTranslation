@@ -14,6 +14,15 @@ from .preparation import SvgStructureException, make_translation_ready
 
 logger = logging.getLogger(__name__)
 
+def get_target_path(output_file, output_dir, svg_path):
+    if output_file:
+        target_path = Path(output_file)
+    else:
+        output_dir = output_dir or svg_path.parent
+        target_path = Path(output_dir) / svg_path.name
+        target_path.mkdir(parents=True, exist_ok=True)
+    
+    return target_path
 
 def generate_unique_id(base_id: str, lang: str, existing_ids: set[str]) -> str:
     """Generate a unique identifier by appending the language and a counter."""
@@ -290,15 +299,8 @@ def inject(
         sort_switch_texts(elem)
 
     if save_result:
-        if output_file:
-            target_path = Path(output_file)
-        else:
-            output_dir = output_dir or svg_path.parent
-            target_path = Path(output_dir) / svg_path.name
-            target_path.parent.mkdir(parents=True, exist_ok=True)
-
-        # Write the modified SVG
         try:
+            target_path = get_target_path(output_file, output_dir, svg_path)
             tree.write(str(target_path), encoding='utf-8', xml_declaration=True, pretty_print=True)
             logger.debug(f"Saved modified SVG to {target_path}")
         except Exception as e:
