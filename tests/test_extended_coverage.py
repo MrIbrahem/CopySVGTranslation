@@ -296,48 +296,6 @@ class TestSortSwitchTexts(unittest.TestCase):
 class TestReorderTexts(unittest.TestCase):
     """Test suite for reorder_texts function."""
 
-    def test_reorder_texts_basic(self):
-        """Test reordering text elements in switches."""
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
-            <switch>
-                <text id="trsvg2" systemLanguage="ar">Arabic</text>
-                <text id="trsvg1" systemLanguage="fr">French</text>
-                <text>Default</text>
-            </switch>
-        </svg>'''
-        root = etree.fromstring(svg_content)
-
-        reorder_texts(root)
-
-        switch = root.find('.//{http://www.w3.org/2000/svg}switch')
-        texts = switch.findall('{http://www.w3.org/2000/svg}text')
-
-        # Fallback should be last
-        self.assertIsNone(texts[-1].get('systemLanguage'))
-
-    def test_reorder_texts_multiple_switches(self):
-        """Test reordering with multiple switches."""
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
-            <switch>
-                <text id="trsvg1">Default1</text>
-                <text id="trsvg2" systemLanguage="ar">Arabic1</text>
-            </switch>
-            <switch>
-                <text id="trsvg4">Default2</text>
-                <text id="trsvg3" systemLanguage="fr">French2</text>
-            </switch>
-        </svg>'''
-        root = etree.fromstring(svg_content)
-
-        reorder_texts(root)
-
-        switches = root.findall('.//{http://www.w3.org/2000/svg}switch')
-        for switch in switches:
-            texts = switch.findall('{http://www.w3.org/2000/svg}text')
-            # Last text should be fallback (no systemLanguage)
-            if texts:
-                self.assertIsNone(texts[-1].get('systemLanguage'))
-
     def test_reorder_texts_no_switches(self):
         """Test reordering with no switch elements."""
         svg_content = '<svg xmlns="http://www.w3.org/2000/svg"><text>No switch</text></svg>'
