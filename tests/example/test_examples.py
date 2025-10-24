@@ -7,7 +7,7 @@ from pathlib import Path
 from CopySvgTranslate import (
     extract,
     svg_extract_and_inject,
-    svg_extract_and_injects,
+    inject,
 )
 
 FIXTURES_DIR = Path(__file__).parent
@@ -42,7 +42,7 @@ class TestIntegrationWorkflows:
         assert output_svg.exists()
         assert data_file.exists()
 
-    def test_svg_extract_and_injects_with_dict(self, tmp_path: Path):
+    def test_inject_with_dict(self, tmp_path: Path):
         """Test inject with pre-extracted translations dict."""
         target_svg = tmp_path / "before_translate.svg"
         target_svg.write_text(
@@ -54,14 +54,20 @@ class TestIntegrationWorkflows:
         translations = extract(FIXTURES_DIR / "source.svg")
 
         # Inject using the dict
-        result, stats = svg_extract_and_injects(
-            translations,
+
+        result, stats = inject(
             target_svg,
-            output_dir=tmp_path,
+            # output_dir=tmp_path,
+            all_mappings=translations,
             save_result=True,
             return_stats=True,
         )
-
         assert result is not None
         assert isinstance(stats, dict)
         assert "inserted_translations" in stats
+
+        source_svg = FIXTURES_DIR / "after_translate.svg"
+        new_text = target_svg.read_text(encoding="utf-8")
+        expected_text = source_svg.read_text(encoding="utf-8")
+
+        assert new_text == expected_text

@@ -137,6 +137,6 @@ def extract(svg_file_path, case_insensitive: bool = True):
                 if store_key in translations["new"]:
                     translations["new"][store_key][system_lang] = normalized_translation
 
-    # translations["title"] = make_title_translations(translations["new"])
+    translations["title"] = make_title_translations(translations["new"])
 
     return translations
