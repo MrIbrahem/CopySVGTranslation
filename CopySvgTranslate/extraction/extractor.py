@@ -72,7 +72,7 @@ def extract(svg_file_path, case_insensitive: bool = True):
 
             tspans = text_elem.xpath('./svg:tspan', namespaces={'svg': 'http://www.w3.org/2000/svg'})
             if tspans:
-                tspans_to_id = {tspan.text.strip(): tspan.get('id') for tspan in tspans if tspan.text and tspan.get('id')}
+                tspans_to_id = {tspan.text.strip(): tspan.get('id') for tspan in tspans if tspan.text and tspan.text.strip() and tspan.get('id')}
                 # Return a list of text from each tspan element
                 text_contents = [tspan.text.strip() if tspan.text else "" for tspan in tspans]
             else:
