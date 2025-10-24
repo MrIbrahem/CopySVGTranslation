@@ -680,8 +680,8 @@ class TestEdgeCases(unittest.TestCase):
         svg_path = self.test_dir / "malformed.svg"
         svg_path.write_text("<svg><text>Unclosed", encoding='utf-8')
         
-        with self.assertRaises(etree.XMLSyntaxError):
-            extract(svg_path)
+        result = extract(svg_path)
+        self.assertIsNone(result)
 
     def test_inject_return_stats_false(self):
         """Test inject with return_stats=False."""

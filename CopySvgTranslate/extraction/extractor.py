@@ -22,7 +22,11 @@ def extract(svg_file_path, case_insensitive: bool = True):
 
     # Parse SVG as XML
     parser = etree.XMLParser(remove_blank_text=True)
-    tree = etree.parse(str(svg_file_path), parser)
+    try:
+        tree = etree.parse(str(svg_file_path), parser)
+    except (etree.XMLSyntaxError, OSError) as exc:
+        logger.error(f"Failed to parse SVG file {svg_file_path}: {exc}")
+        return None
     root = tree.getroot()
 
     # Find all switch elements
