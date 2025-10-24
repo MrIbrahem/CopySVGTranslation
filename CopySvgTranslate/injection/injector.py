@@ -36,6 +36,7 @@ def get_target_path(
     """
     if output_file:
         target_path = Path(output_file)
+        target_path.parent.mkdir(parents=True, exist_ok=True)
     else:
         save_dir = output_dir or svg_path.parent
         target_path = Path(save_dir) / svg_path.name

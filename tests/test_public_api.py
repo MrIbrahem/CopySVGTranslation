@@ -232,7 +232,6 @@ class TestExtractFunction:
         """extract should return a dict with expected top-level keys."""
         result = extract(FIXTURES_DIR / "source.svg")
         assert "new" in result
-        assert "old_way" in result
         assert "title" in result
 
     def test_extract_nonexistent_file_returns_none(self):

@@ -20,6 +20,7 @@ from CopySvgTranslate import svg_extract_and_inject
 tree = svg_extract_and_inject(
     extract_file=Path("examples/source_multilingual.svg"),
     inject_file=Path("examples/target_missing_translations.svg"),
+    data_output_file = Path("examples/data.json")
     save_result=True,
 )
 
@@ -27,9 +28,9 @@ if tree is not None:
     print("Injection completed!")
 ```
 
-The helper stores the extracted phrases under `CopySvgTranslate/data/` and,
+The helper stores the extracted phrases under `Path("examples/data.json")` and,
 when `save_result=True`, writes the translated SVG to
-`CopySvgTranslate/translated/`. If you also need statistics about how many
+`output_dir=Path("./translated")`. If you also need statistics about how many
 translations were inserted, call the lower level injector with
 `return_stats=True`:
 
@@ -39,6 +40,7 @@ from CopySvgTranslate.injection import inject
 tree, stats = inject(
     inject_file="examples/target_missing_translations.svg",
     mapping_files=["CopySvgTranslate/data/source_multilingual.svg.json"],
+    output_dir=Path("./translated"),
     save_result=True,
     return_stats=True,
 )
@@ -102,7 +104,7 @@ Older exports may omit the wrapper and look like
 structures, but the recommended format is the nested `"new"` layout shown
 above.
 
-## Example
+## Extract Example
 
 ### Input SVG (arabic.svg)
 
@@ -136,22 +138,8 @@ above.
 }
 ```
 
-### Output SVG after Injection
-
-```xml
-<switch style="font-size:30px;font-family:Bitstream Vera Sans">
-    <text x="259.34814" y="927.29651" style="font-size:30px;font-family:Bitstream Vera Sans"
-        id="text2213-ar"
-        xml:space="preserve" systemLanguage="ar">
-        <tspan x="259.34814" y="927.29651" id="tspan2215-ar">لكنها موصولة بمرحلتين متعاكستين.</tspan>
-    </text>
-    <text x="259.34814" y="927.29651" style="font-size:30px;font-family:Bitstream Vera Sans"
-        id="text2213"
-        xml:space="preserve">
-        <tspan x="259.34814" y="927.29651" id="tspan2215">but are connected in anti-phase</tspan>
-    </text>
-</switch>
-```
+### Injection Example 
+- TODO
 
 ## Testing
 

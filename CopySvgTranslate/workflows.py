@@ -36,6 +36,9 @@ def svg_extract_and_inject(
 
         data_output_file = json_output_dir / f"{extract_path.name}.json"
 
+    data_output_file = Path(data_output_file)
+    data_output_file.parent.mkdir(parents=True, exist_ok=True)
+
     # Save translations to JSON
     with open(data_output_file, 'w', encoding='utf-8') as handle:
         json.dump(translations, handle, indent=2, ensure_ascii=False)

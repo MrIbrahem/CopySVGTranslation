@@ -82,29 +82,11 @@ class TestSVGTranslate(unittest.TestCase):
 
         self.expected_translations = {
             "new": {
-                "default_tspans_by_id": {
-                    "tspan2207": "Rear speakers carry same signal,",
-                    "tspan2215": "but are connected in anti-phase",
-                },
                 "rear speakers carry same signal,": {
                     "ar": "السماعات الخلفية تنقل الإشارة نفسها،",
                 },
                 "but are connected in anti-phase": {
                     "ar": "لكنها موصولة بمرحلتين متعاكستين.",
-                },
-            },
-            "old_way": {
-                "rear speakers carry same signal,": {
-                    "_texts": ["rear speakers carry same signal,"],
-                    "_translations": {
-                        "ar": ["السماعات الخلفية تنقل الإشارة نفسها،"],
-                    },
-                },
-                "but are connected in anti-phase": {
-                    "_texts": ["but are connected in anti-phase"],
-                    "_translations": {
-                        "ar": ["لكنها موصولة بمرحلتين متعاكستين."],
-                    },
                 },
             },
             "title": {},
@@ -162,10 +144,8 @@ class TestSVGTranslate(unittest.TestCase):
         # Verify translations
         self.assertIsNotNone(translations)
         self.assertIn("new", translations)
-        self.assertIn("old_way", translations)
         self.assertIn("title", translations)
         self.assertEqual(translations["new"], self.expected_translations["new"])
-        self.assertEqual(translations["old_way"], self.expected_translations["old_way"])
         self.assertEqual(translations["title"], self.expected_translations["title"])
 
     def test_extract_case_insensitive(self):
@@ -182,7 +162,6 @@ class TestSVGTranslate(unittest.TestCase):
         self.assertIsNotNone(translations)
         self.assertIn("new", translations)
         self.assertEqual(translations["new"], self.expected_translations["new"])
-        self.assertEqual(translations["old_way"], self.expected_translations["old_way"])
         self.assertEqual(translations["title"], self.expected_translations["title"])
 
     def test_extract_nonexistent_file(self):
@@ -443,10 +422,8 @@ if __name__ == '__main__':
         mapping1_path = self.test_dir / "mapping1.json"
         mapping1 = {
             "new": {
-                "default_tspans_by_id": {"tspan2207": "Text 1"},
                 "text 1": {"ar": "نص 1"}
             },
-            "old_way": {},
             "title": {}
         }
         with open(mapping1_path, 'w', encoding='utf-8') as f:
@@ -456,10 +433,8 @@ if __name__ == '__main__':
         mapping2_path = self.test_dir / "mapping2.json"
         mapping2 = {
             "new": {
-                "default_tspans_by_id": {"tspan2215": "Text 2"},
                 "text 2": {"ar": "نص 2"}
             },
-            "old_way": {},
             "title": {}
         }
         with open(mapping2_path, 'w', encoding='utf-8') as f:
@@ -683,7 +658,7 @@ if __name__ == '__main__':
 
     def test_inject_empty_mapping_file(self):
         """Test injection with empty mapping file."""
-        empty_mapping = {"new": {}, "old_way": {}, "title": {}}
+        empty_mapping = {"new": {}, "title": {}}
         mapping_path = self.test_dir / "empty_mapping.json"
         with open(mapping_path, 'w', encoding='utf-8') as f:
             json.dump(empty_mapping, f)
