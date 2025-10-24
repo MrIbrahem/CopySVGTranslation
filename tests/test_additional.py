@@ -16,7 +16,6 @@ from CopySvgTranslate import extract, inject, normalize_text, generate_unique_id
 from CopySvgTranslate.text_utils import extract_text_from_node
 from CopySvgTranslate.injection.injector import load_all_mappings
 from CopySvgTranslate.injection.preparation import normalize_lang, get_text_content, clone_element, SvgStructureException
-from CopySvgTranslate.workflows import svg_extract_and_injects
 
 
 # -------------------------------
@@ -164,13 +163,13 @@ class TestInjectorFunctions:
 class TestWorkflowFunctions:
     """Tests for high-level workflow functions."""
 
-    def test_svg_extract_and_injects_basic_workflow(self, temp_dir):
-        """Test basic svg_extract_and_injects workflow."""
+    def test_inject_basic_workflow(self, temp_dir):
+        """Test basic inject workflow."""
         target = temp_dir / "target.svg"
         content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t1"><tspan>Hi</tspan></text></switch></svg>'''
         target.write_text(content, encoding='utf-8')
         translations = {"new": {"hi": {"ar": "مرحبا"}}}
-        tree, stats = svg_extract_and_injects(translations, target, return_stats=True)
+        tree, stats = inject(translations, target, output_dir=temp_dir, return_stats=True)
         assert tree is not None
         assert stats is not None
 

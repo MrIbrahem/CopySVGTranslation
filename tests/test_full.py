@@ -48,7 +48,7 @@ def test_svg_extract_and_inject_creates_translation_files(tmp_path: Path, target
     assert "السكان 2020" in injected_svg
 
 
-def test_svg_extract_and_injects_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
+def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
     """svg_extract_and_injects should reuse an already-extracted mapping structure."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
@@ -196,7 +196,7 @@ def test_svg_extract_and_inject_preserves_translation_data(tmp_path: Path, targe
     assert len(translations["new"]) > 0
 
 
-def test_svg_extract_and_injects_without_output_dir(tmp_path: Path, target_svg: Path) -> None:
+def test_inject_without_output_dir(tmp_path: Path, target_svg: Path) -> None:
     """svg_extract_and_injects should handle missing output_dir when save_result=False."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
@@ -211,7 +211,7 @@ def test_svg_extract_and_injects_without_output_dir(tmp_path: Path, target_svg: 
     assert isinstance(stats, dict)
 
 
-def test_svg_extract_and_injects_with_default_output_dir(tmp_path: Path, target_svg: Path) -> None:
+def test_inject_with_default_output_dir(tmp_path: Path, target_svg: Path) -> None:
     """svg_extract_and_injects should create default output_dir when needed."""
     import os
     original_cwd = os.getcwd()
@@ -236,7 +236,7 @@ def test_svg_extract_and_injects_with_default_output_dir(tmp_path: Path, target_
         os.chdir(original_cwd)
 
 
-def test_svg_extract_and_injects_returns_stats(tmp_path: Path, target_svg: Path) -> None:
+def test_inject_returns_stats(tmp_path: Path, target_svg: Path) -> None:
     """svg_extract_and_injects should return detailed statistics when requested."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
@@ -257,7 +257,7 @@ def test_svg_extract_and_injects_returns_stats(tmp_path: Path, target_svg: Path)
         assert key in stats, f"Stats should contain '{key}' key"
 
 
-def test_svg_extract_and_injects_without_stats(tmp_path: Path, target_svg: Path) -> None:
+def test_inject_without_stats(tmp_path: Path, target_svg: Path) -> None:
     """svg_extract_and_injects should return only tree when return_stats=False."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
@@ -372,7 +372,7 @@ def test_svg_extract_and_inject_with_overwrite_true(tmp_path: Path, target_svg: 
     assert "systemLanguage=\"ar\"" in content2
 
 
-def test_svg_extract_and_injects_with_empty_translations(tmp_path: Path, target_svg: Path) -> None:
+def test_inject_with_empty_translations(tmp_path: Path, target_svg: Path) -> None:
     """svg_extract_and_injects should handle empty translation dictionaries gracefully."""
     empty_translations = {"new": {}, "title": {}}
 
@@ -449,7 +449,7 @@ def test_svg_extract_and_inject_creates_parent_directories(tmp_path: Path, targe
     assert nested_data.exists(), "Data file should be created with parent directories"
 
 
-def test_svg_extract_and_injects_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
+def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
     """svg_extract_and_injects should handle multiple injection operations."""
     translations = extract(FIXTURES_DIR / "source.svg")
 

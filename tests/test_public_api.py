@@ -77,7 +77,7 @@ class TestPublicAPIExports:
         assert callable(svg_extract_and_inject)
         assert svg_extract_and_inject.__name__ == "svg_extract_and_inject"
 
-    def test_svg_extract_and_injects_is_importable(self):
+    def test_inject_is_importable(self):
         """The svg_extract_and_injects function should be importable from top-level module."""
         assert callable(svg_extract_and_injects)
         assert svg_extract_and_injects.__name__ == "svg_extract_and_injects"
@@ -281,7 +281,7 @@ class TestIntegrationWorkflows:
         assert output_svg.exists()
         assert data_file.exists()
 
-    def test_svg_extract_and_injects_with_dict(self, tmp_path: Path):
+    def test_inject_with_dict(self, tmp_path: Path):
         """Test inject with pre-extracted translations dict."""
         target_svg = tmp_path / "target.svg"
         target_svg.write_text(

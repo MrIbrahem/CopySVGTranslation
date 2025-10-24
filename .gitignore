@@ -1,3 +1,4 @@
 *.pyc
 *.svg
 !tests/example/**.svg
+data/source.svg.json

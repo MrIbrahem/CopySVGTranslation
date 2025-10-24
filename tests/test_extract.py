@@ -112,7 +112,7 @@ class TestWorkflows:
         result = svg_extract_and_inject(temp_dir / "none.svg", target_svg, save_result=False)
         assert result is None
 
-    def test_svg_extract_and_injects_with_return_stats(self, temp_dir):
+    def test_inject_with_return_stats(self, temp_dir):
         """Test svg_extract_and_injects with return_stats=True."""
         target = temp_dir / "target.svg"
         target.write_text(
@@ -128,7 +128,7 @@ class TestWorkflows:
         assert stats is not None
         assert "processed_switches" in stats
 
-    def test_svg_extract_and_injects_with_overwrite(self, temp_dir):
+    def test_inject_with_overwrite(self, temp_dir):
         """Test svg_extract_and_injects with overwrite parameter."""
         target = temp_dir / "target.svg"
         target.write_text(

@@ -34,11 +34,12 @@ def get_target_path(
         Path: The resolved filesystem path for the output SVG file.
     """
     if output_file:
-        target_path = Path(output_file)
+        target_path = Path(output_file) if not isinstance(output_file, Path) else output_file
         target_path.parent.mkdir(parents=True, exist_ok=True)
     else:
+        output_dir = Path(output_dir) if not isinstance(output_dir, Path) else output_dir
         save_dir = output_dir or svg_path.parent
-        target_path = Path(save_dir) / svg_path.name
+        target_path = save_dir / svg_path.name
         target_path.parent.mkdir(parents=True, exist_ok=True)
 
     return target_path
@@ -65,7 +66,8 @@ def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
     all_mappings: dict = {}
 
     for mapping_file in mapping_files:
-        mapping_path = Path(mapping_file)
+        mapping_path = Path(mapping_file) if not isinstance(mapping_file, Path) else mapping_file
+
         if not mapping_path.exists():
             logger.warning(f"Mapping file not found: {mapping_path}")
             continue
@@ -271,7 +273,7 @@ def inject(
 ):
     """Inject translations into the provided SVG file."""
 
-    svg_path = Path(svg_file_path)
+    svg_path = Path(svg_file_path) if not isinstance(svg_file_path, Path) else svg_file_path
 
     if not svg_path.exists():
         logger.error(f"SVG file not found: {svg_path}")
