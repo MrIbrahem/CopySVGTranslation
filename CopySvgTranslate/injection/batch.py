@@ -39,17 +39,17 @@ def start_injects(
         stats["file_path"] = ""
 
         output_file = output_dir_translated / file.name
-        if stats.get("new_languages", 0) == 0 and stats.get("updated_translations", 0) == 0:
-            no_changes += 1
-            files_stats[file.name] = stats
-            continue
-            
         if not tree:
             logger.debug(f"Failed to translate {file.name}")
             if stats.get("error") == "structure-error-nested-tspans-not-supported":
                 nested_files += 1
             else:
                 no_save += 1
+            files_stats[file.name] = stats
+            continue
+
+        if stats.get("new_languages", 0) == 0 and stats.get("updated_translations", 0) == 0:
+            no_changes += 1
             files_stats[file.name] = stats
             continue
         try:
