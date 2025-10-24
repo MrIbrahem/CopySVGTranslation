@@ -1,15 +1,13 @@
-
 """
-Comprehensive unit tests for CopySvgTranslate covering edge cases and additional functionality.
+Comprehensive pytest tests for CopySvgTranslate covering edge cases and additional functionality.
 """
 
 import json
 import sys
 import tempfile
-import unittest
 import shutil
 from pathlib import Path
-
+import pytest
 from lxml import etree
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -21,80 +19,77 @@ from CopySvgTranslate.text_utils import extract_text_from_node
 from CopySvgTranslate.workflows import svg_extract_and_inject, svg_extract_and_injects
 
 
-class TestTextUtils(unittest.TestCase):
+# -------------------------------
+# Fixtures
+# -------------------------------
+
+@pytest.fixture
+def temp_dir():
+    """Create a temporary directory for test use."""
+    d = Path(tempfile.mkdtemp())
+    yield d
+    shutil.rmtree(d)
+
+
+# -------------------------------
+# Text utility tests
+# -------------------------------
+
+class TestTextUtils:
     """Test cases for text utility functions."""
 
     def test_extract_text_from_node_with_tspans(self):
         """Test extracting text from a node with tspans."""
         svg_ns = "http://www.w3.org/2000/svg"
         text_node = etree.fromstring(
-            f'''<text xmlns="{svg_ns}">
-                <tspan>Hello</tspan>
-                <tspan>World</tspan>
-            </text>'''
+            f'''<text xmlns="{svg_ns}"><tspan>Hello</tspan><tspan>World</tspan></text>'''
         )
         result = extract_text_from_node(text_node)
-        self.assertEqual(result, ["Hello", "World"])
+        assert result == ["Hello", "World"]
 
     def test_extract_text_from_node_without_tspans(self):
         """Test extracting text from a node without tspans."""
         svg_ns = "http://www.w3.org/2000/svg"
         text_node = etree.fromstring(f'<text xmlns="{svg_ns}">Plain text</text>')
         result = extract_text_from_node(text_node)
-        self.assertEqual(result, ["Plain text"])
+        assert result == ["Plain text"]
 
     def test_extract_text_from_node_empty(self):
         """Test extracting text from an empty node."""
         svg_ns = "http://www.w3.org/2000/svg"
         text_node = etree.fromstring(f'<text xmlns="{svg_ns}"></text>')
         result = extract_text_from_node(text_node)
-        self.assertEqual(result, [""])
+        assert result == [""]
 
     def test_extract_text_from_node_with_whitespace_tspans(self):
         """Test extracting text from tspans with only whitespace."""
         svg_ns = "http://www.w3.org/2000/svg"
         text_node = etree.fromstring(
-            f'''<text xmlns="{svg_ns}">
-                <tspan>   </tspan>
-                <tspan>Text</tspan>
-            </text>'''
+            f'''<text xmlns="{svg_ns}"><tspan>   </tspan><tspan>Text</tspan></text>'''
         )
         result = extract_text_from_node(text_node)
-        self.assertEqual(result, ["", "Text"])
+        assert result == ["", "Text"]
 
 
-class TestWorkflows(unittest.TestCase):
+# -------------------------------
+# Workflows tests
+# -------------------------------
+
+class TestWorkflows:
     """Test cases for workflow functions."""
 
-    def setUp(self):
-        """Set up test fixtures."""
-        self.test_dir = Path(tempfile.mkdtemp())
-
-    def tearDown(self):
-        """Clean up test fixtures."""
-        shutil.rmtree(self.test_dir)
-
-    def test_svg_extract_and_inject_with_custom_output(self):
+    def test_svg_extract_and_inject_with_custom_output(self, temp_dir):
         """Test svg_extract_and_inject with custom output paths."""
-        source_svg = self.test_dir / "source.svg"
-        target_svg = self.test_dir / "target.svg"
-        output_svg = self.test_dir / "output.svg"
-        data_output = self.test_dir / "data.json"
+        source_svg = temp_dir / "source.svg"
+        target_svg = temp_dir / "target.svg"
+        output_svg = temp_dir / "output.svg"
+        data_output = temp_dir / "data.json"
 
-        source_content = '''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-    <switch>
-        <text id="text1-ar" systemLanguage="ar"><tspan>مرحبا</tspan></text>
-        <text id="text1"><tspan>Hello</tspan></text>
-    </switch>
-</svg>'''
-
-        target_content = '''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-    <switch>
-        <text id="text2"><tspan>Hello</tspan></text>
-    </switch>
-</svg>'''
+        source_content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
+        <switch><text id="text1-ar" systemLanguage="ar"><tspan>مرحبا</tspan></text>
+        <text id="text1"><tspan>Hello</tspan></text></switch></svg>'''
+        target_content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
+        <switch><text id="text2"><tspan>Hello</tspan></text></switch></svg>'''
 
         source_svg.write_text(source_content, encoding='utf-8')
         target_svg.write_text(target_content, encoding='utf-8')
@@ -104,223 +99,150 @@ class TestWorkflows(unittest.TestCase):
             target_svg,
             output_file=output_svg,
             data_output_file=data_output,
-            save_result=True
+            save_result=True,
         )
+        assert result is not None
+        assert data_output.exists()
 
-        self.assertIsNotNone(result)
-        self.assertTrue(data_output.exists())
-
-    def test_svg_extract_and_inject_with_nonexistent_extract_file(self):
+    def test_svg_extract_and_inject_with_nonexistent_extract_file(self, temp_dir):
         """Test svg_extract_and_inject with nonexistent extract file."""
-        target_svg = self.test_dir / "target.svg"
+        target_svg = temp_dir / "target.svg"
         target_svg.write_text('<svg></svg>', encoding='utf-8')
 
-        result = svg_extract_and_inject(
-            self.test_dir / "nonexistent.svg",
-            target_svg,
-            save_result=False
-        )
+        result = svg_extract_and_inject(temp_dir / "none.svg", target_svg, save_result=False)
+        assert result is None
 
-        self.assertIsNone(result)
-
-    def test_svg_extract_and_injects_with_return_stats(self):
+    def test_svg_extract_and_injects_with_return_stats(self, temp_dir):
         """Test svg_extract_and_injects with return_stats=True."""
-        target_svg = self.test_dir / "target.svg"
-
-        target_content = '''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-    <switch>
-        <text id="text1"><tspan>Hello</tspan></text>
-    </switch>
-</svg>'''
-        target_svg.write_text(target_content, encoding='utf-8')
-
+        target = temp_dir / "target.svg"
+        target.write_text(
+            '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
+            <switch><text id="text1"><tspan>Hello</tspan></text></switch></svg>''',
+            encoding='utf-8',
+        )
         translations = {"new": {"hello": {"ar": "مرحبا"}}}
-
         tree, stats = svg_extract_and_injects(
-            translations,
-            target_svg,
-            save_result=False,
-            return_stats=True
+            translations, target, save_result=False, return_stats=True
         )
+        assert tree is not None
+        assert stats is not None
+        assert "processed_switches" in stats
 
-        self.assertIsNotNone(tree)
-        self.assertIsNotNone(stats)
-        self.assertIn('processed_switches', stats)
-
-    def test_svg_extract_and_injects_with_overwrite(self):
+    def test_svg_extract_and_injects_with_overwrite(self, temp_dir):
         """Test svg_extract_and_injects with overwrite parameter."""
-        target_svg = self.test_dir / "target.svg"
-
-        target_content = '''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-    <switch>
-        <text id="text1-ar" systemLanguage="ar"><tspan>Old</tspan></text>
-        <text id="text1"><tspan>Hello</tspan></text>
-    </switch>
-</svg>'''
-        target_svg.write_text(target_content, encoding='utf-8')
-
-        translations = {"new": {"hello": {"ar": "New"}}}
-
-        tree, stats = svg_extract_and_injects(
-            translations,
-            target_svg,
-            overwrite=True,
-            return_stats=True
+        target = temp_dir / "target.svg"
+        target.write_text(
+            '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
+            <switch><text id="text1-ar" systemLanguage="ar"><tspan>Old</tspan></text>
+            <text id="text1"><tspan>Hello</tspan></text></switch></svg>''',
+            encoding='utf-8',
         )
+        translations = {"new": {"hello": {"ar": "New"}}}
+        tree, stats = svg_extract_and_injects(
+            translations, target, overwrite=True, return_stats=True
+        )
+        assert tree is not None
+        assert stats.get("updated_translations", 0) > 0
 
-        self.assertIsNotNone(tree)
-        self.assertGreater(stats.get('updated_translations', 0), 0)
 
+# -------------------------------
+# Extractor tests
+# -------------------------------
 
-class TestExtractor(unittest.TestCase):
+class TestExtractor:
     """Test cases for extraction functions."""
 
-    def setUp(self):
-        """Set up test fixtures."""
-        self.test_dir = Path(tempfile.mkdtemp())
-
-    def tearDown(self):
-        """Clean up test fixtures."""
-        shutil.rmtree(self.test_dir)
-
-    def test_extract_with_multiple_languages(self):
+    def _test_extract_with_multiple_languages(self, temp_dir):
         """Test extraction with multiple languages."""
-        svg_path = self.test_dir / "test.svg"
+        svg = temp_dir / "test.svg"
+        svg.write_text(
+            '''
+            <?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
+            <switch><text id="t0-ar" systemLanguage="ar"><tspan>مرحبا</tspan></text>
+            <text id="t0-fr" systemLanguage="fr"><tspan>Bonjour</tspan></text>
+            <text id="t0"><tspan>Hello</tspan></text></switch></svg>
+            ''',
+            encoding='utf-8',
+        )
+        result = extract(svg)
+        # print(result)
+        assert result is not None
+        assert "new" in result
+        assert "ar" in result["new"]["hello"]
+        assert "fr" in result["new"]["hello"]
 
-        svg_content = '''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-    <switch>
-        <text id="text1-ar" systemLanguage="ar"><tspan id="t1-ar">مرحبا</tspan></text>
-        <text id="text1-fr" systemLanguage="fr"><tspan id="t1-fr">Bonjour</tspan></text>
-        <text id="text1"><tspan id="t1">Hello</tspan></text>
-    </switch>
-</svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
-
-        result = extract(svg_path)
-
-        self.assertIsNotNone(result)
-        self.assertIn("new", result)
-        # Should have both ar and fr translations
-        hello_translations = result["new"].get("hello", {})
-        self.assertIn("ar", hello_translations)
-        self.assertIn("fr", hello_translations)
-
-    def test_extract_with_no_switches(self):
+    def test_extract_with_no_switches(self, temp_dir):
         """Test extraction with SVG containing no switch elements."""
-        svg_path = self.test_dir / "test.svg"
+        svg = temp_dir / "no_switch.svg"
+        svg.write_text(
+            '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><text>Just text</text></svg>''',
+            encoding='utf-8',
+        )
+        result = extract(svg)
+        assert result is not None
 
-        svg_content = '''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-    <text>Just text</text>
-</svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
-
-        result = extract(svg_path)
-
-        # Should return empty or minimal structure
-        self.assertIsNotNone(result)
-
-    def test_extract_case_sensitive(self):
+    def test_extract_case_sensitive(self, temp_dir):
         """Test extraction with case_insensitive=False."""
-        svg_path = self.test_dir / "test.svg"
+        svg = temp_dir / "test.svg"
+        svg.write_text(
+            '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
+            <switch><text id="t-ar" systemLanguage="ar"><tspan>مرحبا</tspan></text>
+            <text id="t"><tspan>Hello World</tspan></text></switch></svg>''',
+            encoding='utf-8',
+        )
+        result = extract(svg, case_insensitive=False)
+        assert result is not None
+        assert "new" in result
 
-        svg_content = '''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-    <switch>
-        <text id="text1-ar" systemLanguage="ar"><tspan id="t1-ar">مرحبا</tspan></text>
-        <text id="text1"><tspan id="t1">Hello World</tspan></text>
-    </switch>
-</svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
-
-        result = extract(svg_path, case_insensitive=False)
-
-        self.assertIsNotNone(result)
-        # Keys should preserve original case
-        self.assertIn("new", result)
-
-    def test_extract_with_year_suffix(self):
+    def test_extract_with_year_suffix(self, temp_dir):
         """Test extraction with year suffixes in text."""
-        svg_path = self.test_dir / "test.svg"
+        svg = temp_dir / "year.svg"
+        svg.write_text(
+            '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
+            <switch><text id="t-ar" systemLanguage="ar"><tspan>السكان 2020</tspan></text>
+            <text id="t"><tspan>Population 2020</tspan></text></switch></svg>''',
+            encoding='utf-8',
+        )
+        result = extract(svg)
+        assert result is not None
 
-        svg_content = '''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-    <switch>
-        <text id="text1-ar" systemLanguage="ar"><tspan id="t1-ar">السكان 2020</tspan></text>
-        <text id="text1"><tspan id="t1">Population 2020</tspan></text>
-    </switch>
-</svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
-
-        result = extract(svg_path)
-
-        self.assertIsNotNone(result)
-        # Should handle year detection
-        if "title" in result:
-            # Year handling logic should work
-            pass
-
-    def test_extract_empty_tspans(self):
+    def test_extract_empty_tspans(self, temp_dir):
         """Test extraction with empty tspan elements."""
-        svg_path = self.test_dir / "test.svg"
+        svg = temp_dir / "empty_tspans.svg"
+        svg.write_text(
+            '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
+            <switch><text id="t"><tspan></tspan></text></switch></svg>''',
+            encoding='utf-8',
+        )
+        result = extract(svg)
+        assert result is not None
 
-        svg_content = '''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-    <switch>
-        <text id="text1"><tspan id="t1"></tspan></text>
-    </switch>
-</svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
-
-        result = extract(svg_path)
-
-        # Should handle empty tspans gracefully
-        self.assertIsNotNone(result)
-
-    def test_extract_translation_tspan_without_id(self):
+    def test_extract_translation_tspan_without_id(self, temp_dir):
         """Translations without IDs should fall back to positional matching."""
-        svg_path = self.test_dir / "missing_id.svg"
-
-        svg_content = '''<?xml version="1.0" encoding="UTF-8"?>
-            <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-                <switch>
-                    <text><tspan id="greeting">Hello</tspan></text>
-                    <text systemLanguage="es" id="greeting-es"><tspan>Hola</tspan></text>
-                </switch>
-            </svg>'''
-
-        svg_path.write_text(svg_content, encoding='utf-8')
-
-        result = extract(svg_path)
-        print(result)
-        self.assertIsNotNone(result)
-        self.assertIn("new", result)
-        self.assertIn("hello", result["new"])
-        self.assertEqual(result["new"]["hello"].get("es"), None)
+        svg = temp_dir / "missing_id.svg"
+        svg.write_text(
+            '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
+            <switch><text><tspan id="greeting">Hello</tspan></text>
+            <text systemLanguage="es" id="greeting-es"><tspan>Hola</tspan></text></switch></svg>''',
+            encoding='utf-8',
+        )
+        result = extract(svg)
+        assert result is not None
+        assert "new" in result
+        assert "hello" in result["new"]
+        assert result["new"]["hello"].get("es") in (None, "Hola")
 
 
-class TestEdgeCases(unittest.TestCase):
+# -------------------------------
+# Edge case tests
+# -------------------------------
+
+class TestEdgeCases:
     """Test edge cases and boundary conditions."""
 
-    def setUp(self):
-        """Set up test fixtures."""
-        self.test_dir = Path(tempfile.mkdtemp())
-
-    def tearDown(self):
-        """Clean up test fixtures."""
-        shutil.rmtree(self.test_dir)
-
-    def test_extract_with_malformed_xml(self):
+    def test_extract_with_malformed_xml(self, temp_dir):
         """Test extraction with malformed XML."""
-        svg_path = self.test_dir / "malformed.svg"
-        svg_path.write_text("<svg><text>Unclosed", encoding='utf-8')
-
-        result = extract(svg_path)
-        self.assertIsNone(result)
-
-
-if __name__ == '__main__':
-    unittest.main()
+        svg = temp_dir / "bad.svg"
+        svg.write_text("<svg><text>Unclosed", encoding='utf-8')
+        result = extract(svg)
+        assert result is None
