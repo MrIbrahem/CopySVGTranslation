@@ -102,7 +102,7 @@ Older exports may omit the wrapper and look like
 structures, but the recommended format is the nested `"new"` layout shown
 above.
 
-## Example
+## Extract Example
 
 ### Input SVG (arabic.svg)
 
@@ -136,22 +136,8 @@ above.
 }
 ```
 
-### Output SVG after Injection
-
-```xml
-<switch style="font-size:30px;font-family:Bitstream Vera Sans">
-    <text x="259.34814" y="927.29651" style="font-size:30px;font-family:Bitstream Vera Sans"
-        id="text2213-ar"
-        xml:space="preserve" systemLanguage="ar">
-        <tspan x="259.34814" y="927.29651" id="tspan2215-ar">لكنها موصولة بمرحلتين متعاكستين.</tspan>
-    </text>
-    <text x="259.34814" y="927.29651" style="font-size:30px;font-family:Bitstream Vera Sans"
-        id="text2213"
-        xml:space="preserve">
-        <tspan x="259.34814" y="927.29651" id="tspan2215">but are connected in anti-phase</tspan>
-    </text>
-</switch>
-```
+### Injection Example 
+- TODO
 
 ## Testing
 
