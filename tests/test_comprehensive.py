@@ -325,14 +325,7 @@ class TestWorkflows(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test fixtures."""
-        for file in self.test_dir.rglob('*'):
-            if file.is_file():
-                file.unlink()
-        for dir in sorted(self.test_dir.rglob('*'), reverse=True):
-            if dir.is_dir():
-                dir.rmdir()
-        if self.test_dir.exists():
-            self.test_dir.rmdir()
+        cleanup_directory(self.test_dir)
 
     def test_svg_extract_and_inject_with_custom_output(self):
         """Test svg_extract_and_inject with custom output paths."""
@@ -443,14 +436,7 @@ class TestBatch(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test fixtures."""
-        for file in self.test_dir.rglob('*'):
-            if file.is_file():
-                file.unlink()
-        for dir in sorted(self.test_dir.rglob('*'), reverse=True):
-            if dir.is_dir():
-                dir.rmdir()
-        if self.test_dir.exists():
-            self.test_dir.rmdir()
+        cleanup_directory(self.test_dir)
 
     def test_start_injects_single_file(self):
         """Test batch injection with a single file."""
@@ -533,9 +519,7 @@ class TestExtractor(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test fixtures."""
-        for file in self.test_dir.glob('*'):
-            file.unlink()
-        self.test_dir.rmdir()
+        cleanup_directory(self.test_dir)
 
     def test_extract_with_multiple_languages(self):
         """Test extraction with multiple languages."""
@@ -642,9 +626,7 @@ class TestEdgeCases(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test fixtures."""
-        for file in self.test_dir.glob('*'):
-            file.unlink()
-        self.test_dir.rmdir()
+        cleanup_directory(self.test_dir)
 
     def test_normalize_text_with_only_whitespace(self):
         """Test normalization with only whitespace."""
