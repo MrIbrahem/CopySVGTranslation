@@ -72,7 +72,7 @@ def extract(svg_file_path, case_insensitive: bool = True):
 
             tspans = text_elem.xpath('./svg:tspan', namespaces={'svg': 'http://www.w3.org/2000/svg'})
             if tspans:
-                tspans_to_id = {tspan.text.strip(): tspan.get('id') for tspan in tspans if tspan.text}
+                tspans_to_id = {tspan.text.strip(): tspan.get('id') for tspan in tspans if tspan.text and tspan.get('id')}
                 # Return a list of text from each tspan element
                 text_contents = [tspan.text.strip() if tspan.text else "" for tspan in tspans]
             else:
@@ -83,7 +83,11 @@ def extract(svg_file_path, case_insensitive: bool = True):
 
             for text in text_contents:
                 normalized_translation = normalize_text(text)
-                base_id = tspans_to_id.get(text.strip(), "").split("-")[0].strip()
+                base_id = tspans_to_id.get(text.strip(), "")
+                if not base_id:
+                    continue
+                    
+                base_id = base_id.split("-")[0].strip()
                 english_text = (
                     translations["new"]["default_tspans_by_id"].get(base_id)
                     or translations["new"]["default_tspans_by_id"].get(base_id.lower())
