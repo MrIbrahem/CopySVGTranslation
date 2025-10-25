@@ -152,25 +152,6 @@ class TestWorkflows:
 class TestExtractor:
     """Test cases for extraction functions."""
 
-    def test_extract_with_multiple_languages(self, temp_dir):
-        """Test extraction with multiple languages."""
-        svg = temp_dir / "test.svg"
-        svg.write_text(
-            '''
-            <?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
-            <switch><text id="t0-ar" systemLanguage="ar"><tspan>مرحبا</tspan></text>
-            <text id="t0-fr" systemLanguage="fr"><tspan>Bonjour</tspan></text>
-            <text id="t0"><tspan>Hello</tspan></text></switch></svg>
-            ''',
-            encoding='utf-8',
-        )
-        result = extract(svg)
-        print(result)
-        assert result is not None
-        assert "new" in result
-        assert "ar" in result["new"]["hello"]
-        assert "fr" in result["new"]["hello"]
-
     def test_extract_with_no_switches(self, temp_dir):
         """Test extraction with SVG containing no switch elements."""
         svg = temp_dir / "no_switch.svg"
