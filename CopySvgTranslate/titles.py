@@ -25,7 +25,7 @@ def make_title_translations(
         new: A dictionary mapping full titles (ending with a year) to their translations.
 
     Returns:
-        A dictionary mapping year -> { language -> title without year }.
+        A dictionary mapping base title -> { language -> title without year }.
     """
     all_mappings_title: Dict[str, Dict[str, str]] = {}
 
