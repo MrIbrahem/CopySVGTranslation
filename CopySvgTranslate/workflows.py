@@ -6,7 +6,6 @@ import json
 import logging
 from pathlib import Path
 from typing import Mapping
-from warnings import deprecated
 
 from .extraction import extract
 from .injection import inject
@@ -30,7 +29,7 @@ def svg_extract_and_inject(
         inject_file (Path | str): Path to the SVG file to inject translations into.
         output_file (Path | None): Optional path for the resulting injected SVG. If omitted, a file with the same name as `inject_file` is created in a `translated` directory under the current working directory.
         data_output_file (Path | None): Optional path for the JSON file that will store extracted translations. If omitted, a file named after `extract_file` is created in a `data` directory under the current working directory.
-        overwrite (bool | None): If `True`, an existing `output_file` will be overwritten. Treated as `False` when not provided.
+        overwrite (bool | None): If `True`, existing translation nodes inside the SVG are updated; when `False`, they are left as-is. Ignored for file I/O: when `save_result=True`, the output file is written regardless. `None` is treated as `False`.
         save_result (bool): If `True`, the injection result will be saved to `output_file`.
 
     Returns:
@@ -81,7 +80,6 @@ def svg_extract_and_inject(
     return tree
 
 
-@deprecated("use CopySvgTranslate.inject(inject_file, mapping_files=[], all_mappings={}, ...) insted")
 def svg_extract_and_injects(
     translations: Mapping,
     inject_file: Path | str,
