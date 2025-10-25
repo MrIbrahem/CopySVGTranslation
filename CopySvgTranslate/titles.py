@@ -4,6 +4,32 @@ from typing import Dict, List
 logger = logging.getLogger(__name__)
 
 
+def make_title_translations_match_all(
+    new: Dict[str, Dict[str, str]]
+) -> Dict[str, Dict[str, str]]:
+
+    all_mappings_title: Dict[str, Dict[str, str]] = {}
+
+    for key, mapping in list(new.items()):
+        if len(key) < 5:
+            continue
+
+        year = key[-4:]
+        if not key or key == year or not year.isdigit():
+            continue
+
+        # Ensure all translations end with the same 4-digit year
+        all_valid = all(value[-4:].isdigit() and value[-4:] == year for value in mapping.values())
+
+        if all_valid:
+            all_mappings_title[key[:-4].strip()] = {
+                lang: text[:-4].strip()
+                for lang, text in mapping.items()
+            }
+
+    return all_mappings_title
+
+
 def make_title_translations(
     new: Dict[str, Dict[str, str]]
 ) -> Dict[str, Dict[str, str]]:
@@ -37,15 +63,13 @@ def make_title_translations(
         if not key or key == year or not year.isdigit():
             continue
 
-        # Ensure all translations end with the same 4-digit year
-        all_valid = all(value[-4:].isdigit() and value[-4:] == year for value in mapping.values())
-
-        if all_valid:
-            # Store translations without the trailing year
-            all_mappings_title[key[:-4].strip()] = {
-                lang: text[:-4].strip()
-                for lang, text in mapping.items()
-            }
+        data = {
+            lang: value[:-4].strip()
+            for lang, value in mapping.items()
+            if len(value) > 4 and value[-4:] == year
+        }
+        if data:
+            all_mappings_title[key[:-4].strip()] = data
 
     return all_mappings_title
 
@@ -77,11 +101,15 @@ def get_titles_translations(
     """
     titles_translations: Dict[str, Dict[str, str]] = {}
 
+    all_mappings_title_fixed = {
+        x.strip().lower(): v for x, v in all_mappings_title.items()
+    }
+
     for text in default_texts:
         if len(text) > 4 and text[-4:].isdigit():
             year = text[-4:]
-            key = text[:-4].strip()
-            translations = all_mappings_title.get(key) or all_mappings_title.get(key.strip())
+            key = text[:-4]
+            translations = all_mappings_title_fixed.get(key.strip().lower())
             if translations:
                 titles_translations[text] = {lang: f"{value} {year}" for lang, value in translations.items()}
 
