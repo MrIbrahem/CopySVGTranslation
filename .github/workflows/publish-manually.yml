@@ -8,7 +8,7 @@ on:
         required: true
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
 
 jobs:
@@ -28,13 +28,6 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install build hatchling hatch-vcs
-
-      - name: Create version tag
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git tag ${{ inputs.version }}
-          git push origin ${{ inputs.version }}
 
       - name: Build package
         run: python -m build
