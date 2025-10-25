@@ -8,8 +8,7 @@ from lxml import etree
 from ..text_utils import normalize_text
 from ..titles import make_title_translations
 
-logger = logging.getLogger(__name__)
-
+logger = logging.getLogger("CopySvgTranslate")
 
 def get_english_default_texts(text_elements, case_insensitive):
     new_keys = []
@@ -40,6 +39,8 @@ def get_english_default_texts(text_elements, case_insensitive):
         new_keys.extend(default_texts)
 
     logger.debug(f"new_keys: {len(new_keys):,}, default_tspans_by_id: {len(default_tspans_by_id):,}")
+    logger.debug(f"new_keys:{new_keys}")
+    logger.debug(f"default_tspans_by_id:{default_tspans_by_id}")
 
     return new_keys, default_tspans_by_id
 
@@ -96,8 +97,6 @@ def extract(svg_file_path, case_insensitive: bool = True):
         new_keys, default_tspans_by_id = get_english_default_texts(text_elements, case_insensitive)
 
         tspans_by_id.update(default_tspans_by_id)
-
-        logger.debug(f"default_tspans_by_id: {str(default_tspans_by_id)}")
 
         translations["new"].update({x: {} for x in new_keys if x not in translations["new"]})
         switch_translations = {}

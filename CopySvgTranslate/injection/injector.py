@@ -14,7 +14,7 @@ from .preparation import SvgStructureException, make_translation_ready
 from ..titles import get_titles_translations
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("CopySvgTranslate")
 
 
 def get_target_path(

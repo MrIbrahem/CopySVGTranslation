@@ -10,7 +10,7 @@ from typing import List, Set, Tuple
 
 from lxml import etree
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("CopySvgTranslate")
 
 SVG_NS = "http://www.w3.org/2000/svg"
 XMLNS_ATTR = "{http://www.w3.org/2000/xmlns/}xmlns"
