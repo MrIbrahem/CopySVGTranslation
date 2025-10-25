@@ -1,6 +1,5 @@
 import logging
 from typing import Dict, List
-from .text_utils import normalize_text
 
 logger = logging.getLogger(__name__)
 

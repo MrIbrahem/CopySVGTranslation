@@ -39,6 +39,8 @@ def get_english_default_texts(text_elements, case_insensitive):
         # for text in default_texts: key = text.lower() if case_insensitive else text
         new_keys.extend(default_texts)
 
+    logger.debug(f"new_keys: {len(new_keys):,}, default_tspans_by_id: {len(default_tspans_by_id):,}")
+
     return new_keys, default_tspans_by_id
 
 
