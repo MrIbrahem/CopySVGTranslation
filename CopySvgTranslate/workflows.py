@@ -95,9 +95,9 @@ def svg_extract_and_injects(
         output_dir.mkdir(parents=True, exist_ok=True)
 
     return inject(
-        inject_path,
-        output_dir=output_dir,
+        inject_file=inject_path,
         all_mappings=translations,
+        output_dir=output_dir,
         save_result=save_result,
         **kwargs,
     )

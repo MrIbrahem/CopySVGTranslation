@@ -13,7 +13,6 @@ from CopySvgTranslate import (
     normalize_text,
     start_injects,
     svg_extract_and_inject,
-    svg_extract_and_injects,
 )
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -36,7 +35,6 @@ class TestPublicAPIExports:
             "normalize_text",
             "start_injects",
             "svg_extract_and_inject",
-            "svg_extract_and_injects",
         ]
         for name in expected_exports:
             assert name in CopySvgTranslate.__all__, f"{name} should be in __all__"
@@ -76,11 +74,6 @@ class TestPublicAPIExports:
         """The svg_extract_and_inject function should be importable from top-level module."""
         assert callable(svg_extract_and_inject)
         assert svg_extract_and_inject.__name__ == "svg_extract_and_inject"
-
-    def test_inject_is_importable(self):
-        """The svg_extract_and_injects function should be importable from top-level module."""
-        assert callable(svg_extract_and_injects)
-        assert svg_extract_and_injects.__name__ == "svg_extract_and_injects"
 
     def test_module_has_docstring(self):
         """The module should have a docstring."""
@@ -293,9 +286,9 @@ class TestIntegrationWorkflows:
         translations = extract(FIXTURES_DIR / "source.svg")
 
         # Inject using the dict
-        result, stats = svg_extract_and_injects(
-            translations,
-            target_svg,
+        result, stats = inject(
+            inject_file=target_svg,
+            all_mappings=translations,
             output_dir=tmp_path,
             save_result=True,
             return_stats=True,

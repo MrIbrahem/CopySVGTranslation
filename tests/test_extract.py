@@ -14,9 +14,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from CopySvgTranslate import extract
+from CopySvgTranslate import extract, inject
 from CopySvgTranslate.text_utils import extract_text_from_node
-from CopySvgTranslate.workflows import svg_extract_and_inject, svg_extract_and_injects
+from CopySvgTranslate.workflows import svg_extract_and_inject
 
 
 # -------------------------------
@@ -113,7 +113,7 @@ class TestWorkflows:
         assert result is None
 
     def test_inject_with_return_stats(self, temp_dir):
-        """Test svg_extract_and_injects with return_stats=True."""
+        """Test inject with return_stats=True."""
         target = temp_dir / "target.svg"
         target.write_text(
             '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
@@ -121,15 +121,15 @@ class TestWorkflows:
             encoding='utf-8',
         )
         translations = {"new": {"hello": {"ar": "مرحبا"}}}
-        tree, stats = svg_extract_and_injects(
-            translations, target, save_result=False, return_stats=True
+        tree, stats = inject(
+            all_mappings=translations, inject_file=target, save_result=False, return_stats=True
         )
         assert tree is not None
         assert stats is not None
         assert "processed_switches" in stats
 
     def test_inject_with_overwrite(self, temp_dir):
-        """Test svg_extract_and_injects with overwrite parameter."""
+        """Test inject with overwrite parameter."""
         target = temp_dir / "target.svg"
         target.write_text(
             '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
@@ -138,8 +138,8 @@ class TestWorkflows:
             encoding='utf-8',
         )
         translations = {"new": {"hello": {"ar": "New"}}}
-        tree, stats = svg_extract_and_injects(
-            translations, target, overwrite=True, return_stats=True
+        tree, stats = inject(
+            all_mappings=translations, inject_file=target, overwrite=True, return_stats=True
         )
         assert tree is not None
         assert stats.get("updated_translations", 0) > 0

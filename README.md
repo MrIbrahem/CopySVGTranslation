@@ -67,15 +67,11 @@ translations = {
 
 tree, stats = inject(
     inject_file: Path("examples/target_missing_translations.svg"),
-    mapping_files: Iterable[Path | str] | None = None,
-    all_mappings: Mapping | None = None,
-    case_insensitive: bool = True,
-    output_file: Path | None = None,
+    all_mappings: translations,
     output_dir=Path("./translated"),
     overwrite=True,
     save_result=True,
     return_stats=True,
-    translations=translations,
 )
 
 print("Saved to", Path("./translated/target_missing_translations.svg"))

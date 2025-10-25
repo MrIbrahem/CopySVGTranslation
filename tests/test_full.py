@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySvgTranslate import extract, svg_extract_and_inject, svg_extract_and_injects
+from CopySvgTranslate import extract, svg_extract_and_inject, inject
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -49,14 +49,14 @@ def test_svg_extract_and_inject_creates_translation_files(tmp_path: Path, target
 
 
 def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_injects should reuse an already-extracted mapping structure."""
+    """inject should reuse an already-extracted mapping structure."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
     output_dir = tmp_path / "outputs"
     output_dir.mkdir(parents=True, exist_ok=True)
-    tree, stats = svg_extract_and_injects(
-        translations,
-        target_svg,
+    tree, stats = inject(
+        inject_file=target_svg,
+        all_mappings=translations,
         output_dir=output_dir,
         save_result=True,
         return_stats=True,
@@ -197,12 +197,12 @@ def test_svg_extract_and_inject_preserves_translation_data(tmp_path: Path, targe
 
 
 def test_inject_without_output_dir(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_injects should handle missing output_dir when save_result=False."""
+    """inject should handle missing output_dir when save_result=False."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
-    tree, stats = svg_extract_and_injects(
-        translations,
-        target_svg,
+    tree, stats = inject(
+        inject_file=target_svg,
+        all_mappings=translations,
         save_result=False,
         return_stats=True,
     )
@@ -212,7 +212,7 @@ def test_inject_without_output_dir(tmp_path: Path, target_svg: Path) -> None:
 
 
 def test_inject_with_default_output_dir(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_injects should create default output_dir when needed."""
+    """inject should create default output_dir when needed."""
     import os
     original_cwd = os.getcwd()
 
@@ -221,28 +221,29 @@ def test_inject_with_default_output_dir(tmp_path: Path, target_svg: Path) -> Non
 
         translations = extract(FIXTURES_DIR / "source.svg")
 
-        tree, _stats = svg_extract_and_injects(
-            translations,
-            target_svg,
+        tree, _stats = inject(
+            inject_file=target_svg,
+            all_mappings=translations,
             save_result=True,
             return_stats=True,
         )
 
         assert tree is not None
         # Check that default directory was created
-        assert (tmp_path / "translated").exists()
-        assert (tmp_path / "translated" / target_svg.name).exists()
+        translated_dir = Path(str(target_svg)).parent# / "translated"
+        assert translated_dir.exists()
+        assert (translated_dir / target_svg.name).exists()
     finally:
         os.chdir(original_cwd)
 
 
 def test_inject_returns_stats(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_injects should return detailed statistics when requested."""
+    """inject should return detailed statistics when requested."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
-    result = svg_extract_and_injects(
-        translations,
-        target_svg,
+    result = inject(
+        inject_file=target_svg,
+        all_mappings=translations,
         return_stats=True,
     )
 
@@ -258,12 +259,12 @@ def test_inject_returns_stats(tmp_path: Path, target_svg: Path) -> None:
 
 
 def test_inject_without_stats(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_injects should return only tree when return_stats=False."""
+    """inject should return only tree when return_stats=False."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
-    result = svg_extract_and_injects(
-        translations,
-        target_svg,
+    result = inject(
+        inject_file=target_svg,
+        all_mappings=translations,
         return_stats=False,
     )
 
@@ -373,12 +374,12 @@ def test_svg_extract_and_inject_with_overwrite_true(tmp_path: Path, target_svg: 
 
 
 def test_inject_with_empty_translations(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_injects should handle empty translation dictionaries gracefully."""
+    """inject should handle empty translation dictionaries gracefully."""
     empty_translations = {"new": {}, "title": {}}
 
-    result = svg_extract_and_injects(
-        empty_translations,
-        target_svg,
+    result = inject(
+        inject_file=target_svg,
+        all_mappings=empty_translations,
         save_result=False,
     )
 
@@ -450,15 +451,15 @@ def test_svg_extract_and_inject_creates_parent_directories(tmp_path: Path, targe
 
 
 def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_injects should handle multiple injection operations."""
+    """inject should handle multiple injection operations."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
     # First injection
     output1 = tmp_path / "output1"
     output1.mkdir()
-    tree1, stats1 = svg_extract_and_injects(
-        translations,
-        target_svg,
+    tree1, stats1 = inject(
+        inject_file=target_svg,
+        all_mappings=translations,
         output_dir=output1,
         save_result=True,
         return_stats=True,
@@ -467,9 +468,9 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
     # Second injection to different location
     output2 = tmp_path / "output2"
     output2.mkdir()
-    tree2, stats2 = svg_extract_and_injects(
-        translations,
-        target_svg,
+    tree2, stats2 = inject(
+        inject_file=target_svg,
+        all_mappings=translations,
         output_dir=output2,
         save_result=True,
         return_stats=True,

@@ -84,7 +84,6 @@ User guide including:
 
 ### CopySvgTranslate.workflows ✅
 - `svg_extract_and_inject()` - Integration workflow
-- `svg_extract_and_injects()` - Translation injection workflow
 
 ### CopySvgTranslate.extraction.extractor ✅
 - `extract()` - Multiple languages, empty files, case modes

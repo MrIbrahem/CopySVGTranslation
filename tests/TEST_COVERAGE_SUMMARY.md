@@ -86,7 +86,6 @@ Edge case tests for injection functionality:
 
 ### SvgTranslate.workflows
 - **svg_extract_and_inject()** - ✅ Integration tests
-- **svg_extract_and_injects()** - ✅ Workflow tests
 
 ### SvgTranslate.extraction.extractor
 - **extract()** - ✅ Multiple languages, empty files, edge cases
@@ -123,7 +122,7 @@ python -m unittest discover tests/
 - Test methods: 10
 - Focus: Core functionality (extract, inject, normalize_text, generate_unique_id)
 
-### Existing Tests (test.py)  
+### Existing Tests (test.py)
 - Test methods: 2
 - Focus: Integration workflows
 
