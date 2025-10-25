@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" height="721.1"
+  style="font-family: Lato, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Liberation Sans&quot;, sans-serif; text-rendering: geometricprecision; -webkit-font-smoothing: antialiased; font-size: 18px; background-color: rgb(255, 255, 255);"
+  version="1.1" viewBox="0 0 850 721.1" width="850">
+  <defs>
+
+  </defs>
+  <defs>
+    <pattern height="4" id="noDataPattern" patternTransform="rotate(-45 2 2)"
+      patternUnits="userSpaceOnUse" width="4">
+      <path d="M -1,2 l 6,0" stroke="#ccc" stroke-width="0.7" />
+    </pattern>
+  </defs>
+  <g class="HeaderView" id="header">
+
+    <a
+      href="https://ourworldindata.org/grapher/parkinsons-disease-prevalence-ihme?region=Oceania&amp;globe=1&amp;globeRotation=-18.8%2C152.65&amp;globeZoom=2"
+      id="title" rel="noopener"
+      style="font-family: &quot;Playfair Display&quot;, Georgia, &quot;Times New Roman&quot;, &quot;Liberation Serif&quot;, serif;"
+      target="_blank">
+      <text fill="#2d2e2d" font-size="25.00" font-weight="600" x="16.0" y="40.3">
+        <tspan x="16" y="40.25">Parkinson's disease prevalence, 2018</tspan>
+      </text>
+    </a>
+    <g class="markdown-text-wrap" id="subtitle">
+      <text fill="#5b5b5b" style="font-size: 15px; line-height: 1.2;" x="16.0" y="66.5">
+        <tspan x="16" y="66.5">Estimated number of people with Parkinson's disease¹ per 100,000
+          people.</tspan>
+      </text>
+    </g>
+  </g>
+  <g class="SourcesFooter" id="footer" style="fill: rgb(133, 133, 133);">
+    <g class="markdown-text-wrap" id="sources">
+      <text style="font-size: 13px; line-height: 1.2;" x="16.0" y="581.0">
+        <tspan x="16" y="581.0">Data source: IHME, Global Burden of Disease (2024)</tspan>
+      </text>
+    </g>
+    <text font-size="13.00" id="origin-url" x="570.5" y="581.0">
+      <tspan x="570.49" y="581.01">OurWorldinData.org/causes-of-death | CC BY</tspan>
+    </text>
+  </g>
+  <line id="separator-line" stroke="#e7e7e7" x1="16" x2="834" y1="600" y2="600" />
+  <g id="details" transform="translate(15, 616)">
+    <g class="markdown-text-wrap">
+      <text style="font-size: 12.375px; fill: rgb(133, 133, 133); line-height: 1.2;" x="0.0"
+        y="12.0">
+        <tspan x="0" y="12.0">1. Parkinson's disease Parkinson's disease is a brain condition that
+          affects movement control. Symptoms usually begin gradually and worsen over</tspan>
+        <tspan x="0" y="26.9">time, as parts of the brain become progressively damaged over many
+          years.</tspan>
+        <tspan x="0" y="41.7">It arises when certain cells in the brain, responsible for producing a
+          chemical called dopamine, become damaged or die. Dopamine helps regulate</tspan>
+        <tspan x="0" y="56.6">muscle movements, and its deficiency in Parkinson's leads to symptoms
+          like tremors (shaking), stiffness, and difficulty with balance and coordination.</tspan>
+        <tspan x="0" y="71.4">As the disease progresses, it can also bring about changes in speech,
+          sleep problems, depression, memory difficulties, and fatigue. Treatments like</tspan>
+        <tspan x="0" y="86.3">medication, devices, and therapies can help manage symptoms and
+          improve quality of life for those with Parkinson's.</tspan>
+      </text>
+    </g>
+  </g>
+</svg>

@@ -10,7 +10,7 @@ from typing import List, Set, Tuple
 
 from lxml import etree
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("CopySvgTranslate")
 
 SVG_NS = "http://www.w3.org/2000/svg"
 XMLNS_ATTR = "{http://www.w3.org/2000/xmlns/}xmlns"
@@ -123,17 +123,17 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
         css = (s.text or "")
         if '#' in css:
             if not css_simple_re.match(css):
-                raise SvgStructureException('structure-error-css-too-complex', s)
+                raise SvgStructureException('structure-error-css-too-complex', None, [s.get("id", "")])
             # split selectors roughly and ensure no '#' in selectors portion
             selectors = re.split(r'\{[^}]*\}', css)
             for selector in selectors:
                 if '#' in selector:
-                    raise SvgStructureException('structure-error-css-has-ids', s)
+                    raise SvgStructureException('structure-error-css-has-ids', None, [s.get("id", "")])
 
     # tref not supported
     trefs = root.findall(".//{%s}tref" % SVG_NS)
     if len(trefs) != 0:
-        raise SvgStructureException('structure-error-contains-tref', trefs[0])
+        raise SvgStructureException('structure-error-contains-tref')
 
     # Track all IDs in the document and normalise whitespace around them early
     existing_ids: Set[str] = set()
@@ -185,7 +185,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
             translatable_nodes.append(tspan)
         else:
             # Nested tspans or children not supported
-            raise SvgStructureException('structure-error-nested-tspans-not-supported', tspan)
+            raise SvgStructureException('structure-error-nested-tspans-not-supported', tspan, [tspan.get("id", "")])
 
     # Process text elements: wrap raw text nodes into <tspan>
     texts = root.findall(".//{%s}text" % SVG_NS)
@@ -227,7 +227,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
             else:
                 node.set("id", node_id)
                 if "|" in node_id or "/" in node_id:
-                    raise SvgStructureException('structure-error-invalid-node-id', node)
+                    raise SvgStructureException('structure-error-invalid-node-id', node, [node_id])
                 m = re.match(r'^trsvg([0-9]+)$', node_id)
                 if m:
                     ids_in_use.append(int(m.group(1)))
@@ -279,7 +279,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
             switch = etree.Element("{%s}switch" % SVG_NS)
             parent_of_text = parent
             if parent_of_text is None:
-                raise SvgStructureException('structure-error-no-parent-for-text', text)
+                raise SvgStructureException('structure-error-no-parent-for-text', text, text)
             # insert switch before text
             idx = list(parent_of_text).index(text)
             parent_of_text.insert(idx, switch)
@@ -294,7 +294,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
         # verify that children of text are only tspans or text nodes
         for child in text:
             if child.tag not in ({f"{{{SVG_NS}}}tspan", "tspan"}):
-                raise SvgStructureException('structure-error-non-tspan-inside-text', child)
+                raise SvgStructureException('structure-error-non-tspan-inside-text', child, child)
 
     # Process all switches: split comma-separated systemLanguage values
     switches = root.findall(".//{%s}switch" % SVG_NS)
@@ -307,10 +307,10 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
             if not isinstance(child.tag, str):
                 # ignore comments etc, but if there's text content outside elements, check whitespace
                 if (child.text or "").strip():
-                    raise SvgStructureException('structure-error-switch-text-content-outside-text', child)
+                    raise SvgStructureException('structure-error-switch-text-content-outside-text', child, child)
                 continue
             if child.tag not in ({f"{{{SVG_NS}}}text", "text"}):
-                raise SvgStructureException('structure-error-switch-child-not-text', child)
+                raise SvgStructureException('structure-error-switch-child-not-text', child, child)
 
             language_attr = child.get("systemLanguage")
             real_langs = re.split(r',\s*', language_attr) if language_attr else ["fallback"]

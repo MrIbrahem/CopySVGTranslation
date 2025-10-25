@@ -11,8 +11,10 @@ from lxml import etree
 
 from ..text_utils import extract_text_from_node, normalize_text
 from .preparation import SvgStructureException, make_translation_ready
+from ..titles import get_titles_translations
 
-logger = logging.getLogger(__name__)
+
+logger = logging.getLogger("CopySvgTranslate")
 
 
 def get_target_path(
@@ -140,13 +142,9 @@ def work_on_switches(
         if not default_texts:
             continue
 
-        for text in default_texts:
-            if text[-4:].isdigit():
-                year = text[-4:]
-                key = text[:-4]
-                if key in all_mappings_title:
-                    translations = all_mappings_title[key]
-                    all_mappings[text] = {lang: f"{value} {year}" for lang, value in translations.items()}
+        titles_translations = get_titles_translations(all_mappings_title, default_texts)
+
+        all_mappings.update(titles_translations)
 
         # Determine translations for each text line
         available_translations = {}
@@ -283,7 +281,7 @@ def inject(
 
     if not inject_path.exists():
         logger.error(f"SVG file not found: {inject_path}")
-        error = {"error": "File not exists"}
+        error = {"error": "File does not exist"}
         return (None, error) if return_stats else None
 
     if not all_mappings and kwargs.get("translations"):
@@ -332,7 +330,12 @@ def inject(
     if save_result:
         try:
             target_path = get_target_path(output_file, output_dir, inject_path)
-            tree.write(str(target_path), encoding='utf-8', xml_declaration=True, pretty_print=True)
+            tree.write(
+                str(target_path),
+                encoding='utf-8',
+                xml_declaration=True,
+                pretty_print=kwargs.get("pretty_print", True)
+            )
             logger.debug(f"Saved modified SVG to {target_path}")
         except Exception as e:
             logger.error(f"Failed writing {inject_path.name}: {e}")

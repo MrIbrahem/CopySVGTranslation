@@ -1,6 +1,7 @@
 import pytest
+import json
 from pathlib import Path
-from CopySvgTranslate import extract, svg_extract_and_inject, inject
+from CopySvgTranslate import extract, svg_extract_and_inject, inject, make_translation_ready
 
 FIXTURES_DIR = Path(__file__).parent
 
@@ -34,6 +35,7 @@ def setup_tmpdir(tmp_path):
 
 
 class TestIntegrationWorkflows:
+
     def test_svg_extract_and_inject_end_to_end(self, setup_tmpdir):
         r = svg_extract_and_inject(
             setup_tmpdir["source_svg"],
@@ -61,3 +63,26 @@ class TestIntegrationWorkflows:
 
         # new_text = setup_tmpdir["target_svg"].read_text(encoding="utf-8")
         # assert new_text == setup_tmpdir["expected_text"]
+
+    def test_translations(self, setup_tmpdir):
+        new_data_file = FIXTURES_DIR / "data.json"
+        translations = extract(setup_tmpdir["source_svg"])
+
+        with open(new_data_file, 'w', encoding='utf-8') as handle:
+            json.dump(translations, handle, indent=4, ensure_ascii=False)
+
+        assert translations is not None
+        assert isinstance(translations, dict)
+
+    def test_translations_compare(self, setup_tmpdir):
+        new_data_file = FIXTURES_DIR / "data.json"
+        expected_data_path = FIXTURES_DIR / "expected_data.json"
+
+        new_data = json.loads(new_data_file.read_text(encoding="utf-8"))
+        expected_data = json.loads(expected_data_path.read_text(encoding="utf-8"))
+
+        assert new_data_file.exists()
+        assert expected_data_path.exists()
+
+        assert new_data["new"] == expected_data["new"]
+        assert new_data["title"] == expected_data["title"]

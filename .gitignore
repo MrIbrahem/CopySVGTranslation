@@ -1,4 +1,6 @@
 *.pyc
 *.svg
-!tests/example/**.svg
+!tests/**/**.svg
+!tests/**.svg
 data/source.svg.json
+tests/example/برمت.txt
