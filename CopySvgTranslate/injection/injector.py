@@ -10,7 +10,11 @@ from typing import Iterable, Mapping
 from lxml import etree
 
 from ..text_utils import extract_text_from_node, normalize_text
-from .preparation import SvgStructureException, make_translation_ready
+from .preparation import (
+    SvgNestedTspanException,
+    SvgStructureException,
+    make_translation_ready,
+)
 from ..titles import get_titles_translations
 
 
@@ -328,6 +332,9 @@ def inject(
     # Parse SVG as XML
     try:
         tree, root = make_translation_ready(inject_path, write_back=False)
+    except SvgNestedTspanException as exc:
+        error = {"error": str(exc), "nested_tspan_error": True}
+        return (None, error) if return_stats else None
     except SvgStructureException as exc:
         error = {"error": str(exc)}
         return (None, error) if return_stats else None

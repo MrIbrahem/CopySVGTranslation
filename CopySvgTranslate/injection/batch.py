@@ -41,7 +41,7 @@ def start_injects(
         output_file = output_dir_translated / file.name
         if not tree:
             logger.debug(f"Failed to translate {file.name}")
-            if stats.get("error") == "structure-error-nested-tspans-not-supported":
+            if stats.get("nested_tspan_error"):
                 nested_files += 1
             else:
                 no_save += 1
