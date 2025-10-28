@@ -38,6 +38,13 @@ class SvgStructureException(Exception):
         super().__init__(msg)
 
 
+class SvgNestedTspanException(SvgStructureException):
+    """Raised when encountering nested ``<tspan>`` elements."""
+
+    def __init__(self, element=None, extra=None):
+        super().__init__("structure-error-nested-tspans-not-supported", element, extra)
+
+
 def normalize_lang(lang: str) -> str:
     """
     Normalize a language tag to a simple IETF-like form.
@@ -185,7 +192,8 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
             translatable_nodes.append(tspan)
         else:
             # Nested tspans or children not supported
-            raise SvgStructureException('structure-error-nested-tspans-not-supported', tspan, [tspan.get("id", "")])
+            # raise SvgStructureException('structure-error-nested-tspans-not-supported', tspan, [tspan.get("id", "")])
+            raise SvgNestedTspanException(tspan, [tspan.get("id", "")])
 
     # Process text elements: wrap raw text nodes into <tspan>
     texts = root.findall(".//{%s}text" % SVG_NS)
