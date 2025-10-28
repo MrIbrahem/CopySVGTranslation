@@ -17,17 +17,27 @@ from ..titles import get_titles_translations
 logger = logging.getLogger("CopySvgTranslate")
 
 
-def file_langs(file_path: Path | str|None, root=None) -> list[str]:
+def file_langs(
+    file: Path | str | etree._ElementTree | etree._Element | None,
+) -> list[str]:
     """Return the list of languages declared in ``systemLanguage`` attributes."""
 
     languages: set[str] = set()
+    root: etree._Element | None = None
 
     try:
-        if file_path and root == None:
-            svg_path = Path(str(file_path))
+        if isinstance(file, etree._ElementTree):
+            root = file.getroot()
+        elif isinstance(file, etree._Element):
+            root = file
+        elif file is not None:
+            svg_path = Path(str(file))
             parser = etree.XMLParser(remove_blank_text=True)
             tree = etree.parse(str(svg_path), parser)
             root = tree.getroot()
+
+        if root is None:
+            return []
 
         text_elements = root.xpath(
             './/svg:text',
@@ -38,7 +48,7 @@ def file_langs(file_path: Path | str|None, root=None) -> list[str]:
             if system_language:
                 languages.add(system_language)
     except (etree.XMLSyntaxError, OSError):
-        logger.exception(f"Error parsing SVG file: {file_path}")
+        logger.exception(f"Error parsing SVG file: {file}")
 
     return list(languages)
 
@@ -362,7 +372,7 @@ def inject(
             logger.error(f"Failed writing {inject_path.name}: {e}")
             tree = None
     else:
-        after_languages = set(file_langs(None, tree.getroot()))
+        after_languages = set(file_langs(tree))
     new_languages = after_languages - before_languages
     stats["all_languages"] = len(after_languages)
     stats["new_languages"] = len(new_languages)

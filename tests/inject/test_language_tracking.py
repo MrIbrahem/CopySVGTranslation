@@ -1,6 +1,8 @@
 import textwrap
 from pathlib import Path
 
+from lxml import etree
+
 from CopySvgTranslate.injection.injector import file_langs, inject
 
 
@@ -88,3 +90,20 @@ def test_file_langs_handles_element_tree(tmp_path):
     )
 
     assert set(file_langs(tree)) == {"ar"}
+
+
+def test_file_langs_handles_element_root():
+    svg = textwrap.dedent(
+        """
+        <svg xmlns=\"http://www.w3.org/2000/svg\">
+            <text systemLanguage=\"en\">Hello</text>
+            <text systemLanguage=\"fr\">Bonjour</text>
+        </svg>
+        """
+    )
+
+    root = etree.fromstring(svg)
+    tree = etree.ElementTree(root)
+
+    assert set(file_langs(tree)) == {"en", "fr"}
+    assert set(file_langs(root)) == {"en", "fr"}
