@@ -3,7 +3,8 @@ from pathlib import Path
 
 from lxml import etree
 
-from CopySvgTranslate.injection.injector import file_langs, inject
+from CopySvgTranslate.injection.injector import inject
+from CopySvgTranslate.injection.utils import file_langs
 
 
 def write_svg(tmp_path: Path, content: str) -> Path:
@@ -24,7 +25,7 @@ def test_inject_tracks_new_languages(tmp_path):
         """,
     )
 
-    before_languages = set(file_langs(svg_path))
+    before_languages = file_langs(svg_path)
     mapping = {"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}}
 
     tree, stats = inject(
@@ -34,7 +35,7 @@ def test_inject_tracks_new_languages(tmp_path):
         return_stats=True,
     )
 
-    after_languages = set(file_langs(tree))
+    after_languages = file_langs(tree)
 
     assert before_languages == set()
     assert after_languages == {"ar", "fr"}
@@ -89,7 +90,7 @@ def test_file_langs_handles_element_tree(tmp_path):
         return_stats=True,
     )
 
-    assert set(file_langs(tree)) == {"ar"}
+    assert file_langs(tree) == {"ar"}
 
 
 def test_file_langs_handles_element_root():
@@ -105,5 +106,5 @@ def test_file_langs_handles_element_root():
     root = etree.fromstring(svg)
     tree = etree.ElementTree(root)
 
-    assert set(file_langs(tree)) == {"en", "fr"}
-    assert set(file_langs(root)) == {"en", "fr"}
+    assert sorted(file_langs(tree)) == ["en", "fr"]
+    assert sorted(file_langs(root)) == ["en", "fr"]
