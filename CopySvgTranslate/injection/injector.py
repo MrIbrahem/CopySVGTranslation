@@ -17,6 +17,42 @@ from ..titles import get_titles_translations
 logger = logging.getLogger("CopySvgTranslate")
 
 
+def file_langs(
+    file: Path | str | etree._ElementTree | etree._Element | None,
+) -> list[str]:
+    """Return the list of languages declared in ``systemLanguage`` attributes."""
+
+    languages: set[str] = set()
+    root: etree._Element | None = None
+
+    try:
+        if isinstance(file, etree._ElementTree):
+            root = file.getroot()
+        elif isinstance(file, etree._Element):
+            root = file
+        elif file is not None:
+            svg_path = Path(str(file))
+            parser = etree.XMLParser(remove_blank_text=True)
+            tree = etree.parse(str(svg_path), parser)
+            root = tree.getroot()
+
+        if root is None:
+            return []
+
+        text_elements = root.xpath(
+            './/svg:text',
+            namespaces={'svg': 'http://www.w3.org/2000/svg'},
+        )
+        for text in text_elements:
+            system_language = text.get("systemLanguage")
+            if system_language:
+                languages.add(system_language)
+    except (etree.XMLSyntaxError, OSError):
+        logger.exception(f"Error parsing SVG file: {file}")
+
+    return list(languages)
+
+
 def get_target_path(
     output_file: Path | str | None,
     output_dir: Path | str | None,
@@ -118,9 +154,6 @@ def work_on_switches(
     all_mappings_title = mappings.get("title", {})
     all_mappings = mappings.get("new", mappings)
 
-    all_languages = set()
-    new_languages = set()
-
     for switch in switches:
         text_elements = switch.xpath('./svg:text', namespaces=svg_ns)
         if not text_elements:
@@ -159,7 +192,6 @@ def work_on_switches(
             continue
 
         existing_languages = {t.get('systemLanguage') for t in text_elements if t.get('systemLanguage')}
-        all_languages.update(existing_languages)
 
         # We assume all texts share same set of languages
         all_langs = set()
@@ -189,8 +221,6 @@ def work_on_switches(
                     stats['updated_translations'] += 1
                     break
                 continue
-
-            new_languages.add(lang)
 
             new_node = etree.Element(default_node.tag, attrib=default_node.attrib)
             new_node.set('systemLanguage', lang)
@@ -228,9 +258,6 @@ def work_on_switches(
             stats['inserted_translations'] += 1
 
         stats['processed_switches'] += 1
-
-    stats["all_languages"] = len(all_languages)
-    stats["new_languages"] = len(new_languages)
 
     return stats
 
@@ -313,7 +340,9 @@ def inject(
     # Collect all existing IDs to ensure uniqueness
     # existing_ids = {elem.get('id') for elem in root.xpath('//*[@id]') if elem.get('id')}
     existing_ids = set(root.xpath('//@id'))
-
+    
+    before_languages = set(file_langs(inject_path))
+    
     stats = work_on_switches(
         root,
         existing_ids,
@@ -321,12 +350,13 @@ def inject(
         case_insensitive=case_insensitive,
         overwrite=overwrite,
     )
-
+    
     # Fix old <svg:switch> tags if present
     for elem in root.findall(".//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"}):
         elem.tag = "switch"
         sort_switch_texts(elem)
 
+    after_languages = set()
     if save_result:
         try:
             target_path = get_target_path(output_file, output_dir, inject_path)
@@ -336,10 +366,17 @@ def inject(
                 xml_declaration=True,
                 pretty_print=kwargs.get("pretty_print", True)
             )
+            after_languages = set(file_langs(target_path))
             logger.debug(f"Saved modified SVG to {target_path}")
         except Exception as e:
             logger.error(f"Failed writing {inject_path.name}: {e}")
             tree = None
+    else:
+        after_languages = set(file_langs(tree))
+    new_languages = after_languages - before_languages
+    stats["all_languages"] = len(after_languages)
+    stats["new_languages"] = len(new_languages)
+    stats["new_languages_list"] = sorted(new_languages)
 
     logger.debug(f"Processed {stats['processed_switches']} switches")
     logger.debug(f"Inserted {stats['inserted_translations']} translations")

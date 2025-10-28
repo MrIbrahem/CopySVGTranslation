@@ -102,7 +102,6 @@ class TestWorkOnSwitches(unittest.TestCase):
 
         self.assertEqual(stats['processed_switches'], 1)
         self.assertEqual(stats['inserted_translations'], 2)
-        self.assertEqual(stats['new_languages'], 2)
 
     def test_work_on_switches_no_overwrite(self):
         """Test switch processing without overwriting existing translations."""
