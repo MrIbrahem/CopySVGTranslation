@@ -17,16 +17,17 @@ from ..titles import get_titles_translations
 logger = logging.getLogger("CopySvgTranslate")
 
 
-def file_langs(file_path: Path | str) -> list[str]:
+def file_langs(file_path: Path | str|None, root=None) -> list[str]:
     """Return the list of languages declared in ``systemLanguage`` attributes."""
 
     languages: set[str] = set()
 
     try:
-        svg_path = Path(str(file_path))
-        parser = etree.XMLParser(remove_blank_text=True)
-        tree = etree.parse(str(svg_path), parser)
-        root = tree.getroot()
+        if file_path and root == None:
+            svg_path = Path(str(file_path))
+            parser = etree.XMLParser(remove_blank_text=True)
+            tree = etree.parse(str(svg_path), parser)
+            root = tree.getroot()
 
         text_elements = root.xpath(
             './/svg:text',
@@ -360,7 +361,8 @@ def inject(
         except Exception as e:
             logger.error(f"Failed writing {inject_path.name}: {e}")
             tree = None
-            
+    else:
+        after_languages = set(file_langs(None, tree.get_root()))
     new_languages = after_languages - before_languages
     stats["all_languages"] = len(after_languages)
     stats["new_languages"] = len(new_languages)
