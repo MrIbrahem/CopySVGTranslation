@@ -362,7 +362,7 @@ def inject(
             logger.error(f"Failed writing {inject_path.name}: {e}")
             tree = None
     else:
-        after_languages = set(file_langs(None, tree.get_root()))
+        after_languages = set(file_langs(None, tree.getroot()))
     new_languages = after_languages - before_languages
     stats["all_languages"] = len(after_languages)
     stats["new_languages"] = len(new_languages)
