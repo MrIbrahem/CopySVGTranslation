@@ -17,6 +17,36 @@ from ..titles import get_titles_translations
 logger = logging.getLogger("CopySvgTranslate")
 
 
+def file_langs(file_path: Path | str | etree._ElementTree | etree._Element) -> list[str]:
+    """Return the list of languages declared in ``systemLanguage`` attributes."""
+
+    languages: set[str] = set()
+
+    try:
+        if isinstance(file_path, etree._ElementTree):
+            root = file_path.getroot()
+        elif isinstance(file_path, etree._Element):
+            root = file_path
+        else:
+            svg_path = Path(str(file_path)) if not isinstance(file_path, Path) else file_path
+            parser = etree.XMLParser(remove_blank_text=True)
+            tree = etree.parse(str(svg_path), parser)
+            root = tree.getroot()
+
+        text_elements = root.xpath(
+            './/svg:text',
+            namespaces={'svg': 'http://www.w3.org/2000/svg'},
+        )
+        for text in text_elements:
+            system_language = text.get("systemLanguage")
+            if system_language:
+                languages.add(system_language)
+    except (etree.XMLSyntaxError, OSError):
+        logger.exception(f"Error parsing SVG file: {file_path}")
+
+    return list(languages)
+
+
 def get_target_path(
     output_file: Path | str | None,
     output_dir: Path | str | None,
@@ -118,9 +148,6 @@ def work_on_switches(
     all_mappings_title = mappings.get("title", {})
     all_mappings = mappings.get("new", mappings)
 
-    all_languages = set()
-    new_languages = set()
-
     for switch in switches:
         text_elements = switch.xpath('./svg:text', namespaces=svg_ns)
         if not text_elements:
@@ -159,7 +186,6 @@ def work_on_switches(
             continue
 
         existing_languages = {t.get('systemLanguage') for t in text_elements if t.get('systemLanguage')}
-        all_languages.update(existing_languages)
 
         # We assume all texts share same set of languages
         all_langs = set()
@@ -189,8 +215,6 @@ def work_on_switches(
                     stats['updated_translations'] += 1
                     break
                 continue
-
-            new_languages.add(lang)
 
             new_node = etree.Element(default_node.tag, attrib=default_node.attrib)
             new_node.set('systemLanguage', lang)
@@ -228,9 +252,6 @@ def work_on_switches(
             stats['inserted_translations'] += 1
 
         stats['processed_switches'] += 1
-
-    stats["all_languages"] = len(all_languages)
-    stats["new_languages"] = len(new_languages)
 
     return stats
 
@@ -284,6 +305,8 @@ def inject(
         error = {"error": "File does not exist"}
         return (None, error) if return_stats else None
 
+    before_languages = set(file_langs(inject_path))
+
     if not all_mappings and kwargs.get("translations"):
         all_mappings = kwargs["translations"]
 
@@ -321,6 +344,12 @@ def inject(
         case_insensitive=case_insensitive,
         overwrite=overwrite,
     )
+
+    after_languages = set(file_langs(tree)) if tree is not None else set()
+    new_languages = after_languages - before_languages
+    stats["all_languages"] = len(after_languages)
+    stats["new_languages"] = len(new_languages)
+    stats["new_languages_list"] = sorted(new_languages)
 
     # Fix old <svg:switch> tags if present
     for elem in root.findall(".//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"}):
