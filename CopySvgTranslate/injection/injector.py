@@ -17,21 +17,16 @@ from ..titles import get_titles_translations
 logger = logging.getLogger("CopySvgTranslate")
 
 
-def file_langs(file_path: Path | str | etree._ElementTree | etree._Element) -> list[str]:
+def file_langs(file_path: Path | str) -> list[str]:
     """Return the list of languages declared in ``systemLanguage`` attributes."""
 
     languages: set[str] = set()
 
     try:
-        if isinstance(file_path, etree._ElementTree):
-            root = file_path.getroot()
-        elif isinstance(file_path, etree._Element):
-            root = file_path
-        else:
-            svg_path = Path(str(file_path)) if not isinstance(file_path, Path) else file_path
-            parser = etree.XMLParser(remove_blank_text=True)
-            tree = etree.parse(str(svg_path), parser)
-            root = tree.getroot()
+        svg_path = Path(str(file_path))
+        parser = etree.XMLParser(remove_blank_text=True)
+        tree = etree.parse(str(svg_path), parser)
+        root = tree.getroot()
 
         text_elements = root.xpath(
             './/svg:text',
@@ -350,12 +345,7 @@ def inject(
         elem.tag = "switch"
         sort_switch_texts(elem)
 
-    after_languages = set(file_langs(tree)) if tree is not None else set()
-    new_languages = after_languages - before_languages
-    stats["all_languages"] = len(after_languages)
-    stats["new_languages"] = len(new_languages)
-    stats["new_languages_list"] = sorted(new_languages)
-
+    after_languages = set()
     if save_result:
         try:
             target_path = get_target_path(output_file, output_dir, inject_path)
@@ -365,10 +355,16 @@ def inject(
                 xml_declaration=True,
                 pretty_print=kwargs.get("pretty_print", True)
             )
+            after_languages = set(file_langs(target_path))
             logger.debug(f"Saved modified SVG to {target_path}")
         except Exception as e:
             logger.error(f"Failed writing {inject_path.name}: {e}")
             tree = None
+            
+    new_languages = after_languages - before_languages
+    stats["all_languages"] = len(after_languages)
+    stats["new_languages"] = len(new_languages)
+    stats["new_languages_list"] = sorted(new_languages)
 
     logger.debug(f"Processed {stats['processed_switches']} switches")
     logger.debug(f"Inserted {stats['inserted_translations']} translations")
