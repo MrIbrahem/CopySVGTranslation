@@ -305,8 +305,6 @@ def inject(
         error = {"error": "File does not exist"}
         return (None, error) if return_stats else None
 
-    before_languages = set(file_langs(inject_path))
-
     if not all_mappings and kwargs.get("translations"):
         all_mappings = kwargs["translations"]
 
@@ -336,7 +334,9 @@ def inject(
     # Collect all existing IDs to ensure uniqueness
     # existing_ids = {elem.get('id') for elem in root.xpath('//*[@id]') if elem.get('id')}
     existing_ids = set(root.xpath('//@id'))
-
+    
+    before_languages = set(file_langs(inject_path))
+    
     stats = work_on_switches(
         root,
         existing_ids,
@@ -344,17 +344,17 @@ def inject(
         case_insensitive=case_insensitive,
         overwrite=overwrite,
     )
+    
+    # Fix old <svg:switch> tags if present
+    for elem in root.findall(".//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"}):
+        elem.tag = "switch"
+        sort_switch_texts(elem)
 
     after_languages = set(file_langs(tree)) if tree is not None else set()
     new_languages = after_languages - before_languages
     stats["all_languages"] = len(after_languages)
     stats["new_languages"] = len(new_languages)
     stats["new_languages_list"] = sorted(new_languages)
-
-    # Fix old <svg:switch> tags if present
-    for elem in root.findall(".//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"}):
-        elem.tag = "switch"
-        sort_switch_texts(elem)
 
     if save_result:
         try:
