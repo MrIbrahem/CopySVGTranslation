@@ -20,50 +20,6 @@ def flatten_text(elem):
     return "".join(text_parts)
 
 
-def wrap_tspan_with_anchor(root):
-    """Wrap <tspan> inside <a> when <a> was originally inside the <tspan>."""
-    SVG_NS = "http://www.w3.org/2000/svg"
-    NSMAP = {"svg": SVG_NS}
-
-    for tspan in root.findall(".//svg:tspan", namespaces=NSMAP):
-        anchors = tspan.findall(".//svg:a", namespaces=NSMAP)
-        if not anchors:
-            continue
-
-        if len(anchors) > 1:
-            flattened = flatten_text(tspan)
-            for child in list(tspan):
-                tspan.remove(child)
-            tspan.text = flattened
-            tspan.tail = None
-            continue
-
-        anchor = anchors[0]  # take the first <a>
-        parent = tspan.getparent()
-        index = parent.index(tspan)
-
-        # Collect all text inside the <tspan> (including the <a> content)
-        full_text = []
-        for node in tspan.iter():
-            if node.text:
-                full_text.append(node.text)
-            if node.tail:
-                full_text.append(node.tail)
-        combined_text = "".join(full_text).strip()
-
-        # Create a new <a> element with same attributes
-        new_anchor = etree.Element(anchor.tag, **anchor.attrib)
-        new_tspan = etree.Element(tspan.tag, **tspan.attrib)
-        new_tspan.text = combined_text
-        new_anchor.append(new_tspan)
-
-        # Replace old <tspan> with new <a>
-        parent.remove(tspan)
-        parent.insert(index, new_anchor)
-
-    return root
-
-
 def fix_nested_tspans(root, tag=None):
     """Flatten nested <tspan> elements while preserving text order and spacing."""
     tag = tag or "tspan"
