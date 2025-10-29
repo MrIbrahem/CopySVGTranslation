@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from doctest import FAIL_FAST
 import logging
 from pathlib import Path
 from lxml import etree
