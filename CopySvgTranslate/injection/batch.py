@@ -18,8 +18,8 @@ def start_injects(
     overwrite: bool = False,
 ) -> dict[str, Any]:
     """Inject translations into a collection of SVG files and write the results."""
-    saved_done = 0
-    no_save = 0
+    success = 0
+    failed = 0
     nested_files = 0
     no_changes = 0
 
@@ -45,7 +45,7 @@ def start_injects(
             if stats.get("nested_tspan_error"):
                 nested_files += 1
             else:
-                no_save += 1
+                failed += 1
             files_stats[file.name] = stats
             continue
 
@@ -56,21 +56,21 @@ def start_injects(
         try:
             tree.write(str(output_file), encoding='utf-8', xml_declaration=True, pretty_print=True)
             stats["file_path"] = str(output_file)
-            saved_done += 1
+            success += 1
         except Exception as e:
             logger.error(f"Failed writing {output_file}: {e}")
             stats["error"] = "write-failed"
             stats["file_path"] = ""
             tree = None
-            no_save += 1
+            failed += 1
 
         files_stats[file.name] = stats
 
-    logger.debug(f"all files: {len(files):,} Saved {saved_done:,}, skipped {no_save:,}, nested_files: {nested_files:,}")
+    logger.debug(f"all files: {len(files):,} Saved {success:,}, skipped {failed:,}, nested_files: {nested_files:,}")
 
     return {
-        "saved_done": saved_done,
-        "no_save": no_save,
+        "success": success,
+        "failed": failed,
         "nested_files": nested_files,
         "no_changes": no_changes,
         "files": files_stats,
