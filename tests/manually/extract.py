@@ -26,6 +26,17 @@ svg_file.write_text(
     '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
     <switch>
         <text id="t0-ar" systemLanguage="ar">
+            <tspan id="t0-ar">الموسيقى في عام 2020</tspan>
+        </text>
+        <text id="t0-fr" systemLanguage="fr">
+            <tspan id="t0-fr">La musique en 2020</tspan>
+        </text>
+        <text id="t0">
+            <tspan id="t0">Music in 2020</tspan>
+        </text>
+    </switch>
+    <switch>
+        <text id="t0-ar" systemLanguage="ar">
             <tspan id="t0-ar">مرحبا</tspan>
         </text>
         <text id="t0-fr" systemLanguage="fr">
