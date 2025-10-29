@@ -24,6 +24,7 @@ def start_injects(
     no_changes = 0
 
     files_stats = {}
+    nested_files_list = []
 
     for file in tqdm(files, total=len(files), desc="Inject files:"):
 
@@ -44,9 +45,10 @@ def start_injects(
             logger.debug(f"Failed to translate {file.name}")
             if stats.get("nested_tspan_error"):
                 nested_files += 1
+                nested_files_list.append(file.name)
             else:
                 failed += 1
-            files_stats[file.name] = stats
+                files_stats[file.name] = stats
             continue
 
         if stats.get("new_languages", 0) == 0 and stats.get("updated_translations", 0) == 0:
@@ -73,5 +75,6 @@ def start_injects(
         "failed": failed,
         "nested_files": nested_files,
         "no_changes": no_changes,
+        "nested_files_list": nested_files_list,
         "files": files_stats,
     }

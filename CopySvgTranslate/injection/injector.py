@@ -265,7 +265,7 @@ def inject(
     try:
         tree, root = make_translation_ready(inject_path, write_back=False)
     except SvgNestedTspanException as exc:
-        error = {"error": str(exc), "nested_tspan_error": True}
+        error = {"nested_tspan_error": True, "node": str(exc)}
         return (None, error) if return_stats else None
     except SvgStructureException as exc:
         error = {"error": str(exc)}
