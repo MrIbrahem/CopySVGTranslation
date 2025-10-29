@@ -58,7 +58,7 @@ def extract(svg_file_path, case_insensitive: bool = True):
     Returns:
         dict | None: A dictionary containing extracted translations (may include a "new" mapping of source text to per-language translations and a "title" mapping), or `None` if the file does not exist or could not be parsed.
     """
-    svg_file_path = Path(str(svg_file_path)) if not isinstance(svg_file_path, Path) else svg_file_path
+    svg_file_path = Path(str(svg_file_path))
 
     if not svg_file_path.exists():
         logger.error(f"SVG file not found: {svg_file_path}")

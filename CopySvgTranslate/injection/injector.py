@@ -43,7 +43,7 @@ def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
     all_mappings: dict = {}
 
     for mapping_file in mapping_files:
-        mapping_path = Path(str(mapping_file)) if not isinstance(mapping_file, Path) else mapping_file
+        mapping_path = Path(str(mapping_file))
 
         if not mapping_path.exists():
             logger.warning(f"Mapping file not found: {mapping_path}")
@@ -241,7 +241,7 @@ def inject(
     if not inject_file and kwargs.get("svg_file_path"):
         inject_file = kwargs["svg_file_path"]
 
-    inject_path = Path(str(inject_file)) if not isinstance(inject_file, Path) else inject_file
+    inject_path = Path(str(inject_file))
 
     if not inject_path.exists():
         logger.error(f"SVG file not found: {inject_path}")
