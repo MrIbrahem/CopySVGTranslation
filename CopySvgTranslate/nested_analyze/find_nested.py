@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from doctest import FAIL_FAST
 import logging
 from pathlib import Path
 from lxml import etree
@@ -70,13 +71,13 @@ def match_nested_tags(svg_file_path: Path) -> list:
     return result
 
 
-def fix_nested_file(svg_file_path: Path, new_path: Path):
+def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_print: bool = True):
     """
     !
     """
     # ---
     svg_file_path = Path(svg_file_path)
-    new_path = Path(new_path)
+    new_path = Path(new_path or svg_file_path)
     # ---
     parser = etree.XMLParser(remove_blank_text=False)
     # ---
@@ -94,7 +95,7 @@ def fix_nested_file(svg_file_path: Path, new_path: Path):
     # ---
     try:
         new_path.write_text(
-            etree.tostring(root, encoding="unicode", pretty_print=True),
+            etree.tostring(root, encoding="unicode", pretty_print=pretty_print),
             encoding="utf-8"
         )
         return True
