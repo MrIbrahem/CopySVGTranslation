@@ -6,7 +6,7 @@ from .text_utils import normalize_text
 from .workflows import svg_extract_and_inject, svg_extract_and_injects
 from .titles import make_title_translations, get_titles_translations
 from .injection import make_translation_ready
-from .nested_analyze import match_nested_tags
+from .nested_analyze import analyze_nested_tags, match_nested_tags, fix_nested_file
 
 __all__ = [
     "extract",
@@ -19,5 +19,7 @@ __all__ = [
     "make_title_translations",
     "get_titles_translations",
     "make_translation_ready",
+    "analyze_nested_tags",
     "match_nested_tags",
+    "fix_nested_file",
 ]

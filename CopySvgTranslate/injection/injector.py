@@ -271,7 +271,11 @@ def inject(
     except SvgStructureException as exc:
         error = {"error": str(exc)}
         return (None, error) if return_stats else None
-    except OSError as exc:
+    except etree.XMLSyntaxError as exc:
+        logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
+        error = {"error": str(exc)}
+        return (None, error) if return_stats else None
+    except (OSError, Exception) as exc:
         logger.error("Failed to parse SVG file: %s", exc)
         error = {"error": str(exc)}
         return (None, error) if return_stats else None
