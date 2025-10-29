@@ -7,42 +7,14 @@ import logging
 import re
 from pathlib import Path
 from typing import List, Set, Tuple
-
 from lxml import etree
+
+from .utils import SvgStructureException, SvgNestedTspanException
 
 logger = logging.getLogger("CopySvgTranslate")
 
 SVG_NS = "http://www.w3.org/2000/svg"
 XMLNS_ATTR = "{http://www.w3.org/2000/xmlns/}xmlns"
-
-
-class SvgStructureException(Exception):
-    """Raised when SVG structure is unsuitable for translation."""
-
-    def __init__(self, code: str, element=None, extra=None):
-        """Store structured error details for later reporting.
-
-        Parameters:
-            code (str): Machine-readable error code describing the structural
-                issue encountered.
-            element: Optional XML element related to the error (for diagnostics).
-            extra: Optional supplemental data used to enrich the exception
-                message.
-        """
-        self.code = code
-        self.element = element
-        self.extra = extra
-        msg = code
-        if extra:
-            msg += ": " + str(extra)
-        super().__init__(msg)
-
-
-class SvgNestedTspanException(SvgStructureException):
-    """Raised when encountering nested ``<tspan>`` elements."""
-
-    def __init__(self, element=None, extra=None):
-        super().__init__("structure-error-nested-tspans-not-supported", element, extra)
 
 
 def normalize_lang(lang: str) -> str:
@@ -137,6 +109,21 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
                 if '#' in selector:
                     raise SvgStructureException('structure-error-css-has-ids', None, [s.get("id", "")])
 
+    translatable_nodes: List[etree._Element] = []
+
+    # Process tspans
+    tspans = root.findall(".//{%s}tspan" % SVG_NS)
+    for tspan in tspans:
+        # nested content check: tspan should not have element children
+        element_children = [c for c in tspan if isinstance(c.tag, str)]
+        if len(element_children) == 0:
+            translatable_nodes.append(tspan)
+        else:
+            # Nested tspans or children not supported
+            # raise SvgStructureException('structure-error-nested-tspans-not-supported', tspan, element_children)
+            node_text = etree.tostring(tspan, pretty_print=True).decode("utf-8")
+            raise SvgNestedTspanException(tspan, [tspan.get("id", "")], node_text=node_text)
+
     # tref not supported
     trefs = root.findall(".//{%s}tref" % SVG_NS)
     if len(trefs) != 0:
@@ -155,7 +142,6 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
 
     # Collect translatable nodes and prepare idsInUse
     ids_in_use: List[int] = [0]
-    translatable_nodes: List[etree._Element] = []
 
     def allocate_trsvg_id() -> str:
         """Allocate a new unique ``trsvg`` identifier."""
@@ -182,18 +168,6 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
             existing_ids.add(candidate)
             return candidate
         return allocate_trsvg_id()
-
-    # Process tspans
-    tspans = root.findall(".//{%s}tspan" % SVG_NS)
-    for tspan in tspans:
-        # nested content check: tspan should not have element children
-        element_children = [c for c in tspan if isinstance(c.tag, str)]
-        if len(element_children) == 0:
-            translatable_nodes.append(tspan)
-        else:
-            # Nested tspans or children not supported
-            # raise SvgStructureException('structure-error-nested-tspans-not-supported', tspan, [tspan.get("id", "")])
-            raise SvgNestedTspanException(tspan, [tspan.get("id", "")])
 
     # Process text elements: wrap raw text nodes into <tspan>
     texts = root.findall(".//{%s}text" % SVG_NS)

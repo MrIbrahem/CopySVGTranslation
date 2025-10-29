@@ -11,12 +11,13 @@ from lxml import etree
 
 from ..text_utils import extract_text_from_node, normalize_text
 from ..titles import get_titles_translations
-from .utils import get_target_path, file_langs
-from .preparation import (
+from .utils import (
     SvgNestedTspanException,
     SvgStructureException,
-    make_translation_ready,
+    get_target_path,
+    file_langs,
 )
+from .preparation import make_translation_ready
 
 logger = logging.getLogger("CopySvgTranslate")
 
@@ -265,7 +266,7 @@ def inject(
     try:
         tree, root = make_translation_ready(inject_path, write_back=False)
     except SvgNestedTspanException as exc:
-        error = {"nested_tspan_error": True, "node": str(exc)}
+        error = {"nested_tspan_error": True, "node": exc.node()}
         return (None, error) if return_stats else None
     except SvgStructureException as exc:
         error = {"error": str(exc)}

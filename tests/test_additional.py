@@ -15,12 +15,15 @@ if str(PROJECT_ROOT) not in sys.path:
 from CopySvgTranslate import extract, inject, normalize_text, generate_unique_id
 from CopySvgTranslate.text_utils import extract_text_from_node
 from CopySvgTranslate.injection.injector import load_all_mappings
-from CopySvgTranslate.injection.preparation import normalize_lang, get_text_content, clone_element, SvgStructureException
-
+from CopySvgTranslate.injection.preparation import normalize_lang, get_text_content, clone_element
+from CopySvgTranslate.injection import (
+    SvgStructureException,
+)
 
 # -------------------------------
 # Fixtures
 # -------------------------------
+
 
 @pytest.fixture
 def temp_dir():

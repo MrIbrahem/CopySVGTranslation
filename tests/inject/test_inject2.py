@@ -17,7 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from CopySvgTranslate import inject, make_translation_ready, start_injects
-from CopySvgTranslate.injection.preparation import (
+from CopySvgTranslate.injection import (
     SvgNestedTspanException,
     SvgStructureException,
 )
@@ -115,4 +115,4 @@ class Testinject:
         )
 
         assert result["nested_files"] == 1
-        assert result["files"][file.name]["nested_tspan_error"] is True
+        assert file.name in result["nested_files_list"]

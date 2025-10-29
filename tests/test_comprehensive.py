@@ -23,13 +23,15 @@ from CopySvgTranslate.injection.preparation import (
     get_text_content,
     clone_element,
     make_translation_ready,
+)
+from CopySvgTranslate.injection import (
     SvgStructureException,
 )
-
 
 # -------------------------------
 # Fixtures
 # -------------------------------
+
 
 @pytest.fixture
 def temp_dir():
