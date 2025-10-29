@@ -97,7 +97,8 @@ def get_target_path(
     Returns:
         Path: The resolved filesystem path for the output SVG file.
     """
-    output_dir = Path(str(output_dir))
+    if output_dir:
+        output_dir = Path(str(output_dir))
 
     if output_file:
         target_path = Path(str(output_file))

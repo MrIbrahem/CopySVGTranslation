@@ -77,7 +77,7 @@ def start_injects(
 
         files_stats[file.name] = stats
 
-    logger.debug(f"all files: {len(files):,} Saved {success:,}, skipped {failed:,}, nested_files: {nested_files:,}")
+    logger.debug(f"all files: {len(files):,} Saved {success:,}, failed {failed:,}, nested_files: {nested_files:,}")
 
     if output_dir_nested_files:
         data["output_dir_nested_files"] = str(output_dir_nested_files)
