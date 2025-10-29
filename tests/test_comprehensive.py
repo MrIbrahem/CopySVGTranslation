@@ -23,13 +23,15 @@ from CopySvgTranslate.injection.preparation import (
     get_text_content,
     clone_element,
     make_translation_ready,
+)
+from CopySvgTranslate.injection import (
     SvgStructureException,
 )
-
 
 # -------------------------------
 # Fixtures
 # -------------------------------
+
 
 @pytest.fixture
 def temp_dir():
@@ -241,8 +243,8 @@ class TestBatch:
         svg_file.write_text(svg_content, encoding='utf-8')
         translations = {"new": {"hello": {"ar": "مرحبا"}}}
         result = start_injects([svg_file], translations, out_dir, overwrite=False)
-        assert result["saved_done"] == 1
-        assert result["no_save"] == 0
+        assert result["success"] == 1
+        assert result["failed"] == 0
 
     def test_start_injects_multiple_files(self, temp_dir):
         """Test batch injection with multiple files."""
@@ -255,7 +257,7 @@ class TestBatch:
         svg2.write_text(svg_content, encoding='utf-8')
         translations = {"new": {"hello": {"ar": "مرحبا"}}}
         result = start_injects([svg1, svg2], translations, out_dir)
-        assert result["saved_done"] == 2
+        assert result["success"] == 2
         assert "test1.svg" in result["files"]
         assert "test2.svg" in result["files"]
 
@@ -265,8 +267,8 @@ class TestBatch:
         out_dir.mkdir()
         translations = {"new": {"hello": {"ar": "مرحبا"}}}
         result = start_injects([temp_dir / "nonexistent.svg"], translations, out_dir)
-        assert result["saved_done"] == 0
-        assert result["no_save"] == 1
+        assert result["success"] == 0
+        assert result["failed"] == 1
 
 
 # -------------------------------

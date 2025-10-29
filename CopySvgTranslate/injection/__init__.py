@@ -7,7 +7,9 @@ from .injector import (
     load_all_mappings,
     work_on_switches,
 )
-from .preparation import make_translation_ready, SvgStructureException
+from .preparation import make_translation_ready
+from .utils import SvgStructureException, SvgNestedTspanException
+from .find_nested import match_nested_tags
 
 __all__ = [
     "generate_unique_id",
@@ -16,5 +18,7 @@ __all__ = [
     "make_translation_ready",
     "start_injects",
     "SvgStructureException",
+    "SvgNestedTspanException",
     "work_on_switches",
+    "match_nested_tags",
 ]

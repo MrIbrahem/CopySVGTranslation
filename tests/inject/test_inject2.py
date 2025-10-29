@@ -16,7 +16,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from CopySvgTranslate import inject, make_translation_ready
+from CopySvgTranslate import inject, make_translation_ready, start_injects
+from CopySvgTranslate.injection import (
+    SvgNestedTspanException,
+    SvgStructureException,
+)
 
 
 @pytest.fixture
@@ -75,66 +79,40 @@ class Testinject:
 
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
 
-        try:
+        with pytest.raises(SvgStructureException) as excinfo:
             make_translation_ready(file, True)
-            # inject(inject_file=file, all_mappings=data)
-        except Exception as e:
-            assert "structure-error-multiple-text-same-lang: ['la']" == str(e)
+        assert str(excinfo.value) == "structure-error-multiple-text-same-lang: ['la']"
 
-    def testExeptions(self, temp_dir):
-        # ---
-        data = {
-            "Simple nested tspan": {
-                "svg": "<text><tspan>foo <tspan>bar</tspan></tspan></text>",
-                "message": "structure-error-nested-tspans-not-supported",
-                "params": [""]
-            },
-            "Nested tspan with ID": {
-                "svg": "<text><tspan id='test'>foo <tspan>bar</tspan></tspan></text>",
-                "message": "structure-error-nested-tspans-not-supported",
-                "params": ["test"]
-            },
-            "Nested tspan with grandparent with ID": {
-                "svg": "<g id='gparent'><text><tspan>foo <tspan>bar</tspan></tspan></text></g>",
-                "message": "structure-error-nested-tspans-not-supported",
-                "params": [""]
-            },
-            "CSS too complex": {
-                "svg": "<style>#foo { stroke:1px; } .bar { color:pink; }</style><text>Foo</text>",
-                "message": "structure-error-css-too-complex",
-                "params": [""]
-            },
-            "id-chars": {
-                "svg": "<text id='x|'>Foo</text>",
-                "message": "structure-error-invalid-node-id",
-                "params": [
-                    "x|"
-                ]
-            },
-            "Text with dollar numbers": {
-                "svg": "<text id='blah'>Foo $3 bar</text>",
-                "message": "structure-error-text-contains-dollar",
-                "params": [
-                    # "blah",
-                    "Foo $3 bar"
-                ]
-            }
-        }
-        # ---
-        result = {}
-        # ---
-        for key, tab in data.items():
-            # <svg xmlns='http://www.w3.org/2000/svg' version='1.0' xmlns:xlink='http://www.w3.org/1999/xlink'>
-            # ---
-            text = f'<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">{tab["svg"]}</svg>'
-            # ---
-            file = self.getSvgFileFromString(temp_dir, text)
-            # ---
-            try:
-                make_translation_ready(file, True)
-                # inject(inject_file=file)
-            except Exception as e:
-                result[str(e)] = f"{tab['message']}: {str(tab['params'])}"
-                # assert f"{tab['message']}: {str(tab['params'])}" == str(e)
-        # ---
-        assert list(result.keys()) == list(result.values())
+    @pytest.mark.parametrize(
+        "svg, exc_type, code, extra",
+        [
+            ("<text><tspan>foo <tspan>bar</tspan></tspan></text>", SvgNestedTspanException, "structure-error-nested-tspans-not-supported", [""]),
+            ("<text><tspan id='test'>foo <tspan>bar</tspan></tspan></text>", SvgNestedTspanException, "structure-error-nested-tspans-not-supported", ["test"]),
+            ("<g id='gparent'><text><tspan>foo <tspan>bar</tspan></tspan></text></g>", SvgNestedTspanException, "structure-error-nested-tspans-not-supported", [""]),
+            ("<style>#foo { stroke:1px; } .bar { color:pink; }</style><text>Foo</text>", SvgStructureException, "structure-error-css-too-complex", [""]),
+            ("<text id='x|'>Foo</text>", SvgStructureException, "structure-error-invalid-node-id", ["x|"]),
+            ("<text id='blah'>Foo $3 bar</text>", SvgStructureException, "structure-error-text-contains-dollar", ["Foo $3 bar"]),
+        ],
+    )
+    def testExeptions(self, temp_dir, svg, exc_type, code, extra):
+        text = f'<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">{svg}</svg>'
+        file = self.getSvgFileFromString(temp_dir, text)
+
+        with pytest.raises(exc_type) as excinfo:
+            make_translation_ready(file, True)
+
+        assert excinfo.value.code == code
+        assert excinfo.value.extra == extra
+
+    def test_start_injects_counts_nested_tspans(self, temp_dir):
+        nested_svg = "<?xml version=\"1.0\"?><svg xmlns=\"http://www.w3.org/2000/svg\"><text><tspan>foo <tspan>bar</tspan></tspan></text></svg>"
+        file = self.getSvgFileFromString(temp_dir, nested_svg)
+
+        result = start_injects(
+            [str(file)],
+            translations={"new": {"dummy": {"la": "value"}}},
+            output_dir_translated=temp_dir,
+        )
+
+        assert result["nested_files"] == 1
+        assert file.name in result["nested_files_list"]

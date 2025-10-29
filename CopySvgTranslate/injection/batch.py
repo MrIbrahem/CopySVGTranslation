@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import shutil
 from tqdm import tqdm
 from pathlib import Path
 from typing import Any
@@ -16,18 +17,21 @@ def start_injects(
     translations: dict,
     output_dir_translated: Path,
     overwrite: bool = False,
+    output_dir_nested_files: Path | None = None,
 ) -> dict[str, Any]:
     """Inject translations into a collection of SVG files and write the results."""
-    saved_done = 0
-    no_save = 0
+    data = {}
+    success = 0
+    failed = 0
     nested_files = 0
     no_changes = 0
 
     files_stats = {}
+    nested_files_list = {}
 
     for file in tqdm(files, total=len(files), desc="Inject files:"):
 
-        file = Path(str(file)) if not isinstance(file, Path) else file
+        file = Path(str(file))
 
         tree, stats = inject(
             file,
@@ -36,16 +40,24 @@ def start_injects(
             return_stats=True,
             overwrite=overwrite,
         )
+
         stats["file_path"] = ""
 
         output_file = output_dir_translated / file.name
         if not tree:
             logger.debug(f"Failed to translate {file.name}")
-            if stats.get("error") == "structure-error-nested-tspans-not-supported":
+            if stats.get("nested_tspan_error"):
                 nested_files += 1
+                nested_files_list[file.name] = stats.get("node", "")
+                if output_dir_nested_files:
+                    # copy file to output_dir_nested_files
+                    try:
+                        shutil.copy(file, output_dir_nested_files / file.name)
+                    except Exception as e:
+                        logger.error(f"Failed copying {file} to {output_dir_nested_files}: {e}")
             else:
-                no_save += 1
-            files_stats[file.name] = stats
+                failed += 1
+                files_stats[file.name] = stats
             continue
 
         if stats.get("new_languages", 0) == 0 and stats.get("updated_translations", 0) == 0:
@@ -55,22 +67,27 @@ def start_injects(
         try:
             tree.write(str(output_file), encoding='utf-8', xml_declaration=True, pretty_print=True)
             stats["file_path"] = str(output_file)
-            saved_done += 1
+            success += 1
         except Exception as e:
             logger.error(f"Failed writing {output_file}: {e}")
             stats["error"] = "write-failed"
             stats["file_path"] = ""
             tree = None
-            no_save += 1
+            failed += 1
 
         files_stats[file.name] = stats
 
-    logger.debug(f"all files: {len(files):,} Saved {saved_done:,}, skipped {no_save:,}, nested_files: {nested_files:,}")
+    logger.debug(f"all files: {len(files):,} Saved {success:,}, failed {failed:,}, nested_files: {nested_files:,}")
 
-    return {
-        "saved_done": saved_done,
-        "no_save": no_save,
+    if output_dir_nested_files:
+        data["output_dir_nested_files"] = str(output_dir_nested_files)
+
+    data.update({
+        "success": success,
+        "failed": failed,
         "nested_files": nested_files,
         "no_changes": no_changes,
+        "nested_files_list": nested_files_list,
         "files": files_stats,
-    }
+    })
+    return data
