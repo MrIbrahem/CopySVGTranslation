@@ -1,7 +1,7 @@
 import pytest
 import json
 from pathlib import Path
-from CopySvgTranslate import extract, svg_extract_and_inject, inject, make_translation_ready
+from CopySVGTranslation import extract, svg_extract_and_inject, inject, make_translation_ready
 
 FIXTURES_DIR = Path(__file__).parent
 

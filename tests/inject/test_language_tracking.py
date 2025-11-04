@@ -3,8 +3,8 @@ from pathlib import Path
 
 from lxml import etree
 
-from CopySvgTranslate.injection.injector import inject
-from CopySvgTranslate.injection.utils import file_langs
+from CopySVGTranslation.injection.injector import inject
+from CopySVGTranslation.injection.utils import file_langs
 
 
 def write_svg(tmp_path: Path, content: str) -> Path:

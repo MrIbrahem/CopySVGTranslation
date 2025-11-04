@@ -1,4 +1,4 @@
-"""Additional comprehensive pytest tests for CopySvgTranslate."""
+"""Additional comprehensive pytest tests for CopySVGTranslation."""
 
 import sys
 from pathlib import Path
@@ -7,7 +7,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from CopySvgTranslate.nested_analyze.find_nested import match_nested_tags
+from CopySVGTranslation.nested_analyze.find_nested import match_nested_tags
 
 SVG_NS = "http://www.w3.org/2000/svg"
 

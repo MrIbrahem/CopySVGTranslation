@@ -1,9 +1,9 @@
 import logging
 from typing import Dict, List
 
-logger = logging.getLogger("CopySvgTranslate")
+logger = logging.getLogger("CopySVGTranslation")
 
-    
+
 def make_title_translations(
     new: Dict[str, Dict[str, str]]
 ) -> Dict[str, Dict[str, str]]:

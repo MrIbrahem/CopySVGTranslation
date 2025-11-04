@@ -7,7 +7,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from CopySvgTranslate import make_title_translations, get_titles_translations
+from CopySVGTranslation import make_title_translations, get_titles_translations
 
 
 class TestMakeTitlesTranslations:

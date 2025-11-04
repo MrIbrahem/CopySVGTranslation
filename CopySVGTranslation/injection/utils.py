@@ -7,7 +7,7 @@ from pathlib import Path
 
 from lxml import etree
 
-logger = logging.getLogger("CopySvgTranslate")
+logger = logging.getLogger("CopySVGTranslation")
 
 
 class SvgStructureException(Exception):

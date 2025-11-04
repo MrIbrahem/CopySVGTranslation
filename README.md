@@ -7,7 +7,7 @@ This tool extracts multilingual text pairs from SVG files and applies translatio
 This tool requires Python 3.10+. Install the lightweight core dependencies with:
 
 ```bash
-pip install CopySvgTranslate
+pip install CopySVGTranslation
 ```
 ## Usage
 
@@ -15,7 +15,7 @@ pip install CopySvgTranslate
 
 ```python
 from pathlib import Path
-from CopySvgTranslate import svg_extract_and_inject
+from CopySVGTranslation import svg_extract_and_inject
 
 tree = svg_extract_and_inject(
     extract_file=Path("examples/source_multilingual.svg"),
@@ -35,11 +35,11 @@ translations were inserted, call the lower level injector with
 `return_stats=True`:
 
 ```python
-from CopySvgTranslate.injection import inject
+from CopySVGTranslation.injection import inject
 
 tree, stats = inject(
     inject_file="examples/target_missing_translations.svg",
-    mapping_files=["CopySvgTranslate/data/source_multilingual.svg.json"],
+    mapping_files=["CopySVGTranslation/data/source_multilingual.svg.json"],
     output_dir=Path("./translated"),
     save_result=True,
     return_stats=True,
@@ -57,7 +57,7 @@ files are written.
 
 ```python
 from pathlib import Path
-from CopySvgTranslate import inject
+from CopySVGTranslation import inject
 
 translations = {
     "new": {
@@ -104,31 +104,70 @@ above.
 ### Input SVG (arabic.svg)
 
 ```xml
-<switch style="font-size:30px;font-family:Bitstream Vera Sans">
-    <text x="259.34814" y="927.29651" style="font-size:30px;font-family:Bitstream Vera Sans"
-        id="text2213-ar"
-        xml:space="preserve" systemLanguage="ar">
-        <tspan x="259.34814" y="927.29651" id="tspan2215-ar">لكنها موصولة بمرحلتين متعاكستين.</tspan>
-    </text>
-    <text x="259.34814" y="927.29651" style="font-size:30px;font-family:Bitstream Vera Sans"
-        id="text2213"
-        xml:space="preserve">
-        <tspan x="259.34814" y="927.29651" id="tspan2215">but are connected in anti-phase</tspan>
-    </text>
-</switch>
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg">
+  <switch>
+      <text id="t0-ar" systemLanguage="ar">
+          <tspan id="t0-ar">الموسيقى في عام 2020</tspan>
+      </text>
+      <text id="t0-fr" systemLanguage="fr">
+          <tspan id="t0-fr">La musique en 2020</tspan>
+      </text>
+      <text id="t0">
+          <tspan id="t0">Music in 2020</tspan>
+      </text>
+  </switch>
+  <switch>
+      <text id="t0-ar" systemLanguage="ar">
+          <tspan id="t0-ar">مرحبا</tspan>
+      </text>
+      <text id="t0-fr" systemLanguage="fr">
+          <tspan id="t0-fr">Bonjour</tspan>
+      </text>
+      <text id="t0">
+          <tspan id="t0">Hello</tspan>
+      </text>
+  </switch>
+</svg>
 ```
 
-### Extracted JSON (arabic.svg.json)
+### Python code
+
+```python
+from pathlib import Path
+from CopySVGTranslation import extract
+
+translations = extract(
+    svg_file_path=Path("arabic.svg"),
+    case_insensitive=True,
+)
+```
+### Extracted JSON
 
 ```json
 {
-  "new": {
-    "but are connected in anti-phase": {
-      "ar": "لكنها موصولة بمرحلتين متعاكستين."
+    "new": {
+        "music in 2020": {
+            "ar": "الموسيقى في عام 2020",
+            "fr": "La musique en 2020"
+        },
+        "hello": {
+            "ar": "مرحبا",
+            "fr": "Bonjour"
+        }
+    },
+    "title": {
+        "music in": {
+            "ar": "الموسيقى في عام",
+            "fr": "La musique en"
+        }
+    },
+    "tspans_by_id": {
+        "t0": "Hello"
     }
-  }
 }
 ```
+
 
 ### Injection Example
 - TODO

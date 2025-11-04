@@ -8,7 +8,7 @@ from lxml import etree
 from ..text_utils import normalize_text
 from ..titles import make_title_translations
 
-logger = logging.getLogger("CopySvgTranslate")
+logger = logging.getLogger("CopySVGTranslation")
 
 def get_english_default_texts(text_elements, case_insensitive):
     new_keys = []
