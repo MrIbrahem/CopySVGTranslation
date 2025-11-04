@@ -1,12 +1,12 @@
-"""Comprehensive tests for the CopySvgTranslate public API module (__init__.py)."""
+"""Comprehensive tests for the CopySVGTranslation public API module (__init__.py)."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
 # Test that the public API is importable
-import CopySvgTranslate
-from CopySvgTranslate import (
+import CopySVGTranslation
+from CopySVGTranslation import (
     extract,
     generate_unique_id,
     inject,
@@ -23,8 +23,8 @@ class TestPublicAPIExports:
 
     def test_all_attribute_exists(self):
         """The __all__ attribute should be defined."""
-        assert hasattr(CopySvgTranslate, "__all__")
-        assert isinstance(CopySvgTranslate.__all__, list)
+        assert hasattr(CopySVGTranslation, "__all__")
+        assert isinstance(CopySVGTranslation.__all__, list)
 
     def test_all_attribute_completeness(self):
         """The __all__ attribute should contain all expected public functions."""
@@ -37,12 +37,12 @@ class TestPublicAPIExports:
             "svg_extract_and_inject",
         ]
         for name in expected_exports:
-            assert name in CopySvgTranslate.__all__, f"{name} should be in __all__"
+            assert name in CopySVGTranslation.__all__, f"{name} should be in __all__"
 
     def test_all_exports_are_callable(self):
         """All items in __all__ should be callable functions."""
-        for name in CopySvgTranslate.__all__:
-            obj = getattr(CopySvgTranslate, name)
+        for name in CopySVGTranslation.__all__:
+            obj = getattr(CopySVGTranslation, name)
             assert callable(obj), f"{name} should be callable"
 
     def test_extract_is_importable(self):
@@ -77,18 +77,18 @@ class TestPublicAPIExports:
 
     def test_module_has_docstring(self):
         """The module should have a docstring."""
-        assert CopySvgTranslate.__doc__ is not None
-        assert len(CopySvgTranslate.__doc__) > 0
+        assert CopySVGTranslation.__doc__ is not None
+        assert len(CopySVGTranslation.__doc__) > 0
 
     def test_star_import(self):
         """Test that star import works correctly."""
         # Verify that all items in __all__ are accessible from the module
-        for name in CopySvgTranslate.__all__:
-            assert hasattr(CopySvgTranslate, name), f"{name} should be available via star import"
+        for name in CopySVGTranslation.__all__:
+            assert hasattr(CopySVGTranslation, name), f"{name} should be available via star import"
 
     def test_no_private_exports(self):
         """The __all__ list should not contain private names."""
-        for name in CopySvgTranslate.__all__:
+        for name in CopySVGTranslation.__all__:
             assert not name.startswith("_"), f"{name} should not be private"
 
 
@@ -349,27 +349,27 @@ class TestAPIConsistency:
 
     def test_all_functions_have_docstrings(self):
         """All exported functions should have docstrings."""
-        for name in CopySvgTranslate.__all__:
-            func = getattr(CopySvgTranslate, name)
+        for name in CopySVGTranslation.__all__:
+            func = getattr(CopySVGTranslation, name)
             assert func.__doc__ is not None, f"{name} should have a docstring"
             assert len(func.__doc__) > 0, f"{name} docstring should not be empty"
 
     def test_import_paths_consistency(self):
         """Verify that functions are accessible from both paths."""
         # These should all refer to the same function objects
-        from CopySvgTranslate import extract as extract1
-        from CopySvgTranslate.extraction import extract as extract2
+        from CopySVGTranslation import extract as extract1
+        from CopySVGTranslation.extraction import extract as extract2
 
         # The functions should be the same object
         assert extract1 is extract2
 
     def test_module_name_is_correct(self):
         """The module should have the correct name."""
-        assert CopySvgTranslate.__name__ == "CopySvgTranslate"
+        assert CopySVGTranslation.__name__ == "CopySVGTranslation"
 
     def test_package_structure(self):
         """Verify the package has expected submodules."""
-        assert hasattr(CopySvgTranslate, "extraction")
-        assert hasattr(CopySvgTranslate, "injection")
-        assert hasattr(CopySvgTranslate, "workflows")
-        assert hasattr(CopySvgTranslate, "text_utils")
+        assert hasattr(CopySVGTranslation, "extraction")
+        assert hasattr(CopySVGTranslation, "injection")
+        assert hasattr(CopySVGTranslation, "workflows")
+        assert hasattr(CopySVGTranslation, "text_utils")
