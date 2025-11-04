@@ -3,7 +3,7 @@ requires = ["hatchling>=1.17"]
 build-backend = "hatchling.build"
 
 [project]
-name = "CopySvgTranslate"
+name = "CopySVGTranslation"
 version = "0.1.4"
 description = "Utilities for extracting and applying translations to multilingual SVG files."
 readme = "README.md"
@@ -17,12 +17,12 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/MrIbrahem/CopySvgTranslate"
-Repository = "https://github.com/MrIbrahem/CopySvgTranslate"
-Issues = "https://github.com/MrIbrahem/CopySvgTranslate/issues"
+Homepage = "https://github.com/MrIbrahem/CopySVGTranslation"
+Repository = "https://github.com/MrIbrahem/CopySVGTranslation"
+Issues = "https://github.com/MrIbrahem/CopySVGTranslation/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["CopySvgTranslate"]
+packages = ["CopySVGTranslation"]
 
 
 [tool.black]

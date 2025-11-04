@@ -19,7 +19,7 @@ from .utils import (
 )
 from .preparation import make_translation_ready
 
-logger = logging.getLogger("CopySvgTranslate")
+logger = logging.getLogger("CopySVGTranslation")
 
 
 def generate_unique_id(base_id: str, lang: str, existing_ids: set[str]) -> str:

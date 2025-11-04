@@ -1,4 +1,4 @@
-"""Public API for the CopySvgTranslate package."""
+"""Public API for the CopySVGTranslation package."""
 
 from .extraction import extract
 from .injection import generate_unique_id, inject, start_injects

@@ -1,4 +1,4 @@
-"""Injection phase helpers for CopySvgTranslate."""
+"""Injection phase helpers for CopySVGTranslation."""
 
 from .find_nested import match_nested_tags, fix_nested_file, fix_nested_tspans
 

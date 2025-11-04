@@ -7,7 +7,7 @@ This tool extracts multilingual text pairs from SVG files and applies translatio
 This tool requires Python 3.10+. Install the lightweight core dependencies with:
 
 ```bash
-pip install CopySvgTranslate
+pip install CopySVGTranslation
 ```
 ## Usage
 
@@ -15,7 +15,7 @@ pip install CopySvgTranslate
 
 ```python
 from pathlib import Path
-from CopySvgTranslate import svg_extract_and_inject
+from CopySVGTranslation import svg_extract_and_inject
 
 tree = svg_extract_and_inject(
     extract_file=Path("examples/source_multilingual.svg"),
@@ -35,11 +35,11 @@ translations were inserted, call the lower level injector with
 `return_stats=True`:
 
 ```python
-from CopySvgTranslate.injection import inject
+from CopySVGTranslation.injection import inject
 
 tree, stats = inject(
     inject_file="examples/target_missing_translations.svg",
-    mapping_files=["CopySvgTranslate/data/source_multilingual.svg.json"],
+    mapping_files=["CopySVGTranslation/data/source_multilingual.svg.json"],
     output_dir=Path("./translated"),
     save_result=True,
     return_stats=True,
@@ -57,7 +57,7 @@ files are written.
 
 ```python
 from pathlib import Path
-from CopySvgTranslate import inject
+from CopySVGTranslation import inject
 
 translations = {
     "new": {
@@ -135,7 +135,7 @@ above.
 
 ```python
 from pathlib import Path
-from CopySvgTranslate import inject
+from CopySVGTranslation import inject
 
 translations = extract(
     svg_file_path=Path("arabic.svg"),

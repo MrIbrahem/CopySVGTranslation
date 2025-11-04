@@ -1,5 +1,5 @@
 """
-Comprehensive pytest tests for CopySvgTranslate covering edge cases and additional functionality.
+Comprehensive pytest tests for CopySVGTranslation covering edge cases and additional functionality.
 """
 
 import json
@@ -14,9 +14,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from CopySvgTranslate import extract, inject
-from CopySvgTranslate.text_utils import extract_text_from_node
-from CopySvgTranslate.workflows import svg_extract_and_inject
+from CopySVGTranslation import extract, inject
+from CopySVGTranslation.text_utils import extract_text_from_node
+from CopySVGTranslation.workflows import svg_extract_and_inject
 
 
 # -------------------------------

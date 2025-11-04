@@ -1,4 +1,4 @@
-"""Extraction phase helpers for CopySvgTranslate."""
+"""Extraction phase helpers for CopySVGTranslation."""
 
 from .extractor import extract
 

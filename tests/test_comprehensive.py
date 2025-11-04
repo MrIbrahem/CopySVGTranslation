@@ -1,7 +1,7 @@
 #
 
 """
-Comprehensive pytest tests for CopySvgTranslate covering edge cases and additional functionality.
+Comprehensive pytest tests for CopySVGTranslation covering edge cases and additional functionality.
 """
 
 import json
@@ -16,15 +16,15 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from CopySvgTranslate import inject, normalize_text, generate_unique_id, start_injects
-from CopySvgTranslate.injection.injector import load_all_mappings
-from CopySvgTranslate.injection.preparation import (
+from CopySVGTranslation import inject, normalize_text, generate_unique_id, start_injects
+from CopySVGTranslation.injection.injector import load_all_mappings
+from CopySVGTranslation.injection.preparation import (
     normalize_lang,
     get_text_content,
     clone_element,
     make_translation_ready,
 )
-from CopySvgTranslate.injection import (
+from CopySVGTranslation.injection import (
     SvgStructureException,
 )
 

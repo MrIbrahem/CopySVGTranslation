@@ -1,12 +1,12 @@
 """
-python I:/SVG_PY/CopySvgTranslate/tests/manually/extract.py
+python I:/SVG_PY/CopySVGTranslation/tests/manually/extract.py
 """
 import sys
 import tempfile
 import logging
 from pathlib import Path
 
-logger = logging.getLogger("CopySvgTranslate")
+logger = logging.getLogger("CopySVGTranslation")
 logger.setLevel(logging.DEBUG)
 
 console = logging.StreamHandler()
@@ -17,7 +17,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from CopySvgTranslate import extract, make_translation_ready
+from CopySVGTranslation import extract, make_translation_ready
 
 temp_dir = Path(tempfile.mkdtemp())
 svg_file = temp_dir / "test.svg"

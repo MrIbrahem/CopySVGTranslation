@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-logger = logging.getLogger("CopySvgTranslate")
+logger = logging.getLogger("CopySVGTranslation")
 
 
 def normalize_text(text: str | None, case_insensitive: bool = False) -> str:

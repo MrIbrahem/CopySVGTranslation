@@ -10,7 +10,7 @@ from typing import Mapping
 from .extraction import extract
 from .injection import inject
 
-logger = logging.getLogger("CopySvgTranslate")
+logger = logging.getLogger("CopySVGTranslation")
 
 
 def svg_extract_and_inject(
