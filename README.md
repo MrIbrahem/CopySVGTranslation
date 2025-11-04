@@ -1,5 +1,7 @@
 # SVG Translation Tool
 
+[![PyPi Version](https://img.shields.io/pypi/v/CopySVGTranslation.svg?style=flat-square)](https://pypi.org/project/CopySVGTranslation/)
+
 This tool extracts multilingual text pairs from SVG files and applies translations to other SVG files by inserting missing `<text systemLanguage="XX">` blocks.
 
 ## Installation
