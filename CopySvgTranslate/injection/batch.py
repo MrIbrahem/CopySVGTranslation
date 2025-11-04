@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .injector import inject
-logger = logging.getLogger("CopySvgTranslate")
+logger = logging.getLogger("CopySVGTranslation")
 
 
 def start_injects(

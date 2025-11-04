@@ -1,11 +1,11 @@
 """
-python I:/SVG_PY/CopySvgTranslate/tests/manually/inject.py
+python I:/SVG_PY/CopySVGTranslation/tests/manually/inject.py
 """
 import sys
 import logging
 from pathlib import Path
 
-logger = logging.getLogger("CopySvgTranslate")
+logger = logging.getLogger("CopySVGTranslation")
 logger.setLevel(logging.DEBUG)
 
 console = logging.StreamHandler()
@@ -16,7 +16,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from CopySvgTranslate import inject, make_translation_ready
+from CopySVGTranslation import inject, make_translation_ready
 
 svg_file = Path(__file__).parent / "test.svg"
 

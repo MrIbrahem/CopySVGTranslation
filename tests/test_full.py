@@ -1,4 +1,4 @@
-"""Integration-style tests for the public CopySvgTranslate API."""
+"""Integration-style tests for the public CopySVGTranslation API."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySvgTranslate import extract, svg_extract_and_inject, inject
+from CopySVGTranslation import extract, svg_extract_and_inject, inject
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
