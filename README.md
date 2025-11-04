@@ -135,7 +135,7 @@ above.
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import inject
+from CopySVGTranslation import extract
 
 translations = extract(
     svg_file_path=Path("arabic.svg"),
