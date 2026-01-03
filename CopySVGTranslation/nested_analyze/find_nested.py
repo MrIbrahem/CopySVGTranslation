@@ -70,7 +70,7 @@ def match_nested_tags(svg_file_path: Path) -> list:
     return result
 
 
-def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_print: bool = True):
+def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_print: bool = True) -> bool:
     """
     !
     """
