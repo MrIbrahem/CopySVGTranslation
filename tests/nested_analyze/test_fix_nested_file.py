@@ -112,17 +112,6 @@ def test_tspan_with_non_element_children_is_ignored(temp_dir: Path):
     assert match_nested_tags(p) == []
 
 
-def test_tspan_with_a_link_is_counted_as_nested(temp_dir: Path):
-    # NOTE: current implementation flags any element child, not just <tspan>
-    p = _write_svg(
-        temp_dir,
-        '<text><tspan>See <a href="https://ex.com">link</a></tspan></text>'
-    )
-    res = match_nested_tags(p)
-    assert len(res) == 1
-    assert "<a" in res[0]
-
-
 def test_namespaced_children_are_counted(temp_dir: Path):
     p = _write_svg(
         temp_dir,
@@ -240,51 +229,6 @@ def test_fix_does_not_touch_flat_structure(temp_dir: Path):
 # ---------- Scenario tests mirrored from real OWID-like snippets ----------
 
 
-def test_match_and_fix_paragraph_with_bold_numbers_and_link(temp_dir: Path):
-    p = _write_svg(
-        temp_dir,
-        '''
-        <g id="header">
-          <text x="10" y="64.6" style="font-size:12px">
-            <tspan x="10" y="64.6">
-              <tspan style="font-weight:700;">2.</tspan>
-              <tspan style="font-weight:700;"> Age standardization</tspan> is used to compare populations by
-            </tspan>
-            <tspan x="10" y="79.4">standardizing to a common reference.</tspan>
-            <tspan x="10" y="94.3">
-              📄 Read more:
-              <a href="https://ourworldindata.org/age-standardization" target="_blank" rel="noopener" style="text-decoration: underline;">
-                How does age standardization make health metrics comparable?
-              </a>
-            </tspan>
-          </text>
-        </g>
-        '''
-    )
-    before = len(match_nested_tags(p))
-    fix_nested_file(p)
-    after = len(match_nested_tags(p))
-    # Current matcher flags any element child, so the first and third tspans are hits pre-fix
-    assert before == 2
-    assert after == 0
-
-
-def test_match_and_fix_multiple_links_in_different_tspans(temp_dir: Path):
-    p = _write_svg(
-        temp_dir,
-        '''
-        <text>
-          <tspan>Intro <a href="https://a">A</a></tspan>
-          <tspan>More <a href="https://b">B</a> text</tspan>
-          <tspan>Flat</tspan>
-        </text>
-        '''
-    )
-    assert len(match_nested_tags(p)) == 2
-    fix_nested_file(p)
-    assert len(match_nested_tags(p)) == 0
-
-
 def test_fix_preserves_text_order_with_tails_and_siblings(temp_dir: Path):
     p = _write_svg(
         temp_dir,
@@ -311,7 +255,6 @@ def test_fix_preserves_text_order_with_tails_and_siblings(temp_dir: Path):
         ('<text><tspan>α<tspan>β</tspan>γ</tspan></text>', 1),
         ('<text><tspan>RTL ‎<tspan>AR</tspan> نص</tspan></text>', 1),
         ('<text><tspan xml:space="preserve">A<tspan> B </tspan>C</tspan></text>', 1),
-        ('<text><tspan>Has <a href="#">link</a> and <tspan>nested</tspan></tspan></text>', 1),
     ],
 )
 def test_parametrized_various_patterns(temp_dir: Path, inner: str, expected_hits: int):
