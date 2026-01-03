@@ -41,30 +41,65 @@ logger = logging.getLogger("CopySVGTranslation")
 SVG_NS = "http://www.w3.org/2000/svg"
 
 
-def flatten_text(elem):
-    """Recursively collect text and tails preserving order."""
-    text_parts = []
-    if elem.text:
-        text_parts.append(elem.text)
-    for child in elem:
-        text_parts.append(flatten_text(child))
-        if child.tail:
-            text_parts.append(child.tail)
-    return "".join(text_parts)
-
-
 def fix_nested_tspans(root, tag=None):
-    """Flatten nested <tspan> elements while preserving text order and spacing."""
+    """Flatten nested <tspan> elements while preserving text order and spacing.
+
+    For tspans with styled nested children, convert them to sibling tspans instead
+    of flattening into a single tspan.
+    """
     tag = tag or "tspan"
-    # Process all tspans that contain nested tspans
-    for tspan in root.findall(f".//{{{SVG_NS}}}tspan"):
-        nested = tspan.findall(f".//{{{SVG_NS}}}{tag}")
-        if nested:
-            flattened = flatten_text(tspan)
-            for child in list(tspan):
-                tspan.remove(child)
-            tspan.text = flattened
-            tspan.tail = None
+
+    # Find all parent elements that have tspan/tag children with nested content
+    # We need to process from bottom-up to handle deeply nested structures
+    for parent in root.findall(f".//{{{SVG_NS}}}text"):
+        # Get direct tspan children of this text element
+        direct_tspans = [child for child in parent if child.tag == f"{{{SVG_NS}}}tspan"]
+
+        for tspan in direct_tspans:
+            # Check if this tspan has nested children (direct children only)
+            nested_children = [child for child in tspan if child.tag == f"{{{SVG_NS}}}{tag}"]
+
+            if nested_children:
+                # Get the position of the current tspan in its parent
+                parent_list = list(parent)
+                tspan_index = parent_list.index(tspan)
+
+                # Collect all the new sibling tspans we'll create
+                new_siblings = []
+
+                # If the parent tspan has its own text before children, preserve it
+                # Note: We skip text that is only whitespace (e.g., indentation) as it's not
+                # semantically meaningful. Text with actual content is always preserved.
+                if tspan.text and tspan.text.strip():
+                    text_tspan = etree.Element(f"{{{SVG_NS}}}tspan")
+                    text_tspan.text = tspan.text
+                    new_siblings.append(text_tspan)
+
+                # Process each nested child in order
+                for nested in nested_children:
+                    # Clone the nested element (it becomes a sibling)
+                    new_tspan = etree.Element(f"{{{SVG_NS}}}tspan")
+                    # Copy all attributes from the nested element
+                    for key, value in nested.attrib.items():
+                        new_tspan.set(key, value)
+                    # Copy the text content
+                    new_tspan.text = nested.text
+                    new_siblings.append(new_tspan)
+
+                    # If the nested element has a tail, wrap it in a new tspan
+                    # Note: We skip tail text that is only whitespace (e.g., indentation)
+                    # as it's not semantically meaningful. Tail text with actual content is preserved.
+                    if nested.tail and nested.tail.strip():
+                        tail_tspan = etree.Element(f"{{{SVG_NS}}}tspan")
+                        tail_tspan.text = nested.tail
+                        new_siblings.append(tail_tspan)
+
+                # Remove the original tspan
+                parent.remove(tspan)
+
+                # Insert the new siblings at the position where the original tspan was
+                for i, sibling in enumerate(new_siblings):
+                    parent.insert(tspan_index + i, sibling)
 
     return root
 
