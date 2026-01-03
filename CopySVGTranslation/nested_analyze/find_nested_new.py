@@ -41,18 +41,6 @@ logger = logging.getLogger("CopySVGTranslation")
 SVG_NS = "http://www.w3.org/2000/svg"
 
 
-def flatten_text(elem):
-    """Recursively collect text and tails preserving order."""
-    text_parts = []
-    if elem.text:
-        text_parts.append(elem.text)
-    for child in elem:
-        text_parts.append(flatten_text(child))
-        if child.tail:
-            text_parts.append(child.tail)
-    return "".join(text_parts)
-
-
 def fix_nested_tspans(root, tag=None):
     """Flatten nested <tspan> elements while preserving text order and spacing.
     
@@ -79,7 +67,13 @@ def fix_nested_tspans(root, tag=None):
                 # Collect all the new sibling tspans we'll create
                 new_siblings = []
                 
-                # Process each nested child
+                # If the parent tspan has its own text before children, preserve it
+                if tspan.text and tspan.text.strip():
+                    text_tspan = etree.Element(f"{{{SVG_NS}}}tspan")
+                    text_tspan.text = tspan.text
+                    new_siblings.append(text_tspan)
+                
+                # Process each nested child in order
                 for nested in nested_children:
                     # Clone the nested element (it becomes a sibling)
                     new_tspan = etree.Element(f"{{{SVG_NS}}}tspan")
