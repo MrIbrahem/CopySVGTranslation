@@ -70,7 +70,7 @@ def match_nested_tags(svg_file_path: Path) -> list:
     return result
 
 
-def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_print: bool = True):
+def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_print: bool = True) -> bool:
     """
     !
     """
@@ -90,6 +90,8 @@ def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_pr
     # ---
     root = fix_nested_tspans(root)
     # ---
+    # NOTE: <a tags can also be nested inside <tspan>, so fix those too
+    # https://svgtranslate.toolforge.org/ result: This file has unexpected content within a text element. Only tspan elements should be used within text.
     root = fix_nested_tspans(root, "a")
     # ---
     try:
