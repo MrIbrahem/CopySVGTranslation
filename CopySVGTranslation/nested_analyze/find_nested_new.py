@@ -68,6 +68,8 @@ def fix_nested_tspans(root, tag=None):
                 new_siblings = []
                 
                 # If the parent tspan has its own text before children, preserve it
+                # Note: We skip text that is only whitespace (e.g., indentation) as it's not
+                # semantically meaningful. Text with actual content is always preserved.
                 if tspan.text and tspan.text.strip():
                     text_tspan = etree.Element(f"{{{SVG_NS}}}tspan")
                     text_tspan.text = tspan.text
@@ -85,6 +87,8 @@ def fix_nested_tspans(root, tag=None):
                     new_siblings.append(new_tspan)
                     
                     # If the nested element has a tail, wrap it in a new tspan
+                    # Note: We skip tail text that is only whitespace (e.g., indentation)
+                    # as it's not semantically meaningful. Tail text with actual content is preserved.
                     if nested.tail and nested.tail.strip():
                         tail_tspan = etree.Element(f"{{{SVG_NS}}}tspan")
                         tail_tspan.text = nested.tail
