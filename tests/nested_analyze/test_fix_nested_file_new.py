@@ -69,7 +69,8 @@ def test_match_and_fix_2(temp_dir: Path):
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100" height="100">
             <g class="markdown-text-wrap">
                 <text x="16.0" y="581.0" style="font-size: 13px; line-height: 1.2;">
-                    <tspan x="16" y="581.0">Data source: United Nations Inter-agency Group for Child Mortality Estimation (2025)</tspan>
+                    <tspan style="font-weight: 700;">Data source: </tspan>
+                    <tspan>United Nations Inter-agency Group for Child Mortality Estimation (2025)</tspan>
                 </text>
             </g>
         </svg>
