@@ -3,6 +3,9 @@
 TODO:
 - Implement a function to transform the SVG text as described in the comments.
 
+CopySVGTranslation/nested_analyze/find_nested_new.py
+
+input:
 <text x="16.0" y="581.0" style="font-size: 13px; line-height: 1.2;">
     <tspan x="16" y="581.0">
         <tspan style="font-weight: 700;">Data source:</tspan> United Nations Inter-agency Group for Child
@@ -22,6 +25,10 @@ but ideally it actually should be something like this:
     <tspan style="font-weight: 700;">Data source: </tspan>
     <tspan>United Nations Inter-agency Group for Child Mortality Estimation (2025)</tspan>
 </text>
+
+tests for the above functionality are in tests/nested_analyze/test_fix_nested_file_new.py
+
+pytest -m todo
 
 """
 from __future__ import annotations
