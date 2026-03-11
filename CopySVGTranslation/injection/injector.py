@@ -118,7 +118,10 @@ def work_on_switches(
         new_titles_translations = get_new_titles_translations(all_mappings_title_new, default_texts)
 
         # all_mappings.update(titles_translations)
-        all_mappings.update(new_titles_translations)
+        # all_mappings.update(new_titles_translations)
+
+        for key, translations in new_titles_translations.items():
+            all_mappings.setdefault(key, {}).update(translations)
 
         # Determine translations for each text line
         available_translations = {}
