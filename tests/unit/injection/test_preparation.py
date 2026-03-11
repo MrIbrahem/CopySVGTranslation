@@ -124,7 +124,7 @@ class TestCloneElement(unittest.TestCase):
 
         assert cloned.get('id') == 'text1'
         assert cloned.text == 'Hello'
-        self.assertIsNot(cloned, elem)
+        assert cloned is not elem
 
     def test_clone_element_with_children(self):
         """Test cloning element with children."""
