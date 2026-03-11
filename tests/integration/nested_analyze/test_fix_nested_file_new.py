@@ -2,7 +2,6 @@
 
 from pathlib import Path
 import pytest
-from lxml import etree
 
 
 from CopySVGTranslation.nested_analyze.find_nested_new import match_nested_tags, fix_nested_file
@@ -20,24 +19,6 @@ def _write_svg(tmp_dir: Path, inner_svg: str, name: str = "test.svg") -> Path:
     p = tmp_dir / name
     p.write_text(_wrap_svg(inner_svg), encoding="utf-8")
     return p
-
-# ---------- Fixtures ----------
-
-
-@pytest.fixture
-def temp_dir(tmp_path: Path) -> Path:
-    return tmp_path
-
-
-@pytest.fixture
-def getSvgFileFromString(temp_dir):
-    def _factory(tmp_dir: Path, full_svg: str) -> Path:
-        p = tmp_dir / "from_string.svg"
-        p.write_text(full_svg, encoding="utf-8")
-        return p
-    return _factory
-
-# ---------- Core tests: matching behavior ----------
 
 
 def test_match_and_fix_2(temp_dir: Path):

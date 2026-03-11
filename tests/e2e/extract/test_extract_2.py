@@ -1,24 +1,6 @@
 
 
-import tempfile
-import shutil
-from pathlib import Path
-import pytest
-
-
 from CopySVGTranslation import extract
-
-
-# -------------------------------
-# Fixtures
-# -------------------------------
-
-@pytest.fixture
-def temp_dir():
-    """Create a temporary directory for test use."""
-    d = Path(tempfile.mkdtemp())
-    yield d
-    shutil.rmtree(d)
 
 
 class TestExtractor:

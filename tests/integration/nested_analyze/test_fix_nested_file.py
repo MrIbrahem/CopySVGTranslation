@@ -21,24 +21,6 @@ def _write_svg(tmp_dir: Path, inner_svg: str, name: str = "test.svg") -> Path:
     p.write_text(_wrap_svg(inner_svg), encoding="utf-8")
     return p
 
-# ---------- Fixtures ----------
-
-
-@pytest.fixture
-def temp_dir(tmp_path: Path) -> Path:
-    return tmp_path
-
-
-@pytest.fixture
-def getSvgFileFromString(temp_dir):
-    def _factory(tmp_dir: Path, full_svg: str) -> Path:
-        p = tmp_dir / "from_string.svg"
-        p.write_text(full_svg, encoding="utf-8")
-        return p
-    return _factory
-
-# ---------- Core tests: matching behavior ----------
-
 
 def test_empty_file_returns_empty(temp_dir: Path):
     p = temp_dir / "empty.svg"
