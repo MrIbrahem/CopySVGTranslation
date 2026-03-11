@@ -79,6 +79,8 @@ class TestExtractEdgeCases(unittest.TestCase):
 
         result = extract(svg_path, case_insensitive=True)
 
+        self.assertIn("new", result)
+
         # Keys should be lowercase
         self.assertTrue(any(key.islower() for key in result["new"].keys()))
 

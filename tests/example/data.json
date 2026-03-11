@@ -152,6 +152,17 @@
             "ar": "انتشار مرض باركنسون،"
         }
     },
+    "title_new": {
+        "parkinson's disease prevalence, {year}": {
+            "pt": "Prevalência de doença de Parkinson, {year}",
+            "es": "Prevalencia de la enfermedad de Parkinson, {year}",
+            "ca": "Prevalència de la malaltia de Parkinson, {year}",
+            "eu": "Parkinsonen gaixotasunaren prebalentzia, {year}",
+            "cs": "Prevalence Parkinsonovy nemoci, {year}",
+            "si": "පාකින්සන් රෝග ව්‍යාප්තිය, {year}",
+            "ar": "انتشار مرض باركنسون، {year}"
+        }
+    },
     "tspans_by_id": {
         "trsvg1": "Parkinson's disease prevalence, 1990",
         "trsvg2": "Estimated number of people with Parkinson's disease¹ per 100,000 people.",

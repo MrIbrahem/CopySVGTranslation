@@ -38,6 +38,7 @@ class TestExtractYearHandling(unittest.TestCase):
         # Should create title mapping for year-suffixed text
         self.assertIsInstance(result["title"], dict)
 
+        self.assertIn("title", result)
         assert result["title"] == {'population': {'ar': 'السكان'}}
 
     def test_extract_year_with_multiple_languages(self):
@@ -58,6 +59,16 @@ class TestExtractYearHandling(unittest.TestCase):
         self.assertIn("new", result)
         self.assertIn("title", result)
 
+        assert result["title"] == {'population': {'ar': 'السكان', 'fr': 'Population'}}
+
+        self.assertIn("title_new", result)
+        assert result["title_new"] == {
+            'population {year}': {
+                'ar': 'السكان {year}',
+                'fr': 'Population {year}',
+            }
+        }
+
     def test_extract_non_year_digits(self):
         """Test that non-year digit sequences are handled correctly."""
         svg_path = self.test_dir / "test.svg"
@@ -71,7 +82,38 @@ class TestExtractYearHandling(unittest.TestCase):
         result = extract(svg_path)
 
         self.assertIsNotNone(result)
-        # Should not create title mapping for non-4-digit numbers
+        assert result == {'new': {'value 42': {}}, 'title': {}, 'title_new': {}, 'tspans_by_id': {'t1': 'Value 42'}}
+
+    def test_extract_title(self):
+        """Test year suffix handling with multiple languages."""
+        svg_path = self.test_dir / "test.svg"
+        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <switch>
+                <text id="text1-ko" systemLanguage="ko"><tspan id="t1-ko">2000년 말라리아 사망률</tspan></text>
+                <text id="text1-ar" systemLanguage="ar"><tspan id="t1-ar">معدل الوفيات الناجمة عن الملاريا، 2000</tspan></text>
+                <text id="text1"><tspan id="t1">death rate from malaria, 2000</tspan></text>
+            </switch>
+        </svg>'''
+        svg_path.write_text(svg_content, encoding='utf-8')
+
+        result = extract(svg_path)
+
+        self.assertIsNotNone(result)
+        self.assertIn("new", result)
+        self.assertIn("title", result)
+
+        assert result["title"] == {
+            'death rate from malaria,': {
+                'ar': 'معدل الوفيات الناجمة عن الملاريا،'
+            }
+        }
+        self.assertIn("title_new", result)
+        assert result["title_new"] == {
+            'death rate from malaria, {year}': {
+                'ko': '{year}년 말라리아 사망률',
+                'ar': 'معدل الوفيات الناجمة عن الملاريا، {year}',
+            }
+        }
 
 
 if __name__ == '__main__':
