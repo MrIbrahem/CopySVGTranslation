@@ -266,7 +266,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         _tree, root = make_translation_ready(svg_path)
 
         text_elem = root.find('.//{http://www.w3.org/2000/svg}text')
-        assert text_elem.get('id' is not None)
+        assert text_elem.get('id') is not None
 
     def test_make_translation_ready_duplicate_lang_error(self):
         """Test that duplicate language codes in switch raise exception."""
