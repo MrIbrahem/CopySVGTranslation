@@ -187,7 +187,7 @@ class TestSortSwitchTexts(unittest.TestCase):
 
         texts = switch.findall('.//{http://www.w3.org/2000/svg}text')
         # Default (no systemLanguage) should be last
-        self.assertIsNone(texts[-1].get('systemLanguage'))
+        assert texts[-1].get('systemLanguage') is None
 
     def test_sort_switch_texts_empty_switch(self):
         """Test sorting an empty switch element."""

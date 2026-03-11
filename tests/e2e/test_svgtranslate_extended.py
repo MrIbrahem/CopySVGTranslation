@@ -188,7 +188,7 @@ class TestSVGTranslate(unittest.TestCase):
     def test_extract_directory_path(self):
         """Test extraction with directory path instead of file."""
         result = extract(self.test_dir)
-        self.assertIsNone(result)
+        assert result is None
 
     def test_inject_with_multiple_mapping_files(self):
         """Test injection with multiple mapping files."""
@@ -458,7 +458,7 @@ class TestSVGTranslate(unittest.TestCase):
             f.write(self.no_translations_svg_content)
 
         result = inject(target_path, [mapping_path])
-        self.assertIsNone(result)
+        assert result is None
 
     def test_normalize_text_preserves_content(self):
         """Test that normalize_text doesn't remove important content."""

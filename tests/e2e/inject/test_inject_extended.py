@@ -136,7 +136,7 @@ class TestInjectEdgeCases(unittest.TestCase):
 
         result, stats = inject(svg_path, all_mappings=mappings, return_stats=True)
 
-        self.assertIsNone(result)
+        assert result is None
         assert 'error' in stats
 
     def test_inject_case_insensitive_false(self):

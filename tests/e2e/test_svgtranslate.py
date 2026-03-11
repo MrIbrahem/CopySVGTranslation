@@ -174,7 +174,7 @@ class TestSVGTranslate(unittest.TestCase):
         """Test extraction with non-existent file."""
         nonexistent_path = self.test_dir / "nonexistent.svg"
         translations = extract(nonexistent_path)
-        self.assertIsNone(translations)
+        assert translations is None
 
     def test_inject(self):
         """Test injection of translations into SVG."""
@@ -327,7 +327,7 @@ class TestSVGTranslate(unittest.TestCase):
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         result = inject(nonexistent_path, [mapping_path])
-        self.assertIsNone(result)
+        assert result is None
 
     def test_inject_nonexistent_mapping(self):
         """Test injection with non-existent mapping file."""
@@ -338,7 +338,7 @@ class TestSVGTranslate(unittest.TestCase):
             f.write(self.no_translations_svg_content)
 
         result = inject(svg_path, [nonexistent_mapping])
-        self.assertIsNone(result)
+        assert result is None
 
 
 if __name__ == '__main__':
