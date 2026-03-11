@@ -43,7 +43,7 @@ class TestStartInjectsEdgeCases(unittest.TestCase):
         result = start_injects(files, translations, self.output_dir)
 
         assert result['success'] == 0
-        self.assertGreater(result['failed'], 0)
+        assert result['failed'] > 0
 
     def test_start_injects_tracks_nested_files(self):
         """Test that start_injects tracks nested tspan errors."""

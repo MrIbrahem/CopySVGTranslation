@@ -183,7 +183,7 @@ class TestSVGTranslate(unittest.TestCase):
         assert translations is not None
         assert "new" in translations
         # Should have extracted multiple translations
-        self.assertGreater(len(translations["new"]), 1)
+        assert len(translations["new"]) > 1
 
     def test_extract_directory_path(self):
         """Test extraction with directory path instead of file."""
@@ -239,7 +239,7 @@ class TestSVGTranslate(unittest.TestCase):
         assert tree is not None
         assert stats is not None
         # Should have processed translations from both files
-        self.assertGreater(stats['inserted_translations'], 0)
+        assert stats['inserted_translations'] > 0
 
     def test_inject_with_output_directory(self):
         """Test injection specifying output directory."""
@@ -425,7 +425,7 @@ class TestSVGTranslate(unittest.TestCase):
         )
 
         assert tree is not None
-        self.assertGreater(stats['inserted_translations'], 0)
+        assert stats['inserted_translations'] > 0
 
         # Verify the translated content
         self.assertTreeHasTranslations(tree)

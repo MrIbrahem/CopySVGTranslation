@@ -240,7 +240,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
 
         text_elem = root.find('.//{http://www.w3.org/2000/svg}text')
         tspans = text_elem.findall('{http://www.w3.org/2000/svg}tspan')
-        self.assertGreater(len(tspans), 0)
+        assert len(tspans) > 0
 
     def test_make_translation_ready_creates_switch(self):
         """Test that text elements are wrapped in switch elements."""
@@ -253,7 +253,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         _tree, root = make_translation_ready(svg_path)
 
         switches = root.findall('.//{http://www.w3.org/2000/svg}switch')
-        self.assertGreater(len(switches), 0)
+        assert len(switches) > 0
 
     def test_make_translation_ready_assigns_ids(self):
         """Test that missing IDs are assigned."""
@@ -301,7 +301,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         text_elems = switch.findall('{http://www.w3.org/2000/svg}text')
 
         # Should have split into separate text elements
-        self.assertGreater(len(text_elems), 2)
+        assert len(text_elems) > 2
 
     def test_make_translation_ready_invalid_node_id(self):
         """Test that invalid node IDs raise exception."""
