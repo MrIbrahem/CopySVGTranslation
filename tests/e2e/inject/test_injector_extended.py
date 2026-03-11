@@ -97,8 +97,8 @@ class TestWorkOnSwitches(unittest.TestCase):
 
         stats = work_on_switches(root, existing_ids, mappings, case_insensitive=True)
 
-        self.assertEqual(stats['processed_switches'], 1)
-        self.assertEqual(stats['inserted_translations'], 2)
+        assert stats['processed_switches'] == 1
+        assert stats['inserted_translations'] == 2
 
     def test_work_on_switches_no_overwrite(self):
         """Test switch processing without overwriting existing translations."""
@@ -114,8 +114,8 @@ class TestWorkOnSwitches(unittest.TestCase):
 
         stats = work_on_switches(root, existing_ids, mappings, overwrite=False)
 
-        self.assertEqual(stats['skipped_translations'], 1)
-        self.assertEqual(stats['inserted_translations'], 1)
+        assert stats['skipped_translations'] == 1
+        assert stats['inserted_translations'] == 1
 
     def test_work_on_switches_with_overwrite(self):
         """Test switch processing with overwriting existing translations."""
@@ -131,7 +131,7 @@ class TestWorkOnSwitches(unittest.TestCase):
 
         stats = work_on_switches(root, existing_ids, mappings, overwrite=True)
 
-        self.assertEqual(stats['updated_translations'], 1)
+        assert stats['updated_translations'] == 1
 
     def test_work_on_switches_case_sensitive(self):
         """Test switch processing with case-sensitive matching."""
@@ -146,7 +146,7 @@ class TestWorkOnSwitches(unittest.TestCase):
 
         stats = work_on_switches(root, existing_ids, mappings, case_insensitive=False)
 
-        self.assertEqual(stats['inserted_translations'], 1)
+        assert stats['inserted_translations'] == 1
 
     def test_work_on_switches_with_year_suffix(self):
         """Test switch processing with year suffix handling."""
@@ -211,7 +211,7 @@ class TestSortSwitchTexts(unittest.TestCase):
         sort_switch_texts(switch)
 
         texts = switch.findall('.//{http://www.w3.org/2000/svg}text')
-        self.assertEqual(len(texts), 1)
+        assert len(texts) == 1
 
 
 class TestLoadAllMappingsEdgeCases(unittest.TestCase):

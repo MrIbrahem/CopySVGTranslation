@@ -34,6 +34,7 @@ class TestExtractEdgeCases(unittest.TestCase):
 
         # Should handle gracefully
         self.assertIsNotNone(result)
+        assert result is not None
 
     def test_extract_switch_without_default_text(self):
         """Test extraction with switch containing only translated text."""

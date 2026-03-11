@@ -114,11 +114,11 @@ class TestSVGTranslate(unittest.TestCase):
 
     def test_normalize_text(self):
         """Test text normalization."""
-        self.assertEqual(normalize_text("  hello  world  "), "hello world")
-        self.assertEqual(normalize_text("hello    world"), "hello world")
-        self.assertEqual(normalize_text("  hello world  "), "hello world")
-        self.assertEqual(normalize_text(""), "")
-        self.assertEqual(normalize_text(None), "")
+        assert normalize_text("  hello  world  ") == "hello world"
+        assert normalize_text("hello    world") == "hello world"
+        assert normalize_text("  hello world  ") == "hello world"
+        assert normalize_text("") == ""
+        assert normalize_text(None) == ""
 
     def test_generate_unique_id(self):
         """Test unique ID generation."""
@@ -126,16 +126,16 @@ class TestSVGTranslate(unittest.TestCase):
 
         # Test with no collision
         new_id = generate_unique_id("id1", "fr", existing_ids)
-        self.assertEqual(new_id, "id1-fr")
+        assert new_id == "id1-fr"
 
         # Test with collision
         new_id = generate_unique_id("id1", "ar", existing_ids)
-        self.assertEqual(new_id, "id1-ar-1")
+        assert new_id == "id1-ar-1"
 
         # Test with multiple collisions
         existing_ids.add("id1-ar-1")
         new_id = generate_unique_id("id1", "ar", existing_ids)
-        self.assertEqual(new_id, "id1-ar-2")
+        assert new_id == "id1-ar-2"
 
     def test_extract(self):
         """Test extraction of translations from SVG."""
@@ -151,8 +151,8 @@ class TestSVGTranslate(unittest.TestCase):
         self.assertIsNotNone(translations)
         self.assertIn("new", translations)
         self.assertIn("title", translations)
-        self.assertEqual(translations["new"], self.expected_translations["new"])
-        self.assertEqual(translations["title"], self.expected_translations["title"])
+        assert translations["new"] == self.expected_translations["new"]
+        assert translations["title"] == self.expected_translations["title"]
 
     def test_extract_case_insensitive(self):
         """Test extraction with case insensitive matching."""
@@ -167,8 +167,8 @@ class TestSVGTranslate(unittest.TestCase):
         # Verify translations (keys should be lowercase)
         self.assertIsNotNone(translations)
         self.assertIn("new", translations)
-        self.assertEqual(translations["new"], self.expected_translations["new"])
-        self.assertEqual(translations["title"], self.expected_translations["title"])
+        assert translations["new"] == self.expected_translations["new"]
+        assert translations["title"] == self.expected_translations["title"]
 
     def test_extract_nonexistent_file(self):
         """Test extraction with non-existent file."""
@@ -204,10 +204,10 @@ class TestSVGTranslate(unittest.TestCase):
         # Verify stats
         self.assertIsNotNone(tree)
         self.assertIsNotNone(stats)
-        self.assertEqual(stats['processed_switches'], 2)
-        self.assertEqual(stats['inserted_translations'], 2)
-        self.assertEqual(stats['updated_translations'], 0)
-        self.assertEqual(stats['skipped_translations'], 0)
+        assert stats['processed_switches'] == 2
+        assert stats['inserted_translations'] == 2
+        assert stats['updated_translations'] == 0
+        assert stats['skipped_translations'] == 0
 
         # Verify the in-memory tree has the translations
         self.assertTreeHasTranslations(tree)
@@ -246,14 +246,14 @@ class TestSVGTranslate(unittest.TestCase):
         # Verify stats
         self.assertIsNotNone(tree)
         self.assertIsNotNone(stats)
-        self.assertEqual(stats['processed_switches'], 2)
-        self.assertEqual(stats['inserted_translations'], 2)
+        assert stats['processed_switches'] == 2
+        assert stats['inserted_translations'] == 2
 
         # Verify file was not modified
         with open(no_translations_path, 'r', encoding='utf-8') as f:
             current_content = f.read()
 
-        self.assertEqual(original_content, current_content)
+        assert original_content == current_content
 
         # Verify the in-memory tree has the translations
         self.assertTreeHasTranslations(tree)
@@ -303,10 +303,10 @@ class TestSVGTranslate(unittest.TestCase):
         # Verify stats
         self.assertIsNotNone(tree)
         self.assertIsNotNone(stats)
-        self.assertEqual(stats['processed_switches'], 1)
-        self.assertEqual(stats['inserted_translations'], 0)
-        self.assertEqual(stats['updated_translations'], 1)
-        self.assertEqual(stats['skipped_translations'], 0)
+        assert stats['processed_switches'] == 1
+        assert stats['inserted_translations'] == 0
+        assert stats['updated_translations'] == 1
+        assert stats['skipped_translations'] == 0
 
         # Verify the in-memory tree has the translations
         self.assertTreeHasTranslations(tree, [self.expected_arabic_texts[0]])

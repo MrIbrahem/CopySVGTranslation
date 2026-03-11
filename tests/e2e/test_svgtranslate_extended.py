@@ -114,13 +114,13 @@ class TestSVGTranslate(unittest.TestCase):
 
     def test_normalize_text_with_numbers(self):
         """Test text normalization with numbers."""
-        self.assertEqual(normalize_text("Population 2020"), "Population 2020")
-        self.assertEqual(normalize_text("  Population   2020  "), "Population 2020")
+        assert normalize_text("Population 2020") == "Population 2020"
+        assert normalize_text("  Population   2020  ") == "Population 2020"
 
     def test_normalize_text_with_punctuation(self):
         """Test text normalization with punctuation."""
-        self.assertEqual(normalize_text("Hello, World!"), "Hello, World!")
-        self.assertEqual(normalize_text("  Hello,  World!  "), "Hello, World!")
+        assert normalize_text("Hello == World!", "Hello, World!")
+        assert normalize_text("  Hello ==  World!  ", "Hello, World!")
 
     def test_normalize_text_case_insensitive_arabic(self):
         """Test case insensitive normalization preserves Arabic text."""
@@ -139,7 +139,7 @@ class TestSVGTranslate(unittest.TestCase):
         """Test unique ID generation with empty base ID."""
         existing_ids = set()
         new_id = generate_unique_id("", "fr", existing_ids)
-        self.assertEqual(new_id, "-fr")
+        assert new_id == "-fr"
 
     def test_generate_unique_id_numeric_suffix_collision(self):
         """Test unique ID generation with existing numeric suffixes."""
@@ -153,7 +153,7 @@ class TestSVGTranslate(unittest.TestCase):
         """Test unique ID generation with special characters in base ID."""
         existing_ids = set()
         new_id = generate_unique_id("text_2205-tspan", "ar", existing_ids)
-        self.assertEqual(new_id, "text_2205-tspan-ar")
+        assert new_id == "text_2205-tspan-ar"
 
     def test_extract_with_multiple_switches(self):
         """Test extraction with multiple switch elements."""
@@ -319,8 +319,8 @@ class TestSVGTranslate(unittest.TestCase):
 
         self.assertIsNotNone(tree)
         # Should have skipped the existing translation
-        self.assertEqual(stats['inserted_translations'], 0)
-        self.assertEqual(stats['skipped_translations'], 1)
+        assert stats['inserted_translations'] == 0
+        assert stats['skipped_translations'] == 1
 
         # Verify original text is preserved
         with open(svg_path, 'r', encoding='utf-8') as f:
@@ -353,7 +353,7 @@ class TestSVGTranslate(unittest.TestCase):
             for key in translations["new"]:
                 if isinstance(key, str):
                     # Should not have leading/trailing spaces or multiple consecutive spaces
-                    self.assertEqual(key, key.strip())
+                    assert key == key.strip()
                     self.assertNotIn("  ", key)
 
     def test_inject_stats_accuracy(self):
@@ -445,7 +445,7 @@ class TestSVGTranslate(unittest.TestCase):
 
         # Should complete without error, but with no translations
         self.assertIsNotNone(tree)
-        self.assertEqual(stats['inserted_translations'], 0)
+        assert stats['inserted_translations'] == 0
 
     def test_inject_invalid_json_mapping(self):
         """Test injection with invalid JSON mapping file."""

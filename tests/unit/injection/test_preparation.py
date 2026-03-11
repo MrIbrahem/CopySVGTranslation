@@ -40,34 +40,34 @@ class TestNormalizeLang(unittest.TestCase):
 
     def test_normalize_lang_simple_code(self):
         """Test normalization of simple language code."""
-        self.assertEqual(normalize_lang("EN"), "en")
-        self.assertEqual(normalize_lang("FR"), "fr")
-        self.assertEqual(normalize_lang("ar"), "ar")
+        assert normalize_lang("EN") == "en"
+        assert normalize_lang("FR") == "fr"
+        assert normalize_lang("ar") == "ar"
 
     def test_normalize_lang_with_region(self):
         """Test normalization with region code."""
-        self.assertEqual(normalize_lang("en-US"), "en-US")
-        self.assertEqual(normalize_lang("en_us"), "en-US")
-        self.assertEqual(normalize_lang("pt_br"), "pt-BR")
-        self.assertEqual(normalize_lang("zh-cn"), "zh-CN")
+        assert normalize_lang("en-US") == "en-US"
+        assert normalize_lang("en_us") == "en-US"
+        assert normalize_lang("pt_br") == "pt-BR"
+        assert normalize_lang("zh-cn") == "zh-CN"
 
     def test_normalize_lang_complex_format(self):
         """Test normalization with complex format."""
-        self.assertEqual(normalize_lang("en-us-variant"), "en-US-Variant")
+        assert normalize_lang("en-us-variant") == "en-US-Variant"
 
     def test_normalize_lang_empty_string(self):
         """Test normalization of empty string."""
-        self.assertEqual(normalize_lang(""), "")
+        assert normalize_lang("") == ""
 
     def test_normalize_lang_with_whitespace(self):
         """Test normalization handles whitespace."""
-        self.assertEqual(normalize_lang("  en-US  "), "en-US")
-        self.assertEqual(normalize_lang("en us"), "en-US")
+        assert normalize_lang("  en-US  ") == "en-US"
+        assert normalize_lang("en us") == "en-US"
 
     def test_normalize_lang_hyphen_variations(self):
         """Test different hyphen/underscore variations."""
-        self.assertEqual(normalize_lang("en-GB"), "en-GB")
-        self.assertEqual(normalize_lang("en_GB"), "en-GB")
+        assert normalize_lang("en-GB") == "en-GB"
+        assert normalize_lang("en_GB") == "en-GB"
 
 
 class TestGetTextContent(unittest.TestCase):
@@ -122,8 +122,8 @@ class TestCloneElement(unittest.TestCase):
         elem = etree.fromstring(xml)
         cloned = clone_element(elem)
 
-        self.assertEqual(cloned.get('id'), 'text1')
-        self.assertEqual(cloned.text, 'Hello')
+        assert cloned.get('id') == 'text1'
+        assert cloned.text == 'Hello'
         self.assertIsNot(cloned, elem)
 
     def test_clone_element_with_children(self):
@@ -136,9 +136,9 @@ class TestCloneElement(unittest.TestCase):
         cloned = clone_element(elem)
 
         children = cloned.findall('{http://www.w3.org/2000/svg}tspan')
-        self.assertEqual(len(children), 2)
-        self.assertEqual(children[0].get('id'), 't1')
-        self.assertEqual(children[1].get('id'), 't2')
+        assert len(children) == 2
+        assert children[0].get('id') == 't1'
+        assert children[1].get('id') == 't2'
 
     def test_clone_element_deep_copy(self):
         """Test that clone is a deep copy."""
@@ -150,7 +150,7 @@ class TestCloneElement(unittest.TestCase):
         elem.set('id', 'modified')
 
         # Clone should be unchanged
-        self.assertEqual(cloned.get('id'), 'text1')
+        assert cloned.get('id') == 'text1'
 
     def test_clone_element_with_attributes(self):
         """Test cloning preserves all attributes."""
@@ -158,10 +158,10 @@ class TestCloneElement(unittest.TestCase):
         elem = etree.fromstring(xml)
         cloned = clone_element(elem)
 
-        self.assertEqual(cloned.get('id'), 't1')
-        self.assertEqual(cloned.get('class'), 'label')
-        self.assertEqual(cloned.get('x'), '10')
-        self.assertEqual(cloned.get('y'), '20')
+        assert cloned.get('id') == 't1'
+        assert cloned.get('class') == 'label'
+        assert cloned.get('x') == '10'
+        assert cloned.get('y') == '20'
 
 
 class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
