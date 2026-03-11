@@ -265,8 +265,8 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
 
         result = load_all_mappings([mapping_file])
 
-        self.assertIn("new", result)
-        self.assertIn("title", result)
+        assert "new" in result
+        assert "title" in result
 
     def test_load_all_mappings_merge_overlapping_keys(self):
         """Test merging mappings with overlapping keys."""
@@ -281,8 +281,8 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
 
         result = load_all_mappings([m1, m2])
 
-        self.assertIn("lang1", result["key"])
-        self.assertIn("lang2", result["key"])
+        assert "lang1" in result["key"]
+        assert "lang2" in result["key"]
 
     def test_load_all_mappings_string_paths(self):
         """Test loading with string paths instead of Path objects."""
@@ -292,7 +292,7 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
 
         result = load_all_mappings([str(mapping_file)])
 
-        self.assertIn("key", result)
+        assert "key" in result
 
 
 if __name__ == '__main__':

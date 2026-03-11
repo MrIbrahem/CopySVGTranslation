@@ -89,9 +89,9 @@ class TestGetTextContent(unittest.TestCase):
         elem = etree.fromstring(xml)
         result = get_text_content(elem)
 
-        self.assertIn("Hello", result)
-        self.assertIn("World", result)
-        self.assertIn("Test", result)
+        assert "Hello" in result
+        assert "World" in result
+        assert "Test" in result
 
     def test_get_text_content_empty(self):
         """Test getting text content from empty element."""
@@ -109,8 +109,8 @@ class TestGetTextContent(unittest.TestCase):
         elem = etree.fromstring(xml)
         result = get_text_content(elem)
 
-        self.assertIn("First", result)
-        self.assertIn("Nested", result)
+        assert "First" in result
+        assert "Nested" in result
 
 
 class TestCloneElement(unittest.TestCase):
@@ -186,7 +186,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         with self.assertRaises(SvgStructureException) as ctx:
             make_translation_ready(svg_path)
 
-        self.assertIn('tref', str(ctx.exception))
+        assert 'tref' in str(ctx.exception)
 
     def test_make_translation_ready_with_css_ids(self):
         """Test that CSS with ID selectors raises exception."""
@@ -200,7 +200,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         with self.assertRaises(SvgStructureException) as ctx:
             make_translation_ready(svg_path)
 
-        self.assertIn('css', str(ctx.exception).lower())
+        assert 'css' in str(ctx.exception).lower()
 
     def test_make_translation_ready_with_dollar_sign(self):
         """Test that text with dollar signs raises exception."""
@@ -213,7 +213,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         with self.assertRaises(SvgStructureException) as ctx:
             make_translation_ready(svg_path)
 
-        self.assertIn('dollar', str(ctx.exception).lower())
+        assert 'dollar' in str(ctx.exception).lower()
 
     def test_make_translation_ready_nested_tspans(self):
         """Test that nested tspans raise exception."""
@@ -226,7 +226,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         with self.assertRaises(SvgStructureException) as ctx:
             make_translation_ready(svg_path)
 
-        self.assertIn('nested', str(ctx.exception).lower())
+        assert 'nested' in str(ctx.exception).lower()
 
     def test_make_translation_ready_wraps_raw_text(self):
         """Test that raw text in text elements is wrapped in tspans."""
@@ -282,7 +282,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         with self.assertRaises(SvgStructureException) as ctx:
             make_translation_ready(svg_path)
 
-        self.assertIn('lang', str(ctx.exception).lower())
+        assert 'lang' in str(ctx.exception).lower()
 
     def test_make_translation_ready_splits_comma_langs(self):
         """Test that comma-separated languages are split."""
@@ -314,7 +314,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         with self.assertRaises(SvgStructureException) as ctx:
             make_translation_ready(svg_path)
 
-        self.assertIn('id', str(ctx.exception).lower())
+        assert 'id' in str(ctx.exception).lower()
 
 
 if __name__ == '__main__':

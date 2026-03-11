@@ -77,7 +77,7 @@ class TestStartInjectsEdgeCases(unittest.TestCase):
         result = start_injects([str(svg_path)], translations, self.output_dir, overwrite=False)
 
         # Should track files with no changes
-        self.assertIn('no_changes', result)
+        assert 'no_changes' in result
 
     def test_start_injects_with_overwrite(self):
         """Test start_injects with overwrite option."""
@@ -95,7 +95,7 @@ class TestStartInjectsEdgeCases(unittest.TestCase):
         result = start_injects([str(svg_path)], translations, self.output_dir, overwrite=True)
 
         # Should process the file
-        self.assertIn('files', result)
+        assert 'files' in result
 
     def test_start_injects_returns_file_stats(self):
         """Test that start_injects returns per-file statistics."""
@@ -109,7 +109,7 @@ class TestStartInjectsEdgeCases(unittest.TestCase):
 
         result = start_injects([str(svg_path)], translations, self.output_dir)
 
-        self.assertIn('files', result)
+        assert 'files' in result
         self.assertIsInstance(result['files'], dict)
 
 
@@ -137,7 +137,7 @@ class TestInjectEdgeCases(unittest.TestCase):
         result, stats = inject(svg_path, all_mappings=mappings, return_stats=True)
 
         self.assertIsNone(result)
-        self.assertIn('error', stats)
+        assert 'error' in stats
 
     def test_inject_case_insensitive_false(self):
         """Test inject with case-sensitive matching."""

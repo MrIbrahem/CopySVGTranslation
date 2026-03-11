@@ -110,7 +110,7 @@ class TestSVGTranslate(unittest.TestCase):
         found_texts = tree.xpath("//svg:text[@systemLanguage='ar']/svg:tspan/text()", namespaces=ns)
         texts_to_check = expected_texts or self.expected_arabic_texts
         for expected in texts_to_check:
-            self.assertIn(expected, found_texts)
+            assert expected in found_texts
 
     def test_normalize_text_with_numbers(self):
         """Test text normalization with numbers."""
@@ -127,7 +127,7 @@ class TestSVGTranslate(unittest.TestCase):
         arabic_text = "السكان 2020"
         result = normalize_text(arabic_text, case_insensitive=True)
         # Arabic text doesn't have uppercase/lowercase, should be preserved
-        self.assertIn("السكان", result)
+        assert "السكان" in result
 
     def test_normalize_text_multiple_languages(self):
         """Test text normalization with mixed scripts."""
@@ -146,7 +146,7 @@ class TestSVGTranslate(unittest.TestCase):
         existing_ids = {"base-ar", "base-ar-1", "base-ar-2", "base-ar-5"}
         # Should find the next available number (not necessarily 3)
         new_id = generate_unique_id("base", "ar", existing_ids)
-        self.assertIn("base-ar", new_id)
+        assert "base-ar" in new_id
         self.assertNotIn(new_id, existing_ids)
 
     def test_generate_unique_id_with_special_characters(self):
@@ -181,7 +181,7 @@ class TestSVGTranslate(unittest.TestCase):
         translations = extract(svg_path)
 
         assert translations is not None
-        self.assertIn("new", translations)
+        assert "new" in translations
         # Should have extracted multiple translations
         self.assertGreater(len(translations["new"]), 1)
 
@@ -281,8 +281,8 @@ class TestSVGTranslate(unittest.TestCase):
         assert tree is not None
         # Original elements should still be present
         tree_str = etree.tostring(tree.getroot(), encoding='unicode')
-        self.assertIn('id="foreground"', tree_str)
-        self.assertIn('switch', tree_str)
+        assert 'id="foreground"' in tree_str
+        assert 'switch' in tree_str
 
     def test_inject_without_overwrite_skips_existing(self):
         """Test injection without overwrite skips existing translations."""
@@ -325,7 +325,7 @@ class TestSVGTranslate(unittest.TestCase):
         # Verify original text is preserved
         with open(svg_path, 'r', encoding='utf-8') as f:
             content = f.read()
-        self.assertIn('Existing Arabic', content)
+        assert 'Existing Arabic' in content
 
     def test_extract_with_whitespace_in_text(self):
         """Test extraction handles text with various whitespace."""
@@ -391,9 +391,9 @@ class TestSVGTranslate(unittest.TestCase):
 
         assert tree is not None
         # Verify stats are present and reasonable
-        self.assertIn('processed_switches', stats)
-        self.assertIn('inserted_translations', stats)
-        self.assertIn('updated_translations', stats)
+        assert 'processed_switches' in stats
+        assert 'inserted_translations' in stats
+        assert 'updated_translations' in stats
         self.assertGreaterEqual(stats['processed_switches'], 0)
 
     def test_extract_and_inject_roundtrip(self):

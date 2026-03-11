@@ -110,7 +110,7 @@ class TestSVGTranslate(unittest.TestCase):
         found_texts = tree.xpath("//svg:text[@systemLanguage='ar']/svg:tspan/text()", namespaces=ns)
         texts_to_check = expected_texts or self.expected_arabic_texts
         for expected in texts_to_check:
-            self.assertIn(expected, found_texts)
+            assert expected in found_texts
 
     def test_normalize_text(self):
         """Test text normalization."""
@@ -149,8 +149,8 @@ class TestSVGTranslate(unittest.TestCase):
 
         # Verify translations
         assert translations is not None
-        self.assertIn("new", translations)
-        self.assertIn("title", translations)
+        assert "new" in translations
+        assert "title" in translations
         assert translations["new"] == self.expected_translations["new"]
         assert translations["title"] == self.expected_translations["title"]
 
@@ -166,7 +166,7 @@ class TestSVGTranslate(unittest.TestCase):
 
         # Verify translations (keys should be lowercase)
         assert translations is not None
-        self.assertIn("new", translations)
+        assert "new" in translations
         assert translations["new"] == self.expected_translations["new"]
         assert translations["title"] == self.expected_translations["title"]
 
@@ -216,9 +216,9 @@ class TestSVGTranslate(unittest.TestCase):
         with open(no_translations_path, 'r', encoding='utf-8') as f:
             modified_svg = f.read()
 
-        self.assertIn('systemLanguage="ar"', modified_svg)
-        self.assertIn('السماعات الخلفية تنقل الإشارة نفسها،', modified_svg)
-        self.assertIn('لكنها موصولة بمرحلتين متعاكستين.', modified_svg)
+        assert 'systemLanguage="ar"' in modified_svg
+        assert 'السماعات الخلفية تنقل الإشارة نفسها،' in modified_svg
+        assert 'لكنها موصولة بمرحلتين متعاكستين.' in modified_svg
 
     def test_inject_dry_run(self):
         """Test injection in dry-run mode."""
@@ -315,7 +315,7 @@ class TestSVGTranslate(unittest.TestCase):
         with open(svg_path, 'r', encoding='utf-8') as f:
             modified_svg = f.read()
 
-        self.assertIn('السماعات الخلفية تنقل الإشارة نفسها،', modified_svg)
+        assert 'السماعات الخلفية تنقل الإشارة نفسها،' in modified_svg
         self.assertNotIn('Old translation', modified_svg)
 
     def test_inject_nonexistent_file(self):

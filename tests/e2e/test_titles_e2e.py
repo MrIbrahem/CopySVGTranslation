@@ -38,7 +38,7 @@ class TestExtractYearHandling(unittest.TestCase):
         # Should create title mapping for year-suffixed text
         self.assertIsInstance(result["title"], dict)
 
-        self.assertIn("title", result)
+        assert "title" in result
         assert result["title"] == {'population': {'ar': 'السكان'}}
 
     def test_extract_year_with_multiple_languages(self):
@@ -56,12 +56,12 @@ class TestExtractYearHandling(unittest.TestCase):
         result = extract(svg_path)
 
         assert result is not None
-        self.assertIn("new", result)
-        self.assertIn("title", result)
+        assert "new" in result
+        assert "title" in result
 
         assert result["title"] == {'population': {'ar': 'السكان', 'fr': 'Population'}}
 
-        self.assertIn("title_new", result)
+        assert "title_new" in result
         assert result["title_new"] == {
             'population {year}': {
                 'ar': 'السكان {year}',
@@ -99,15 +99,15 @@ class TestExtractYearHandling(unittest.TestCase):
         result = extract(svg_path)
 
         assert result is not None
-        self.assertIn("new", result)
-        self.assertIn("title", result)
+        assert "new" in result
+        assert "title" in result
 
         assert result["title"] == {
             'death rate from malaria,': {
                 'ar': 'معدل الوفيات الناجمة عن الملاريا،'
             }
         }
-        self.assertIn("title_new", result)
+        assert "title_new" in result
         assert result["title_new"] == {
             'death rate from malaria, {year}': {
                 'ko': '{year}년 말라리아 사망률',
