@@ -114,7 +114,7 @@ def work_on_switches(
         if not default_texts:
             continue
 
-        titles_translations = get_titles_translations(all_mappings_title, default_texts)
+        # titles_translations = get_titles_translations(all_mappings_title, default_texts)
         new_titles_translations = get_new_titles_translations(all_mappings_title_new, default_texts)
 
         # all_mappings.update(titles_translations)

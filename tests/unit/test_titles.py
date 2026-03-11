@@ -96,6 +96,52 @@ class TestGetTitlesTranslations(unittest.TestCase):
         result = get_titles_translations(all_mappings_title, default_texts)
         self.assertEqual(result, {})
 
+    def test_case_insensitivity(self):
+        all_mappings_title = {
+            "coviD-19 PANdemic": {"ar": "جائحة كوفيد"}
+        }
+        default_texts = ["COVID-19 pandemic 2021"]
+        result = get_titles_translations(all_mappings_title, default_texts)
+        self.assertEqual(result, {"COVID-19 pandemic 2021": {"ar": "جائحة كوفيد 2021"}})
+
+    def test_whitespace_handling(self):
+        all_mappings_title = {
+            "  COVID-19 pandemic  ": {"ar": "جائحة كوفيد"}
+        }
+        default_texts = ["  COVID-19 pandemic 2021"]
+        result = get_titles_translations(all_mappings_title, default_texts)
+        self.assertEqual(result, {"  COVID-19 pandemic 2021": {"ar": "جائحة كوفيد 2021"}})
+
+    def test_multiple_default_texts(self):
+        all_mappings_title = {
+            "pandemic": {"ar": "جائحة"}
+        }
+        default_texts = ["Pandemic 2020", "Unknown 2021", "Pandemic 2022"]
+        result = get_titles_translations(all_mappings_title, default_texts)
+        self.assertEqual(
+            result,
+            {
+                "Pandemic 2020": {"ar": "جائحة 2020"},
+                "Pandemic 2022": {"ar": "جائحة 2022"}
+            }
+        )
+
+    def test_text_too_short(self):
+        all_mappings_title = {
+            "": {"en": "empty"}
+        }
+        default_texts = ["2020"]
+        result = get_titles_translations(all_mappings_title, default_texts)
+        self.assertEqual(result, {})
+
+    def test_text_not_ending_in_digits(self):
+        all_mappings_title = {
+            "covid": {"ar": "كوفيد"}
+        }
+        default_texts = ["covid year"]
+        result = get_titles_translations(all_mappings_title, default_texts)
+        self.assertEqual(result, {})
+
 
 if __name__ == '__main__':
     unittest.main()
