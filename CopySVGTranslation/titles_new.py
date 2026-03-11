@@ -100,6 +100,6 @@ def get_new_titles_translations(
             en_key = replace_year(text, year)
             translations = all_mappings_title_fixed.get(en_key.strip().lower())
             if translations:
-                titles_translations[text] = {lang: f"{value} {year}" for lang, value in translations.items()}
+                titles_translations[text] = {lang: value.replace("{year}", year) for lang, value in translations.items()}
 
     return titles_translations

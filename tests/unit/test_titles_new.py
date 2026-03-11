@@ -62,5 +62,41 @@ class TestExtractYearHandling(unittest.TestCase):
         }
 
 
+class TestGetNewTitlesTranslations(unittest.TestCase):
+    """Test suite for reattaching year to base titles with {year} template."""
+
+    def test_basic_reconstruction(self):
+        all_mappings_title = {
+            "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}", "es": "Pandemia de COVID-19 {year}"}
+        }
+        default_texts = ["COVID-19 pandemic 1990"]
+        result = get_new_titles_translations(all_mappings_title, default_texts)
+        self.assertEqual(
+            result,
+            {
+                "COVID-19 pandemic 1990": {
+                    "ar": "جائحة كوفيد 1990",
+                    "es": "Pandemia de COVID-19 1990"
+                }
+            }
+        )
+
+    def test_missing_mapping(self):
+        all_mappings_title = {
+            "Population {year}": {"ar": "السكان {year}", "es": "Population {year}"}
+        }
+        default_texts = ["Unknown 2020"]
+        result = get_new_titles_translations(all_mappings_title, default_texts)
+        self.assertEqual(result, {})
+
+    def test_invalid_default_text_no_year(self):
+        all_mappings_title = {
+            "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}"}
+        }
+        default_texts = ["COVID-19 pandemic"]
+        result = get_new_titles_translations(all_mappings_title, default_texts)
+        self.assertEqual(result, {})
+
+
 if __name__ == '__main__':
     unittest.main()
