@@ -40,7 +40,7 @@ class TestGetTargetPath(unittest.TestCase):
         result = get_target_path(output_file, None, self.svg_path)
 
         assert result == output_file
-        self.assertTrue(result.parent.exists())
+        assert result.parent.exists() is True
 
     def test_get_target_path_with_output_dir(self):
         """Test get_target_path when output_dir is specified."""
@@ -48,7 +48,7 @@ class TestGetTargetPath(unittest.TestCase):
         result = get_target_path(None, output_dir, self.svg_path)
 
         assert result == output_dir / "source.svg"
-        self.assertTrue(result.parent.exists())
+        assert result.parent.exists() is True
 
     def test_get_target_path_default_to_source_dir(self):
         """Test get_target_path defaults to source file's directory."""
@@ -61,7 +61,7 @@ class TestGetTargetPath(unittest.TestCase):
         output_file = self.test_dir / "a" / "b" / "c" / "result.svg"
         result = get_target_path(output_file, None, self.svg_path)
 
-        self.assertTrue(result.parent.exists())
+        assert result.parent.exists() is True
         assert result == output_file
 
     def test_get_target_path_with_string_paths(self):
@@ -69,8 +69,8 @@ class TestGetTargetPath(unittest.TestCase):
         output_dir = str(self.test_dir / "output")
         result = get_target_path(None, output_dir, self.svg_path)
 
-        self.assertTrue(isinstance(result, Path))
-        self.assertTrue(result.parent.exists())
+        assert isinstance(result, Path) is True
+        assert result.parent.exists() is True
 
 
 class TestWorkOnSwitches(unittest.TestCase):

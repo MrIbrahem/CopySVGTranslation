@@ -316,7 +316,7 @@ class TestSVGTranslate(unittest.TestCase):
             modified_svg = f.read()
 
         assert 'السماعات الخلفية تنقل الإشارة نفسها،' in modified_svg
-        self.assertNotIn('Old translation', modified_svg)
+        assert 'Old translation' not in modified_svg
 
     def test_inject_nonexistent_file(self):
         """Test injection with non-existent file."""

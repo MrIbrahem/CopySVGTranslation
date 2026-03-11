@@ -83,7 +83,7 @@ class TestExtractEdgeCases(unittest.TestCase):
         assert "new" in result
 
         # Keys should be lowercase
-        self.assertTrue(any(key.islower() for key in result["new"].keys()))
+        assert any(key.islower() for key in result["new"].keys()) is True
 
     def test_extract_preserves_empty_tspan_text(self):
         """Test extraction handles empty tspan text."""

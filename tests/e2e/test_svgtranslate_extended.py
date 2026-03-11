@@ -147,7 +147,7 @@ class TestSVGTranslate(unittest.TestCase):
         # Should find the next available number (not necessarily 3)
         new_id = generate_unique_id("base", "ar", existing_ids)
         assert "base-ar" in new_id
-        self.assertNotIn(new_id, existing_ids)
+        assert new_id not in existing_ids
 
     def test_generate_unique_id_with_special_characters(self):
         """Test unique ID generation with special characters in base ID."""
@@ -264,7 +264,7 @@ class TestSVGTranslate(unittest.TestCase):
         assert tree is not None
         # Check that file was saved in output directory
         expected_output = output_dir / target_path.name
-        self.assertTrue(expected_output.exists())
+        assert expected_output.exists() is True
 
     def test_inject_preserves_original_structure(self):
         """Test that injection preserves the original SVG structure."""
@@ -354,7 +354,7 @@ class TestSVGTranslate(unittest.TestCase):
                 if isinstance(key, str):
                     # Should not have leading/trailing spaces or multiple consecutive spaces
                     assert key == key.strip()
-                    self.assertNotIn("  ", key)
+                    assert "  " not in key
 
     def test_inject_stats_accuracy(self):
         """Test that injection statistics are accurate."""

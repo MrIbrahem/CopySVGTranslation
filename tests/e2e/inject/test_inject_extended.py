@@ -194,7 +194,7 @@ class TestInjectEdgeCases(unittest.TestCase):
             save_result=True
         )
 
-        self.assertTrue(output_file.exists())
+        assert output_file.exists() is True
 
     def test_inject_without_save_result_no_file_created(self):
         """Test that save_result=False doesn't create output file."""
