@@ -6,7 +6,7 @@ import unittest
 from CopySVGTranslation.titles_new import make_new_title_translations, get_new_titles_translations
 
 
-class TestExtractYearHandling(unittest.TestCase):
+class TestTitlesNew(unittest.TestCase):
     """Test suite for year suffix handling in extract function."""
 
     def test_basic(self):
@@ -73,6 +73,23 @@ class TestExtractYearHandling(unittest.TestCase):
             }
         }
 
+    def test_year_multiple_occurrences(self):
+        """Test titles with multiple year occurrences are handled correctly."""
+        input_data = {
+            "2020 Highlights of 2020": {
+                "fr": "Faits saillants de 2020 en 2020"
+            }
+        }
+        # This test will fail with the current implementation of `replace_year`,
+        # but will pass with the suggested improvement.
+        result = make_new_title_translations(input_data)
+        expected = {
+            "2020 Highlights of {year}": {
+                "fr": "Faits saillants de 2020 en {year}"
+            }
+        }
+        assert result == expected
+
 
 class TestGetNewTitlesTranslations(unittest.TestCase):
     """Test suite for reattaching year to base titles with {year} template."""
@@ -99,7 +116,7 @@ class TestGetNewTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["Unknown 2020"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_invalid_default_text_no_year(self):
         all_mappings_title = {
@@ -107,7 +124,7 @@ class TestGetNewTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["COVID-19 pandemic"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_case_insensitivity(self):
         all_mappings_title = {
@@ -115,7 +132,7 @@ class TestGetNewTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["COVID-19 pandemic 2021"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {"COVID-19 pandemic 2021": {"ar": "جائحة كوفيد 2021"}})
+        assert result == {"COVID-19 pandemic 2021": {"ar": "جائحة كوفيد 2021"}}
 
     def test_whitespace_handling(self):
         all_mappings_title = {
@@ -123,7 +140,7 @@ class TestGetNewTitlesTranslations(unittest.TestCase):
         }
         default_texts = [" COVID-19 2021"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {" COVID-19 2021": {"ar": "كوفيد 2021"}})
+        assert result == {" COVID-19 2021": {"ar": "كوفيد 2021"}}
 
     def test_multiple_default_texts(self):
         all_mappings_title = {
@@ -145,7 +162,7 @@ class TestGetNewTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["Pandemic 2020 in 2020"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {})
+        assert result == {'Pandemic 2020 in 2020': {'ar': 'جائحة 2020 2020'}}
 
     def test_text_too_short(self):
         all_mappings_title = {
@@ -161,7 +178,7 @@ class TestGetNewTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["covid year"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_translation_without_year_template(self):
         all_mappings_title = {
@@ -169,7 +186,7 @@ class TestGetNewTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["Covid 2021"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {"Covid 2021": {"ar": "كوفيد فقط"}})
+        assert result == {"Covid 2021": {"ar": "كوفيد فقط"}}
 
 
 if __name__ == '__main__':

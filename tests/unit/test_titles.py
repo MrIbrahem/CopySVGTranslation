@@ -86,7 +86,7 @@ class TestGetTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["Unknown 2020"]
         result = get_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_invalid_default_text_no_year(self):
         all_mappings_title = {
@@ -94,7 +94,7 @@ class TestGetTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["COVID-19 pandemic"]
         result = get_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_case_insensitivity(self):
         all_mappings_title = {
@@ -102,7 +102,7 @@ class TestGetTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["COVID-19 pandemic 2021"]
         result = get_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {"COVID-19 pandemic 2021": {"ar": "جائحة كوفيد 2021"}})
+        assert result == {"COVID-19 pandemic 2021": {"ar": "جائحة كوفيد 2021"}}
 
     def test_whitespace_handling(self):
         all_mappings_title = {
@@ -110,7 +110,7 @@ class TestGetTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["  COVID-19 pandemic 2021"]
         result = get_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {"  COVID-19 pandemic 2021": {"ar": "جائحة كوفيد 2021"}})
+        assert result == {"  COVID-19 pandemic 2021": {"ar": "جائحة كوفيد 2021"}}
 
     def test_multiple_default_texts(self):
         all_mappings_title = {
@@ -132,7 +132,7 @@ class TestGetTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["2020"]
         result = get_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_text_not_ending_in_digits(self):
         all_mappings_title = {
@@ -140,7 +140,7 @@ class TestGetTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["covid year"]
         result = get_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {})
+        assert result == {}
 
 
 if __name__ == '__main__':

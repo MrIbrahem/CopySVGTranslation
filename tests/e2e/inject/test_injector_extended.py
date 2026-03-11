@@ -39,7 +39,7 @@ class TestGetTargetPath(unittest.TestCase):
         output_file = self.test_dir / "output" / "result.svg"
         result = get_target_path(output_file, None, self.svg_path)
 
-        self.assertEqual(result, output_file)
+        assert result == output_file
         self.assertTrue(result.parent.exists())
 
     def test_get_target_path_with_output_dir(self):
@@ -47,14 +47,14 @@ class TestGetTargetPath(unittest.TestCase):
         output_dir = self.test_dir / "translated"
         result = get_target_path(None, output_dir, self.svg_path)
 
-        self.assertEqual(result, output_dir / "source.svg")
+        assert result == output_dir / "source.svg"
         self.assertTrue(result.parent.exists())
 
     def test_get_target_path_default_to_source_dir(self):
         """Test get_target_path defaults to source file's directory."""
         result = get_target_path(None, None, self.svg_path)
 
-        self.assertEqual(result, self.svg_path.parent / "source.svg")
+        assert result == self.svg_path.parent / "source.svg"
 
     def test_get_target_path_creates_nested_directories(self):
         """Test get_target_path creates nested output directories."""
@@ -62,7 +62,7 @@ class TestGetTargetPath(unittest.TestCase):
         result = get_target_path(output_file, None, self.svg_path)
 
         self.assertTrue(result.parent.exists())
-        self.assertEqual(result, output_file)
+        assert result == output_file
 
     def test_get_target_path_with_string_paths(self):
         """Test get_target_path handles string paths."""
@@ -229,7 +229,7 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
         """Test loading with empty file list."""
         result = load_all_mappings([])
 
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_load_all_mappings_empty_json_file(self):
         """Test loading empty JSON file."""
@@ -238,7 +238,7 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
 
         result = load_all_mappings([mapping_file])
 
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_load_all_mappings_corrupted_json(self):
         """Test loading corrupted JSON file."""
@@ -247,7 +247,7 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
 
         result = load_all_mappings([mapping_file])
 
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_load_all_mappings_nested_structure(self):
         """Test loading with nested mapping structure."""

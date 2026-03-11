@@ -1,3 +1,4 @@
+import re
 import logging
 from typing import Dict, List
 
@@ -22,8 +23,13 @@ def match_year(text):
 
 
 def replace_year(value, year):
-    if value.count(year) == 1:
-        return value.replace(year, "{year}")
+    # if value.count(year) == 1:
+
+    if value.endswith(year):
+        return re.sub(r"\d{4}$", "{year}", value)
+
+    if value.startswith(year):
+        return re.sub(r"^\d{4}", "{year}", value)
     return ""
 
 

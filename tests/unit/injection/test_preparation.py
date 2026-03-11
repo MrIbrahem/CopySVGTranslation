@@ -79,7 +79,7 @@ class TestGetTextContent(unittest.TestCase):
         elem = etree.fromstring(xml)
         result = get_text_content(elem)
 
-        self.assertEqual(result, "Hello")
+        assert result == "Hello"
 
     def test_get_text_content_with_children(self):
         """Test getting text content with child elements."""
@@ -99,7 +99,7 @@ class TestGetTextContent(unittest.TestCase):
         elem = etree.fromstring(xml)
         result = get_text_content(elem)
 
-        self.assertEqual(result, "")
+        assert result == ""
 
     def test_get_text_content_nested_structure(self):
         """Test getting text content with nested structure."""

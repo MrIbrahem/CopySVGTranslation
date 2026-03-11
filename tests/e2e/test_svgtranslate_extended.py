@@ -133,7 +133,7 @@ class TestSVGTranslate(unittest.TestCase):
         """Test text normalization with mixed scripts."""
         mixed_text = "  Hello مرحبا World  "
         result = normalize_text(mixed_text)
-        self.assertEqual(result, "Hello مرحبا World")
+        assert result == "Hello مرحبا World"
 
     def test_generate_unique_id_empty_base(self):
         """Test unique ID generation with empty base ID."""
@@ -475,7 +475,7 @@ class TestSVGTranslate(unittest.TestCase):
 
         for input_text, expected in test_cases:
             result = normalize_text(input_text)
-            self.assertEqual(result, expected, f"Failed for input: {input_text}")
+            assert result == expected, f"Failed for input: {input_text}"
 
 
 if __name__ == '__main__':
