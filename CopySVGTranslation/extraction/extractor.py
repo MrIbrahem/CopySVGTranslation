@@ -7,8 +7,10 @@ from lxml import etree
 
 from ..text_utils import normalize_text
 from ..titles import make_title_translations
+from ..titles_new import make_new_title_translations
 
 logger = logging.getLogger("CopySVGTranslation")
+
 
 def get_english_default_texts(text_elements, case_insensitive):
     new_keys = []
@@ -45,7 +47,10 @@ def get_english_default_texts(text_elements, case_insensitive):
     return new_keys, default_tspans_by_id
 
 
-def extract(svg_file_path, case_insensitive: bool = True):
+def extract(
+    svg_file_path,
+        case_insensitive: bool = True,
+):
     """
     Extract translation strings from an SVG file into a structured dictionary.
 
@@ -83,6 +88,7 @@ def extract(svg_file_path, case_insensitive: bool = True):
     translations = {
         "new": {},
         "title": {},
+        "title_new": {},
         "tspans_by_id": {}
     }
     tspans_by_id = translations["tspans_by_id"]
@@ -137,5 +143,6 @@ def extract(svg_file_path, case_insensitive: bool = True):
                     translations["new"][store_key][system_lang] = normalized_translation
 
     translations["title"] = make_title_translations(translations["new"])
+    translations["title_new"] = make_new_title_translations(translations["new"])
 
     return translations
