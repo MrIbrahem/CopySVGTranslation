@@ -27,7 +27,7 @@ def make_title_translations(
     Returns:
         A dictionary mapping base title -> { language -> title without year }.
     """
-    all_mappings_title: Dict[str, Dict[str, str]] = {}
+    result: Dict[str, Dict[str, str]] = {}
 
     new_fixed = {
         x.strip(): {z.strip(): h.strip() for z, h in v.items()}
@@ -47,9 +47,9 @@ def make_title_translations(
             if len(value) > 4 and value[-4:] == year
         }
         if data:
-            all_mappings_title[key[:-4].strip()] = data
+            result[key[:-4].strip()] = data
 
-    return all_mappings_title
+    return result
 
 
 def get_titles_translations(
