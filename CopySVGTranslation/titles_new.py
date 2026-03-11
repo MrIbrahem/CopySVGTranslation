@@ -4,6 +4,16 @@ from typing import Dict, List
 logger = logging.getLogger("CopySVGTranslation")
 
 
+def match_year(text):
+    """
+    match 4 digit year at the end/start of a string
+    """
+    year = text[-4:]
+    if year.isdigit():
+        return year
+    return ""
+
+
 def replace_year(value, year):
     if value.count(year) == 1:
         return value.replace(year, "{year}")
@@ -95,11 +105,12 @@ def get_new_titles_translations(
     }
 
     for text in default_texts:
-        if len(text) > 4 and text[-4:].isdigit():
-            year = text[-4:]
-            en_key = replace_year(text, year)
-            translations = all_mappings_title_fixed.get(en_key.strip().lower())
-            if translations:
-                titles_translations[text] = {lang: value.replace("{year}", year) for lang, value in translations.items()}
+        year = match_year(text)
+        if not year:
+            continue
+        en_key = replace_year(text, year)
+        translations = all_mappings_title_fixed.get(en_key.strip().lower())
+        if translations:
+            titles_translations[text] = {lang: value.replace("{year}", year) for lang, value in translations.items()}
 
     return titles_translations

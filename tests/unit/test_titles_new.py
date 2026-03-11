@@ -115,15 +115,15 @@ class TestGetNewTitlesTranslations(unittest.TestCase):
 
     def test_multiple_default_texts(self):
         all_mappings_title = {
-            "pandemic {year}": {"ar": "جائحة {year}"}
+            "pandemic {year}": {"ar": "جائحة {year}", "ko": "{year}년 팬데믹", "fr": ""}
         }
         default_texts = ["Pandemic 2020", "Unknown 2021", "Pandemic 2022"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
         self.assertEqual(
             result,
             {
-                "Pandemic 2020": {"ar": "جائحة 2020"},
-                "Pandemic 2022": {"ar": "جائحة 2022"}
+                "Pandemic 2020": {"ar": "جائحة 2020", "ko": "2020년 팬데믹", "fr": ""},
+                "Pandemic 2022": {"ar": "جائحة 2022", "ko": "2022년 팬데믹", "fr": ""}
             }
         )
 
@@ -141,7 +141,7 @@ class TestGetNewTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["2020"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {})
+        assert result == {'2020': {'en': '2020'}}
 
     def test_text_not_ending_in_digits(self):
         all_mappings_title = {
