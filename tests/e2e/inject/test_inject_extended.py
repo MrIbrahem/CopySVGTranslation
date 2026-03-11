@@ -10,8 +10,6 @@ import shutil
 from pathlib import Path
 
 
-
-
 from CopySVGTranslation import inject, start_injects
 
 
@@ -110,7 +108,7 @@ class TestStartInjectsEdgeCases(unittest.TestCase):
         result = start_injects([str(svg_path)], translations, self.output_dir)
 
         assert 'files' in result
-        self.assertIsInstance(result['files'], dict)
+        assert isinstance(result['files'], dict)
 
 
 class TestInjectEdgeCases(unittest.TestCase):
@@ -214,7 +212,7 @@ class TestInjectEdgeCases(unittest.TestCase):
             save_result=False
         )
 
-        self.assertFalse(output_file.exists())
+        assert output_file.exists() is False
 
 
 if __name__ == '__main__':

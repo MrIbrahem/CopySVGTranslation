@@ -36,7 +36,7 @@ class TestExtractYearHandling(unittest.TestCase):
         result = extract(svg_path)
 
         # Should create title mapping for year-suffixed text
-        self.assertIsInstance(result["title"], dict)
+        assert isinstance(result["title"], dict)
 
         assert "title" in result
         assert result["title"] == {'population': {'ar': 'السكان'}}

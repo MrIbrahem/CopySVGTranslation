@@ -105,7 +105,7 @@ class TestSVGTranslate(unittest.TestCase):
 
     def assertTreeHasTranslations(self, tree, expected_texts=None):
         """Verify that the injected tree contains the expected Arabic texts."""
-        self.assertIsInstance(tree, etree._ElementTree)
+        assert isinstance(tree, etree._ElementTree)
         ns = {"svg": "http://www.w3.org/2000/svg"}
         found_texts = tree.xpath("//svg:text[@systemLanguage='ar']/svg:tspan/text()", namespaces=ns)
         texts_to_check = expected_texts or self.expected_arabic_texts
