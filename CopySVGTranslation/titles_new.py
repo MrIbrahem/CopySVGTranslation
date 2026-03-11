@@ -6,11 +6,18 @@ logger = logging.getLogger("CopySVGTranslation")
 
 def match_year(text):
     """
-    match 4 digit year at the end/start of a string
+    match and return 4 digit year at the end or start of a string
     """
-    year = text[-4:]
-    if year.isdigit():
-        return year
+    text = text.strip()
+    if len(text) < 4:
+        return ""
+
+    if text[-4:].isdigit():
+        return text[-4:]
+
+    if text[:4].isdigit():
+        return text[:4]
+
     return ""
 
 
@@ -52,9 +59,10 @@ def make_new_title_translations(
     }
 
     for key, mapping in list(new_fixed.items()):
-        if len(key) < 5:
+        if len(key) < 4:
             continue
-        year = key[-4:]
+
+        year = match_year(key)
         if not key or key == year or not year.isdigit():
             continue
 
@@ -101,7 +109,8 @@ def get_new_titles_translations(
     titles_translations: Dict[str, Dict[str, str]] = {}
 
     all_mappings_title_fixed = {
-        x.strip().lower(): v for x, v in all_mappings_title.items()
+        x.strip().lower(): v
+        for x, v in all_mappings_title.items()
     }
 
     for text in default_texts:

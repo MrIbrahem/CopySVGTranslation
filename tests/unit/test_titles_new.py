@@ -30,6 +30,18 @@ class TestExtractYearHandling(unittest.TestCase):
 
         assert result == {'Population {year}': {'ar': 'السكان {year}', 'es': 'Population {year}'}}
 
+    def test_year_in_start_with_multiple_languages(self):
+        """Test year suffix handling with multiple languages."""
+        input_data = {
+            "2020 Population": {"ar": "السكان 2020", "es": "Population 2020"}
+        }
+
+        result = make_new_title_translations(input_data)
+
+        self.assertIsNotNone(result)
+
+        assert result == {'{year} Population': {'ar': 'السكان {year}', 'es': 'Population {year}'}}
+
     def test_extract_non_year_digits(self):
         """Test that non-year digit sequences are handled correctly."""
         input_data = {
