@@ -55,7 +55,7 @@ class TestExtractYearHandling(unittest.TestCase):
 
         result = extract(svg_path)
 
-        self.assertIsNotNone(result)
+        assert result is not None
         self.assertIn("new", result)
         self.assertIn("title", result)
 
@@ -81,7 +81,7 @@ class TestExtractYearHandling(unittest.TestCase):
 
         result = extract(svg_path)
 
-        self.assertIsNotNone(result)
+        assert result is not None
         assert result == {'new': {'value 42': {}}, 'title': {}, 'title_new': {}, 'tspans_by_id': {'t1': 'Value 42'}}
 
     def test_extract_title(self):
@@ -98,7 +98,7 @@ class TestExtractYearHandling(unittest.TestCase):
 
         result = extract(svg_path)
 
-        self.assertIsNotNone(result)
+        assert result is not None
         self.assertIn("new", result)
         self.assertIn("title", result)
 

@@ -26,7 +26,7 @@ class TestTitlesNew(unittest.TestCase):
 
         result = make_new_title_translations(input_data)
 
-        self.assertIsNotNone(result)
+        assert result is not None
 
         assert result == {'Population {year}': {'ar': 'السكان {year}', 'es': 'Population {year}'}}
 
@@ -38,7 +38,7 @@ class TestTitlesNew(unittest.TestCase):
 
         result = make_new_title_translations(input_data)
 
-        self.assertIsNotNone(result)
+        assert result is not None
 
         assert result == {'{year} Population': {'ar': 'السكان {year}', 'es': 'Population {year}'}}
 
@@ -50,7 +50,7 @@ class TestTitlesNew(unittest.TestCase):
 
         result = make_new_title_translations(input_data)
 
-        self.assertIsNotNone(result)
+        assert result is not None
         assert result == {}
 
     def test_extract_title(self):
@@ -64,7 +64,7 @@ class TestTitlesNew(unittest.TestCase):
 
         result = make_new_title_translations(input_data)
 
-        self.assertIsNotNone(result)
+        assert result is not None
 
         assert result == {
             'death rate from malaria, {year}': {

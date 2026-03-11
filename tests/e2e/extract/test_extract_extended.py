@@ -33,7 +33,7 @@ class TestExtractEdgeCases(unittest.TestCase):
         result = extract(svg_path)
 
         # Should handle gracefully
-        self.assertIsNotNone(result)
+        assert result is not None
         assert result is not None
 
     def test_extract_switch_without_default_text(self):
@@ -48,7 +48,7 @@ class TestExtractEdgeCases(unittest.TestCase):
 
         result = extract(svg_path)
 
-        self.assertIsNotNone(result)
+        assert result is not None
 
     def test_extract_with_mixed_tspan_and_text(self):
         """Test extraction with mixed tspan and direct text."""
@@ -65,7 +65,7 @@ class TestExtractEdgeCases(unittest.TestCase):
 
         result = extract(svg_path)
 
-        self.assertIsNotNone(result)
+        assert result is not None
 
     def test_extract_case_insensitive_default(self):
         """Test that case_insensitive is True by default."""
@@ -97,7 +97,7 @@ class TestExtractEdgeCases(unittest.TestCase):
 
         result = extract(svg_path)
 
-        self.assertIsNotNone(result)
+        assert result is not None
 
     def test_extract_with_base_id_fallback(self):
         """Test extraction with base_id lookup fallback."""
@@ -112,7 +112,7 @@ class TestExtractEdgeCases(unittest.TestCase):
 
         result = extract(svg_path)
 
-        self.assertIsNotNone(result)
+        assert result is not None
 
 
 if __name__ == '__main__':

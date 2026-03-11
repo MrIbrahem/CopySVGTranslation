@@ -151,7 +151,7 @@ class TestInjectEdgeCases(unittest.TestCase):
 
         result = inject(svg_path, all_mappings=mappings, case_insensitive=False)
 
-        self.assertIsNotNone(result)
+        assert result is not None
 
     def test_inject_both_mapping_files_and_all_mappings(self):
         """Test that all_mappings takes precedence over mapping_files."""
@@ -174,7 +174,7 @@ class TestInjectEdgeCases(unittest.TestCase):
         )
 
         # all_mappings should be used
-        self.assertIsNotNone(result)
+        assert result is not None
 
     def test_inject_save_result_creates_output_file(self):
         """Test that save_result=True creates the output file."""

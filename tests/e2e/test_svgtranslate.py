@@ -148,7 +148,7 @@ class TestSVGTranslate(unittest.TestCase):
         translations = extract(arabic_svg_path)
 
         # Verify translations
-        self.assertIsNotNone(translations)
+        assert translations is not None
         self.assertIn("new", translations)
         self.assertIn("title", translations)
         assert translations["new"] == self.expected_translations["new"]
@@ -165,7 +165,7 @@ class TestSVGTranslate(unittest.TestCase):
         translations = extract(arabic_svg_path, case_insensitive=True)
 
         # Verify translations (keys should be lowercase)
-        self.assertIsNotNone(translations)
+        assert translations is not None
         self.assertIn("new", translations)
         assert translations["new"] == self.expected_translations["new"]
         assert translations["title"] == self.expected_translations["title"]
@@ -202,8 +202,8 @@ class TestSVGTranslate(unittest.TestCase):
         )
 
         # Verify stats
-        self.assertIsNotNone(tree)
-        self.assertIsNotNone(stats)
+        assert tree is not None
+        assert stats is not None
         assert stats['processed_switches'] == 2
         assert stats['inserted_translations'] == 2
         assert stats['updated_translations'] == 0
@@ -244,8 +244,8 @@ class TestSVGTranslate(unittest.TestCase):
         tree, stats = inject(no_translations_path, [mapping_path], return_stats=True)
 
         # Verify stats
-        self.assertIsNotNone(tree)
-        self.assertIsNotNone(stats)
+        assert tree is not None
+        assert stats is not None
         assert stats['processed_switches'] == 2
         assert stats['inserted_translations'] == 2
 
@@ -301,8 +301,8 @@ class TestSVGTranslate(unittest.TestCase):
         )
 
         # Verify stats
-        self.assertIsNotNone(tree)
-        self.assertIsNotNone(stats)
+        assert tree is not None
+        assert stats is not None
         assert stats['processed_switches'] == 1
         assert stats['inserted_translations'] == 0
         assert stats['updated_translations'] == 1

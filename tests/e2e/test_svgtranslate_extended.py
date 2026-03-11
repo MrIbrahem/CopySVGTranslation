@@ -180,7 +180,7 @@ class TestSVGTranslate(unittest.TestCase):
 
         translations = extract(svg_path)
 
-        self.assertIsNotNone(translations)
+        assert translations is not None
         self.assertIn("new", translations)
         # Should have extracted multiple translations
         self.assertGreater(len(translations["new"]), 1)
@@ -236,8 +236,8 @@ class TestSVGTranslate(unittest.TestCase):
             return_stats=True,
         )
 
-        self.assertIsNotNone(tree)
-        self.assertIsNotNone(stats)
+        assert tree is not None
+        assert stats is not None
         # Should have processed translations from both files
         self.assertGreater(stats['inserted_translations'], 0)
 
@@ -261,7 +261,7 @@ class TestSVGTranslate(unittest.TestCase):
             save_result=True,
         )
 
-        self.assertIsNotNone(tree)
+        assert tree is not None
         # Check that file was saved in output directory
         expected_output = output_dir / target_path.name
         self.assertTrue(expected_output.exists())
@@ -278,7 +278,7 @@ class TestSVGTranslate(unittest.TestCase):
 
         tree = inject(target_path, [mapping_path])
 
-        self.assertIsNotNone(tree)
+        assert tree is not None
         # Original elements should still be present
         tree_str = etree.tostring(tree.getroot(), encoding='unicode')
         self.assertIn('id="foreground"', tree_str)
@@ -317,7 +317,7 @@ class TestSVGTranslate(unittest.TestCase):
             output_file=svg_path,
         )
 
-        self.assertIsNotNone(tree)
+        assert tree is not None
         # Should have skipped the existing translation
         assert stats['inserted_translations'] == 0
         assert stats['skipped_translations'] == 1
@@ -347,7 +347,7 @@ class TestSVGTranslate(unittest.TestCase):
 
         translations = extract(svg_path)
 
-        self.assertIsNotNone(translations)
+        assert translations is not None
         # Whitespace should be normalized
         if "new" in translations:
             for key in translations["new"]:
@@ -389,7 +389,7 @@ class TestSVGTranslate(unittest.TestCase):
             return_stats=True,
         )
 
-        self.assertIsNotNone(tree)
+        assert tree is not None
         # Verify stats are present and reasonable
         self.assertIn('processed_switches', stats)
         self.assertIn('inserted_translations', stats)
@@ -405,7 +405,7 @@ class TestSVGTranslate(unittest.TestCase):
 
         # Extract translations
         translations = extract(arabic_svg_path)
-        self.assertIsNotNone(translations)
+        assert translations is not None
 
         # Save to JSON
         mapping_path = self.test_dir / "roundtrip.json"
@@ -424,7 +424,7 @@ class TestSVGTranslate(unittest.TestCase):
             return_stats=True,
         )
 
-        self.assertIsNotNone(tree)
+        assert tree is not None
         self.assertGreater(stats['inserted_translations'], 0)
 
         # Verify the translated content
@@ -444,7 +444,7 @@ class TestSVGTranslate(unittest.TestCase):
         tree, stats = inject(target_path, [mapping_path], return_stats=True)
 
         # Should complete without error, but with no translations
-        self.assertIsNotNone(tree)
+        assert tree is not None
         assert stats['inserted_translations'] == 0
 
     def test_inject_invalid_json_mapping(self):

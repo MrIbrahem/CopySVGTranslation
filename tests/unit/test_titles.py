@@ -26,7 +26,7 @@ class TestExtractYearHandling(unittest.TestCase):
 
         result = make_title_translations(input_data)
 
-        self.assertIsNotNone(result)
+        assert result is not None
 
         assert result == {'Population': {'ar': 'السكان', 'es': 'Population'}}
 
@@ -38,7 +38,7 @@ class TestExtractYearHandling(unittest.TestCase):
 
         result = make_title_translations(input_data)
 
-        self.assertIsNotNone(result)
+        assert result is not None
         assert result == {}
 
     def test_extract_title(self):
@@ -52,7 +52,7 @@ class TestExtractYearHandling(unittest.TestCase):
 
         result = make_title_translations(input_data)
 
-        self.assertIsNotNone(result)
+        assert result is not None
 
         assert result == {
             'death rate from malaria,': {
