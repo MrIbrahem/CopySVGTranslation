@@ -27,7 +27,7 @@ class TestExtractTextFromNode(unittest.TestCase):
         node = etree.fromstring(xml)
         result = extract_text_from_node(node)
 
-        self.assertEqual(result, ["First", "Second"])
+        assert result == ["First", "Second"]
 
     def test_extract_from_text_without_tspans(self):
         """Test extraction from text element without tspans."""
@@ -35,7 +35,7 @@ class TestExtractTextFromNode(unittest.TestCase):
         node = etree.fromstring(xml)
         result = extract_text_from_node(node)
 
-        self.assertEqual(result, ["Direct text"])
+        assert result == ["Direct text"]
 
     def test_extract_from_text_with_empty_tspans(self):
         """Test extraction with empty tspan elements."""
@@ -46,7 +46,7 @@ class TestExtractTextFromNode(unittest.TestCase):
         node = etree.fromstring(xml)
         result = extract_text_from_node(node)
 
-        self.assertEqual(result, ["", "Content"])
+        assert result == ["", "Content"]
 
     def test_extract_from_text_with_whitespace_tspans(self):
         """Test extraction handles whitespace in tspans."""
@@ -57,7 +57,7 @@ class TestExtractTextFromNode(unittest.TestCase):
         node = etree.fromstring(xml)
         result = extract_text_from_node(node)
 
-        self.assertEqual(result, ["Spaces", "Tabs"])
+        assert result == ["Spaces", "Tabs"]
 
     def test_extract_from_empty_text_node(self):
         """Test extraction from empty text node."""
@@ -65,7 +65,7 @@ class TestExtractTextFromNode(unittest.TestCase):
         node = etree.fromstring(xml)
         result = extract_text_from_node(node)
 
-        self.assertEqual(result, [""])
+        assert result == [""]
 
     def test_extract_with_unicode_content(self):
         """Test extraction with Unicode content."""
@@ -77,7 +77,7 @@ class TestExtractTextFromNode(unittest.TestCase):
         node = etree.fromstring(xml)
         result = extract_text_from_node(node)
 
-        self.assertEqual(result, ["مرحبا", "你好", "Привет"])
+        assert result == ["مرحبا", "你好", "Привет"]
 
 
 if __name__ == '__main__':

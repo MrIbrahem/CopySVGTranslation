@@ -24,13 +24,6 @@ def _write_full_svg(tmp_dir: Path, svg_text: str, name: str = "test.svg") -> Pat
     p.write_text(svg_text, encoding="utf-8")
     return p
 
-# ---------- Fixtures ----------
-
-
-@pytest.fixture
-def temp_dir(tmp_path: Path) -> Path:
-    return tmp_path
-
 
 def test_tspan_with_a_link_is_counted_as_nested(temp_dir: Path):
     # NOTE: current implementation flags any element child, not just <tspan>

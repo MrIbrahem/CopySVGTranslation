@@ -2,35 +2,17 @@
 Comprehensive pytest tests for CopySVGTranslation covering edge cases and additional functionality.
 """
 
-import json
-import tempfile
-import shutil
-from pathlib import Path
-import pytest
 from lxml import etree
-
 
 
 from CopySVGTranslation import extract, inject
 from CopySVGTranslation.text_utils import extract_text_from_node
 from CopySVGTranslation.workflows import svg_extract_and_inject
 
-
-# -------------------------------
-# Fixtures
-# -------------------------------
-
-@pytest.fixture
-def temp_dir():
-    """Create a temporary directory for test use."""
-    d = Path(tempfile.mkdtemp())
-    yield d
-    shutil.rmtree(d)
-
-
 # -------------------------------
 # Text utility tests
 # -------------------------------
+
 
 class TestTextUtils:
     """Test cases for text utility functions."""

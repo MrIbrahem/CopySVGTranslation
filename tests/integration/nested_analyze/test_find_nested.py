@@ -1,22 +1,7 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
-import json
-import shutil
-import tempfile
-from pathlib import Path
-from lxml import etree
-import pytest
-
 
 from CopySVGTranslation.nested_analyze.find_nested import match_nested_tags, fix_nested_file
-
-
-@pytest.fixture
-def temp_dir():
-    """Create a temporary directory for test use."""
-    d = Path(tempfile.mkdtemp())
-    yield d
-    shutil.rmtree(d)
 
 
 class TestNestedFiles:

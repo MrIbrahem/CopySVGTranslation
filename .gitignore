@@ -5,3 +5,4 @@
 data/source.svg.json
 tests/example/برمت.txt
 /tests/tests_files
+.coverage

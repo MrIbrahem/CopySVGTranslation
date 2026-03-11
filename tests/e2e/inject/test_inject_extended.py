@@ -10,8 +10,6 @@ import shutil
 from pathlib import Path
 
 
-
-
 from CopySVGTranslation import inject, start_injects
 
 
@@ -34,8 +32,8 @@ class TestStartInjectsEdgeCases(unittest.TestCase):
 
         result = start_injects([], translations, self.output_dir)
 
-        self.assertEqual(result['success'], 0)
-        self.assertEqual(result['failed'], 0)
+        assert result['success'] == 0
+        assert result['failed'] == 0
 
     def test_start_injects_nonexistent_files(self):
         """Test start_injects with nonexistent files."""
@@ -44,8 +42,8 @@ class TestStartInjectsEdgeCases(unittest.TestCase):
 
         result = start_injects(files, translations, self.output_dir)
 
-        self.assertEqual(result['success'], 0)
-        self.assertGreater(result['failed'], 0)
+        assert result['success'] == 0
+        assert result['failed'] > 0
 
     def test_start_injects_tracks_nested_files(self):
         """Test that start_injects tracks nested tspan errors."""
@@ -77,7 +75,7 @@ class TestStartInjectsEdgeCases(unittest.TestCase):
         result = start_injects([str(svg_path)], translations, self.output_dir, overwrite=False)
 
         # Should track files with no changes
-        self.assertIn('no_changes', result)
+        assert 'no_changes' in result
 
     def test_start_injects_with_overwrite(self):
         """Test start_injects with overwrite option."""
@@ -95,7 +93,7 @@ class TestStartInjectsEdgeCases(unittest.TestCase):
         result = start_injects([str(svg_path)], translations, self.output_dir, overwrite=True)
 
         # Should process the file
-        self.assertIn('files', result)
+        assert 'files' in result
 
     def test_start_injects_returns_file_stats(self):
         """Test that start_injects returns per-file statistics."""
@@ -109,8 +107,8 @@ class TestStartInjectsEdgeCases(unittest.TestCase):
 
         result = start_injects([str(svg_path)], translations, self.output_dir)
 
-        self.assertIn('files', result)
-        self.assertIsInstance(result['files'], dict)
+        assert 'files' in result
+        assert isinstance(result['files'], dict)
 
 
 class TestInjectEdgeCases(unittest.TestCase):
@@ -136,8 +134,8 @@ class TestInjectEdgeCases(unittest.TestCase):
 
         result, stats = inject(svg_path, all_mappings=mappings, return_stats=True)
 
-        self.assertIsNone(result)
-        self.assertIn('error', stats)
+        assert result is None
+        assert 'error' in stats
 
     def test_inject_case_insensitive_false(self):
         """Test inject with case-sensitive matching."""
@@ -151,7 +149,7 @@ class TestInjectEdgeCases(unittest.TestCase):
 
         result = inject(svg_path, all_mappings=mappings, case_insensitive=False)
 
-        self.assertIsNotNone(result)
+        assert result is not None
 
     def test_inject_both_mapping_files_and_all_mappings(self):
         """Test that all_mappings takes precedence over mapping_files."""
@@ -174,7 +172,7 @@ class TestInjectEdgeCases(unittest.TestCase):
         )
 
         # all_mappings should be used
-        self.assertIsNotNone(result)
+        assert result is not None
 
     def test_inject_save_result_creates_output_file(self):
         """Test that save_result=True creates the output file."""
@@ -194,7 +192,7 @@ class TestInjectEdgeCases(unittest.TestCase):
             save_result=True
         )
 
-        self.assertTrue(output_file.exists())
+        assert output_file.exists() is True
 
     def test_inject_without_save_result_no_file_created(self):
         """Test that save_result=False doesn't create output file."""
@@ -214,7 +212,7 @@ class TestInjectEdgeCases(unittest.TestCase):
             save_result=False
         )
 
-        self.assertFalse(output_file.exists())
+        assert output_file.exists() is False
 
 
 if __name__ == '__main__':

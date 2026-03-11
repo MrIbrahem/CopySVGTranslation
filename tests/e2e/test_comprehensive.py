@@ -5,8 +5,6 @@ Comprehensive pytest tests for CopySVGTranslation covering edge cases and additi
 """
 
 import json
-import tempfile
-import shutil
 from pathlib import Path
 import pytest
 from lxml import etree
@@ -25,21 +23,9 @@ from CopySVGTranslation.injection import (
 )
 
 # -------------------------------
-# Fixtures
-# -------------------------------
-
-
-@pytest.fixture
-def temp_dir():
-    """Create a temporary directory for test use."""
-    d = Path(tempfile.mkdtemp())
-    yield d
-    shutil.rmtree(d)
-
-
-# -------------------------------
 # Text utility tests
 # -------------------------------
+
 
 class TestTextUtils:
     """Test cases for text utility functions."""

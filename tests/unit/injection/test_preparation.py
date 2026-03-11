@@ -3,7 +3,6 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
-import json
 import tempfile
 import unittest
 import shutil
@@ -41,34 +40,34 @@ class TestNormalizeLang(unittest.TestCase):
 
     def test_normalize_lang_simple_code(self):
         """Test normalization of simple language code."""
-        self.assertEqual(normalize_lang("EN"), "en")
-        self.assertEqual(normalize_lang("FR"), "fr")
-        self.assertEqual(normalize_lang("ar"), "ar")
+        assert normalize_lang("EN") == "en"
+        assert normalize_lang("FR") == "fr"
+        assert normalize_lang("ar") == "ar"
 
     def test_normalize_lang_with_region(self):
         """Test normalization with region code."""
-        self.assertEqual(normalize_lang("en-US"), "en-US")
-        self.assertEqual(normalize_lang("en_us"), "en-US")
-        self.assertEqual(normalize_lang("pt_br"), "pt-BR")
-        self.assertEqual(normalize_lang("zh-cn"), "zh-CN")
+        assert normalize_lang("en-US") == "en-US"
+        assert normalize_lang("en_us") == "en-US"
+        assert normalize_lang("pt_br") == "pt-BR"
+        assert normalize_lang("zh-cn") == "zh-CN"
 
     def test_normalize_lang_complex_format(self):
         """Test normalization with complex format."""
-        self.assertEqual(normalize_lang("en-us-variant"), "en-US-Variant")
+        assert normalize_lang("en-us-variant") == "en-US-Variant"
 
     def test_normalize_lang_empty_string(self):
         """Test normalization of empty string."""
-        self.assertEqual(normalize_lang(""), "")
+        assert normalize_lang("") == ""
 
     def test_normalize_lang_with_whitespace(self):
         """Test normalization handles whitespace."""
-        self.assertEqual(normalize_lang("  en-US  "), "en-US")
-        self.assertEqual(normalize_lang("en us"), "en-US")
+        assert normalize_lang("  en-US  ") == "en-US"
+        assert normalize_lang("en us") == "en-US"
 
     def test_normalize_lang_hyphen_variations(self):
         """Test different hyphen/underscore variations."""
-        self.assertEqual(normalize_lang("en-GB"), "en-GB")
-        self.assertEqual(normalize_lang("en_GB"), "en-GB")
+        assert normalize_lang("en-GB") == "en-GB"
+        assert normalize_lang("en_GB") == "en-GB"
 
 
 class TestGetTextContent(unittest.TestCase):
@@ -80,7 +79,7 @@ class TestGetTextContent(unittest.TestCase):
         elem = etree.fromstring(xml)
         result = get_text_content(elem)
 
-        self.assertEqual(result, "Hello")
+        assert result == "Hello"
 
     def test_get_text_content_with_children(self):
         """Test getting text content with child elements."""
@@ -90,9 +89,9 @@ class TestGetTextContent(unittest.TestCase):
         elem = etree.fromstring(xml)
         result = get_text_content(elem)
 
-        self.assertIn("Hello", result)
-        self.assertIn("World", result)
-        self.assertIn("Test", result)
+        assert "Hello" in result
+        assert "World" in result
+        assert "Test" in result
 
     def test_get_text_content_empty(self):
         """Test getting text content from empty element."""
@@ -100,7 +99,7 @@ class TestGetTextContent(unittest.TestCase):
         elem = etree.fromstring(xml)
         result = get_text_content(elem)
 
-        self.assertEqual(result, "")
+        assert result == ""
 
     def test_get_text_content_nested_structure(self):
         """Test getting text content with nested structure."""
@@ -110,8 +109,8 @@ class TestGetTextContent(unittest.TestCase):
         elem = etree.fromstring(xml)
         result = get_text_content(elem)
 
-        self.assertIn("First", result)
-        self.assertIn("Nested", result)
+        assert "First" in result
+        assert "Nested" in result
 
 
 class TestCloneElement(unittest.TestCase):
@@ -123,9 +122,9 @@ class TestCloneElement(unittest.TestCase):
         elem = etree.fromstring(xml)
         cloned = clone_element(elem)
 
-        self.assertEqual(cloned.get('id'), 'text1')
-        self.assertEqual(cloned.text, 'Hello')
-        self.assertIsNot(cloned, elem)
+        assert cloned.get('id') == 'text1'
+        assert cloned.text == 'Hello'
+        assert cloned is not elem
 
     def test_clone_element_with_children(self):
         """Test cloning element with children."""
@@ -137,9 +136,9 @@ class TestCloneElement(unittest.TestCase):
         cloned = clone_element(elem)
 
         children = cloned.findall('{http://www.w3.org/2000/svg}tspan')
-        self.assertEqual(len(children), 2)
-        self.assertEqual(children[0].get('id'), 't1')
-        self.assertEqual(children[1].get('id'), 't2')
+        assert len(children) == 2
+        assert children[0].get('id') == 't1'
+        assert children[1].get('id') == 't2'
 
     def test_clone_element_deep_copy(self):
         """Test that clone is a deep copy."""
@@ -151,7 +150,7 @@ class TestCloneElement(unittest.TestCase):
         elem.set('id', 'modified')
 
         # Clone should be unchanged
-        self.assertEqual(cloned.get('id'), 'text1')
+        assert cloned.get('id') == 'text1'
 
     def test_clone_element_with_attributes(self):
         """Test cloning preserves all attributes."""
@@ -159,10 +158,10 @@ class TestCloneElement(unittest.TestCase):
         elem = etree.fromstring(xml)
         cloned = clone_element(elem)
 
-        self.assertEqual(cloned.get('id'), 't1')
-        self.assertEqual(cloned.get('class'), 'label')
-        self.assertEqual(cloned.get('x'), '10')
-        self.assertEqual(cloned.get('y'), '20')
+        assert cloned.get('id') == 't1'
+        assert cloned.get('class') == 'label'
+        assert cloned.get('x') == '10'
+        assert cloned.get('y') == '20'
 
 
 class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
@@ -187,7 +186,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         with self.assertRaises(SvgStructureException) as ctx:
             make_translation_ready(svg_path)
 
-        self.assertIn('tref', str(ctx.exception))
+        assert 'tref' in str(ctx.exception)
 
     def test_make_translation_ready_with_css_ids(self):
         """Test that CSS with ID selectors raises exception."""
@@ -201,7 +200,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         with self.assertRaises(SvgStructureException) as ctx:
             make_translation_ready(svg_path)
 
-        self.assertIn('css', str(ctx.exception).lower())
+        assert 'css' in str(ctx.exception).lower()
 
     def test_make_translation_ready_with_dollar_sign(self):
         """Test that text with dollar signs raises exception."""
@@ -214,7 +213,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         with self.assertRaises(SvgStructureException) as ctx:
             make_translation_ready(svg_path)
 
-        self.assertIn('dollar', str(ctx.exception).lower())
+        assert 'dollar' in str(ctx.exception).lower()
 
     def test_make_translation_ready_nested_tspans(self):
         """Test that nested tspans raise exception."""
@@ -227,7 +226,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         with self.assertRaises(SvgStructureException) as ctx:
             make_translation_ready(svg_path)
 
-        self.assertIn('nested', str(ctx.exception).lower())
+        assert 'nested' in str(ctx.exception).lower()
 
     def test_make_translation_ready_wraps_raw_text(self):
         """Test that raw text in text elements is wrapped in tspans."""
@@ -241,7 +240,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
 
         text_elem = root.find('.//{http://www.w3.org/2000/svg}text')
         tspans = text_elem.findall('{http://www.w3.org/2000/svg}tspan')
-        self.assertGreater(len(tspans), 0)
+        assert len(tspans) > 0
 
     def test_make_translation_ready_creates_switch(self):
         """Test that text elements are wrapped in switch elements."""
@@ -254,7 +253,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         _tree, root = make_translation_ready(svg_path)
 
         switches = root.findall('.//{http://www.w3.org/2000/svg}switch')
-        self.assertGreater(len(switches), 0)
+        assert len(switches) > 0
 
     def test_make_translation_ready_assigns_ids(self):
         """Test that missing IDs are assigned."""
@@ -267,7 +266,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         _tree, root = make_translation_ready(svg_path)
 
         text_elem = root.find('.//{http://www.w3.org/2000/svg}text')
-        self.assertIsNotNone(text_elem.get('id'))
+        assert text_elem.get('id') is not None
 
     def test_make_translation_ready_duplicate_lang_error(self):
         """Test that duplicate language codes in switch raise exception."""
@@ -283,7 +282,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         with self.assertRaises(SvgStructureException) as ctx:
             make_translation_ready(svg_path)
 
-        self.assertIn('lang', str(ctx.exception).lower())
+        assert 'lang' in str(ctx.exception).lower()
 
     def test_make_translation_ready_splits_comma_langs(self):
         """Test that comma-separated languages are split."""
@@ -302,7 +301,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         text_elems = switch.findall('{http://www.w3.org/2000/svg}text')
 
         # Should have split into separate text elements
-        self.assertGreater(len(text_elems), 2)
+        assert len(text_elems) > 2
 
     def test_make_translation_ready_invalid_node_id(self):
         """Test that invalid node IDs raise exception."""
@@ -315,7 +314,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         with self.assertRaises(SvgStructureException) as ctx:
             make_translation_ready(svg_path)
 
-        self.assertIn('id', str(ctx.exception).lower())
+        assert 'id' in str(ctx.exception).lower()
 
 
 if __name__ == '__main__':

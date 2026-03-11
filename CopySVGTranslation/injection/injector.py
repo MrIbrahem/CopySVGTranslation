@@ -11,6 +11,7 @@ from lxml import etree
 
 from ..text_utils import extract_text_from_node, normalize_text
 from ..titles import get_titles_translations
+from ..titles_new import get_new_titles_translations
 from .utils import (
     SvgNestedTspanException,
     SvgStructureException,
@@ -89,6 +90,7 @@ def work_on_switches(
         logger.error("No switch elements found in SVG")
 
     all_mappings_title = mappings.get("title", {})
+    all_mappings_title_new = mappings.get("title_new", {})
     all_mappings = mappings.get("new", mappings)
 
     for switch in switches:
@@ -112,9 +114,14 @@ def work_on_switches(
         if not default_texts:
             continue
 
-        titles_translations = get_titles_translations(all_mappings_title, default_texts)
+        # titles_translations = get_titles_translations(all_mappings_title, default_texts)
+        new_titles_translations = get_new_titles_translations(all_mappings_title_new, default_texts)
 
-        all_mappings.update(titles_translations)
+        # all_mappings.update(titles_translations)
+        # all_mappings.update(new_titles_translations)
+
+        for key, translations in new_titles_translations.items():
+            all_mappings.setdefault(key, {}).update(translations)
 
         # Determine translations for each text line
         available_translations = {}

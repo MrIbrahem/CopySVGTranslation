@@ -39,38 +39,38 @@ class TestGetTargetPath(unittest.TestCase):
         output_file = self.test_dir / "output" / "result.svg"
         result = get_target_path(output_file, None, self.svg_path)
 
-        self.assertEqual(result, output_file)
-        self.assertTrue(result.parent.exists())
+        assert result == output_file
+        assert result.parent.exists() is True
 
     def test_get_target_path_with_output_dir(self):
         """Test get_target_path when output_dir is specified."""
         output_dir = self.test_dir / "translated"
         result = get_target_path(None, output_dir, self.svg_path)
 
-        self.assertEqual(result, output_dir / "source.svg")
-        self.assertTrue(result.parent.exists())
+        assert result == output_dir / "source.svg"
+        assert result.parent.exists() is True
 
     def test_get_target_path_default_to_source_dir(self):
         """Test get_target_path defaults to source file's directory."""
         result = get_target_path(None, None, self.svg_path)
 
-        self.assertEqual(result, self.svg_path.parent / "source.svg")
+        assert result == self.svg_path.parent / "source.svg"
 
     def test_get_target_path_creates_nested_directories(self):
         """Test get_target_path creates nested output directories."""
         output_file = self.test_dir / "a" / "b" / "c" / "result.svg"
         result = get_target_path(output_file, None, self.svg_path)
 
-        self.assertTrue(result.parent.exists())
-        self.assertEqual(result, output_file)
+        assert result.parent.exists() is True
+        assert result == output_file
 
     def test_get_target_path_with_string_paths(self):
         """Test get_target_path handles string paths."""
         output_dir = str(self.test_dir / "output")
         result = get_target_path(None, output_dir, self.svg_path)
 
-        self.assertTrue(isinstance(result, Path))
-        self.assertTrue(result.parent.exists())
+        assert isinstance(result, Path) is True
+        assert result.parent.exists() is True
 
 
 class TestWorkOnSwitches(unittest.TestCase):
@@ -97,8 +97,8 @@ class TestWorkOnSwitches(unittest.TestCase):
 
         stats = work_on_switches(root, existing_ids, mappings, case_insensitive=True)
 
-        self.assertEqual(stats['processed_switches'], 1)
-        self.assertEqual(stats['inserted_translations'], 2)
+        assert stats['processed_switches'] == 1
+        assert stats['inserted_translations'] == 2
 
     def test_work_on_switches_no_overwrite(self):
         """Test switch processing without overwriting existing translations."""
@@ -114,8 +114,8 @@ class TestWorkOnSwitches(unittest.TestCase):
 
         stats = work_on_switches(root, existing_ids, mappings, overwrite=False)
 
-        self.assertEqual(stats['skipped_translations'], 1)
-        self.assertEqual(stats['inserted_translations'], 1)
+        assert stats['skipped_translations'] == 1
+        assert stats['inserted_translations'] == 1
 
     def test_work_on_switches_with_overwrite(self):
         """Test switch processing with overwriting existing translations."""
@@ -131,7 +131,7 @@ class TestWorkOnSwitches(unittest.TestCase):
 
         stats = work_on_switches(root, existing_ids, mappings, overwrite=True)
 
-        self.assertEqual(stats['updated_translations'], 1)
+        assert stats['updated_translations'] == 1
 
     def test_work_on_switches_case_sensitive(self):
         """Test switch processing with case-sensitive matching."""
@@ -146,7 +146,7 @@ class TestWorkOnSwitches(unittest.TestCase):
 
         stats = work_on_switches(root, existing_ids, mappings, case_insensitive=False)
 
-        self.assertEqual(stats['inserted_translations'], 1)
+        assert stats['inserted_translations'] == 1
 
     def test_work_on_switches_with_year_suffix(self):
         """Test switch processing with year suffix handling."""
@@ -187,7 +187,7 @@ class TestSortSwitchTexts(unittest.TestCase):
 
         texts = switch.findall('.//{http://www.w3.org/2000/svg}text')
         # Default (no systemLanguage) should be last
-        self.assertIsNone(texts[-1].get('systemLanguage'))
+        assert texts[-1].get('systemLanguage') is None
 
     def test_sort_switch_texts_empty_switch(self):
         """Test sorting an empty switch element."""
@@ -211,7 +211,7 @@ class TestSortSwitchTexts(unittest.TestCase):
         sort_switch_texts(switch)
 
         texts = switch.findall('.//{http://www.w3.org/2000/svg}text')
-        self.assertEqual(len(texts), 1)
+        assert len(texts) == 1
 
 
 class TestLoadAllMappingsEdgeCases(unittest.TestCase):
@@ -229,7 +229,7 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
         """Test loading with empty file list."""
         result = load_all_mappings([])
 
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_load_all_mappings_empty_json_file(self):
         """Test loading empty JSON file."""
@@ -238,7 +238,7 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
 
         result = load_all_mappings([mapping_file])
 
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_load_all_mappings_corrupted_json(self):
         """Test loading corrupted JSON file."""
@@ -247,7 +247,7 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
 
         result = load_all_mappings([mapping_file])
 
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_load_all_mappings_nested_structure(self):
         """Test loading with nested mapping structure."""
@@ -265,8 +265,8 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
 
         result = load_all_mappings([mapping_file])
 
-        self.assertIn("new", result)
-        self.assertIn("title", result)
+        assert "new" in result
+        assert "title" in result
 
     def test_load_all_mappings_merge_overlapping_keys(self):
         """Test merging mappings with overlapping keys."""
@@ -281,8 +281,8 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
 
         result = load_all_mappings([m1, m2])
 
-        self.assertIn("lang1", result["key"])
-        self.assertIn("lang2", result["key"])
+        assert "lang1" in result["key"]
+        assert "lang2" in result["key"]
 
     def test_load_all_mappings_string_paths(self):
         """Test loading with string paths instead of Path objects."""
@@ -292,7 +292,7 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
 
         result = load_all_mappings([str(mapping_file)])
 
-        self.assertIn("key", result)
+        assert "key" in result
 
 
 if __name__ == '__main__':

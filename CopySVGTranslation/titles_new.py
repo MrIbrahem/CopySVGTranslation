@@ -1,10 +1,39 @@
+import re
 import logging
 from typing import Dict, List
 
 logger = logging.getLogger("CopySVGTranslation")
 
 
-def make_title_translations(
+def match_year(text):
+    """
+    match and return 4 digit year at the end or start of a string
+    """
+    text = text.strip()
+    if len(text) < 4:
+        return ""
+
+    if text[-4:].isdigit():
+        return text[-4:]
+
+    if text[:4].isdigit():
+        return text[:4]
+
+    return ""
+
+
+def replace_year(value, year):
+    # if value.count(year) == 1:
+
+    if value.endswith(year):
+        return re.sub(r"\d{4}$", "{year}", value)
+
+    if value.startswith(year):
+        return re.sub(r"^\d{4}", "{year}", value)
+    return ""
+
+
+def make_new_title_translations(
     new: Dict[str, Dict[str, str]]
 ) -> Dict[str, Dict[str, str]]:
     """
@@ -18,15 +47,16 @@ def make_title_translations(
             }
         Output:
             {
-                "COVID-19 pandemic": {"ar": "جائحة كوفيد", "es": "Pandemia de COVID-19"}
+                "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}", "es": "Pandemia de COVID-19 {year}"}
             }
 
     Args:
         new: A dictionary mapping full titles (ending with a year) to their translations.
 
     Returns:
-        A dictionary mapping base title -> { language -> title without year }.
+        A dictionary mapping base title -> { language -> title with `{year}` }.
     """
+
     result: Dict[str, Dict[str, str]] = {}
 
     new_fixed = {
@@ -35,24 +65,29 @@ def make_title_translations(
     }
 
     for key, mapping in list(new_fixed.items()):
-        if len(key) < 5:
+        if len(key) < 4:
             continue
-        year = key[-4:]
+
+        year = match_year(key)
         if not key or key == year or not year.isdigit():
             continue
 
-        data = {
-            lang: value[:-4].strip()
-            for lang, value in mapping.items()
-            if len(value) > 4 and value[-4:] == year
-        }
+        data = {}
+        en_key = replace_year(key, year)
+        if not en_key:
+            continue
+        for lang, value in mapping.items():
+            new_str = replace_year(value, year)
+            if new_str:
+                data[lang] = new_str
+
         if data:
-            result[key[:-4].strip()] = data
+            result[en_key] = data
 
     return result
 
 
-def get_titles_translations(
+def get_new_titles_translations(
     all_mappings_title: Dict[str, Dict[str, str]],
     default_texts: List[str],
 ) -> Dict[str, Dict[str, str]]:
@@ -62,7 +97,7 @@ def get_titles_translations(
     Example:
         Input:
             all_mappings_title = {
-                "COVID-19 pandemic": {"ar": "جائحة كوفيد", "es": "Pandemia de COVID-19"}
+                "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}", "es": "Pandemia de COVID-19 {year}"}
             }
             default_texts = ["COVID-19 pandemic 1990"]
         Output:
@@ -80,15 +115,17 @@ def get_titles_translations(
     titles_translations: Dict[str, Dict[str, str]] = {}
 
     all_mappings_title_fixed = {
-        x.strip().lower(): v for x, v in all_mappings_title.items()
+        x.strip().lower(): v
+        for x, v in all_mappings_title.items()
     }
 
     for text in default_texts:
-        if len(text) > 4 and text[-4:].isdigit():
-            year = text[-4:]
-            key = text[:-4]
-            translations = all_mappings_title_fixed.get(key.strip().lower())
-            if translations:
-                titles_translations[text] = {lang: f"{value} {year}" for lang, value in translations.items()}
+        year = match_year(text)
+        if not year:
+            continue
+        en_key = replace_year(text, year)
+        translations = all_mappings_title_fixed.get(en_key.strip().lower())
+        if translations:
+            titles_translations[text] = {lang: value.replace("{year}", year) for lang, value in translations.items()}
 
     return titles_translations

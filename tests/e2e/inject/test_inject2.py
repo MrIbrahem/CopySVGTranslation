@@ -6,11 +6,6 @@ I:/svgtranslate_php/svgtranslate_php/tests/Model/Svg/SvgFileTest.php
 """
 
 import pytest
-import shutil
-import tempfile
-from pathlib import Path
-
-
 
 
 from CopySVGTranslation import inject, make_translation_ready, start_injects
@@ -18,14 +13,6 @@ from CopySVGTranslation.injection import (
     SvgNestedTspanException,
     SvgStructureException,
 )
-
-
-@pytest.fixture
-def temp_dir():
-    """Create a temporary directory for test use."""
-    d = Path(tempfile.mkdtemp())
-    yield d
-    shutil.rmtree(d)
 
 
 class Testinject:
