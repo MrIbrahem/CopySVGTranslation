@@ -20,7 +20,6 @@ def start_injects(
     output_dir_nested_files: Path | None = None,
 ) -> dict[str, Any]:
     """Inject translations into a collection of SVG files and write the results."""
-    data = {}
     success = 0
     failed = 0
     nested_files = 0
@@ -79,15 +78,14 @@ def start_injects(
 
     logger.debug(f"all files: {len(files):,} Saved {success:,}, failed {failed:,}, nested_files: {nested_files:,}")
 
-    if output_dir_nested_files:
-        data["output_dir_nested_files"] = str(output_dir_nested_files)
-
-    data.update({
+    data = {
+        "output_dir_nested_files": str(output_dir_nested_files) if output_dir_nested_files else "",
         "success": success,
         "failed": failed,
         "nested_files": nested_files,
         "no_changes": no_changes,
         "nested_files_list": nested_files_list,
         "files": files_stats,
-    })
+    }
+
     return data
