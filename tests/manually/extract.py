@@ -1,5 +1,5 @@
 """
-python I:/SVG_PY/CopySVGTranslation/tests/manually/extract.py
+python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/extract.py
 """
 import sys
 import tempfile

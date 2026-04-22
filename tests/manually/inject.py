@@ -1,5 +1,5 @@
 """
-python I:/SVG_PY/CopySVGTranslation/tests/manually/inject.py
+python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/inject.py
 """
 import sys
 import logging

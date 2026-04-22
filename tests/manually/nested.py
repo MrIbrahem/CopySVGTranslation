@@ -1,5 +1,5 @@
 """
-python I:/SVG_PY/CopySVGTranslation/tests/manually/nested.py
+python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/nested.py
 """
 import sys
 import logging
