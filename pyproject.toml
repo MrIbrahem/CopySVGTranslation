@@ -8,13 +8,9 @@ version = "0.1.7"
 description = "Utilities for extracting and applying translations to multilingual SVG files."
 readme = "README.md"
 requires-python = ">=3.10"
-authors = [
-  { name = "Ibrahim Qasim" }
-]
+authors = [{ name = "Ibrahim Qasim" }]
 license = { text = "MIT" }
-dependencies = [
-  "lxml>=4.9"
-]
+dependencies = ["lxml>=4.9"]
 
 [project.urls]
 Homepage = "https://github.com/MrIbrahem/CopySVGTranslation"
