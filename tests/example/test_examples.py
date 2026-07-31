@@ -23,14 +23,14 @@ def setup_tmpdir(tmp_path):
     expected_svg = FIXTURES_DIR / "after_translate.svg"
     expected_text = expected_svg.read_text(encoding="utf-8")
 
-    return dict(
-        test_dir=test_dir,
-        source_svg=source_svg,
-        target_svg=target_svg,
-        output_svg=output_svg,
-        data_file=data_file,
-        expected_text=expected_text,
-    )
+    return {
+        "test_dir": test_dir,
+        "source_svg": source_svg,
+        "target_svg": target_svg,
+        "output_svg": output_svg,
+        "data_file": data_file,
+        "expected_text": expected_text,
+    }
 
 
 class TestIntegrationWorkflows:
