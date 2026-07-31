@@ -66,8 +66,8 @@ def file_langs(
             return set()
 
         text_elements = root.xpath(
-            './/svg:text',
-            namespaces={'svg': 'http://www.w3.org/2000/svg'},
+            ".//svg:text",
+            namespaces={"svg": "http://www.w3.org/2000/svg"},
         )
         for text in text_elements:
             system_language = text.get("systemLanguage")

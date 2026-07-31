@@ -6,20 +6,20 @@ Comprehensive pytest tests for CopySVGTranslation covering edge cases and additi
 
 import json
 from pathlib import Path
+
 import pytest
 from lxml import etree
 
-
-from CopySVGTranslation import inject, normalize_text, generate_unique_id, start_injects
-from CopySVGTranslation.injection.injector import load_all_mappings
-from CopySVGTranslation.injection.preparation import (
-    normalize_lang,
-    get_text_content,
-    clone_element,
-    make_translation_ready,
-)
+from CopySVGTranslation import generate_unique_id, inject, normalize_text, start_injects
 from CopySVGTranslation.injection import (
     SvgStructureException,
+)
+from CopySVGTranslation.injection.injector import load_all_mappings
+from CopySVGTranslation.injection.preparation import (
+    clone_element,
+    get_text_content,
+    make_translation_ready,
+    normalize_lang,
 )
 
 # -------------------------------
@@ -51,6 +51,7 @@ class TestTextUtils:
 # Preparation tests
 # -------------------------------
 
+
 class TestPreparation:
     """Test cases for SVG preparation functions."""
 
@@ -79,9 +80,7 @@ class TestPreparation:
     def test_get_text_content(self):
         """Test getting text content from elements."""
         svg_ns = "http://www.w3.org/2000/svg"
-        element = etree.fromstring(
-            f'''<text xmlns="{svg_ns}">Hello <tspan>World</tspan> Test</text>'''
-        )
+        element = etree.fromstring(f"""<text xmlns="{svg_ns}">Hello <tspan>World</tspan> Test</text>""")
         result = get_text_content(element)
         assert "Hello" in result
         assert "World" in result
@@ -111,8 +110,8 @@ class TestPreparation:
     def test_make_translation_ready_with_valid_svg(self, temp_dir):
         """Test make_translation_ready with valid SVG."""
         svg_path = temp_dir / "test.svg"
-        svg_content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t1"><tspan>Hello</tspan></text></switch></svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t1"><tspan>Hello</tspan></text></switch></svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
         tree, root = make_translation_ready(svg_path)
         assert tree is not None
         assert root is not None
@@ -122,6 +121,7 @@ class TestPreparation:
 # Injector tests
 # -------------------------------
 
+
 class TestInjector:
     """Test cases for injection functions."""
 
@@ -129,7 +129,7 @@ class TestInjector:
         """Test loading a single mapping file."""
         mapping_file = temp_dir / "mapping.json"
         test_mapping = {"new": {"hello": {"ar": "مرحبا"}}}
-        mapping_file.write_text(json.dumps(test_mapping, ensure_ascii=False), encoding='utf-8')
+        mapping_file.write_text(json.dumps(test_mapping, ensure_ascii=False), encoding="utf-8")
         result = load_all_mappings([mapping_file])
         assert "new" in result
         assert result["new"]["hello"]["ar"] == "مرحبا"
@@ -138,8 +138,8 @@ class TestInjector:
         """Test loading multiple mapping files."""
         m1 = temp_dir / "m1.json"
         m2 = temp_dir / "m2.json"
-        m1.write_text(json.dumps({"key1": {"value": 1}}), encoding='utf-8')
-        m2.write_text(json.dumps({"key2": {"value": 2}}), encoding='utf-8')
+        m1.write_text(json.dumps({"key1": {"value": 1}}), encoding="utf-8")
+        m2.write_text(json.dumps({"key2": {"value": 2}}), encoding="utf-8")
         result = load_all_mappings([m1, m2])
         assert "key1" in result
         assert "key2" in result
@@ -152,7 +152,7 @@ class TestInjector:
     def test_load_all_mappings_invalid_json(self, temp_dir):
         """Test loading with invalid JSON."""
         invalid_file = temp_dir / "invalid.json"
-        invalid_file.write_text("{ invalid json", encoding='utf-8')
+        invalid_file.write_text("{ invalid json", encoding="utf-8")
         result = load_all_mappings([invalid_file])
         assert result == {}
 
@@ -160,8 +160,8 @@ class TestInjector:
         """Test that mappings are merged correctly."""
         m1 = temp_dir / "m1.json"
         m2 = temp_dir / "m2.json"
-        m1.write_text(json.dumps({"key": {"lang1": "value1"}}), encoding='utf-8')
-        m2.write_text(json.dumps({"key": {"lang2": "value2"}}), encoding='utf-8')
+        m1.write_text(json.dumps({"key": {"lang1": "value1"}}), encoding="utf-8")
+        m2.write_text(json.dumps({"key": {"lang2": "value2"}}), encoding="utf-8")
         result = load_all_mappings([m1, m2])
         assert "lang1" in result["key"]
         assert "lang2" in result["key"]
@@ -179,8 +179,8 @@ class TestInjector:
     def test_inject_with_all_mappings_parameter(self, temp_dir):
         """Test inject using all_mappings parameter instead of mapping_files."""
         svg_path = temp_dir / "test.svg"
-        svg_content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="text1"><tspan>Hello</tspan></text></switch></svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="text1"><tspan>Hello</tspan></text></switch></svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
         tree, stats = inject(svg_path, all_mappings=mappings, return_stats=True)
         assert tree is not None
@@ -191,8 +191,8 @@ class TestInjector:
         svg_path = temp_dir / "test.svg"
         out_dir = temp_dir / "out"
         out_dir.mkdir()
-        svg_content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
         tree = inject(svg_path, all_mappings=mappings, output_dir=out_dir, save_result=True)
         assert tree is not None
@@ -201,8 +201,8 @@ class TestInjector:
     def test_inject_case_sensitive(self, temp_dir):
         """Test inject with case_insensitive=False."""
         svg_path = temp_dir / "test.svg"
-        svg_content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
         mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
         tree, stats = inject(svg_path, all_mappings=mappings, case_insensitive=False, return_stats=True)
         assert tree is not None
@@ -213,6 +213,7 @@ class TestInjector:
 # Batch tests
 # -------------------------------
 
+
 class TestBatch:
     """Test cases for batch processing functions."""
 
@@ -221,8 +222,8 @@ class TestBatch:
         svg_file = temp_dir / "test.svg"
         out_dir = temp_dir / "out"
         out_dir.mkdir()
-        svg_content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>'''
-        svg_file.write_text(svg_content, encoding='utf-8')
+        svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
+        svg_file.write_text(svg_content, encoding="utf-8")
         translations = {"new": {"hello": {"ar": "مرحبا"}}}
         result = start_injects([svg_file], translations, out_dir, overwrite=False)
         assert result["success"] == 1
@@ -234,9 +235,9 @@ class TestBatch:
         svg2 = temp_dir / "test2.svg"
         out_dir = temp_dir / "out"
         out_dir.mkdir()
-        svg_content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>'''
-        svg1.write_text(svg_content, encoding='utf-8')
-        svg2.write_text(svg_content, encoding='utf-8')
+        svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
+        svg1.write_text(svg_content, encoding="utf-8")
+        svg2.write_text(svg_content, encoding="utf-8")
         translations = {"new": {"hello": {"ar": "مرحبا"}}}
         result = start_injects([svg1, svg2], translations, out_dir)
         assert result["success"] == 2
@@ -257,6 +258,7 @@ class TestBatch:
 # Edge case tests
 # -------------------------------
 
+
 class TestEdgeCases:
     """Test edge cases and boundary conditions."""
 
@@ -275,14 +277,19 @@ class TestEdgeCases:
     def test_inject_with_empty_mappings(self, temp_dir):
         """Test injection with empty mappings."""
         svg = temp_dir / "test.svg"
-        svg.write_text('<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><text>Test</text></svg>', encoding='utf-8')
+        svg.write_text(
+            '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><text>Test</text></svg>', encoding="utf-8"
+        )
         result = inject(svg, all_mappings={})
         assert result is None
 
     def test_inject_return_stats_false(self, temp_dir):
         """Test inject with return_stats=False."""
         svg = temp_dir / "test.svg"
-        svg.write_text('<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>', encoding='utf-8')
+        svg.write_text(
+            '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>',
+            encoding="utf-8",
+        )
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
         result = inject(svg, all_mappings=mappings, return_stats=False)
         assert result is not None

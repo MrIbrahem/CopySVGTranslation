@@ -1,7 +1,9 @@
-import pytest
 import json
 from pathlib import Path
-from CopySVGTranslation import extract, svg_extract_and_inject, inject, make_translation_ready
+
+import pytest
+
+from CopySVGTranslation import extract, inject, make_translation_ready, svg_extract_and_inject
 
 FIXTURES_DIR = Path(__file__).parent
 
@@ -16,10 +18,7 @@ def setup_tmpdir(tmp_path):
     data_file = test_dir / "data.json"
 
     # Copy fixture
-    target_svg.write_text(
-        (FIXTURES_DIR / "before_translate.svg").read_text(encoding="utf-8"),
-        encoding="utf-8"
-    )
+    target_svg.write_text((FIXTURES_DIR / "before_translate.svg").read_text(encoding="utf-8"), encoding="utf-8")
 
     expected_svg = FIXTURES_DIR / "after_translate.svg"
     expected_text = expected_svg.read_text(encoding="utf-8")
@@ -68,7 +67,7 @@ class TestIntegrationWorkflows:
         new_data_file = FIXTURES_DIR / "data.json"
         translations = extract(setup_tmpdir["source_svg"])
 
-        with open(new_data_file, 'w', encoding='utf-8') as handle:
+        with open(new_data_file, "w", encoding="utf-8") as handle:
             json.dump(translations, handle, indent=4, ensure_ascii=False)
 
         assert translations is not None

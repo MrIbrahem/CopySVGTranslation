@@ -1,8 +1,9 @@
 """
 python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/nested.py
 """
-import sys
+
 import logging
+import sys
 from pathlib import Path
 
 logger = logging.getLogger("CopySVGTranslation")
@@ -13,13 +14,12 @@ console.setFormatter(logging.Formatter("%(levelname)s - %(message)s"))
 logger.addHandler(console)
 
 
-
 from CopySVGTranslation import inject, make_translation_ready
 from CopySVGTranslation.injection import SvgNestedTspanException
 
 svg_file = Path(__file__).parent / "test.svg"
 
-svg_example = '''<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="721.1"
+svg_example = """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="721.1"
     viewBox="0 0 850 721.1"
     style="font-family: Lato, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Liberation Sans&quot;, sans-serif; text-rendering: geometricprecision; -webkit-font-smoothing: antialiased; font-size: 18px; background-color: rgb(255, 255, 255);">
     <g id="subtitle" class="markdown-text-wrap">
@@ -32,9 +32,9 @@ svg_example = '''<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="85
                 </tspan> per 100,000 people.</tspan>
         </text>
     </g>
-</svg>'''
+</svg>"""
 
-svg_file.write_text(svg_example, encoding='utf-8')
+svg_file.write_text(svg_example, encoding="utf-8")
 
 data = {"new": {"lang none": {"la": "lang la (new)"}}}
 try:

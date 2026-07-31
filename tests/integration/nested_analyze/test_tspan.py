@@ -1,8 +1,8 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
 from pathlib import Path
-from lxml import etree
 
+from lxml import etree
 
 from CopySVGTranslation.nested_analyze.find_nested import fix_nested_tspans
 
@@ -16,9 +16,7 @@ def _make_svg(content: str):
 
 
 def test_fix_nested_tspans_single_nested():
-    svg = _make_svg(
-        '<text><tspan x="0" y="10">A<tspan>B</tspan>C</tspan></text>'
-    )
+    svg = _make_svg('<text><tspan x="0" y="10">A<tspan>B</tspan>C</tspan></text>')
     fixed = fix_nested_tspans(svg)
     tspans = svg.findall(f".//{{{SVG_NS}}}tspan")
     # only one tspan should remain
@@ -28,9 +26,7 @@ def test_fix_nested_tspans_single_nested():
 
 
 def test_fix_nested_tspans_multiple_nested():
-    svg = _make_svg(
-        '<text><tspan><tspan>inner1</tspan><tspan>inner2</tspan></tspan></text>'
-    )
+    svg = _make_svg("<text><tspan><tspan>inner1</tspan><tspan>inner2</tspan></tspan></text>")
     fixed = fix_nested_tspans(svg)
     tspans = fixed.findall(f".//{{{SVG_NS}}}tspan")
     assert len(tspans) == 1
@@ -38,12 +34,7 @@ def test_fix_nested_tspans_multiple_nested():
 
 
 def test_fix_nested_tspans_preserves_siblings():
-    svg = _make_svg(
-        '<text>'
-        '<tspan>A<tspan>B</tspan></tspan>'
-        '<tspan>C<tspan>D</tspan></tspan>'
-        '</text>'
-    )
+    svg = _make_svg("<text>" "<tspan>A<tspan>B</tspan></tspan>" "<tspan>C<tspan>D</tspan></tspan>" "</text>")
     fixed = fix_nested_tspans(svg)
     tspans = fixed.findall(f".//{{{SVG_NS}}}tspan")
     texts = [t.text for t in tspans]
@@ -51,7 +42,7 @@ def test_fix_nested_tspans_preserves_siblings():
 
 
 def test_no_nested_tspans_unchanged():
-    svg = _make_svg('<text><tspan>A</tspan><tspan>B</tspan></text>')
+    svg = _make_svg("<text><tspan>A</tspan><tspan>B</tspan></text>")
     original = etree.tostring(svg)
     fix_nested_tspans(svg)
     after = etree.tostring(svg)
@@ -59,9 +50,7 @@ def test_no_nested_tspans_unchanged():
 
 
 def test_nested_tspans_with_tail_text():
-    svg = _make_svg(
-        '<text><tspan>start<tspan>mid</tspan>end</tspan></text>'
-    )
+    svg = _make_svg("<text><tspan>start<tspan>mid</tspan>end</tspan></text>")
     fix_nested_tspans(svg)
     tspan = svg.find(f".//{{{SVG_NS}}}tspan")
     assert tspan.text == "startmidend"

@@ -4,13 +4,12 @@ and previously untested functions.
 """
 
 import json
+import shutil
 import tempfile
 import unittest
-import shutil
 from pathlib import Path
 
 from lxml import etree
-
 
 from CopySVGTranslation.text_utils import extract_text_from_node
 
@@ -20,10 +19,10 @@ class TestExtractTextFromNode(unittest.TestCase):
 
     def test_extract_from_text_with_tspans(self):
         """Test extraction from text element with tspan children."""
-        xml = '''<text xmlns="http://www.w3.org/2000/svg">
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
             <tspan>First</tspan>
             <tspan>Second</tspan>
-        </text>'''
+        </text>"""
         node = etree.fromstring(xml)
         result = extract_text_from_node(node)
 
@@ -39,10 +38,10 @@ class TestExtractTextFromNode(unittest.TestCase):
 
     def test_extract_from_text_with_empty_tspans(self):
         """Test extraction with empty tspan elements."""
-        xml = '''<text xmlns="http://www.w3.org/2000/svg">
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
             <tspan></tspan>
             <tspan>Content</tspan>
-        </text>'''
+        </text>"""
         node = etree.fromstring(xml)
         result = extract_text_from_node(node)
 
@@ -50,10 +49,10 @@ class TestExtractTextFromNode(unittest.TestCase):
 
     def test_extract_from_text_with_whitespace_tspans(self):
         """Test extraction handles whitespace in tspans."""
-        xml = '''<text xmlns="http://www.w3.org/2000/svg">
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
             <tspan>  Spaces  </tspan>
             <tspan>	Tabs	</tspan>
-        </text>'''
+        </text>"""
         node = etree.fromstring(xml)
         result = extract_text_from_node(node)
 
@@ -69,16 +68,16 @@ class TestExtractTextFromNode(unittest.TestCase):
 
     def test_extract_with_unicode_content(self):
         """Test extraction with Unicode content."""
-        xml = '''<text xmlns="http://www.w3.org/2000/svg">
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
             <tspan>مرحبا</tspan>
             <tspan>你好</tspan>
             <tspan>Привет</tspan>
-        </text>'''
+        </text>"""
         node = etree.fromstring(xml)
         result = extract_text_from_node(node)
 
         assert result == ["مرحبا", "你好", "Привет"]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

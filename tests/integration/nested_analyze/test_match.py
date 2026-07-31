@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-
 from CopySVGTranslation.nested_analyze.find_nested import match_nested_tags
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -36,16 +35,13 @@ def test_returns_empty_if_no_tspan(tmp_path):
 
 
 def test_returns_empty_if_no_nested_tspan(tmp_path):
-    path = _write_svg(tmp_path, '<text><tspan>Flat</tspan></text>')
+    path = _write_svg(tmp_path, "<text><tspan>Flat</tspan></text>")
     result = match_nested_tags(path)
     assert result == []
 
 
 def test_finds_single_nested_tspan(tmp_path):
-    path = _write_svg(
-        tmp_path,
-        '<text><tspan>A<tspan>B</tspan></tspan></text>'
-    )
+    path = _write_svg(tmp_path, "<text><tspan>A<tspan>B</tspan></tspan></text>")
     result = match_nested_tags(path)
     assert len(result) == 1
     assert "<tspan" in result[0]
@@ -55,11 +51,7 @@ def test_finds_single_nested_tspan(tmp_path):
 
 def test_finds_multiple_nested_tspans(tmp_path):
     path = _write_svg(
-        tmp_path,
-        '<text>'
-        '<tspan>X<tspan>Y</tspan></tspan>'
-        '<tspan>P<tspan>Q</tspan></tspan>'
-        '</text>'
+        tmp_path, "<text>" "<tspan>X<tspan>Y</tspan></tspan>" "<tspan>P<tspan>Q</tspan></tspan>" "</text>"
     )
     result = match_nested_tags(path)
     assert len(result) == 2
@@ -67,10 +59,7 @@ def test_finds_multiple_nested_tspans(tmp_path):
 
 
 def test_ignores_non_element_children(tmp_path):
-    path = _write_svg(
-        tmp_path,
-        '<text><tspan>hello world</tspan></text>'
-    )
+    path = _write_svg(tmp_path, "<text><tspan>hello world</tspan></text>")
     result = match_nested_tags(path)
     assert result == []
 

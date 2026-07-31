@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from pathlib import Path
+
 import pytest
-from CopySVGTranslation.nested_analyze.find_nested import match_nested_tags, fix_nested_file
+
+from CopySVGTranslation.nested_analyze.find_nested import fix_nested_file, match_nested_tags
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -27,10 +29,7 @@ def _write_full_svg(tmp_dir: Path, svg_text: str, name: str = "test.svg") -> Pat
 
 def test_tspan_with_a_link_is_counted_as_nested(temp_dir: Path):
     # NOTE: current implementation flags any element child, not just <tspan>
-    p = _write_svg(
-        temp_dir,
-        '<text><tspan>See <a href="https://ex.com">link</a></tspan></text>'
-    )
+    p = _write_svg(temp_dir, '<text><tspan>See <a href="https://ex.com">link</a></tspan></text>')
     res = match_nested_tags(p)
     assert len(res) == 1
     assert "<a" in res[0]
@@ -39,7 +38,7 @@ def test_tspan_with_a_link_is_counted_as_nested(temp_dir: Path):
 def test_match_and_fix_paragraph_with_bold_numbers_and_link(temp_dir: Path):
     p = _write_svg(
         temp_dir,
-        '''
+        """
         <g id="header">
           <text x="10" y="64.6" style="font-size:12px">
             <tspan x="10" y="64.6">
@@ -55,7 +54,7 @@ def test_match_and_fix_paragraph_with_bold_numbers_and_link(temp_dir: Path):
             </tspan>
           </text>
         </g>
-        '''
+        """,
     )
     before = len(match_nested_tags(p))
     fix_nested_file(p)
@@ -68,13 +67,13 @@ def test_match_and_fix_paragraph_with_bold_numbers_and_link(temp_dir: Path):
 def test_match_and_fix_multiple_links_in_different_tspans(temp_dir: Path):
     p = _write_svg(
         temp_dir,
-        '''
+        """
         <text>
           <tspan>Intro <a href="https://a">A</a></tspan>
           <tspan>More <a href="https://b">B</a> text</tspan>
           <tspan>Flat</tspan>
         </text>
-        '''
+        """,
     )
     assert len(match_nested_tags(p)) == 2
     fix_nested_file(p)
@@ -96,7 +95,7 @@ def test_parametrized_various_patterns(temp_dir: Path, inner: str, expected_hits
 
 
 def test_match_and_fix(temp_dir: Path):
-    text = '''
+    text = """
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="900" height="472">
             <g font-family="DejaVu Sans, Arial, Helvetica" stroke-width="1" xml:space="preserve">
                 <text id="text3446" x="80" y="120" stroke-width="4">
@@ -110,12 +109,8 @@ def test_match_and_fix(temp_dir: Path):
                 </text>
             </g>
         </svg>
-    '''
-    p = _write_full_svg(
-        temp_dir,
-        text,
-        name="testx.svg"
-    )
+    """
+    p = _write_full_svg(temp_dir, text, name="testx.svg")
     before = len(match_nested_tags(p))
     fixed = fix_nested_file(p)
     assert fixed is True
@@ -125,7 +120,7 @@ def test_match_and_fix(temp_dir: Path):
     assert after == 0
 
     new_text = p.read_text(encoding="utf-8")
-    new_text_expected = '''
+    new_text_expected = """
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="900" height="472">
             <g font-family="DejaVu Sans, Arial, Helvetica" stroke-width="1" xml:space="preserve">
                 <text id="text3446" x="80" y="120" stroke-width="4">
@@ -137,7 +132,7 @@ def test_match_and_fix(temp_dir: Path):
                 </text>
             </g>
         </svg>
-    '''
+    """
     new_text_strip = "".join(new_text.split())
     new_text_expected_strip = "".join(new_text_expected.split())
 
@@ -145,7 +140,7 @@ def test_match_and_fix(temp_dir: Path):
 
 
 def test_match_and_fix_2(temp_dir: Path):
-    text = '''
+    text = """
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="700" height="300">
         <g class="markdown-text-wrap">
             <text x="10.0" y="94.3" style="font-size: 12.375px; fill: rgb(133, 133, 133); line-height: 1.2;">
@@ -172,12 +167,8 @@ def test_match_and_fix_2(temp_dir: Path):
         </g>
         </svg>
 
-    '''
-    p = _write_full_svg(
-        temp_dir,
-        text,
-        name="testx.svg"
-    )
+    """
+    p = _write_full_svg(temp_dir, text, name="testx.svg")
     before = len(match_nested_tags(p))
     fixed = fix_nested_file(p)
     assert fixed is True
@@ -187,7 +178,7 @@ def test_match_and_fix_2(temp_dir: Path):
     assert after == 0
 
     new_text = p.read_text(encoding="utf-8")
-    new_text_expected = '''
+    new_text_expected = """
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="700" height="300">
             <g class="markdown-text-wrap">
                 <text x="10.0" y="94.3"
@@ -205,7 +196,7 @@ def test_match_and_fix_2(temp_dir: Path):
             </g>
         </svg>
 
-    '''
+    """
     # new_text_strip = "".join([line.strip() for line in new_text.splitlines() if line.strip()])
     # new_text_expected_strip = "".join([line.strip() for line in new_text_expected.splitlines() if line.strip()])
 
@@ -216,7 +207,7 @@ def test_match_and_fix_2(temp_dir: Path):
 
 
 def test_match_and_fix_3(temp_dir: Path):
-    text = '''
+    text = """
         <g class="markdown-text-wrap">
             <text x="10.0" y="94.3" style="font-size: 12.375px; fill: rgb(133, 133, 133); line-height: 1.2;">
                 <tspan x="10" y="124.0">
@@ -227,12 +218,8 @@ def test_match_and_fix_3(temp_dir: Path):
             </text>
         </g>
 
-    '''
-    p = _write_svg(
-        temp_dir,
-        text,
-        name="testx.svg"
-    )
+    """
+    p = _write_svg(temp_dir, text, name="testx.svg")
     before = len(match_nested_tags(p))
     fixed = fix_nested_file(p)
     assert fixed is True
@@ -242,9 +229,9 @@ def test_match_and_fix_3(temp_dir: Path):
     assert after == 0
 
     new_text = p.read_text(encoding="utf-8")
-    new_text_expected = '''
+    new_text_expected = """
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100" height="100"><g class="markdown-text-wrap"><text x="10.0" y="94.3" style="font-size: 12.375px; fill: rgb(133, 133, 133); line-height: 1.2;"><tspan x="10" y="124.0">Read more:How does age standardization make health metrics comparable?</tspan></text></g></svg>
-    '''
+    """
     new_text_strip = "".join([line.strip() for line in new_text.splitlines() if line.strip()])
     new_text_expected_strip = "".join([line.strip() for line in new_text_expected.splitlines() if line.strip()])
 

@@ -7,7 +7,6 @@ I:/svgtranslate_php/svgtranslate_php/tests/Model/Svg/SvgFileTest.php
 
 import pytest
 
-
 from CopySVGTranslation import inject, make_translation_ready, start_injects
 from CopySVGTranslation.injection import (
     SvgNestedTspanException,
@@ -21,14 +20,14 @@ class Testinject:
     def getSvgFileFromString(self, temp_dir, text):
 
         file = temp_dir / "file.svg"
-        file.write_text(text, encoding='utf-8')
+        file.write_text(text, encoding="utf-8")
 
         return file
 
     def test_inject(self, temp_dir):
         file = self.getSvgFileFromString(
             temp_dir,
-            '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text>lang none</text></switch></svg>'
+            '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text>lang none</text></switch></svg>',
         )
 
         data = {"new": {"lang none": {"la": "lang la"}}}
@@ -43,7 +42,7 @@ class Testinject:
     def testAddsTextToSwitch(self, temp_dir):
         file = self.getSvgFileFromString(
             temp_dir,
-            '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text systemLanguage="la">lang la</text><text>lang none</text></switch></svg>'''
+            """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text systemLanguage="la">lang la</text><text>lang none</text></switch></svg>""",
         )
 
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
@@ -58,7 +57,7 @@ class Testinject:
     def testAddsTextToSwitchSameLang(self, temp_dir):
         file = self.getSvgFileFromString(
             temp_dir,
-            '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch id="testswitch"><text systemLanguage="la">lang la (1)</text><text systemLanguage="la">lang la (2)</text><text>lang none</text></switch></svg>'''
+            """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch id="testswitch"><text systemLanguage="la">lang la (1)</text><text systemLanguage="la">lang la (2)</text><text>lang none</text></switch></svg>""",
         )
 
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
@@ -70,12 +69,37 @@ class Testinject:
     @pytest.mark.parametrize(
         "svg, exc_type, code, extra",
         [
-            ("<text><tspan>foo <tspan>bar</tspan></tspan></text>", SvgNestedTspanException, "structure-error-nested-tspans-not-supported", [""]),
-            ("<text><tspan id='test'>foo <tspan>bar</tspan></tspan></text>", SvgNestedTspanException, "structure-error-nested-tspans-not-supported", ["test"]),
-            ("<g id='gparent'><text><tspan>foo <tspan>bar</tspan></tspan></text></g>", SvgNestedTspanException, "structure-error-nested-tspans-not-supported", [""]),
-            ("<style>#foo { stroke:1px; } .bar { color:pink; }</style><text>Foo</text>", SvgStructureException, "structure-error-css-too-complex", [""]),
+            (
+                "<text><tspan>foo <tspan>bar</tspan></tspan></text>",
+                SvgNestedTspanException,
+                "structure-error-nested-tspans-not-supported",
+                [""],
+            ),
+            (
+                "<text><tspan id='test'>foo <tspan>bar</tspan></tspan></text>",
+                SvgNestedTspanException,
+                "structure-error-nested-tspans-not-supported",
+                ["test"],
+            ),
+            (
+                "<g id='gparent'><text><tspan>foo <tspan>bar</tspan></tspan></text></g>",
+                SvgNestedTspanException,
+                "structure-error-nested-tspans-not-supported",
+                [""],
+            ),
+            (
+                "<style>#foo { stroke:1px; } .bar { color:pink; }</style><text>Foo</text>",
+                SvgStructureException,
+                "structure-error-css-too-complex",
+                [""],
+            ),
             ("<text id='x|'>Foo</text>", SvgStructureException, "structure-error-invalid-node-id", ["x|"]),
-            ("<text id='blah'>Foo $3 bar</text>", SvgStructureException, "structure-error-text-contains-dollar", ["Foo $3 bar"]),
+            (
+                "<text id='blah'>Foo $3 bar</text>",
+                SvgStructureException,
+                "structure-error-text-contains-dollar",
+                ["Foo $3 bar"],
+            ),
         ],
     )
     def testExeptions(self, temp_dir, svg, exc_type, code, extra):
@@ -89,7 +113,7 @@ class Testinject:
         assert excinfo.value.extra == extra
 
     def test_start_injects_counts_nested_tspans(self, temp_dir):
-        nested_svg = "<?xml version=\"1.0\"?><svg xmlns=\"http://www.w3.org/2000/svg\"><text><tspan>foo <tspan>bar</tspan></tspan></text></svg>"
+        nested_svg = '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><text><tspan>foo <tspan>bar</tspan></tspan></text></svg>'
         file = self.getSvgFileFromString(temp_dir, nested_svg)
 
         result = start_injects(

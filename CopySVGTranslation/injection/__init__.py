@@ -8,7 +8,7 @@ from .injector import (
     work_on_switches,
 )
 from .preparation import make_translation_ready
-from .utils import SvgStructureException, SvgNestedTspanException
+from .utils import SvgNestedTspanException, SvgStructureException
 
 __all__ = [
     "generate_unique_id",

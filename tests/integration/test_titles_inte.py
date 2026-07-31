@@ -1,9 +1,9 @@
-import pytest
 import json
 from pathlib import Path
 
+import pytest
 
-from CopySVGTranslation import make_title_translations, get_titles_translations
+from CopySVGTranslation import get_titles_translations, make_title_translations
 
 
 class TestMakeTitlesTranslations:
@@ -17,7 +17,7 @@ class TestMakeTitlesTranslations:
                 "eu": "Parkinsonen gaixotasunaren prebalentzia, 1990",
                 "cs": "Prevalence Parkinsonovy nemoci, 1990",
                 "si": "පාකින්සන් රෝග ව්‍යාප්තිය, 1990",
-                "ar": "انتشار مرض باركنسون، 1990"
+                "ar": "انتشار مرض باركنسون، 1990",
             }
         }
         expected = {
@@ -28,7 +28,7 @@ class TestMakeTitlesTranslations:
                 "eu": "Parkinsonen gaixotasunaren prebalentzia,",
                 "cs": "Prevalence Parkinsonovy nemoci,",
                 "si": "පාකින්සන් රෝග ව්‍යාප්තිය,",
-                "ar": "انتشار مرض باركنسون،"
+                "ar": "انتشار مرض باركنسون،",
             }
         }
         title_translations = make_title_translations(data)
@@ -46,7 +46,7 @@ class TestMakeTitlesTranslations:
                 "eu": "Parkinsonen gaixotasunaren prebalentzia, 1990",
                 "cs": "Prevalence Parkinsonovy nemoci, 1990",
                 "si": "පාකින්සන් රෝග ව්‍යාප්තිය, 1990",
-                "ar": "انتشار مرض باركنسون، 1990"
+                "ar": "انتشار مرض باركنسون، 1990",
             }
         }
         expected = {
@@ -57,7 +57,7 @@ class TestMakeTitlesTranslations:
                 "eu": "Parkinsonen gaixotasunaren prebalentzia,",
                 "cs": "Prevalence Parkinsonovy nemoci,",
                 "si": "පාකින්සන් රෝග ව්‍යාප්තිය,",
-                "ar": "انتشار مرض باركنسون،"
+                "ar": "انتشار مرض باركنسون،",
             }
         }
         title_translations = make_title_translations(data)
@@ -78,12 +78,10 @@ class TestGetTitlesTranslations:
                 "eu": "Parkinsonen gaixotasunaren prebalentzia,",
                 "cs": "Prevalence Parkinsonovy nemoci,",
                 "si": "පාකින්සන් රෝග ව්‍යාප්තිය,",
-                "ar": "انتشار مرض باركنسون،"
+                "ar": "انتشار مرض باركنسون،",
             }
         }
-        default_texts = [
-            "Parkinson's disease prevalence, 2028"
-        ]
+        default_texts = ["Parkinson's disease prevalence, 2028"]
 
         expected_data = {
             "Parkinson's disease prevalence, 2028": {
@@ -93,7 +91,7 @@ class TestGetTitlesTranslations:
                 "eu": "Parkinsonen gaixotasunaren prebalentzia, 2028",
                 "cs": "Prevalence Parkinsonovy nemoci, 2028",
                 "si": "පාකින්සන් රෝග ව්‍යාප්තිය, 2028",
-                "ar": "انتشار مرض باركنسون، 2028"
+                "ar": "انتشار مرض باركنسون، 2028",
             }
         }
 
@@ -112,12 +110,10 @@ class TestGetTitlesTranslations:
                 "eu": "Parkinsonen gaixotasunaren prebalentzia,",
                 "cs": "Prevalence Parkinsonovy nemoci,",
                 "si": "පාකින්සන් රෝග ව්‍යාප්තිය,",
-                "ar": "انتشار مرض باركنسون،"
+                "ar": "انتشار مرض باركنسون،",
             }
         }
-        default_texts = [
-            "parkinson's disease prevalence, 2028"
-        ]
+        default_texts = ["parkinson's disease prevalence, 2028"]
 
         result = get_titles_translations(insert_data, default_texts)
 
@@ -147,18 +143,14 @@ class TestBoth:
         assert result == {}
 
     def test_mismatched_years_skipped(self):
-        data = {
-            "Elections 2021": {"ss": "Lukhetfo lwa-2021", "de": "Elecciones 2020", "es": "Elecciones de 2021"}
-        }
+        data = {"Elections 2021": {"ss": "Lukhetfo lwa-2021", "de": "Elecciones 2020", "es": "Elecciones de 2021"}}
         result = make_title_translations(data)
         assert result is not None
         assert isinstance(result, dict)
         assert result == {"Elections": {"ss": "Lukhetfo lwa-", "es": "Elecciones de"}}
 
     def test_get_titles_translations_basic(self):
-        all_mappings = {
-            "COVID-19 pandemic": {"en": "COVID-19 pandemic", "es": "Pandemia de COVID-19"}
-        }
+        all_mappings = {"COVID-19 pandemic": {"en": "COVID-19 pandemic", "es": "Pandemia de COVID-19"}}
         default_texts = ["COVID-19 pandemic 2020"]
         result = get_titles_translations(all_mappings, default_texts)
         assert "COVID-19 pandemic 2020" in result

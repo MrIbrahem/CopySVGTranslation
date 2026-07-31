@@ -3,15 +3,14 @@ Unit tests for the SVG translation tool.
 """
 
 import json
-import tempfile
 import shutil
+import tempfile
 import unittest
 from pathlib import Path
 
 from lxml import etree
 
-
-from CopySVGTranslation import extract, inject, normalize_text, generate_unique_id
+from CopySVGTranslation import extract, generate_unique_id, inject, normalize_text
 
 
 class TestSVGTranslate(unittest.TestCase):
@@ -29,7 +28,7 @@ class TestSVGTranslate(unittest.TestCase):
             expected_translations: Mapping structure representing expected translation mappings for the two English source strings to Arabic.
         """
         self.test_dir = Path(tempfile.mkdtemp())
-        self.arabic_svg_content = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        self.arabic_svg_content = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" width="1000" height="1000" id="svg2235">
     <g id="foreground">
@@ -58,9 +57,9 @@ class TestSVGTranslate(unittest.TestCase):
             </text>
         </switch>
     </g>
-</svg>'''
+</svg>"""
 
-        self.no_translations_svg_content = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        self.no_translations_svg_content = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" width="1000" height="1000" id="svg2235">
     <g id="foreground">
@@ -79,7 +78,7 @@ class TestSVGTranslate(unittest.TestCase):
             </text>
         </switch>
     </g>
-</svg>'''
+</svg>"""
 
         self.expected_arabic_texts = [
             "السماعات الخلفية تنقل الإشارة نفسها،",
@@ -141,7 +140,7 @@ class TestSVGTranslate(unittest.TestCase):
         """Test extraction of translations from SVG."""
         # Create test SVG file
         arabic_svg_path = self.test_dir / "arabic.svg"
-        with open(arabic_svg_path, 'w', encoding='utf-8') as f:
+        with open(arabic_svg_path, "w", encoding="utf-8") as f:
             f.write(self.arabic_svg_content)
 
         # Extract translations
@@ -158,7 +157,7 @@ class TestSVGTranslate(unittest.TestCase):
         """Test extraction with case insensitive matching."""
         # Create test SVG file
         arabic_svg_path = self.test_dir / "arabic.svg"
-        with open(arabic_svg_path, 'w', encoding='utf-8') as f:
+        with open(arabic_svg_path, "w", encoding="utf-8") as f:
             f.write(self.arabic_svg_content)
 
         # Extract translations with case insensitive option
@@ -183,13 +182,13 @@ class TestSVGTranslate(unittest.TestCase):
         no_translations_path = self.test_dir / "no_translations.svg"
         mapping_path = self.test_dir / "arabic.svg.json"
 
-        with open(arabic_svg_path, 'w', encoding='utf-8') as f:
+        with open(arabic_svg_path, "w", encoding="utf-8") as f:
             f.write(self.arabic_svg_content)
 
-        with open(no_translations_path, 'w', encoding='utf-8') as f:
+        with open(no_translations_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
-        with open(mapping_path, 'w', encoding='utf-8') as f:
+        with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         # Inject translations
@@ -204,21 +203,21 @@ class TestSVGTranslate(unittest.TestCase):
         # Verify stats
         assert tree is not None
         assert stats is not None
-        assert stats['processed_switches'] == 2
-        assert stats['inserted_translations'] == 2
-        assert stats['updated_translations'] == 0
-        assert stats['skipped_translations'] == 0
+        assert stats["processed_switches"] == 2
+        assert stats["inserted_translations"] == 2
+        assert stats["updated_translations"] == 0
+        assert stats["skipped_translations"] == 0
 
         # Verify the in-memory tree has the translations
         self.assertTreeHasTranslations(tree)
 
         # Verify modified SVG contains translations
-        with open(no_translations_path, 'r', encoding='utf-8') as f:
+        with open(no_translations_path, "r", encoding="utf-8") as f:
             modified_svg = f.read()
 
         assert 'systemLanguage="ar"' in modified_svg
-        assert 'السماعات الخلفية تنقل الإشارة نفسها،' in modified_svg
-        assert 'لكنها موصولة بمرحلتين متعاكستين.' in modified_svg
+        assert "السماعات الخلفية تنقل الإشارة نفسها،" in modified_svg
+        assert "لكنها موصولة بمرحلتين متعاكستين." in modified_svg
 
     def test_inject_dry_run(self):
         """Test injection in dry-run mode."""
@@ -227,17 +226,17 @@ class TestSVGTranslate(unittest.TestCase):
         no_translations_path = self.test_dir / "no_translations.svg"
         mapping_path = self.test_dir / "arabic.svg.json"
 
-        with open(arabic_svg_path, 'w', encoding='utf-8') as f:
+        with open(arabic_svg_path, "w", encoding="utf-8") as f:
             f.write(self.arabic_svg_content)
 
-        with open(no_translations_path, 'w', encoding='utf-8') as f:
+        with open(no_translations_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
-        with open(mapping_path, 'w', encoding='utf-8') as f:
+        with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         # Get original file content
-        with open(no_translations_path, 'r', encoding='utf-8') as f:
+        with open(no_translations_path, "r", encoding="utf-8") as f:
             original_content = f.read()
 
         # Inject translations in dry-run mode
@@ -246,11 +245,11 @@ class TestSVGTranslate(unittest.TestCase):
         # Verify stats
         assert tree is not None
         assert stats is not None
-        assert stats['processed_switches'] == 2
-        assert stats['inserted_translations'] == 2
+        assert stats["processed_switches"] == 2
+        assert stats["inserted_translations"] == 2
 
         # Verify file was not modified
-        with open(no_translations_path, 'r', encoding='utf-8') as f:
+        with open(no_translations_path, "r", encoding="utf-8") as f:
             current_content = f.read()
 
         assert original_content == current_content
@@ -261,7 +260,7 @@ class TestSVGTranslate(unittest.TestCase):
     def test_inject_overwrite(self):
         """Test injection with overwrite option."""
         # Create test SVG with existing translations
-        svg_with_existing = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        svg_with_existing = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" width="1000" height="1000" id="svg2235">
     <g id="foreground">
@@ -278,16 +277,16 @@ class TestSVGTranslate(unittest.TestCase):
             </text>
         </switch>
     </g>
-</svg>'''
+</svg>"""
 
         # Create test files
         svg_path = self.test_dir / "test.svg"
         mapping_path = self.test_dir / "arabic.svg.json"
 
-        with open(svg_path, 'w', encoding='utf-8') as f:
+        with open(svg_path, "w", encoding="utf-8") as f:
             f.write(svg_with_existing)
 
-        with open(mapping_path, 'w', encoding='utf-8') as f:
+        with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         # Inject translations with overwrite
@@ -303,27 +302,27 @@ class TestSVGTranslate(unittest.TestCase):
         # Verify stats
         assert tree is not None
         assert stats is not None
-        assert stats['processed_switches'] == 1
-        assert stats['inserted_translations'] == 0
-        assert stats['updated_translations'] == 1
-        assert stats['skipped_translations'] == 0
+        assert stats["processed_switches"] == 1
+        assert stats["inserted_translations"] == 0
+        assert stats["updated_translations"] == 1
+        assert stats["skipped_translations"] == 0
 
         # Verify the in-memory tree has the translations
         self.assertTreeHasTranslations(tree, [self.expected_arabic_texts[0]])
 
         # Verify translation was updated
-        with open(svg_path, 'r', encoding='utf-8') as f:
+        with open(svg_path, "r", encoding="utf-8") as f:
             modified_svg = f.read()
 
-        assert 'السماعات الخلفية تنقل الإشارة نفسها،' in modified_svg
-        assert 'Old translation' not in modified_svg
+        assert "السماعات الخلفية تنقل الإشارة نفسها،" in modified_svg
+        assert "Old translation" not in modified_svg
 
     def test_inject_nonexistent_file(self):
         """Test injection with non-existent file."""
         nonexistent_path = self.test_dir / "nonexistent.svg"
         mapping_path = self.test_dir / "arabic.svg.json"
 
-        with open(mapping_path, 'w', encoding='utf-8') as f:
+        with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         result = inject(nonexistent_path, [mapping_path])
@@ -334,12 +333,12 @@ class TestSVGTranslate(unittest.TestCase):
         svg_path = self.test_dir / "test.svg"
         nonexistent_mapping = self.test_dir / "nonexistent.json"
 
-        with open(svg_path, 'w', encoding='utf-8') as f:
+        with open(svg_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
         result = inject(svg_path, [nonexistent_mapping])
         assert result is None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

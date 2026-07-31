@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation import extract, svg_extract_and_inject, inject
+from CopySVGTranslation import extract, inject, svg_extract_and_inject
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -44,7 +44,7 @@ def test_svg_extract_and_inject_creates_translation_files(tmp_path: Path, target
     assert saved_translations["new"]["population 2020"]["ar"] == "السكان 2020"
 
     injected_svg = output_svg.read_text(encoding="utf-8")
-    assert "systemLanguage=\"ar\"" in injected_svg
+    assert 'systemLanguage="ar"' in injected_svg
     assert "السكان 2020" in injected_svg
 
 
@@ -68,7 +68,7 @@ def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
     output_file = output_dir / target_svg.name
     assert output_file.exists(), "The helper should honour the output directory when saving results"
     content = output_file.read_text(encoding="utf-8")
-    assert "systemLanguage=\"ar\"" in content
+    assert 'systemLanguage="ar"' in content
     assert "السكان 2020" in content
 
 
@@ -95,6 +95,7 @@ def test_svg_extract_and_inject_without_save_result(tmp_path: Path, target_svg: 
 def test_svg_extract_and_inject_with_default_paths(tmp_path: Path, target_svg: Path) -> None:
     """svg_extract_and_inject should use default paths when none are provided."""
     import os
+
     original_cwd = os.getcwd()
 
     try:
@@ -214,6 +215,7 @@ def test_inject_without_output_dir(tmp_path: Path, target_svg: Path) -> None:
 def test_inject_with_default_output_dir(tmp_path: Path, target_svg: Path) -> None:
     """inject should create default output_dir when needed."""
     import os
+
     original_cwd = os.getcwd()
 
     try:
@@ -230,7 +232,7 @@ def test_inject_with_default_output_dir(tmp_path: Path, target_svg: Path) -> Non
 
         assert tree is not None
         # Check that default directory was created
-        translated_dir = Path(str(target_svg)).parent# / "translated"
+        translated_dir = Path(str(target_svg)).parent  # / "translated"
         assert translated_dir.exists()
         assert (translated_dir / target_svg.name).exists()
     finally:
@@ -297,9 +299,7 @@ def test_extract_empty_svg(tmp_path: Path) -> None:
     """extract should handle SVG files with no translations gracefully."""
     empty_svg = tmp_path / "empty.svg"
     empty_svg.write_text(
-        '<?xml version="1.0" encoding="UTF-8"?>'
-        '<svg xmlns="http://www.w3.org/2000/svg"></svg>',
-        encoding="utf-8"
+        '<?xml version="1.0" encoding="UTF-8"?>' '<svg xmlns="http://www.w3.org/2000/svg"></svg>', encoding="utf-8"
     )
 
     result = extract(empty_svg)
@@ -312,7 +312,7 @@ def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
     """extract should preserve translations for multiple languages."""
     multi_lang_svg = tmp_path / "multi.svg"
     multi_lang_svg.write_text(
-        '''<?xml version="1.0" encoding="UTF-8"?>
+        """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg">
   <switch>
     <text id="label" xml:space="preserve">
@@ -328,8 +328,8 @@ def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
       <tspan id="label-es">Hola</tspan>
     </text>
   </switch>
-</svg>''',
-        encoding="utf-8"
+</svg>""",
+        encoding="utf-8",
     )
 
     result = extract(multi_lang_svg)
@@ -370,7 +370,7 @@ def test_svg_extract_and_inject_with_overwrite_true(tmp_path: Path, target_svg: 
     assert tree2 is not None
     # File should still exist and be valid
     content2 = output_svg.read_text(encoding="utf-8")
-    assert "systemLanguage=\"ar\"" in content2
+    assert 'systemLanguage="ar"' in content2
 
 
 def test_inject_with_empty_translations(tmp_path: Path, target_svg: Path) -> None:
@@ -408,7 +408,7 @@ def test_extract_with_case_insensitive_false(tmp_path: Path) -> None:
     """extract should preserve original case when case_insensitive=False."""
     svg_with_caps = tmp_path / "caps.svg"
     svg_with_caps.write_text(
-        '''<?xml version="1.0" encoding="UTF-8"?>
+        """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg">
   <switch>
     <text id="label" xml:space="preserve">
@@ -418,8 +418,8 @@ def test_extract_with_case_insensitive_false(tmp_path: Path) -> None:
       <tspan id="label-ar">مرحبا</tspan>
     </text>
   </switch>
-</svg>''',
-        encoding="utf-8"
+</svg>""",
+        encoding="utf-8",
     )
 
     result = extract(svg_with_caps, case_insensitive=False)

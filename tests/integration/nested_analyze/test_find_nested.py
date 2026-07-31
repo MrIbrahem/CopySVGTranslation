@@ -1,7 +1,6 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
-
-from CopySVGTranslation.nested_analyze.find_nested import match_nested_tags, fix_nested_file
+from CopySVGTranslation.nested_analyze.find_nested import fix_nested_file, match_nested_tags
 
 
 class TestNestedFiles:
@@ -10,13 +9,14 @@ class TestNestedFiles:
     def getSvgFileFromString(self, temp_dir, text):
 
         file = temp_dir / "file.svg"
-        file.write_text(text, encoding='utf-8')
+        file.write_text(text, encoding="utf-8")
 
         return file
 
     def test_match_nested_one_url(self, temp_dir):
         file = self.getSvgFileFromString(
-            temp_dir, '''<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="729.1" viewBox="0 0 850 729.1">
+            temp_dir,
+            """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="729.1" viewBox="0 0 850 729.1">
                 <g id="header" class="HeaderView">
                 <text x="10" y="64.6" style="font-size: 12.375px; fill: rgb(133, 133, 133); line-height: 1.2;">
                 <tspan x="10" y="64.6">
@@ -33,7 +33,8 @@ class TestNestedFiles:
                 </text>
                 </g>
             </svg>
-        ''')
+        """,
+        )
         len_result_before = len(match_nested_tags(file))
         _fix_file = fix_nested_file(file)
         len_result_after = len(match_nested_tags(file))
@@ -43,7 +44,8 @@ class TestNestedFiles:
 
     def test_match_nested_multi_urls(self, temp_dir):
         file = self.getSvgFileFromString(
-            temp_dir, '''<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="300" height="100"
+            temp_dir,
+            """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="300" height="100"
             style="font-family: Lato, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Liberation Sans&quot;, sans-serif; font-feature-settings: &quot;liga&quot;, &quot;kern&quot;, &quot;calt&quot;,
             &quot;lnum&quot;; text-rendering: geometricprecision; -webkit-font-smoothing: antialiased; font-size: 18px;
             background-color: rgb(255, 255, 255);">
@@ -54,7 +56,8 @@ class TestNestedFiles:
             style="fill: #858585;" href="https://creativecommons.org/licenses/by/4.0/">CC BY</a></tspan>
             </text>
             </g>
-        </svg>''')
+        </svg>""",
+        )
         len_result_before = len(match_nested_tags(file))
         _fix_file = fix_nested_file(file)
         len_result_after = len(match_nested_tags(file))
@@ -64,7 +67,8 @@ class TestNestedFiles:
 
     def test_match_nested_multi_tags(self, temp_dir):
         file = self.getSvgFileFromString(
-            temp_dir, '''<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="729.1" viewBox="0 0 850 729.1"
+            temp_dir,
+            """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="729.1" viewBox="0 0 850 729.1"
                 style="font-family: Lato, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Liberation Sans&quot;, sans-serif; text-rendering: geometricprecision; -webkit-font-smoothing: antialiased; font-size: 18px; background-color: rgb(255, 255, 255);">
                 <g id="header" class="HeaderView">
                 <g class="markdown-text-wrap">
@@ -77,7 +81,7 @@ class TestNestedFiles:
                 target="_blank" rel="noopener" style="text-decoration: underline;">
                 How does
                 age standardization
-                make health metrics comparable?</a></tspan></text></g></g></svg>'''
+                make health metrics comparable?</a></tspan></text></g></g></svg>""",
         )
         len_result_before = len(match_nested_tags(file))
         _fix_file = fix_nested_file(file)
@@ -88,7 +92,8 @@ class TestNestedFiles:
 
     def test_match_nested_multi_tags2(self, temp_dir):
         file = self.getSvgFileFromString(
-            temp_dir, '''<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="721.1"
+            temp_dir,
+            """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="721.1"
                 viewBox="0 0 850 721.1"
                 style="font-family: Lato, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Liberation Sans&quot;, sans-serif; text-rendering: geometricprecision; -webkit-font-smoothing: antialiased; font-size: 18px; background-color: rgb(255, 255, 255);">
                 <g class="markdown-text-wrap" id="subtitle">
@@ -99,7 +104,8 @@ class TestNestedFiles:
                             100,000 people.</tspan>
                     </text>
                 </g>
-            </svg>''')
+            </svg>""",
+        )
         len_result_before = len(match_nested_tags(file))
         _fix_file = fix_nested_file(file)
         len_result_after = len(match_nested_tags(file))
@@ -109,7 +115,8 @@ class TestNestedFiles:
 
     def test_match_nested_multi_tags_9(self, temp_dir):
         file = self.getSvgFileFromString(
-            temp_dir, '''<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="758.8" viewBox="0 0 850 758.8"
+            temp_dir,
+            """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="758.8" viewBox="0 0 850 758.8"
                 style="font-family: Lato, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Liberation Sans&quot;, sans-serif; font-feature-settings: &quot;liga&quot;, &quot;kern&quot;, &quot;calt&quot;, &quot;lnum&quot;; text-rendering: geometricprecision; -webkit-font-smoothing: antialiased; font-size: 18px; background-color: rgb(255, 255, 255);">
                 <g id="footer" class="SourcesFooter" style="fill: rgb(133, 133, 133);">
                     <g id="sources" class="markdown-text-wrap"><text x="16.0" y="545.3" style="font-size: 13px; line-height: 1.2;">
@@ -161,7 +168,8 @@ class TestNestedFiles:
                                     make health metrics comparable?</a></tspan>
                         </text></g>
                 </g>
-            </svg>''')
+            </svg>""",
+        )
         len_result_before = len(match_nested_tags(file))
         _fix_file = fix_nested_file(file)
         len_result_after = len(match_nested_tags(file))

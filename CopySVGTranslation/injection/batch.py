@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import logging
 import shutil
-from tqdm import tqdm
 from pathlib import Path
 from typing import Any
 
+from tqdm import tqdm
+
 from .injector import inject
+
 logger = logging.getLogger("CopySVGTranslation")
 
 
@@ -64,7 +66,7 @@ def start_injects(
             files_stats[file.name] = stats
             continue
         try:
-            tree.write(str(output_file), encoding='utf-8', xml_declaration=True, pretty_print=True)
+            tree.write(str(output_file), encoding="utf-8", xml_declaration=True, pretty_print=True)
             stats["file_path"] = str(output_file)
             success += 1
         except Exception as e:

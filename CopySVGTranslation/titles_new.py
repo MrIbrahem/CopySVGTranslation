@@ -1,5 +1,5 @@
-import re
 import logging
+import re
 from typing import Dict, List
 
 logger = logging.getLogger("CopySVGTranslation")
@@ -33,9 +33,7 @@ def replace_year(value, year):
     return ""
 
 
-def make_new_title_translations(
-    new: Dict[str, Dict[str, str]]
-) -> Dict[str, Dict[str, str]]:
+def make_new_title_translations(new: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, str]]:
     """
     Extract valid title translations by verifying that all translations in a mapping
     end with the same 4-digit year as the key.
@@ -59,10 +57,7 @@ def make_new_title_translations(
 
     result: Dict[str, Dict[str, str]] = {}
 
-    new_fixed = {
-        x.strip(): {z.strip(): h.strip() for z, h in v.items()}
-        for x, v in new.items()
-    }
+    new_fixed = {x.strip(): {z.strip(): h.strip() for z, h in v.items()} for x, v in new.items()}
 
     for key, mapping in list(new_fixed.items()):
         if len(key) < 4:
@@ -114,10 +109,7 @@ def get_new_titles_translations(
     """
     titles_translations: Dict[str, Dict[str, str]] = {}
 
-    all_mappings_title_fixed = {
-        x.strip().lower(): v
-        for x, v in all_mappings_title.items()
-    }
+    all_mappings_title_fixed = {x.strip().lower(): v for x, v in all_mappings_title.items()}
 
     for text in default_texts:
         year = match_year(text)

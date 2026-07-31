@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-import tempfile
-import pytest
-import sys
 import shutil
+import sys
+import tempfile
 from pathlib import Path
+
+import pytest
 
 # Ensure the project root (which contains the ``CopySVGTranslation`` package) is importable
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
