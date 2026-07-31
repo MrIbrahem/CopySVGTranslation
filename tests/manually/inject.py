@@ -1,9 +1,11 @@
 """
-python I:/SVG_PY/CopySVGTranslation/tests/manually/inject.py
+python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/inject.py
 """
-import sys
+
 import logging
 from pathlib import Path
+
+from CopySVGTranslation import inject, make_translation_ready
 
 logger = logging.getLogger("CopySVGTranslation")
 logger.setLevel(logging.DEBUG)
@@ -12,15 +14,11 @@ console = logging.StreamHandler()
 console.setFormatter(logging.Formatter("%(levelname)s - %(message)s"))
 logger.addHandler(console)
 
-
-
-from CopySVGTranslation import inject, make_translation_ready
-
 svg_file = Path(__file__).parent / "test.svg"
 
 svg_file.write_text(
-    '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch id="testswitch"><text systemLanguage="la">lang la (1)</text><text systemLanguage="la">lang la (2)</text><text>lang none</text></switch></svg>''',
-    encoding='utf-8',
+    """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch id="testswitch"><text systemLanguage="la">lang la (1)</text><text systemLanguage="la">lang la (2)</text><text>lang none</text></switch></svg>""",
+    encoding="utf-8",
 )
 
 data = {"new": {"lang none": {"la": "lang la (new)"}}}

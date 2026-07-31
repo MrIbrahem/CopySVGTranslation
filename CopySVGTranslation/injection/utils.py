@@ -5,12 +5,12 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from lxml import etree
+from lxml import etree  # type: ignore
 
 logger = logging.getLogger("CopySVGTranslation")
 
 
-class SvgStructureException(Exception):
+class SvgStructureExceptionError(Exception):
     """Raised when SVG structure is unsuitable for translation."""
 
     def __init__(self, code: str, element=None, extra=None):
@@ -32,7 +32,7 @@ class SvgStructureException(Exception):
         super().__init__(msg)
 
 
-class SvgNestedTspanException(SvgStructureException):
+class SvgNestedTspanExceptionError(SvgStructureExceptionError):
     """Raised when encountering nested ``<tspan>`` elements."""
 
     def __init__(self, element=None, extra=None, node_text=None):
@@ -40,7 +40,7 @@ class SvgNestedTspanException(SvgStructureException):
         super().__init__("structure-error-nested-tspans-not-supported", element, extra)
 
     def node(self):
-        return " ".join(self.node_text.strip().split())
+        return " ".join(str(self.node_text).strip().split())
 
 
 def file_langs(
@@ -66,8 +66,8 @@ def file_langs(
             return set()
 
         text_elements = root.xpath(
-            './/svg:text',
-            namespaces={'svg': 'http://www.w3.org/2000/svg'},
+            ".//svg:text",
+            namespaces={"svg": "http://www.w3.org/2000/svg"},
         )
         for text in text_elements:
             system_language = text.get("systemLanguage")

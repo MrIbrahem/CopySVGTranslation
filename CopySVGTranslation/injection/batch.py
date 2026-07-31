@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import logging
 import shutil
-from tqdm import tqdm
 from pathlib import Path
 from typing import Any
 
+from tqdm import tqdm
+
 from .injector import inject
+
 logger = logging.getLogger("CopySVGTranslation")
 
 
@@ -20,7 +22,6 @@ def start_injects(
     output_dir_nested_files: Path | None = None,
 ) -> dict[str, Any]:
     """Inject translations into a collection of SVG files and write the results."""
-    data = {}
     success = 0
     failed = 0
     nested_files = 0
@@ -65,7 +66,7 @@ def start_injects(
             files_stats[file.name] = stats
             continue
         try:
-            tree.write(str(output_file), encoding='utf-8', xml_declaration=True, pretty_print=True)
+            tree.write(str(output_file), encoding="utf-8", xml_declaration=True, pretty_print=True)
             stats["file_path"] = str(output_file)
             success += 1
         except Exception as e:
@@ -79,15 +80,14 @@ def start_injects(
 
     logger.debug(f"all files: {len(files):,} Saved {success:,}, failed {failed:,}, nested_files: {nested_files:,}")
 
-    if output_dir_nested_files:
-        data["output_dir_nested_files"] = str(output_dir_nested_files)
-
-    data.update({
+    data = {
+        "output_dir_nested_files": str(output_dir_nested_files) if output_dir_nested_files else "",
         "success": success,
         "failed": failed,
         "nested_files": nested_files,
         "no_changes": no_changes,
         "nested_files_list": nested_files_list,
         "files": files_stats,
-    })
+    }
+
     return data

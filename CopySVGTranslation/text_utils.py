@@ -21,7 +21,7 @@ def normalize_text(text: str | None, case_insensitive: bool = False) -> str:
 
 def extract_text_from_node(node) -> list[str]:
     """Extract text content from an SVG ``<text>`` element, honouring ``<tspan>``."""
-    tspans = node.xpath('./svg:tspan', namespaces={'svg': 'http://www.w3.org/2000/svg'})
+    tspans = node.xpath("./svg:tspan", namespaces={"svg": "http://www.w3.org/2000/svg"})
     if tspans:
         return [tspan.text.strip() if tspan.text else "" for tspan in tspans]
 

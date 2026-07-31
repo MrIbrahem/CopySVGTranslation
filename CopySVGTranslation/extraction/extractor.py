@@ -1,7 +1,7 @@
 """Utilities for extracting translation data from SVG files."""
 
-from pathlib import Path
 import logging
+from pathlib import Path
 
 from lxml import etree
 
@@ -17,18 +17,18 @@ def get_english_default_texts(text_elements, case_insensitive):
     default_tspans_by_id = {}
 
     for text_elem in text_elements:
-        system_lang = text_elem.get('systemLanguage')
+        system_lang = text_elem.get("systemLanguage")
         if system_lang:
             continue
 
-        tspans = text_elem.xpath('./svg:tspan', namespaces={'svg': 'http://www.w3.org/2000/svg'})
+        tspans = text_elem.xpath("./svg:tspan", namespaces={"svg": "http://www.w3.org/2000/svg"})
         text_contents = []
         # ---
         if tspans:
             tspans_by_id = {
-                tspan.get('id'): tspan.text.strip()
+                tspan.get("id"): tspan.text.strip()
                 for tspan in tspans
-                if tspan.text and tspan.get('id') and tspan.text.strip()
+                if tspan.text and tspan.get("id") and tspan.text.strip()
             }
             default_tspans_by_id.update(tspans_by_id)
             text_contents = [tspan.text.strip() for tspan in tspans if tspan.text]
@@ -49,7 +49,7 @@ def get_english_default_texts(text_elements, case_insensitive):
 
 def extract(
     svg_file_path,
-        case_insensitive: bool = True,
+    case_insensitive: bool = True,
 ):
     """
     Extract translation strings from an SVG file into a structured dictionary.
@@ -82,20 +82,15 @@ def extract(
     root = tree.getroot()
 
     # Find all switch elements
-    switches = root.xpath('//svg:switch', namespaces={'svg': 'http://www.w3.org/2000/svg'})
+    switches = root.xpath("//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"})
     logger.debug(f"Found {len(switches)} switch elements")
 
-    translations = {
-        "new": {},
-        "title": {},
-        "title_new": {},
-        "tspans_by_id": {}
-    }
+    translations = {"new": {}, "title": {}, "title_new": {}, "tspans_by_id": {}}
     tspans_by_id = translations["tspans_by_id"]
 
     for switch in switches:
         # Find all text elements within this switch
-        text_elements = switch.xpath('./svg:text', namespaces={'svg': 'http://www.w3.org/2000/svg'})
+        text_elements = switch.xpath("./svg:text", namespaces={"svg": "http://www.w3.org/2000/svg"})
 
         if not text_elements:
             continue
@@ -108,13 +103,17 @@ def extract(
         switch_translations = {}
 
         for text_elem in text_elements:
-            system_lang = text_elem.get('systemLanguage')
+            system_lang = text_elem.get("systemLanguage")
             if not system_lang:
                 continue
 
-            tspans = text_elem.xpath('./svg:tspan', namespaces={'svg': 'http://www.w3.org/2000/svg'})
+            tspans = text_elem.xpath("./svg:tspan", namespaces={"svg": "http://www.w3.org/2000/svg"})
             if tspans:
-                tspans_to_id = {tspan.text.strip(): tspan.get('id') for tspan in tspans if tspan.text and tspan.text.strip() and tspan.get('id')}
+                tspans_to_id = {
+                    tspan.text.strip(): tspan.get("id")
+                    for tspan in tspans
+                    if tspan.text and tspan.text.strip() and tspan.get("id")
+                }
                 # text_contents = [tspan.text.strip() if tspan.text else "" for tspan in tspans]
                 text_contents = [tspan.text.strip() for tspan in tspans if tspan.text]
             else:

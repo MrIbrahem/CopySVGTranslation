@@ -6,10 +6,10 @@ import copy
 import logging
 import re
 from pathlib import Path
-from typing import List, Set, Tuple
-from lxml import etree
 
-from .utils import SvgStructureException, SvgNestedTspanException
+from lxml import etree # type: ignore
+
+from .utils import SvgNestedTspanExceptionError, SvgStructureExceptionError
 
 logger = logging.getLogger("CopySVGTranslation")
 
@@ -28,7 +28,7 @@ def normalize_lang(lang: str) -> str:
     """
     if not lang:
         return lang
-    pieces = re.split(r'[_\-\s]+', lang.strip())
+    pieces = re.split(r"[_\-\s]+", lang.strip())
     primary = pieces[0].lower()
     if len(pieces) > 1:
         rest = "-".join(p.upper() if len(p) == 2 else p.title() for p in pieces[1:])
@@ -58,9 +58,10 @@ def reorder_texts(root: etree._Element):
 
         def sort_key(el):
             lang = el.get("systemLanguage") or "fallback"
-            m = re.search(r'trsvg(\d+)', (el.get("id") or ""))
+            m = re.search(r"trsvg(\d+)", (el.get("id") or ""))
             num = int(m.group(1)) if m else 10**9
             return (0 if lang == "fallback" else 1, num, lang)
+
         texts_sorted = sorted(texts, key=sort_key)
         # re-append in sorted order, leaving non-text children (if any) as-is
         for t in texts_sorted:
@@ -69,7 +70,7 @@ def reorder_texts(root: etree._Element):
             sw.append(t)
 
 
-def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tuple[etree._ElementTree, etree._Element]:
+def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> tuple[etree._ElementTree, etree._Element]:
     """Prepare an SVG file for translation and return its tree and root."""
     svg_file_path = Path(str(svg_file_path))
     if not svg_file_path.exists():
@@ -79,11 +80,11 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
     tree = etree.parse(str(svg_file_path), parser)
     root = tree.getroot()
     if root is None:
-        raise SvgStructureException('structure-error-no-doc-element')
+        raise SvgStructureExceptionError("structure-error-no-doc-element")
 
     # Ensure default namespace (xmlns) exists and is sane
     default_ns = root.nsmap.get(None)
-    if default_ns is None or re.match(r'^(&[^;]+;)+$', str(default_ns)):
+    if default_ns is None or re.match(r"^(&[^;]+;)+$", str(default_ns)):
         root.set(XMLNS_ATTR, SVG_NS)
         default_ns = SVG_NS
 
@@ -97,19 +98,19 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
 
     # Check <style> elements for IDs and syntactic complexity
     styles = root.findall(".//{%s}style" % SVG_NS)
-    css_simple_re = re.compile(r'^([^{]+\{[^}]*\})*[^{]+$')
+    css_simple_re = re.compile(r"^([^{]+\{[^}]*\})*[^{]+$")
     for s in styles:
-        css = (s.text or "")
-        if '#' in css:
+        css = s.text or ""
+        if "#" in css:
             if not css_simple_re.match(css):
-                raise SvgStructureException('structure-error-css-too-complex', None, [s.get("id", "")])
+                raise SvgStructureExceptionError("structure-error-css-too-complex", None, [s.get("id", "")])
             # split selectors roughly and ensure no '#' in selectors portion
-            selectors = re.split(r'\{[^}]*\}', css)
+            selectors = re.split(r"\{[^}]*\}", css)
             for selector in selectors:
-                if '#' in selector:
-                    raise SvgStructureException('structure-error-css-has-ids', None, [s.get("id", "")])
+                if "#" in selector:
+                    raise SvgStructureExceptionError("structure-error-css-has-ids", None, [s.get("id", "")])
 
-    translatable_nodes: List[etree._Element] = []
+    translatable_nodes: list[etree._Element] = []
 
     # Process tspans
     tspans = root.findall(".//{%s}tspan" % SVG_NS)
@@ -120,18 +121,18 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
             translatable_nodes.append(tspan)
         else:
             # Nested tspans or children not supported
-            # raise SvgStructureException('structure-error-nested-tspans-not-supported', tspan, element_children)
+            # raise SvgStructureExceptionError('structure-error-nested-tspans-not-supported', tspan, element_children)
             node_text = etree.tostring(tspan, pretty_print=True).decode("utf-8")
-            raise SvgNestedTspanException(tspan, [tspan.get("id", "")], node_text=node_text)
+            raise SvgNestedTspanExceptionError(tspan, [tspan.get("id", "")], node_text=node_text)
 
     # tref not supported
     trefs = root.findall(".//{%s}tref" % SVG_NS)
     if len(trefs) != 0:
-        raise SvgStructureException('structure-error-contains-tref')
+        raise SvgStructureExceptionError("structure-error-contains-tref")
 
     # Track all IDs in the document and normalise whitespace around them early
-    existing_ids: Set[str] = set()
-    for element in root.xpath('//*[@id]'):
+    existing_ids: set[str] = set()
+    for element in root.xpath("//*[@id]"):
         element_id = element.get("id")
         if not element_id:
             continue
@@ -141,7 +142,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
         existing_ids.add(trimmed)
 
     # Collect translatable nodes and prepare idsInUse
-    ids_in_use: List[int] = [0]
+    ids_in_use: list[int] = [0]
 
     def allocate_trsvg_id() -> str:
         """Allocate a new unique ``trsvg`` identifier."""
@@ -156,7 +157,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
 
     def allocate_clone_id(base_id: str | None, lang: str) -> str:
         """Allocate a unique identifier for a cloned ``<text>`` node."""
-        if base_id and re.match(r'^trsvg[0-9]+$', base_id):
+        if base_id and re.match(r"^trsvg[0-9]+$", base_id):
             return allocate_trsvg_id()
         if base_id:
             base_candidate = f"{base_id}-{lang}"
@@ -182,7 +183,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
 
         # handle tails after children
         children = list(text)
-        for idx, child in enumerate(children):
+        for _idx, child in enumerate(children):
             if (child.tail or "").strip():
                 new_tspan = etree.Element("{%s}tspan" % SVG_NS)
                 new_tspan.text = child.tail
@@ -209,8 +210,8 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
             else:
                 node.set("id", node_id)
                 if "|" in node_id or "/" in node_id:
-                    raise SvgStructureException('structure-error-invalid-node-id', node, [node_id])
-                m = re.match(r'^trsvg([0-9]+)$', node_id)
+                    raise SvgStructureExceptionError("structure-error-invalid-node-id", node, [node_id])
+                m = re.match(r"^trsvg([0-9]+)$", node_id)
                 if m:
                     ids_in_use.append(int(m.group(1)))
                 if node_id.isdigit():
@@ -248,8 +249,8 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
     texts = root.findall(".//{%s}text" % SVG_NS)
     for text in texts:
         content = get_text_content(text)
-        if re.search(r'\$[0-9]+', content):
-            raise SvgStructureException('structure-error-text-contains-dollar', text, [content])
+        if re.search(r"\$[0-9]+", content):
+            raise SvgStructureExceptionError("structure-error-text-contains-dollar", text, [content])
 
         # normalize systemLanguage if present
         if text.get("systemLanguage"):
@@ -261,7 +262,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
             switch = etree.Element("{%s}switch" % SVG_NS)
             parent_of_text = parent
             if parent_of_text is None:
-                raise SvgStructureException('structure-error-no-parent-for-text', text, text)
+                raise SvgStructureExceptionError("structure-error-no-parent-for-text", text, text)
             # insert switch before text
             idx = list(parent_of_text).index(text)
             parent_of_text.insert(idx, switch)
@@ -276,34 +277,34 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
         # verify that children of text are only tspans or text nodes
         for child in text:
             if child.tag not in ({f"{{{SVG_NS}}}tspan", "tspan"}):
-                raise SvgStructureException('structure-error-non-tspan-inside-text', child, child)
+                raise SvgStructureExceptionError("structure-error-non-tspan-inside-text", child, child)
 
     # Process all switches: split comma-separated systemLanguage values
     switches = root.findall(".//{%s}switch" % SVG_NS)
     for sw in switches:
         # gather existing languages for duplicate detection
-        existing_langs: Set[str] = set()
+        existing_langs: set[str] = set()
         # collect children first to avoid modifying while iterating
         children = list(sw)
         for child in children:
             if not isinstance(child.tag, str):
                 # ignore comments etc, but if there's text content outside elements, check whitespace
                 if (child.text or "").strip():
-                    raise SvgStructureException('structure-error-switch-text-content-outside-text', child, child)
+                    raise SvgStructureExceptionError("structure-error-switch-text-content-outside-text", child, child)
                 continue
             if child.tag not in ({f"{{{SVG_NS}}}text", "text"}):
-                raise SvgStructureException('structure-error-switch-child-not-text', child, child)
+                raise SvgStructureExceptionError("structure-error-switch-child-not-text", child, child)
 
             language_attr = child.get("systemLanguage")
-            real_langs = re.split(r',\s*', language_attr) if language_attr else ["fallback"]
+            real_langs = re.split(r",\s*", language_attr) if language_attr else ["fallback"]
 
-            languages_present: Set[str] = set()
+            languages_present: set[str] = set()
             for real in real_langs:
                 if real in languages_present:
-                    raise SvgStructureException('structure-error-multiple-lang-in-text', child, [real])
+                    raise SvgStructureExceptionError("structure-error-multiple-lang-in-text", child, [real])
                 languages_present.add(real)
                 if real in existing_langs:
-                    raise SvgStructureException('structure-error-multiple-text-same-lang', sw, [real])
+                    raise SvgStructureExceptionError("structure-error-multiple-text-same-lang", sw, [real])
 
             if len(real_langs) == 1:
                 lang_value = real_langs[0]
@@ -325,7 +326,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
             base_id = child.get("id")
             for real in real_langs[1:]:
                 if real in existing_langs:
-                    raise SvgStructureException('structure-error-multiple-text-same-lang', sw, [real])
+                    raise SvgStructureExceptionError("structure-error-multiple-text-same-lang", sw, [real])
                 cloned = clone_element(child)
                 if real == "fallback":
                     cloned.attrib.pop("systemLanguage", None)

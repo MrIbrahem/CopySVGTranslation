@@ -2,13 +2,12 @@
 
 from lxml import etree
 
-
 from CopySVGTranslation import extract, inject, normalize_text
-from CopySVGTranslation.text_utils import extract_text_from_node
-from CopySVGTranslation.injection.preparation import normalize_lang, get_text_content, clone_element
 from CopySVGTranslation.injection import (
-    SvgStructureException,
+    SvgStructureExceptionError,
 )
+from CopySVGTranslation.injection.preparation import clone_element, get_text_content, normalize_lang
+from CopySVGTranslation.text_utils import extract_text_from_node
 
 # -------------------------------
 # Text utility tests
@@ -52,6 +51,7 @@ class TestTextUtilsComprehensive:
 # Preparation function tests
 # -------------------------------
 
+
 class TestPreparationFunctions:
     """Tests for SVG preparation utility functions."""
 
@@ -88,11 +88,12 @@ class TestPreparationFunctions:
         assert original is not cloned
 
     def test_svg_structure_exception_formatting(self):
-        """Test SvgStructureException message formatting."""
-        exc = SvgStructureException("test-code", extra="Extra info")
+        """Test SvgStructureExceptionError message formatting."""
+        exc = SvgStructureExceptionError("test-code", extra="Extra info")
         assert exc.code == "test-code"
         assert "test-code" in str(exc)
         assert "Extra info" in str(exc)
+
 
 # -------------------------------
 # Workflow tests
@@ -105,8 +106,8 @@ class TestWorkflowFunctions:
     def test_inject_basic_workflow(self, temp_dir):
         """Test basic inject workflow."""
         target = temp_dir / "target.svg"
-        content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t1"><tspan>Hi</tspan></text></switch></svg>'''
-        target.write_text(content, encoding='utf-8')
+        content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t1"><tspan>Hi</tspan></text></switch></svg>"""
+        target.write_text(content, encoding="utf-8")
 
         translations = {"new": {"hi": {"ar": "مرحبا"}}}
 
@@ -120,17 +121,18 @@ class TestWorkflowFunctions:
 # Extraction edge cases
 # -------------------------------
 
+
 class TestExtractorEdgeCases:
     """Edge case tests for extraction."""
 
     def test_extract_multiple_languages(self, temp_dir):
         """Test extracting with multiple language translations."""
         svg = temp_dir / "test.svg"
-        content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch>
+        content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch>
 <text id="t-ar" systemLanguage="ar"><tspan id="s-ar">مرحبا</tspan></text>
 <text id="t-fr" systemLanguage="fr"><tspan id="s-fr">Bonjour</tspan></text>
-<text id="t"><tspan id="s">Hello</tspan></text></switch></svg>'''
-        svg.write_text(content, encoding='utf-8')
+<text id="t"><tspan id="s">Hello</tspan></text></switch></svg>"""
+        svg.write_text(content, encoding="utf-8")
         result = extract(svg)
         assert result is not None
         assert "new" in result
@@ -138,7 +140,7 @@ class TestExtractorEdgeCases:
     def test_extract_empty_svg_gracefully(self, temp_dir):
         """Test extract handles empty SVG gracefully."""
         svg = temp_dir / "empty.svg"
-        svg.write_text('<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"></svg>', encoding='utf-8')
+        svg.write_text('<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"></svg>', encoding="utf-8")
         result = extract(svg)
         assert result is not None
 
@@ -146,6 +148,7 @@ class TestExtractorEdgeCases:
 # -------------------------------
 # Injection edge cases
 # -------------------------------
+
 
 class TestInjectionEdgeCases:
     """Edge case tests for injection."""
@@ -155,8 +158,8 @@ class TestInjectionEdgeCases:
         svg = temp_dir / "test.svg"
         out_dir = temp_dir / "out"
         out_dir.mkdir()
-        content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hi</tspan></text></switch></svg>'''
-        svg.write_text(content, encoding='utf-8')
+        content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hi</tspan></text></switch></svg>"""
+        svg.write_text(content, encoding="utf-8")
         mappings = {"new": {"hi": {"ar": "مرحبا"}}}
         tree = inject(svg, all_mappings=mappings, output_dir=out_dir, save_result=True)
         assert tree is not None
@@ -165,8 +168,8 @@ class TestInjectionEdgeCases:
     def test_inject_case_sensitive_mode(self, temp_dir):
         """Test inject in case-sensitive mode."""
         svg = temp_dir / "test.svg"
-        content = '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>'''
-        svg.write_text(content, encoding='utf-8')
+        content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
+        svg.write_text(content, encoding="utf-8")
         mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
         tree, stats = inject(svg, all_mappings=mappings, case_insensitive=False, return_stats=True)
         assert tree is not None

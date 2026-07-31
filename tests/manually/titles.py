@@ -1,8 +1,4 @@
 import json
-import sys
-from pathlib import Path
-
-
 
 from CopySVGTranslation import get_titles_translations
 
@@ -14,7 +10,7 @@ expected_data = {
         "eu": "Parkinsonen gaixotasunaren prebalentzia, 2028",
         "cs": "Prevalence Parkinsonovy nemoci, 2028",
         "si": "පාකින්සන් රෝග ව්‍යාප්තිය, 2028",
-        "ar": "انتشار مرض باركنسون، 2028"
+        "ar": "انتشار مرض باركنسون، 2028",
     }
 }
 insert_data = {
@@ -25,12 +21,10 @@ insert_data = {
         "eu": "Parkinsonen gaixotasunaren prebalentzia,",
         "cs": "Prevalence Parkinsonovy nemoci,",
         "si": "පාකින්සන් රෝග ව්‍යාප්තිය,",
-        "ar": "انتشار مرض باركنسون،"
+        "ar": "انتشار مرض باركنسون،",
     }
 }
-default_texts = [
-    "parkinson's disease prevalence, 2028"
-]
+default_texts = ["parkinson's disease prevalence, 2028"]
 
 result = get_titles_translations(insert_data, default_texts)
 

@@ -1,10 +1,12 @@
 """
-python I:/SVG_PY/CopySVGTranslation/tests/manually/extract.py
+python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/extract.py
 """
-import sys
-import tempfile
+
 import logging
+import tempfile
 from pathlib import Path
+
+from CopySVGTranslation import extract, make_translation_ready
 
 logger = logging.getLogger("CopySVGTranslation")
 logger.setLevel(logging.DEBUG)
@@ -13,15 +15,11 @@ console = logging.StreamHandler()
 console.setFormatter(logging.Formatter("%(levelname)s - %(message)s"))
 logger.addHandler(console)
 
-
-
-from CopySVGTranslation import extract, make_translation_ready
-
 temp_dir = Path(tempfile.mkdtemp())
 svg_file = temp_dir / "test.svg"
 
 svg_file.write_text(
-    '''<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
+    """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
     <switch>
         <text id="t0-ar" systemLanguage="ar">
             <tspan id="t0-ar">الموسيقى في عام 2020</tspan>
@@ -44,8 +42,8 @@ svg_file.write_text(
             <tspan id="t0">Hello</tspan>
         </text>
     </switch>
-    </svg>''',
-    encoding='utf-8',
+    </svg>""",
+    encoding="utf-8",
 )
 
 make_translation_ready(svg_file, write_back=True)

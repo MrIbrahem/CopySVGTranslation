@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
+
 import pytest
 from lxml import etree
 
-
-from CopySVGTranslation.nested_analyze.find_nested import match_nested_tags, fix_nested_file
+from CopySVGTranslation.nested_analyze.find_nested import fix_nested_file, match_nested_tags
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -50,7 +48,7 @@ def test_flat_tspans_only_returns_empty(temp_dir: Path):
 
 
 def test_nested_tspan_single_hit(temp_dir: Path):
-    p = _write_svg(temp_dir, '<text><tspan>One<tspan>Two</tspan>Three</tspan></text>')
+    p = _write_svg(temp_dir, "<text><tspan>One<tspan>Two</tspan>Three</tspan></text>")
     res = match_nested_tags(p)
     assert len(res) == 1
     assert "<tspan" in res[0]
@@ -58,13 +56,7 @@ def test_nested_tspan_single_hit(temp_dir: Path):
 
 
 def test_nested_tspan_multiple_hits(temp_dir: Path):
-    p = _write_svg(
-        temp_dir,
-        '<text>'
-        '<tspan>X<tspan>Y</tspan></tspan>'
-        '<tspan>P<tspan>Q</tspan></tspan>'
-        '</text>'
-    )
+    p = _write_svg(temp_dir, "<text><tspan>X<tspan>Y</tspan></tspan><tspan>P<tspan>Q</tspan></tspan></text>")
     res = match_nested_tags(p)
     assert len(res) == 2
     assert all(r.count("<tspan") >= 2 for r in res)
@@ -73,14 +65,14 @@ def test_nested_tspan_multiple_hits(temp_dir: Path):
 def test_counts_deeply_nested_levels(temp_dir: Path):
     p = _write_svg(
         temp_dir,
-        '''<text>
+        """<text>
             <tspan>
                 a<tspan>
                 b<tspan>c</tspan>d
                 </tspan>
                 e
             </tspan>
-        </text>'''
+        </text>""",
     )
     res = match_nested_tags(p)
     # Only the outermost <tspan> with element children is captured
@@ -90,16 +82,14 @@ def test_counts_deeply_nested_levels(temp_dir: Path):
 
 def test_tspan_with_non_element_children_is_ignored(temp_dir: Path):
     # No child elements, only text and tails
-    p = _write_svg(temp_dir, '<text><tspan>hello world</tspan></text>')
+    p = _write_svg(temp_dir, "<text><tspan>hello world</tspan></text>")
     assert match_nested_tags(p) == []
 
 
 def test_namespaced_children_are_counted(temp_dir: Path):
     p = _write_svg(
         temp_dir,
-        '<text><tspan>n '
-        f'<foreignObject xmlns="{SVG_NS}"><tspan>m</tspan></foreignObject>'
-        '</tspan></text>'
+        f"<text><tspan>n<foreignObject xmlns='{SVG_NS}'><tspan>m</tspan></foreignObject></tspan></text>",
     )
     res = match_nested_tags(p)
     assert len(res) == 1
@@ -108,18 +98,16 @@ def test_namespaced_children_are_counted(temp_dir: Path):
 
 
 def test_serialization_has_no_backslash_escapes(temp_dir: Path):
-    p = _write_svg(
-        temp_dir,
-        '<text><tspan x="10" y="20">A<tspan>B</tspan></tspan></text>'
-    )
+    p = _write_svg(temp_dir, '<text><tspan x="10" y="20">A<tspan>B</tspan></tspan></text>')
     s = "".join(match_nested_tags(p))
     assert '\\"' not in s and "\\'" not in s
+
 
 # ---------- Integration tests: fix then re-check ----------
 
 
 def test_fix_simple_nested_then_none_left(temp_dir: Path):
-    p = _write_svg(temp_dir, '<text><tspan>One<tspan>Two</tspan></tspan></text>')
+    p = _write_svg(temp_dir, "<text><tspan>One<tspan>Two</tspan></tspan></text>")
     before = len(match_nested_tags(p))
     fix_nested_file(p)
     after = len(match_nested_tags(p))
@@ -128,10 +116,7 @@ def test_fix_simple_nested_then_none_left(temp_dir: Path):
 
 
 def test_fix_two_nested_in_same_text_node(temp_dir: Path):
-    p = _write_svg(
-        temp_dir,
-        '<text><tspan>A<tspan>B</tspan>C<tspan>D</tspan>E</tspan></text>'
-    )
+    p = _write_svg(temp_dir, "<text><tspan>A<tspan>B</tspan>C<tspan>D</tspan>E</tspan></text>")
     assert len(match_nested_tags(p)) == 1
     fix_nested_file(p)
     assert match_nested_tags(p) == []
@@ -143,13 +128,7 @@ def test_fix_two_nested_in_same_text_node(temp_dir: Path):
 
 
 def test_fix_preserves_sibling_tspans_order_and_values(temp_dir: Path):
-    p = _write_svg(
-        temp_dir,
-        '<text>'
-        '<tspan>L<tspan>1</tspan></tspan>'
-        '<tspan>L<tspan>2</tspan></tspan>'
-        '</text>'
-    )
+    p = _write_svg(temp_dir, "<text><tspan>L<tspan>1</tspan></tspan><tspan>L<tspan>2</tspan></tspan></text>")
     fix_nested_file(p)
     parser = etree.XMLParser(remove_blank_text=True)
     root = etree.parse(str(p), parser).getroot()
@@ -158,10 +137,7 @@ def test_fix_preserves_sibling_tspans_order_and_values(temp_dir: Path):
 
 
 def test_fix_keeps_attributes_on_outer_tspan(temp_dir: Path):
-    p = _write_svg(
-        temp_dir,
-        '<text><tspan x="10" y="20" class="c">A<tspan>B</tspan></tspan></text>'
-    )
+    p = _write_svg(temp_dir, '<text><tspan x="10" y="20" class="c">A<tspan>B</tspan></tspan></text>')
     fix_nested_file(p)
     parser = etree.XMLParser(remove_blank_text=True)
     root = etree.parse(str(p), parser).getroot()
@@ -172,12 +148,7 @@ def test_fix_keeps_attributes_on_outer_tspan(temp_dir: Path):
 
 def test_fix_clears_tail_of_fixed_tspan(temp_dir: Path):
     # After fix, code sets tail=None on the modified tspan
-    p = _write_svg(
-        temp_dir,
-        '<text>'
-        '<tspan>A<tspan>B</tspan></tspan>TAIL'
-        '</text>'
-    )
+    p = _write_svg(temp_dir, "<text><tspan>A<tspan>B</tspan></tspan>TAIL</text>")
     # Create explicit tail by putting text outside; fix only sets tail for the fixed node
     fix_nested_file(p)
     parser = etree.XMLParser(remove_blank_text=True)
@@ -187,10 +158,7 @@ def test_fix_clears_tail_of_fixed_tspan(temp_dir: Path):
 
 
 def test_fix_deeply_nested_concatenation_is_linear(temp_dir: Path):
-    p = _write_svg(
-        temp_dir,
-        '<text><tspan>0<tspan>1<tspan>2</tspan>3</tspan>4</tspan></text>'
-    )
+    p = _write_svg(temp_dir, "<text><tspan>0<tspan>1<tspan>2</tspan>3</tspan>4</tspan></text>")
     fix_nested_file(p)
     parser = etree.XMLParser(remove_blank_text=True)
     root = etree.parse(str(p), parser).getroot()
@@ -199,7 +167,7 @@ def test_fix_deeply_nested_concatenation_is_linear(temp_dir: Path):
 
 
 def test_fix_does_not_touch_flat_structure(temp_dir: Path):
-    p = _write_svg(temp_dir, '<text><tspan>Flat</tspan></text>')
+    p = _write_svg(temp_dir, "<text><tspan>Flat</tspan></text>")
     before = Path.read_text(p, encoding="utf-8")
     fix_nested_file(p, pretty_print=False)
     after = Path.read_text(p, encoding="utf-8")
@@ -208,17 +176,12 @@ def test_fix_does_not_touch_flat_structure(temp_dir: Path):
     ra = etree.tostring(etree.fromstring(after.encode("utf-8")), with_tail=False)
     assert rb == ra
 
+
 # ---------- Scenario tests mirrored from real OWID-like snippets ----------
 
 
 def test_fix_preserves_text_order_with_tails_and_siblings(temp_dir: Path):
-    p = _write_svg(
-        temp_dir,
-        '<text>'
-        '<tspan>Start<tspan>Mid</tspan>End</tspan>'
-        '<tspan>Foo</tspan>'
-        '</text>'
-    )
+    p = _write_svg(temp_dir, "<text><tspan>Start<tspan>Mid</tspan>End</tspan><tspan>Foo</tspan></text>")
     fix_nested_file(p)
     parser = etree.XMLParser(remove_blank_text=True)
     root = etree.parse(str(p), parser).getroot()
@@ -226,16 +189,17 @@ def test_fix_preserves_text_order_with_tails_and_siblings(temp_dir: Path):
     assert t1.text == "StartMidEnd"
     assert t2.text == "Foo"
 
+
 # ---------- Parametrized edge cases ----------
 
 
 @pytest.mark.parametrize(
     "inner,expected_hits",
     [
-        ('<text><tspan/></text>', 0),
-        ('<text><tspan> </tspan></text>', 0),
-        ('<text><tspan>α<tspan>β</tspan>γ</tspan></text>', 1),
-        ('<text><tspan>RTL ‎<tspan>AR</tspan> نص</tspan></text>', 1),
+        ("<text><tspan/></text>", 0),
+        ("<text><tspan> </tspan></text>", 0),
+        ("<text><tspan>α<tspan>β</tspan>γ</tspan></text>", 1),
+        ("<text><tspan>RTL ‎<tspan>AR</tspan> نص</tspan></text>", 1),
         ('<text><tspan xml:space="preserve">A<tspan> B </tspan>C</tspan></text>', 1),
     ],
 )
@@ -244,6 +208,7 @@ def test_parametrized_various_patterns(temp_dir: Path, inner: str, expected_hits
     assert len(match_nested_tags(p)) == expected_hits
     fix_nested_file(p)
     assert len(match_nested_tags(p)) == 0
+
 
 # ---------- Safety on huge content ----------
 

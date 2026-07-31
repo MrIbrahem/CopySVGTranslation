@@ -131,7 +131,7 @@ class TestNormalizeTextFunction:
 
     def test_normalize_text_unicode_whitespace(self):
         """normalize_text should handle unicode whitespace."""
-        assert normalize_text("hello\u00A0world") == "hello world"  # Non-breaking space
+        assert normalize_text("hello\u00a0world") == "hello world"  # Non-breaking space
 
     def test_normalize_text_single_word(self):
         """normalize_text should handle single words."""
@@ -256,10 +256,7 @@ class TestIntegrationWorkflows:
         data_file = tmp_path / "data.json"
 
         # Copy target fixture
-        target_svg.write_text(
-            (FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"),
-            encoding="utf-8"
-        )
+        target_svg.write_text((FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
 
         # Run the workflow
         result = svg_extract_and_inject(
@@ -277,10 +274,7 @@ class TestIntegrationWorkflows:
     def test_inject_with_dict(self, tmp_path: Path):
         """Test inject with pre-extracted translations dict."""
         target_svg = tmp_path / "target.svg"
-        target_svg.write_text(
-            (FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"),
-            encoding="utf-8"
-        )
+        target_svg.write_text((FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
 
         # Extract translations first
         translations = extract(FIXTURES_DIR / "source.svg")
@@ -334,10 +328,7 @@ class TestEdgeCasesAndErrorHandling:
     def test_inject_with_empty_mapping_list(self, tmp_path: Path):
         """inject should handle empty mapping file list."""
         target_svg = tmp_path / "target.svg"
-        target_svg.write_text(
-            (FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"),
-            encoding="utf-8"
-        )
+        target_svg.write_text((FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
 
         result = inject(target_svg, [])
         # Should return None or handle gracefully

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
 
 from .extraction import extract
 from .injection import inject
@@ -53,7 +53,7 @@ def svg_extract_and_inject(
     data_output_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Save translations to JSON
-    with open(data_output_file, 'w', encoding='utf-8') as handle:
+    with open(data_output_file, "w", encoding="utf-8") as handle:
         json.dump(translations, handle, indent=2, ensure_ascii=False)
 
     logger.debug(f"Saved translations to {data_output_file}")

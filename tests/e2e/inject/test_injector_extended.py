@@ -4,21 +4,19 @@ and previously untested functions.
 """
 
 import json
+import shutil
 import tempfile
 import unittest
-import shutil
 from pathlib import Path
 
 from lxml import etree
 
-
-
-from CopySVGTranslation.injection.utils import get_target_path
 from CopySVGTranslation.injection.injector import (
     load_all_mappings,
-    work_on_switches,
     sort_switch_texts,
+    work_on_switches,
 )
+from CopySVGTranslation.injection.utils import get_target_path
 
 
 class TestGetTargetPath(unittest.TestCase):
@@ -28,7 +26,7 @@ class TestGetTargetPath(unittest.TestCase):
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
         self.svg_path = self.test_dir / "source.svg"
-        self.svg_path.write_text("<svg></svg>", encoding='utf-8')
+        self.svg_path.write_text("<svg></svg>", encoding="utf-8")
 
     def tearDown(self):
         """Clean up test fixtures."""
@@ -86,86 +84,83 @@ class TestWorkOnSwitches(unittest.TestCase):
 
     def test_work_on_switches_basic(self):
         """Test basic switch processing."""
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <switch>
                 <text id="text1"><tspan>Hello</tspan></text>
             </switch>
-        </svg>'''
+        </svg>"""
         root = etree.fromstring(svg_content)
         existing_ids = {"text1"}
         mappings = {"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}}
 
         stats = work_on_switches(root, existing_ids, mappings, case_insensitive=True)
 
-        assert stats['processed_switches'] == 1
-        assert stats['inserted_translations'] == 2
+        assert stats["processed_switches"] == 1
+        assert stats["inserted_translations"] == 2
 
     def test_work_on_switches_no_overwrite(self):
         """Test switch processing without overwriting existing translations."""
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <switch>
                 <text id="text1-ar" systemLanguage="ar"><tspan>مرحبا</tspan></text>
                 <text id="text1"><tspan>Hello</tspan></text>
             </switch>
-        </svg>'''
+        </svg>"""
         root = etree.fromstring(svg_content)
         existing_ids = {"text1", "text1-ar"}
         mappings = {"new": {"hello": {"ar": "مرحبا جديد", "fr": "Bonjour"}}}
 
         stats = work_on_switches(root, existing_ids, mappings, overwrite=False)
 
-        assert stats['skipped_translations'] == 1
-        assert stats['inserted_translations'] == 1
+        assert stats["skipped_translations"] == 1
+        assert stats["inserted_translations"] == 1
 
     def test_work_on_switches_with_overwrite(self):
         """Test switch processing with overwriting existing translations."""
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <switch>
                 <text id="text1-ar" systemLanguage="ar"><tspan>Old</tspan></text>
                 <text id="text1"><tspan>Hello</tspan></text>
             </switch>
-        </svg>'''
+        </svg>"""
         root = etree.fromstring(svg_content)
         existing_ids = {"text1", "text1-ar"}
         mappings = {"new": {"hello": {"ar": "New"}}}
 
         stats = work_on_switches(root, existing_ids, mappings, overwrite=True)
 
-        assert stats['updated_translations'] == 1
+        assert stats["updated_translations"] == 1
 
     def test_work_on_switches_case_sensitive(self):
         """Test switch processing with case-sensitive matching."""
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <switch>
                 <text id="text1"><tspan>Hello</tspan></text>
             </switch>
-        </svg>'''
+        </svg>"""
         root = etree.fromstring(svg_content)
         existing_ids = {"text1"}
         mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
 
         stats = work_on_switches(root, existing_ids, mappings, case_insensitive=False)
 
-        assert stats['inserted_translations'] == 1
+        assert stats["inserted_translations"] == 1
 
     def test_work_on_switches_with_year_suffix(self):
         """Test switch processing with year suffix handling."""
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <switch>
                 <text id="text1"><tspan>Population 2020</tspan></text>
             </switch>
-        </svg>'''
+        </svg>"""
         root = etree.fromstring(svg_content)
         existing_ids = {"text1"}
-        mappings = {
-            "title": {"Population ": {"ar": "السكان ", "fr": "Population "}},
-            "new": {}
-        }
+        mappings = {"title": {"Population ": {"ar": "السكان ", "fr": "Population "}}, "new": {}}
 
         stats = work_on_switches(root, existing_ids, mappings, case_insensitive=True)
 
         # Year suffix logic should be applied
-        self.assertGreaterEqual(stats['processed_switches'], 0)
+        self.assertGreaterEqual(stats["processed_switches"], 0)
 
 
 class TestSortSwitchTexts(unittest.TestCase):
@@ -173,44 +168,44 @@ class TestSortSwitchTexts(unittest.TestCase):
 
     def test_sort_switch_texts_basic(self):
         """Test sorting text elements in a switch."""
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <switch>
                 <text systemLanguage="ar">Arabic</text>
                 <text>Default</text>
                 <text systemLanguage="fr">French</text>
             </switch>
-        </svg>'''
+        </svg>"""
         root = etree.fromstring(svg_content)
-        switch = root.find('.//{http://www.w3.org/2000/svg}switch')
+        switch = root.find(".//{http://www.w3.org/2000/svg}switch")
 
         sort_switch_texts(switch)
 
-        texts = switch.findall('.//{http://www.w3.org/2000/svg}text')
+        texts = switch.findall(".//{http://www.w3.org/2000/svg}text")
         # Default (no systemLanguage) should be last
-        assert texts[-1].get('systemLanguage') is None
+        assert texts[-1].get("systemLanguage") is None
 
     def test_sort_switch_texts_empty_switch(self):
         """Test sorting an empty switch element."""
         svg_content = '<svg xmlns="http://www.w3.org/2000/svg"><switch></switch></svg>'
         root = etree.fromstring(svg_content)
-        switch = root.find('.//{http://www.w3.org/2000/svg}switch')
+        switch = root.find(".//{http://www.w3.org/2000/svg}switch")
 
         # Should not raise an error
         sort_switch_texts(switch)
 
     def test_sort_switch_texts_only_default(self):
         """Test sorting with only default text."""
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <switch>
                 <text>Default only</text>
             </switch>
-        </svg>'''
+        </svg>"""
         root = etree.fromstring(svg_content)
-        switch = root.find('.//{http://www.w3.org/2000/svg}switch')
+        switch = root.find(".//{http://www.w3.org/2000/svg}switch")
 
         sort_switch_texts(switch)
 
-        texts = switch.findall('.//{http://www.w3.org/2000/svg}text')
+        texts = switch.findall(".//{http://www.w3.org/2000/svg}text")
         assert len(texts) == 1
 
 
@@ -234,7 +229,7 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
     def test_load_all_mappings_empty_json_file(self):
         """Test loading empty JSON file."""
         mapping_file = self.test_dir / "empty.json"
-        mapping_file.write_text("{}", encoding='utf-8')
+        mapping_file.write_text("{}", encoding="utf-8")
 
         result = load_all_mappings([mapping_file])
 
@@ -243,7 +238,7 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
     def test_load_all_mappings_corrupted_json(self):
         """Test loading corrupted JSON file."""
         mapping_file = self.test_dir / "corrupted.json"
-        mapping_file.write_text("{ corrupted", encoding='utf-8')
+        mapping_file.write_text("{ corrupted", encoding="utf-8")
 
         result = load_all_mappings([mapping_file])
 
@@ -253,14 +248,10 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
         """Test loading with nested mapping structure."""
         mapping_file = self.test_dir / "nested.json"
         test_mapping = {
-            "new": {
-                "hello": {"ar": "مرحبا", "fr": "Bonjour"}
-            },
-            "title": {
-                "Population ": {"ar": "السكان ", "fr": "Population "}
-            }
+            "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}},
+            "title": {"Population ": {"ar": "السكان ", "fr": "Population "}},
         }
-        with open(mapping_file, 'w', encoding='utf-8') as f:
+        with open(mapping_file, "w", encoding="utf-8") as f:
             json.dump(test_mapping, f, ensure_ascii=False)
 
         result = load_all_mappings([mapping_file])
@@ -273,10 +264,10 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
         m1 = self.test_dir / "m1.json"
         m2 = self.test_dir / "m2.json"
 
-        with open(m1, 'w', encoding='utf-8') as f:
+        with open(m1, "w", encoding="utf-8") as f:
             json.dump({"key": {"lang1": "value1"}}, f)
 
-        with open(m2, 'w', encoding='utf-8') as f:
+        with open(m2, "w", encoding="utf-8") as f:
             json.dump({"key": {"lang2": "value2"}}, f)
 
         result = load_all_mappings([m1, m2])
@@ -287,7 +278,7 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
     def test_load_all_mappings_string_paths(self):
         """Test loading with string paths instead of Path objects."""
         mapping_file = self.test_dir / "test.json"
-        with open(mapping_file, 'w', encoding='utf-8') as f:
+        with open(mapping_file, "w", encoding="utf-8") as f:
             json.dump({"key": {"value": "test"}}, f)
 
         result = load_all_mappings([str(mapping_file)])
@@ -295,5 +286,5 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
         assert "key" in result
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

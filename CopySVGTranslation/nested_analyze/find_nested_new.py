@@ -31,10 +31,12 @@ tests for the above functionality are in tests/nested_analyze/test_fix_nested_fi
 pytest -m todo
 
 """
+
 from __future__ import annotations
 
 import logging
 from pathlib import Path
+
 from lxml import etree
 
 logger = logging.getLogger("CopySVGTranslation")
@@ -163,10 +165,7 @@ def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_pr
     root = fix_nested_tspans(root, "a")
     # ---
     try:
-        new_path.write_text(
-            etree.tostring(root, encoding="unicode", pretty_print=pretty_print),
-            encoding="utf-8"
-        )
+        new_path.write_text(etree.tostring(root, encoding="unicode", pretty_print=pretty_print), encoding="utf-8")
         return True
     except Exception:
         logger.error(f"Failed to write fixed svg file to: {str(new_path)}")

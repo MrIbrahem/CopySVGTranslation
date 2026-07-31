@@ -48,7 +48,7 @@ The codebase follows a two-phase pipeline: **Extraction** and **Injection**.
 
 - **`CopySVGTranslation/titles.py`**: Handles title-like text (entries ending with 4-digit years) with special handling.
 
-- **`CopySVGTranslation/nested_analyze/`**: Utilities for detecting and fixing nested `<tspan>` structures that would otherwise cause `SvgNestedTspanException`.
+- **`CopySVGTranslation/nested_analyze/`**: Utilities for detecting and fixing nested `<tspan>` structures that would otherwise cause `SvgNestedTspanExceptionError`.
 
 ### Data Flow
 
@@ -73,8 +73,8 @@ The translation JSON format:
 
 ### Exception Types
 
-- **`SvgStructureException`**: Raised for invalid SVG structures (tref elements, CSS with IDs, non-tspan children in text, etc.)
-- **`SvgNestedTspanException`**: Raised when nested `<tspan>` elements are detected. Use `fix_nested_tspans()` or `fix_nested_file()` to resolve.
+- **`SvgStructureExceptionError`**: Raised for invalid SVG structures (tref elements, CSS with IDs, non-tspan children in text, etc.)
+- **`SvgNestedTspanExceptionError`**: Raised when nested `<tspan>` elements are detected. Use `fix_nested_tspans()` or `fix_nested_file()` to resolve.
 
 ## Dependencies
 

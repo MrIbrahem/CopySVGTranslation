@@ -4,21 +4,20 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import Iterable, Mapping
 
 from lxml import etree
 
 from ..text_utils import extract_text_from_node, normalize_text
-from ..titles import get_titles_translations
 from ..titles_new import get_new_titles_translations
-from .utils import (
-    SvgNestedTspanException,
-    SvgStructureException,
-    get_target_path,
-    file_langs,
-)
 from .preparation import make_translation_ready
+from .utils import (
+    SvgNestedTspanExceptionError,
+    SvgStructureExceptionError,
+    file_langs,
+    get_target_path,
+)
 
 logger = logging.getLogger("CopySVGTranslation")
 
@@ -51,7 +50,7 @@ def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
             continue
 
         try:
-            with open(mapping_path, 'r', encoding='utf-8') as f:
+            with open(mapping_path, "r", encoding="utf-8") as f:
                 mappings = json.load(f)
         except Exception as exc:
             logger.error(f"Error loading mapping file {mapping_path}: {exc}")
@@ -73,17 +72,17 @@ def work_on_switches(
     overwrite: bool = False,
 ) -> dict:
     """Process ``<switch>`` elements and insert or update translations."""
-    svg_ns = {'svg': 'http://www.w3.org/2000/svg'}
+    svg_ns = {"svg": "http://www.w3.org/2000/svg"}
     stats = {
-        'all_languages': 0,
-        'new_languages': 0,
-        'processed_switches': 0,
-        'inserted_translations': 0,
-        'skipped_translations': 0,
-        'updated_translations': 0,
+        "all_languages": 0,
+        "new_languages": 0,
+        "processed_switches": 0,
+        "inserted_translations": 0,
+        "skipped_translations": 0,
+        "updated_translations": 0,
     }
 
-    switches = root.xpath('//svg:switch', namespaces=svg_ns)
+    switches = root.xpath("//svg:switch", namespaces=svg_ns)
     logger.debug(f"Found {len(switches)} switch elements")
 
     if not switches:
@@ -94,7 +93,7 @@ def work_on_switches(
     all_mappings = mappings.get("new", mappings)
 
     for switch in switches:
-        text_elements = switch.xpath('./svg:text', namespaces=svg_ns)
+        text_elements = switch.xpath("./svg:text", namespaces=svg_ns)
         if not text_elements:
             continue
 
@@ -102,7 +101,7 @@ def work_on_switches(
         default_node = None
 
         for text_elem in text_elements:
-            system_lang = text_elem.get('systemLanguage')
+            system_lang = text_elem.get("systemLanguage")
             if system_lang:
                 continue
 
@@ -135,7 +134,7 @@ def work_on_switches(
         if not available_translations:
             continue
 
-        existing_languages = {t.get('systemLanguage') for t in text_elements if t.get('systemLanguage')}
+        existing_languages = {t.get("systemLanguage") for t in text_elements if t.get("systemLanguage")}
 
         # We assume all texts share same set of languages
         all_langs = set()
@@ -144,16 +143,16 @@ def work_on_switches(
 
         for lang in all_langs:
             if lang in existing_languages and not overwrite:
-                stats['skipped_translations'] += 1
+                stats["skipped_translations"] += 1
                 continue
 
             # Create or update node
             if lang in existing_languages and overwrite:
                 for text_elem in text_elements:
-                    if text_elem.get('systemLanguage') != lang:
+                    if text_elem.get("systemLanguage") != lang:
                         continue
 
-                    tspans = text_elem.xpath('./svg:tspan', namespaces=svg_ns)
+                    tspans = text_elem.xpath("./svg:tspan", namespaces=svg_ns)
                     for i, tspan in enumerate(tspans):
                         english_text = default_texts[i]
                         lookup_key = english_text.lower() if case_insensitive else english_text
@@ -162,19 +161,19 @@ def work_on_switches(
                         elif lookup_key in available_translations and lang in available_translations[lookup_key]:
                             tspan.text = available_translations[lookup_key][lang]
 
-                    stats['updated_translations'] += 1
+                    stats["updated_translations"] += 1
                     break
                 continue
 
             new_node = etree.Element(default_node.tag, attrib=default_node.attrib)
-            new_node.set('systemLanguage', lang)
-            original_id = default_node.get('id')
+            new_node.set("systemLanguage", lang)
+            original_id = default_node.get("id")
             if original_id:
                 new_id = generate_unique_id(original_id, lang, existing_ids)
-                new_node.set('id', new_id)
+                new_node.set("id", new_id)
                 existing_ids.add(new_id)
 
-            tspans = default_node.xpath('./svg:tspan', namespaces=svg_ns)
+            tspans = default_node.xpath("./svg:tspan", namespaces=svg_ns)
 
             if tspans:
                 for tspan in tspans:
@@ -185,10 +184,10 @@ def work_on_switches(
                     new_tspan.text = translated
 
                     # Generate unique ID for tspan if needed
-                    original_tspan_id = tspan.get('id')
+                    original_tspan_id = tspan.get("id")
                     if original_tspan_id:
                         new_tspan_id = generate_unique_id(original_tspan_id, lang, existing_ids)
-                        new_tspan.set('id', new_tspan_id)
+                        new_tspan.set("id", new_tspan_id)
                         existing_ids.add(new_tspan_id)
 
                     new_node.append(new_tspan)
@@ -199,9 +198,9 @@ def work_on_switches(
                 new_node.text = all_mappings.get(key, {}).get(lang, english_text)
 
             switch.append(new_node)
-            stats['inserted_translations'] += 1
+            stats["inserted_translations"] += 1
 
-        stats['processed_switches'] += 1
+        stats["processed_switches"] += 1
 
     return stats
 
@@ -272,10 +271,10 @@ def inject(
     # Parse SVG as XML
     try:
         tree, root = make_translation_ready(inject_path, write_back=False)
-    except SvgNestedTspanException as exc:
+    except SvgNestedTspanExceptionError as exc:
         error = {"nested_tspan_error": True, "node": exc.node()}
         return (None, error) if return_stats else None
-    except SvgStructureException as exc:
+    except SvgStructureExceptionError as exc:
         error = {"error": str(exc)}
         return (None, error) if return_stats else None
     except etree.XMLSyntaxError as exc:
@@ -289,7 +288,7 @@ def inject(
 
     # Collect all existing IDs to ensure uniqueness
     # existing_ids = {elem.get('id') for elem in root.xpath('//*[@id]') if elem.get('id')}
-    existing_ids = set(root.xpath('//@id'))
+    existing_ids = set(root.xpath("//@id"))
 
     before_languages = file_langs(inject_path)
 
@@ -311,10 +310,7 @@ def inject(
         try:
             target_path = get_target_path(output_file, output_dir, inject_path)
             tree.write(
-                str(target_path),
-                encoding='utf-8',
-                xml_declaration=True,
-                pretty_print=kwargs.get("pretty_print", True)
+                str(target_path), encoding="utf-8", xml_declaration=True, pretty_print=kwargs.get("pretty_print", True)
             )
             after_languages = file_langs(target_path)
             logger.debug(f"Saved modified SVG to {target_path}")

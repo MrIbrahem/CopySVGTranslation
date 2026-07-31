@@ -3,23 +3,22 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
+import shutil
 import tempfile
 import unittest
-import shutil
 from pathlib import Path
 
 from lxml import etree
 
-
 from CopySVGTranslation.injection import (
-    SvgStructureException,
+    SvgStructureExceptionError,
 )
 from CopySVGTranslation.injection.preparation import (
-    normalize_lang,
-    get_text_content,
     clone_element,
-    reorder_texts,
+    get_text_content,
     make_translation_ready,
+    normalize_lang,
+    reorder_texts,
 )
 
 
@@ -83,9 +82,9 @@ class TestGetTextContent(unittest.TestCase):
 
     def test_get_text_content_with_children(self):
         """Test getting text content with child elements."""
-        xml = '''<text xmlns="http://www.w3.org/2000/svg">
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
             Hello <tspan>World</tspan> Test
-        </text>'''
+        </text>"""
         elem = etree.fromstring(xml)
         result = get_text_content(elem)
 
@@ -103,9 +102,9 @@ class TestGetTextContent(unittest.TestCase):
 
     def test_get_text_content_nested_structure(self):
         """Test getting text content with nested structure."""
-        xml = '''<text xmlns="http://www.w3.org/2000/svg">
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
             <tspan>First<tspan>Nested</tspan></tspan>
-        </text>'''
+        </text>"""
         elem = etree.fromstring(xml)
         result = get_text_content(elem)
 
@@ -122,23 +121,23 @@ class TestCloneElement(unittest.TestCase):
         elem = etree.fromstring(xml)
         cloned = clone_element(elem)
 
-        assert cloned.get('id') == 'text1'
-        assert cloned.text == 'Hello'
+        assert cloned.get("id") == "text1"
+        assert cloned.text == "Hello"
         assert cloned is not elem
 
     def test_clone_element_with_children(self):
         """Test cloning element with children."""
-        xml = '''<text xmlns="http://www.w3.org/2000/svg">
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
             <tspan id="t1">First</tspan>
             <tspan id="t2">Second</tspan>
-        </text>'''
+        </text>"""
         elem = etree.fromstring(xml)
         cloned = clone_element(elem)
 
-        children = cloned.findall('{http://www.w3.org/2000/svg}tspan')
+        children = cloned.findall("{http://www.w3.org/2000/svg}tspan")
         assert len(children) == 2
-        assert children[0].get('id') == 't1'
-        assert children[1].get('id') == 't2'
+        assert children[0].get("id") == "t1"
+        assert children[1].get("id") == "t2"
 
     def test_clone_element_deep_copy(self):
         """Test that clone is a deep copy."""
@@ -147,10 +146,10 @@ class TestCloneElement(unittest.TestCase):
         cloned = clone_element(elem)
 
         # Modify original
-        elem.set('id', 'modified')
+        elem.set("id", "modified")
 
         # Clone should be unchanged
-        assert cloned.get('id') == 'text1'
+        assert cloned.get("id") == "text1"
 
     def test_clone_element_with_attributes(self):
         """Test cloning preserves all attributes."""
@@ -158,10 +157,10 @@ class TestCloneElement(unittest.TestCase):
         elem = etree.fromstring(xml)
         cloned = clone_element(elem)
 
-        assert cloned.get('id') == 't1'
-        assert cloned.get('class') == 'label'
-        assert cloned.get('x') == '10'
-        assert cloned.get('y') == '20'
+        assert cloned.get("id") == "t1"
+        assert cloned.get("class") == "label"
+        assert cloned.get("x") == "10"
+        assert cloned.get("y") == "20"
 
 
 class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
@@ -178,127 +177,127 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
     def test_make_translation_ready_with_tref(self):
         """Test that SVG with tref raises exception."""
         svg_path = self.test_dir / "test.svg"
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <text><tref href="#someref"/></text>
-        </svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        </svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureException) as ctx:
+        with self.assertRaises(SvgStructureExceptionError) as ctx:
             make_translation_ready(svg_path)
 
-        assert 'tref' in str(ctx.exception)
+        assert "tref" in str(ctx.exception)
 
     def test_make_translation_ready_with_css_ids(self):
         """Test that CSS with ID selectors raises exception."""
         svg_path = self.test_dir / "test.svg"
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <style>#myid { fill: red; }</style>
             <text id="myid">Test</text>
-        </svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        </svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureException) as ctx:
+        with self.assertRaises(SvgStructureExceptionError) as ctx:
             make_translation_ready(svg_path)
 
-        assert 'css' in str(ctx.exception).lower()
+        assert "css" in str(ctx.exception).lower()
 
     def test_make_translation_ready_with_dollar_sign(self):
         """Test that text with dollar signs raises exception."""
         svg_path = self.test_dir / "test.svg"
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <text>Price: $10</text>
-        </svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        </svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureException) as ctx:
+        with self.assertRaises(SvgStructureExceptionError) as ctx:
             make_translation_ready(svg_path)
 
-        assert 'dollar' in str(ctx.exception).lower()
+        assert "dollar" in str(ctx.exception).lower()
 
     def test_make_translation_ready_nested_tspans(self):
         """Test that nested tspans raise exception."""
         svg_path = self.test_dir / "test.svg"
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <text><tspan>Outer<tspan>Inner</tspan></tspan></text>
-        </svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        </svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureException) as ctx:
+        with self.assertRaises(SvgStructureExceptionError) as ctx:
             make_translation_ready(svg_path)
 
-        assert 'nested' in str(ctx.exception).lower()
+        assert "nested" in str(ctx.exception).lower()
 
     def test_make_translation_ready_wraps_raw_text(self):
         """Test that raw text in text elements is wrapped in tspans."""
         svg_path = self.test_dir / "test.svg"
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <text>Raw text content</text>
-        </svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        </svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
 
         _tree, root = make_translation_ready(svg_path)
 
-        text_elem = root.find('.//{http://www.w3.org/2000/svg}text')
-        tspans = text_elem.findall('{http://www.w3.org/2000/svg}tspan')
+        text_elem = root.find(".//{http://www.w3.org/2000/svg}text")
+        tspans = text_elem.findall("{http://www.w3.org/2000/svg}tspan")
         assert len(tspans) > 0
 
     def test_make_translation_ready_creates_switch(self):
         """Test that text elements are wrapped in switch elements."""
         svg_path = self.test_dir / "test.svg"
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <g><text id="t1">Content</text></g>
-        </svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        </svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
 
         _tree, root = make_translation_ready(svg_path)
 
-        switches = root.findall('.//{http://www.w3.org/2000/svg}switch')
+        switches = root.findall(".//{http://www.w3.org/2000/svg}switch")
         assert len(switches) > 0
 
     def test_make_translation_ready_assigns_ids(self):
         """Test that missing IDs are assigned."""
         svg_path = self.test_dir / "test.svg"
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <text>No ID</text>
-        </svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        </svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
 
         _tree, root = make_translation_ready(svg_path)
 
-        text_elem = root.find('.//{http://www.w3.org/2000/svg}text')
-        assert text_elem.get('id') is not None
+        text_elem = root.find(".//{http://www.w3.org/2000/svg}text")
+        assert text_elem.get("id") is not None
 
     def test_make_translation_ready_duplicate_lang_error(self):
         """Test that duplicate language codes in switch raise exception."""
         svg_path = self.test_dir / "test.svg"
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <switch>
                 <text systemLanguage="ar">Arabic 1</text>
                 <text systemLanguage="ar">Arabic 2</text>
             </switch>
-        </svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        </svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureException) as ctx:
+        with self.assertRaises(SvgStructureExceptionError) as ctx:
             make_translation_ready(svg_path)
 
-        assert 'lang' in str(ctx.exception).lower()
+        assert "lang" in str(ctx.exception).lower()
 
     def test_make_translation_ready_splits_comma_langs(self):
         """Test that comma-separated languages are split."""
         svg_path = self.test_dir / "test.svg"
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <switch>
                 <text systemLanguage="ar,fr">Multi</text>
                 <text>Default</text>
             </switch>
-        </svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        </svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
 
         _tree, root = make_translation_ready(svg_path)
 
-        switch = root.find('.//{http://www.w3.org/2000/svg}switch')
-        text_elems = switch.findall('{http://www.w3.org/2000/svg}text')
+        switch = root.find(".//{http://www.w3.org/2000/svg}switch")
+        text_elems = switch.findall("{http://www.w3.org/2000/svg}text")
 
         # Should have split into separate text elements
         assert len(text_elems) > 2
@@ -306,16 +305,16 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
     def test_make_translation_ready_invalid_node_id(self):
         """Test that invalid node IDs raise exception."""
         svg_path = self.test_dir / "test.svg"
-        svg_content = '''<svg xmlns="http://www.w3.org/2000/svg">
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <text id="invalid|id">Test</text>
-        </svg>'''
-        svg_path.write_text(svg_content, encoding='utf-8')
+        </svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureException) as ctx:
+        with self.assertRaises(SvgStructureExceptionError) as ctx:
             make_translation_ready(svg_path)
 
-        assert 'id' in str(ctx.exception).lower()
+        assert "id" in str(ctx.exception).lower()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
