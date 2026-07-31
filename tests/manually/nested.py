@@ -5,16 +5,15 @@ python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/nested.py
 import logging
 from pathlib import Path
 
+from CopySVGTranslation import make_translation_ready
+from CopySVGTranslation.injection import SvgNestedTspanExceptionError
+
 logger = logging.getLogger("CopySVGTranslation")
 logger.setLevel(logging.DEBUG)
 
 console = logging.StreamHandler()
 console.setFormatter(logging.Formatter("%(levelname)s - %(message)s"))
 logger.addHandler(console)
-
-
-from CopySVGTranslation import make_translation_ready
-from CopySVGTranslation.injection import SvgNestedTspanException
 
 svg_file = Path(__file__).parent / "test.svg"
 
@@ -38,8 +37,8 @@ svg_file.write_text(svg_example, encoding="utf-8")
 data = {"new": {"lang none": {"la": "lang la (new)"}}}
 try:
     make_translation_ready(svg_file, True)
-except SvgNestedTspanException as e:
-    print("SvgNestedTspanException")
+except SvgNestedTspanExceptionError as e:
+    print("SvgNestedTspanExceptionError")
     print(e.node())
 
 # result = inject(inject_file=svg_file, all_mappings=data, save_result=True, overwrite=True, pretty_print=False)

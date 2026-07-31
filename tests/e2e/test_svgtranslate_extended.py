@@ -102,7 +102,7 @@ class TestSVGTranslate(unittest.TestCase):
         # Clean up temporary files
         shutil.rmtree(self.test_dir)
 
-    def assertTreeHasTranslations(self, tree, expected_texts=None):
+    def assert_tree_has_translations(self, tree, expected_texts=None):
         """Verify that the injected tree contains the expected Arabic texts."""
         assert isinstance(tree, etree._ElementTree)
         ns = {"svg": "http://www.w3.org/2000/svg"}
@@ -417,7 +417,7 @@ class TestSVGTranslate(unittest.TestCase):
         assert stats["inserted_translations"] > 0
 
         # Verify the translated content
-        self.assertTreeHasTranslations(tree)
+        self.assert_tree_has_translations(tree)
 
     def test_inject_empty_mapping_file(self):
         """Test injection with empty mapping file."""

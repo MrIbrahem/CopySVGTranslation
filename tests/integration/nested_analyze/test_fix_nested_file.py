@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 import pytest
@@ -90,7 +89,7 @@ def test_tspan_with_non_element_children_is_ignored(temp_dir: Path):
 def test_namespaced_children_are_counted(temp_dir: Path):
     p = _write_svg(
         temp_dir,
-        "<text><tspan>n " f'<foreignObject xmlns="{SVG_NS}"><tspan>m</tspan></foreignObject>' "</tspan></text>",
+        f"<text><tspan>n<foreignObject xmlns='{SVG_NS}'><tspan>m</tspan></foreignObject></tspan></text>",
     )
     res = match_nested_tags(p)
     assert len(res) == 1

@@ -11,7 +11,7 @@ from pathlib import Path
 from lxml import etree
 
 from CopySVGTranslation.injection import (
-    SvgStructureException,
+    SvgStructureExceptionError,
 )
 from CopySVGTranslation.injection.preparation import (
     clone_element,
@@ -182,7 +182,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureException) as ctx:
+        with self.assertRaises(SvgStructureExceptionError) as ctx:
             make_translation_ready(svg_path)
 
         assert "tref" in str(ctx.exception)
@@ -196,7 +196,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureException) as ctx:
+        with self.assertRaises(SvgStructureExceptionError) as ctx:
             make_translation_ready(svg_path)
 
         assert "css" in str(ctx.exception).lower()
@@ -209,7 +209,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureException) as ctx:
+        with self.assertRaises(SvgStructureExceptionError) as ctx:
             make_translation_ready(svg_path)
 
         assert "dollar" in str(ctx.exception).lower()
@@ -222,7 +222,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureException) as ctx:
+        with self.assertRaises(SvgStructureExceptionError) as ctx:
             make_translation_ready(svg_path)
 
         assert "nested" in str(ctx.exception).lower()
@@ -278,7 +278,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureException) as ctx:
+        with self.assertRaises(SvgStructureExceptionError) as ctx:
             make_translation_ready(svg_path)
 
         assert "lang" in str(ctx.exception).lower()
@@ -310,7 +310,7 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureException) as ctx:
+        with self.assertRaises(SvgStructureExceptionError) as ctx:
             make_translation_ready(svg_path)
 
         assert "id" in str(ctx.exception).lower()

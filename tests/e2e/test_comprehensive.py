@@ -12,7 +12,7 @@ from lxml import etree
 
 from CopySVGTranslation import generate_unique_id, inject, normalize_text, start_injects
 from CopySVGTranslation.injection import (
-    SvgStructureException,
+    SvgStructureExceptionError,
 )
 from CopySVGTranslation.injection.injector import load_all_mappings
 from CopySVGTranslation.injection.preparation import (
@@ -95,8 +95,8 @@ class TestPreparation:
         assert original is not cloned
 
     def test_svg_structure_exception(self):
-        """Test SvgStructureException creation."""
-        exc = SvgStructureException("test-code", extra="Extra info")
+        """Test SvgStructureExceptionError creation."""
+        exc = SvgStructureExceptionError("test-code", extra="Extra info")
         assert exc.code == "test-code"
         assert exc.extra == "Extra info"
         assert "test-code" in str(exc)

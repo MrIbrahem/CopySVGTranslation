@@ -102,7 +102,7 @@ class TestSVGTranslate(unittest.TestCase):
         # Clean up temporary files
         shutil.rmtree(self.test_dir)
 
-    def assertTreeHasTranslations(self, tree, expected_texts=None):
+    def assert_tree_has_translations(self, tree, expected_texts=None):
         """Verify that the injected tree contains the expected Arabic texts."""
         assert isinstance(tree, etree._ElementTree)
         ns = {"svg": "http://www.w3.org/2000/svg"}
@@ -209,7 +209,7 @@ class TestSVGTranslate(unittest.TestCase):
         assert stats["skipped_translations"] == 0
 
         # Verify the in-memory tree has the translations
-        self.assertTreeHasTranslations(tree)
+        self.assert_tree_has_translations(tree)
 
         # Verify modified SVG contains translations
         with open(no_translations_path, "r", encoding="utf-8") as f:
@@ -255,7 +255,7 @@ class TestSVGTranslate(unittest.TestCase):
         assert original_content == current_content
 
         # Verify the in-memory tree has the translations
-        self.assertTreeHasTranslations(tree)
+        self.assert_tree_has_translations(tree)
 
     def test_inject_overwrite(self):
         """Test injection with overwrite option."""
@@ -308,7 +308,7 @@ class TestSVGTranslate(unittest.TestCase):
         assert stats["skipped_translations"] == 0
 
         # Verify the in-memory tree has the translations
-        self.assertTreeHasTranslations(tree, [self.expected_arabic_texts[0]])
+        self.assert_tree_has_translations(tree, [self.expected_arabic_texts[0]])
 
         # Verify translation was updated
         with open(svg_path, "r", encoding="utf-8") as f:

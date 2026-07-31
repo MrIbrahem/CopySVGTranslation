@@ -4,7 +4,7 @@ from lxml import etree
 
 from CopySVGTranslation import extract, inject, normalize_text
 from CopySVGTranslation.injection import (
-    SvgStructureException,
+    SvgStructureExceptionError,
 )
 from CopySVGTranslation.injection.preparation import clone_element, get_text_content, normalize_lang
 from CopySVGTranslation.text_utils import extract_text_from_node
@@ -88,8 +88,8 @@ class TestPreparationFunctions:
         assert original is not cloned
 
     def test_svg_structure_exception_formatting(self):
-        """Test SvgStructureException message formatting."""
-        exc = SvgStructureException("test-code", extra="Extra info")
+        """Test SvgStructureExceptionError message formatting."""
+        exc = SvgStructureExceptionError("test-code", extra="Extra info")
         assert exc.code == "test-code"
         assert "test-code" in str(exc)
         assert "Extra info" in str(exc)

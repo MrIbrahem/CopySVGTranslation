@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
-from pathlib import Path
 from collections.abc import Mapping
+from pathlib import Path
 
 from .extraction import extract
 from .injection import inject

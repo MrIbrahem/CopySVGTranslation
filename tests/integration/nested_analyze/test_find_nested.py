@@ -6,7 +6,7 @@ from CopySVGTranslation.nested_analyze.find_nested import fix_nested_file, match
 class TestNestedFiles:
     """Comprehensive tests for text utility functions."""
 
-    def getSvgFileFromString(self, temp_dir, text):
+    def getsvgfilefromstring(self, temp_dir, text):
 
         file = temp_dir / "file.svg"
         file.write_text(text, encoding="utf-8")
@@ -14,7 +14,7 @@ class TestNestedFiles:
         return file
 
     def test_match_nested_one_url(self, temp_dir):
-        file = self.getSvgFileFromString(
+        file = self.getsvgfilefromstring(
             temp_dir,
             """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="729.1" viewBox="0 0 850 729.1">
                 <g id="header" class="HeaderView">
@@ -43,7 +43,7 @@ class TestNestedFiles:
         assert len_result_after == 0
 
     def test_match_nested_multi_urls(self, temp_dir):
-        file = self.getSvgFileFromString(
+        file = self.getsvgfilefromstring(
             temp_dir,
             """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="300" height="100"
             style="font-family: Lato, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Liberation Sans&quot;, sans-serif; font-feature-settings: &quot;liga&quot;, &quot;kern&quot;, &quot;calt&quot;,
@@ -66,7 +66,7 @@ class TestNestedFiles:
         assert len_result_after == 0
 
     def test_match_nested_multi_tags(self, temp_dir):
-        file = self.getSvgFileFromString(
+        file = self.getsvgfilefromstring(
             temp_dir,
             """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="729.1" viewBox="0 0 850 729.1"
                 style="font-family: Lato, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Liberation Sans&quot;, sans-serif; text-rendering: geometricprecision; -webkit-font-smoothing: antialiased; font-size: 18px; background-color: rgb(255, 255, 255);">
@@ -91,7 +91,7 @@ class TestNestedFiles:
         assert len_result_after == 0
 
     def test_match_nested_multi_tags2(self, temp_dir):
-        file = self.getSvgFileFromString(
+        file = self.getsvgfilefromstring(
             temp_dir,
             """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="721.1"
                 viewBox="0 0 850 721.1"
@@ -114,7 +114,7 @@ class TestNestedFiles:
         assert len_result_after == 0
 
     def test_match_nested_multi_tags_9(self, temp_dir):
-        file = self.getSvgFileFromString(
+        file = self.getsvgfilefromstring(
             temp_dir,
             """<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="850" height="758.8" viewBox="0 0 850 758.8"
                 style="font-family: Lato, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Liberation Sans&quot;, sans-serif; font-feature-settings: &quot;liga&quot;, &quot;kern&quot;, &quot;calt&quot;, &quot;lnum&quot;; text-rendering: geometricprecision; -webkit-font-smoothing: antialiased; font-size: 18px; background-color: rgb(255, 255, 255);">

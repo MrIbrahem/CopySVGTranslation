@@ -1,6 +1,5 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
-
 from lxml import etree
 
 from CopySVGTranslation.nested_analyze.find_nested import fix_nested_tspans

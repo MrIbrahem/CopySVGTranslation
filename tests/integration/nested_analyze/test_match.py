@@ -50,9 +50,7 @@ def test_finds_single_nested_tspan(tmp_path):
 
 
 def test_finds_multiple_nested_tspans(tmp_path):
-    path = _write_svg(
-        tmp_path, "<text><tspan>X<tspan>Y</tspan></tspan><tspan>P<tspan>Q</tspan></tspan></text>"
-    )
+    path = _write_svg(tmp_path, "<text><tspan>X<tspan>Y</tspan></tspan><tspan>P<tspan>Q</tspan></tspan></text>")
     result = match_nested_tags(path)
     assert len(result) == 2
     assert all("<tspan" in r for r in result)

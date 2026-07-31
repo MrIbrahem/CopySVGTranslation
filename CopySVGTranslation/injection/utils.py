@@ -5,12 +5,12 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from lxml import etree
+from lxml import etree  # type: ignore
 
 logger = logging.getLogger("CopySVGTranslation")
 
 
-class SvgStructureException(Exception):
+class SvgStructureExceptionError(Exception):
     """Raised when SVG structure is unsuitable for translation."""
 
     def __init__(self, code: str, element=None, extra=None):
@@ -32,7 +32,7 @@ class SvgStructureException(Exception):
         super().__init__(msg)
 
 
-class SvgNestedTspanException(SvgStructureException):
+class SvgNestedTspanExceptionError(SvgStructureExceptionError):
     """Raised when encountering nested ``<tspan>`` elements."""
 
     def __init__(self, element=None, extra=None, node_text=None):

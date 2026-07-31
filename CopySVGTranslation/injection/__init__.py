@@ -8,7 +8,7 @@ from .injector import (
     work_on_switches,
 )
 from .preparation import make_translation_ready
-from .utils import SvgNestedTspanException, SvgStructureException
+from .utils import SvgNestedTspanExceptionError, SvgStructureExceptionError
 
 __all__ = [
     "generate_unique_id",
@@ -16,7 +16,7 @@ __all__ = [
     "load_all_mappings",
     "make_translation_ready",
     "start_injects",
-    "SvgStructureException",
-    "SvgNestedTspanException",
+    "SvgStructureExceptionError",
+    "SvgNestedTspanExceptionError",
     "work_on_switches",
 ]

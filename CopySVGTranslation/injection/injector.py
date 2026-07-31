@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
-from pathlib import Path
 from collections.abc import Iterable, Mapping
+from pathlib import Path
 
 from lxml import etree
 
@@ -13,8 +13,8 @@ from ..text_utils import extract_text_from_node, normalize_text
 from ..titles_new import get_new_titles_translations
 from .preparation import make_translation_ready
 from .utils import (
-    SvgNestedTspanException,
-    SvgStructureException,
+    SvgNestedTspanExceptionError,
+    SvgStructureExceptionError,
     file_langs,
     get_target_path,
 )
@@ -271,10 +271,10 @@ def inject(
     # Parse SVG as XML
     try:
         tree, root = make_translation_ready(inject_path, write_back=False)
-    except SvgNestedTspanException as exc:
+    except SvgNestedTspanExceptionError as exc:
         error = {"nested_tspan_error": True, "node": exc.node()}
         return (None, error) if return_stats else None
-    except SvgStructureException as exc:
+    except SvgStructureExceptionError as exc:
         error = {"error": str(exc)}
         return (None, error) if return_stats else None
     except etree.XMLSyntaxError as exc:

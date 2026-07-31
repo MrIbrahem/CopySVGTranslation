@@ -6,15 +6,14 @@ import logging
 import tempfile
 from pathlib import Path
 
+from CopySVGTranslation import extract, make_translation_ready
+
 logger = logging.getLogger("CopySVGTranslation")
 logger.setLevel(logging.DEBUG)
 
 console = logging.StreamHandler()
 console.setFormatter(logging.Formatter("%(levelname)s - %(message)s"))
 logger.addHandler(console)
-
-
-from CopySVGTranslation import extract, make_translation_ready
 
 temp_dir = Path(tempfile.mkdtemp())
 svg_file = temp_dir / "test.svg"

@@ -5,15 +5,14 @@ python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/inject.py
 import logging
 from pathlib import Path
 
+from CopySVGTranslation import inject, make_translation_ready
+
 logger = logging.getLogger("CopySVGTranslation")
 logger.setLevel(logging.DEBUG)
 
 console = logging.StreamHandler()
 console.setFormatter(logging.Formatter("%(levelname)s - %(message)s"))
 logger.addHandler(console)
-
-
-from CopySVGTranslation import inject, make_translation_ready
 
 svg_file = Path(__file__).parent / "test.svg"
 

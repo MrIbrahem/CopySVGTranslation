@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 import pytest
@@ -95,7 +94,7 @@ def test_match_and_fix_to_do(temp_dir: Path):
     assert new_text_strip == new_text_expected_strip
 
 
-def test_match_and_fix_2(temp_dir: Path):
+def test_match_and_fix_3(temp_dir: Path):
     text = """
         <g class="markdown-text-wrap">
             <text x="10.0" y="94.3" style="font-size: 12.375px; fill: rgb(133, 133, 133); line-height: 1.2;">
