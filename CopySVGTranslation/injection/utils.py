@@ -40,7 +40,7 @@ class SvgNestedTspanExceptionError(SvgStructureExceptionError):
         super().__init__("structure-error-nested-tspans-not-supported", element, extra)
 
     def node(self):
-        return " ".join(self.node_text.strip().split())
+        return " ".join(str(self.node_text).strip().split())
 
 
 def file_langs(

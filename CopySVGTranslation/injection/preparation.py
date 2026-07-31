@@ -7,7 +7,7 @@ import logging
 import re
 from pathlib import Path
 
-from lxml import etree
+from lxml import etree # type: ignore
 
 from .utils import SvgNestedTspanExceptionError, SvgStructureExceptionError
 

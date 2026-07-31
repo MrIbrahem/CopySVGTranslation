@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from lxml import etree
+from lxml import etree # type: ignore
 
 from CopySVGTranslation import extract, generate_unique_id, inject, normalize_text
 
