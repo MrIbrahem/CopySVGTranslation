@@ -5,12 +5,11 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Iterable, Mapping
+from collections.abc import Iterable, Mapping
 
 from lxml import etree
 
 from ..text_utils import extract_text_from_node, normalize_text
-from ..titles import get_titles_translations
 from ..titles_new import get_new_titles_translations
 from .preparation import make_translation_ready
 from .utils import (

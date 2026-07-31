@@ -1,6 +1,5 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
-from pathlib import Path
 
 from lxml import etree
 
@@ -34,7 +33,7 @@ def test_fix_nested_tspans_multiple_nested():
 
 
 def test_fix_nested_tspans_preserves_siblings():
-    svg = _make_svg("<text>" "<tspan>A<tspan>B</tspan></tspan>" "<tspan>C<tspan>D</tspan></tspan>" "</text>")
+    svg = _make_svg("<text><tspan>A<tspan>B</tspan></tspan><tspan>C<tspan>D</tspan></tspan></text>")
     fixed = fix_nested_tspans(svg)
     tspans = fixed.findall(f".//{{{SVG_NS}}}tspan")
     texts = [t.text for t in tspans]

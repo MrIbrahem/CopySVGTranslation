@@ -1,7 +1,4 @@
-import json
-from pathlib import Path
 
-import pytest
 
 from CopySVGTranslation import get_titles_translations, make_title_translations
 

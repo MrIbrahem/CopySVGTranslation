@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Mapping
+from collections.abc import Mapping
 
 from .extraction import extract
 from .injection import inject

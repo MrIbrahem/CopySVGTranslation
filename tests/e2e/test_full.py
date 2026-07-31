@@ -299,7 +299,7 @@ def test_extract_empty_svg(tmp_path: Path) -> None:
     """extract should handle SVG files with no translations gracefully."""
     empty_svg = tmp_path / "empty.svg"
     empty_svg.write_text(
-        '<?xml version="1.0" encoding="UTF-8"?>' '<svg xmlns="http://www.w3.org/2000/svg"></svg>', encoding="utf-8"
+        '<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg"></svg>', encoding="utf-8"
     )
 
     result = extract(empty_svg)

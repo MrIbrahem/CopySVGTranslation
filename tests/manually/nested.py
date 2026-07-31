@@ -3,7 +3,6 @@ python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/nested.py
 """
 
 import logging
-import sys
 from pathlib import Path
 
 logger = logging.getLogger("CopySVGTranslation")
@@ -14,7 +13,7 @@ console.setFormatter(logging.Formatter("%(levelname)s - %(message)s"))
 logger.addHandler(console)
 
 
-from CopySVGTranslation import inject, make_translation_ready
+from CopySVGTranslation import make_translation_ready
 from CopySVGTranslation.injection import SvgNestedTspanException
 
 svg_file = Path(__file__).parent / "test.svg"

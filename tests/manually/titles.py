@@ -1,6 +1,4 @@
 import json
-import sys
-from pathlib import Path
 
 from CopySVGTranslation import get_titles_translations
 

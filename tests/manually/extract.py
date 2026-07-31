@@ -3,7 +3,6 @@ python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/extract.py
 """
 
 import logging
-import sys
 import tempfile
 from pathlib import Path
 

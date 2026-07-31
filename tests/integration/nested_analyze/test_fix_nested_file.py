@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 from pathlib import Path
 
@@ -58,7 +57,7 @@ def test_nested_tspan_single_hit(temp_dir: Path):
 
 
 def test_nested_tspan_multiple_hits(temp_dir: Path):
-    p = _write_svg(temp_dir, "<text>" "<tspan>X<tspan>Y</tspan></tspan>" "<tspan>P<tspan>Q</tspan></tspan>" "</text>")
+    p = _write_svg(temp_dir, "<text><tspan>X<tspan>Y</tspan></tspan><tspan>P<tspan>Q</tspan></tspan></text>")
     res = match_nested_tags(p)
     assert len(res) == 2
     assert all(r.count("<tspan") >= 2 for r in res)
@@ -130,7 +129,7 @@ def test_fix_two_nested_in_same_text_node(temp_dir: Path):
 
 
 def test_fix_preserves_sibling_tspans_order_and_values(temp_dir: Path):
-    p = _write_svg(temp_dir, "<text>" "<tspan>L<tspan>1</tspan></tspan>" "<tspan>L<tspan>2</tspan></tspan>" "</text>")
+    p = _write_svg(temp_dir, "<text><tspan>L<tspan>1</tspan></tspan><tspan>L<tspan>2</tspan></tspan></text>")
     fix_nested_file(p)
     parser = etree.XMLParser(remove_blank_text=True)
     root = etree.parse(str(p), parser).getroot()
@@ -150,7 +149,7 @@ def test_fix_keeps_attributes_on_outer_tspan(temp_dir: Path):
 
 def test_fix_clears_tail_of_fixed_tspan(temp_dir: Path):
     # After fix, code sets tail=None on the modified tspan
-    p = _write_svg(temp_dir, "<text>" "<tspan>A<tspan>B</tspan></tspan>TAIL" "</text>")
+    p = _write_svg(temp_dir, "<text><tspan>A<tspan>B</tspan></tspan>TAIL</text>")
     # Create explicit tail by putting text outside; fix only sets tail for the fixed node
     fix_nested_file(p)
     parser = etree.XMLParser(remove_blank_text=True)
@@ -183,7 +182,7 @@ def test_fix_does_not_touch_flat_structure(temp_dir: Path):
 
 
 def test_fix_preserves_text_order_with_tails_and_siblings(temp_dir: Path):
-    p = _write_svg(temp_dir, "<text>" "<tspan>Start<tspan>Mid</tspan>End</tspan>" "<tspan>Foo</tspan>" "</text>")
+    p = _write_svg(temp_dir, "<text><tspan>Start<tspan>Mid</tspan>End</tspan><tspan>Foo</tspan></text>")
     fix_nested_file(p)
     parser = etree.XMLParser(remove_blank_text=True)
     root = etree.parse(str(p), parser).getroot()

@@ -3,7 +3,6 @@ python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/inject.py
 """
 
 import logging
-import sys
 from pathlib import Path
 
 logger = logging.getLogger("CopySVGTranslation")

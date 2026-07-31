@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation import extract, inject, make_translation_ready, svg_extract_and_inject
+from CopySVGTranslation import extract, inject, svg_extract_and_inject
 
 FIXTURES_DIR = Path(__file__).parent
 

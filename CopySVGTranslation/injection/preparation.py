@@ -6,7 +6,6 @@ import copy
 import logging
 import re
 from pathlib import Path
-from typing import List, Set, Tuple
 
 from lxml import etree
 
@@ -71,7 +70,7 @@ def reorder_texts(root: etree._Element):
             sw.append(t)
 
 
-def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tuple[etree._ElementTree, etree._Element]:
+def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> tuple[etree._ElementTree, etree._Element]:
     """Prepare an SVG file for translation and return its tree and root."""
     svg_file_path = Path(str(svg_file_path))
     if not svg_file_path.exists():
@@ -111,7 +110,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
                 if "#" in selector:
                     raise SvgStructureException("structure-error-css-has-ids", None, [s.get("id", "")])
 
-    translatable_nodes: List[etree._Element] = []
+    translatable_nodes: list[etree._Element] = []
 
     # Process tspans
     tspans = root.findall(".//{%s}tspan" % SVG_NS)
@@ -132,7 +131,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
         raise SvgStructureException("structure-error-contains-tref")
 
     # Track all IDs in the document and normalise whitespace around them early
-    existing_ids: Set[str] = set()
+    existing_ids: set[str] = set()
     for element in root.xpath("//*[@id]"):
         element_id = element.get("id")
         if not element_id:
@@ -143,7 +142,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
         existing_ids.add(trimmed)
 
     # Collect translatable nodes and prepare idsInUse
-    ids_in_use: List[int] = [0]
+    ids_in_use: list[int] = [0]
 
     def allocate_trsvg_id() -> str:
         """Allocate a new unique ``trsvg`` identifier."""
@@ -284,7 +283,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
     switches = root.findall(".//{%s}switch" % SVG_NS)
     for sw in switches:
         # gather existing languages for duplicate detection
-        existing_langs: Set[str] = set()
+        existing_langs: set[str] = set()
         # collect children first to avoid modifying while iterating
         children = list(sw)
         for child in children:
@@ -299,7 +298,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> Tup
             language_attr = child.get("systemLanguage")
             real_langs = re.split(r",\s*", language_attr) if language_attr else ["fallback"]
 
-            languages_present: Set[str] = set()
+            languages_present: set[str] = set()
             for real in real_langs:
                 if real in languages_present:
                     raise SvgStructureException("structure-error-multiple-lang-in-text", child, [real])

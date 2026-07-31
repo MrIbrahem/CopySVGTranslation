@@ -1,10 +1,9 @@
 import logging
-from typing import Dict, List
 
 logger = logging.getLogger("CopySVGTranslation")
 
 
-def make_title_translations(new: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, str]]:
+def make_title_translations(new: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
     """
     Extract valid title translations by verifying that all translations in a mapping
     end with the same 4-digit year as the key.
@@ -25,7 +24,7 @@ def make_title_translations(new: Dict[str, Dict[str, str]]) -> Dict[str, Dict[st
     Returns:
         A dictionary mapping base title -> { language -> title without year }.
     """
-    result: Dict[str, Dict[str, str]] = {}
+    result: dict[str, dict[str, str]] = {}
 
     new_fixed = {x.strip(): {z.strip(): h.strip() for z, h in v.items()} for x, v in new.items()}
 
@@ -44,9 +43,9 @@ def make_title_translations(new: Dict[str, Dict[str, str]]) -> Dict[str, Dict[st
 
 
 def get_titles_translations(
-    all_mappings_title: Dict[str, Dict[str, str]],
-    default_texts: List[str],
-) -> Dict[str, Dict[str, str]]:
+    all_mappings_title: dict[str, dict[str, str]],
+    default_texts: list[str],
+) -> dict[str, dict[str, str]]:
     """
     Build reconstructed translations by reattaching the year to the base titles.
 
@@ -68,7 +67,7 @@ def get_titles_translations(
     Returns:
         Dictionary mapping original title -> translations including the year.
     """
-    titles_translations: Dict[str, Dict[str, str]] = {}
+    titles_translations: dict[str, dict[str, str]] = {}
 
     all_mappings_title_fixed = {x.strip().lower(): v for x, v in all_mappings_title.items()}
 
