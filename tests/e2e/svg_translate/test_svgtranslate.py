@@ -66,6 +66,7 @@ class TestSetup:
         for expected in texts_to_check:
             assert expected in found_texts
 
+
 class TestSVGTranslate(TestSetup):
     def test_normalize_text(self):
         """Test text normalization."""

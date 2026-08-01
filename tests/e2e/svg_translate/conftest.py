@@ -5,9 +5,10 @@ from __future__ import annotations
 import shutil
 import tempfile
 from pathlib import Path
-from lxml import etree  # type: ignore
 
 import pytest
+from lxml import etree  # type: ignore
+
 
 @pytest.fixture
 def mock_no_translations_svg_content():
@@ -31,6 +32,7 @@ def mock_no_translations_svg_content():
             </switch>
         </g>
     </svg>"""
+
 
 @pytest.fixture
 def mock_arabic_svg_content():
@@ -64,6 +66,7 @@ def mock_arabic_svg_content():
             </switch>
         </g>
     </svg>"""
+
 
 class TestSetup:
     """Test cases for the SVG translation tool."""

@@ -2,7 +2,7 @@
 """
 Unit tests for CopySVGTranslation/extraction/extractor.py module.
 
-Functions to test: get_english_default_texts, extract
+Functions to test: extract
 
 TODO: write tests
 """
@@ -13,7 +13,6 @@ from pathlib import Path
 
 from CopySVGTranslation.extraction.extractor import (
     extract,
-    get_english_default_texts,
 )
 
 FIXTURES_DIR = Path(__file__).parent.parent.parent
@@ -27,6 +26,29 @@ def test_extract_with_string_path() -> None:
 
     assert result is not None
     assert isinstance(result, dict)
+    # assert json.dumps(result, ensure_ascii=False) == "{}"
+
+    assert result["tspans_by_id"] == {
+        "trsvg1": "Parkinson's disease prevalence, 1990",
+        "trsvg2": "Estimated number of people with Parkinson's disease¹\n            per 100,000 people.",
+        "trsvg3": "No data",
+        "trsvg4": "0",
+        "trsvg5": "50",
+        "trsvg6": "100",
+        "trsvg7": "150",
+        "trsvg8": "200",
+        "trsvg9": "250",
+        "trsvg10": "300",
+        "trsvg11": "Data source: IHME, Global Burden of Disease (2025)",
+        "trsvg12": "OurWorldinData.org/causes-of-death | CC BY",
+        "trsvg13": "1. Parkinson's disease Parkinson's disease is a brain\n            condition that affects movement control. Symptoms usually begin gradually and worsen\n            over time,",
+        "trsvg14": "as parts of the brain become progressively damaged over\n            many years.",
+        "trsvg15": "It arises when certain cells in the brain, responsible\n            for producing a chemical called dopamine, become damaged or die. Dopamine helps regulate",
+        "trsvg16": "muscle movements, and its deficiency in Parkinson's\n            leads to symptoms like tremors (shaking), stiffness, and difficulty with balance and\n            coordination.",
+        "trsvg17": "As the disease progresses, it can also bring about\n            changes in speech, sleep problems, depression, memory difficulties, and fatigue.\n            Treatments like",
+        "trsvg18": "medication, devices, and therapies can help manage\n            symptoms and improve quality of life for those with Parkinson's."
+    }
+
     assert result["new"] == {
         "parkinson's disease prevalence, 1990": {"dag": "Parkinson's doro yɔlibu biɛɣigu ni, yuuni 1990 puli ni"},
         "estimated number of people with parkinson's disease¹ per 100,000 people.": {},
