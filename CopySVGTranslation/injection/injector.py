@@ -7,7 +7,7 @@ import logging
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 
-from lxml import etree
+from lxml import etree # type: ignore
 
 from ..text_utils import extract_text_from_node, normalize_text
 from ..titles_new import get_new_titles_translations

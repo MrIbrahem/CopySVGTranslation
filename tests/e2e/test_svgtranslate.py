@@ -2,22 +2,23 @@
 Unit tests for the SVG translation tool.
 """
 
+import pytest
 import json
 import shutil
 import tempfile
-import unittest
 from pathlib import Path
 
-from lxml import etree  # type: ignore
+from lxml import etree # type: ignore
 
 from CopySVGTranslation.extraction import extract
 from CopySVGTranslation.injection import generate_unique_id, inject
 from CopySVGTranslation.text_utils import normalize_text
 
 
-class TestSVGTranslate(unittest.TestCase):
+class TestSVGTranslate:
     """Test cases for the SVG translation tool."""
 
+    @pytest.fixture(autouse=True)
     def setUp(self):
         """
         Prepare temporary directory and SVG test fixtures used by the test cases.
@@ -340,7 +341,3 @@ class TestSVGTranslate(unittest.TestCase):
 
         result = inject(svg_path, [nonexistent_mapping])
         assert result is None
-
-
-if __name__ == "__main__":
-    unittest.main()

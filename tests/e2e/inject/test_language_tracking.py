@@ -1,7 +1,7 @@
 import textwrap
 from pathlib import Path
 
-from lxml import etree
+from lxml import etree # type: ignore
 
 from CopySVGTranslation.injection.injector import inject
 from CopySVGTranslation.injection.utils import file_langs

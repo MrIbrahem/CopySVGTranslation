@@ -3,12 +3,12 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
+import pytest
 import shutil
 import tempfile
-import unittest
 from pathlib import Path
 
-from lxml import etree
+from lxml import etree # type: ignore
 
 from CopySVGTranslation.injection import (
     SvgStructureExceptionError,
@@ -22,7 +22,7 @@ from CopySVGTranslation.injection.preparation import (
 )
 
 
-class TestReorderTexts(unittest.TestCase):
+class TestReorderTexts:
     """Test suite for reorder_texts function."""
 
     def test_reorder_texts_no_switches(self):
@@ -34,7 +34,7 @@ class TestReorderTexts(unittest.TestCase):
         reorder_texts(root)
 
 
-class TestNormalizeLang(unittest.TestCase):
+class TestNormalizeLang:
     """Test suite for normalize_lang function."""
 
     def test_normalize_lang_simple_code(self):
@@ -69,7 +69,7 @@ class TestNormalizeLang(unittest.TestCase):
         assert normalize_lang("en_GB") == "en-GB"
 
 
-class TestGetTextContent(unittest.TestCase):
+class TestGetTextContent:
     """Test suite for get_text_content function."""
 
     def test_get_text_content_simple(self):
@@ -112,7 +112,7 @@ class TestGetTextContent(unittest.TestCase):
         assert "Nested" in result
 
 
-class TestCloneElement(unittest.TestCase):
+class TestCloneElement:
     """Test suite for clone_element function."""
 
     def test_clone_element_basic(self):
@@ -163,9 +163,10 @@ class TestCloneElement(unittest.TestCase):
         assert cloned.get("y") == "20"
 
 
-class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
+class TestMakeTranslationReadyEdgeCases:
     """Test suite for make_translation_ready edge cases."""
 
+    @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
@@ -314,7 +315,3 @@ class TestMakeTranslationReadyEdgeCases(unittest.TestCase):
             make_translation_ready(svg_path)
 
         assert "id" in str(ctx.exception).lower()
-
-
-if __name__ == "__main__":
-    unittest.main()

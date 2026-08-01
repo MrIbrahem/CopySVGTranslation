@@ -1,6 +1,6 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
-from lxml import etree
+from lxml import etree # type: ignore
 
 from CopySVGTranslation.extraction import extract
 from CopySVGTranslation.injection import (

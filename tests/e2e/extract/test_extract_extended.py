@@ -3,17 +3,18 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
+import pytest
 import shutil
 import tempfile
-import unittest
 from pathlib import Path
 
 from CopySVGTranslation import extract
 
 
-class TestExtractEdgeCases(unittest.TestCase):
+class TestExtractEdgeCases:
     """Test suite for extract function edge cases."""
 
+    @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
@@ -114,7 +115,3 @@ class TestExtractEdgeCases(unittest.TestCase):
         result = extract(svg_path)
 
         assert result is not None
-
-
-if __name__ == "__main__":
-    unittest.main()

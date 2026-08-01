@@ -3,14 +3,13 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
-import unittest
 
-from lxml import etree
+from lxml import etree # type: ignore
 
 from CopySVGTranslation.text_utils import extract_text_from_node
 
 
-class TestExtractTextFromNode(unittest.TestCase):
+class TestExtractTextFromNode:
     """Test suite for extract_text_from_node function."""
 
     def test_extract_from_text_with_tspans(self):
@@ -73,7 +72,3 @@ class TestExtractTextFromNode(unittest.TestCase):
         result = extract_text_from_node(node)
 
         assert result == ["مرحبا", "你好", "Привет"]
-
-
-if __name__ == "__main__":
-    unittest.main()

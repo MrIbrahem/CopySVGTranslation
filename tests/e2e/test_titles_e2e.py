@@ -3,17 +3,18 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
+import pytest
 import shutil
 import tempfile
-import unittest
 from pathlib import Path
 
 from CopySVGTranslation import extract
 
 
-class TestExtractYearHandling(unittest.TestCase):
+class TestExtractYearHandling:
     """Test suite for year suffix handling in extract function."""
 
+    @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
@@ -111,7 +112,3 @@ class TestExtractYearHandling(unittest.TestCase):
                 "ar": "معدل الوفيات الناجمة عن الملاريا، {year}",
             }
         }
-
-
-if __name__ == "__main__":
-    unittest.main()

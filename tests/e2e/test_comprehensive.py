@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 
 import pytest
-from lxml import etree  # type: ignore
+from lxml import etree # type: ignore
 
 from CopySVGTranslation.injection import (
     SvgStructureExceptionError,

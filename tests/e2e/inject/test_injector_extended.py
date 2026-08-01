@@ -3,13 +3,13 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
+import pytest
 import json
 import shutil
 import tempfile
-import unittest
 from pathlib import Path
 
-from lxml import etree
+from lxml import etree # type: ignore
 
 from CopySVGTranslation.injection.injector import (
     load_all_mappings,
@@ -19,9 +19,10 @@ from CopySVGTranslation.injection.injector import (
 from CopySVGTranslation.injection.utils import get_target_path
 
 
-class TestGetTargetPath(unittest.TestCase):
+class TestGetTargetPath:
     """Test suite for get_target_path function."""
 
+    @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
@@ -71,9 +72,10 @@ class TestGetTargetPath(unittest.TestCase):
         assert result.parent.exists() is True
 
 
-class TestWorkOnSwitches(unittest.TestCase):
+class TestWorkOnSwitches:
     """Test suite for work_on_switches function."""
 
+    @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
@@ -163,7 +165,7 @@ class TestWorkOnSwitches(unittest.TestCase):
         self.assertGreaterEqual(stats["processed_switches"], 0)
 
 
-class TestSortSwitchTexts(unittest.TestCase):
+class TestSortSwitchTexts:
     """Test suite for sort_switch_texts function."""
 
     def test_sort_switch_texts_basic(self):
@@ -209,9 +211,10 @@ class TestSortSwitchTexts(unittest.TestCase):
         assert len(texts) == 1
 
 
-class TestLoadAllMappingsEdgeCases(unittest.TestCase):
+class TestLoadAllMappingsEdgeCases:
     """Test suite for load_all_mappings edge cases."""
 
+    @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
@@ -284,7 +287,3 @@ class TestLoadAllMappingsEdgeCases(unittest.TestCase):
         result = load_all_mappings([str(mapping_file)])
 
         assert "key" in result
-
-
-if __name__ == "__main__":
-    unittest.main()

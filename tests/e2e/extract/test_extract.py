@@ -2,7 +2,7 @@
 Comprehensive pytest tests for CopySVGTranslation covering edge cases and additional functionality.
 """
 
-from lxml import etree  # type: ignore
+from lxml import etree # type: ignore
 
 from CopySVGTranslation import extract, inject
 from CopySVGTranslation.text_utils import extract_text_from_node

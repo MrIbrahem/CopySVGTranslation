@@ -1,11 +1,10 @@
 """ """
 
-import unittest
 
 from CopySVGTranslation.titles import get_titles_translations, make_title_translations
 
 
-class TestExtractYearHandling(unittest.TestCase):
+class TestExtractYearHandling:
     """Test suite for year suffix handling in extract function."""
 
     def test_basic(self):
@@ -50,16 +49,14 @@ class TestExtractYearHandling(unittest.TestCase):
         assert result == {"death rate from malaria,": {"ar": "معدل الوفيات الناجمة عن الملاريا،"}}
 
 
-class TestGetTitlesTranslations(unittest.TestCase):
+class TestGetTitlesTranslations:
     """Test suite for reattaching year to base titles."""
 
     def test_basic_reconstruction(self):
         all_mappings_title = {"COVID-19 pandemic": {"ar": "جائحة كوفيد", "es": "Pandemia de COVID-19"}}
         default_texts = ["COVID-19 pandemic 1990"]
         result = get_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(
-            result, {"COVID-19 pandemic 1990": {"ar": "جائحة كوفيد 1990", "es": "Pandemia de COVID-19 1990"}}
-        )
+        assert result == {"COVID-19 pandemic 1990": {"ar": "جائحة كوفيد 1990", "es": "Pandemia de COVID-19 1990"}}
 
     def test_missing_mapping(self):
         all_mappings_title = {"Population": {"ar": "السكان", "es": "Population"}}
@@ -89,7 +86,7 @@ class TestGetTitlesTranslations(unittest.TestCase):
         all_mappings_title = {"pandemic": {"ar": "جائحة"}}
         default_texts = ["Pandemic 2020", "Unknown 2021", "Pandemic 2022"]
         result = get_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(result, {"Pandemic 2020": {"ar": "جائحة 2020"}, "Pandemic 2022": {"ar": "جائحة 2022"}})
+        assert result == {"Pandemic 2020": {"ar": "جائحة 2020"}, "Pandemic 2022": {"ar": "جائحة 2022"}}
 
     def test_text_too_short(self):
         all_mappings_title = {"": {"en": "empty"}}
@@ -102,7 +99,3 @@ class TestGetTitlesTranslations(unittest.TestCase):
         default_texts = ["covid year"]
         result = get_titles_translations(all_mappings_title, default_texts)
         assert result == {}
-
-
-if __name__ == "__main__":
-    unittest.main()

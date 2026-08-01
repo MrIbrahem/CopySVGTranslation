@@ -1,11 +1,10 @@
 """ """
 
-import unittest
 
 from CopySVGTranslation.titles_new import get_new_titles_translations, make_new_title_translations
 
 
-class TestTitlesNew(unittest.TestCase):
+class TestTitlesNew:
     """Test suite for year suffix handling in extract function."""
 
     def test_basic(self):
@@ -74,7 +73,7 @@ class TestTitlesNew(unittest.TestCase):
         assert result == expected
 
 
-class TestGetNewTitlesTranslations(unittest.TestCase):
+class TestGetNewTitlesTranslations:
     """Test suite for reattaching year to base titles with {year} template."""
 
     def test_basic_reconstruction(self):
@@ -83,9 +82,8 @@ class TestGetNewTitlesTranslations(unittest.TestCase):
         }
         default_texts = ["COVID-19 pandemic 1990"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(
-            result, {"COVID-19 pandemic 1990": {"ar": "جائحة كوفيد 1990", "es": "Pandemia de COVID-19 1990"}}
-        )
+        assert result == {"COVID-19 pandemic 1990": {"ar": "جائحة كوفيد 1990", "es": "Pandemia de COVID-19 1990"}}
+
 
     def test_missing_mapping(self):
         all_mappings_title = {"Population {year}": {"ar": "السكان {year}", "es": "Population {year}"}}
@@ -115,13 +113,10 @@ class TestGetNewTitlesTranslations(unittest.TestCase):
         all_mappings_title = {"pandemic {year}": {"ar": "جائحة {year}", "ko": "{year}년 팬데믹", "fr": ""}}
         default_texts = ["Pandemic 2020", "Unknown 2021", "Pandemic 2022"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
-        self.assertEqual(
-            result,
-            {
+        assert result == {
                 "Pandemic 2020": {"ar": "جائحة 2020", "ko": "2020년 팬데믹", "fr": ""},
                 "Pandemic 2022": {"ar": "جائحة 2022", "ko": "2022년 팬데믹", "fr": ""},
-            },
-        )
+            }
 
     def test_multiple_occurrences_of_year(self):
         all_mappings_title = {"pandemic 2020 in {year}": {"ar": "جائحة 2020 {year}"}}
@@ -146,7 +141,3 @@ class TestGetNewTitlesTranslations(unittest.TestCase):
         default_texts = ["Covid 2021"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
         assert result == {"Covid 2021": {"ar": "كوفيد فقط"}}
-
-
-if __name__ == "__main__":
-    unittest.main()
