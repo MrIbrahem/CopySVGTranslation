@@ -1,6 +1,6 @@
 # ruff: noqa: F401
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/workflows.py module.
+Unit tests for CopySVGTranslation/workflows.py module.
 
 Functions to test: svg_extract_and_inject, svg_extract_and_injects
 

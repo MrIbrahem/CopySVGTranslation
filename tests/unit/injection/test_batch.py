@@ -1,6 +1,6 @@
 # ruff: noqa: F401
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/injection/batch.py module.
+Unit tests for CopySVGTranslation/injection/batch.py module.
 
 Functions to test: start_injects
 
