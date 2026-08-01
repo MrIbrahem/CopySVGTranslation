@@ -105,7 +105,7 @@ class TestSVGTranslate:
         # Clean up temporary files
         shutil.rmtree(self.test_dir)
 
-    def test_assert_tree_has_translations(self, tree, expected_texts=None):
+    def assert_tree_has_translations(self, tree, expected_texts=None):
         """Verify that the injected tree contains the expected Arabic texts."""
         assert isinstance(tree, etree._ElementTree)
         ns = {"svg": "http://www.w3.org/2000/svg"}
