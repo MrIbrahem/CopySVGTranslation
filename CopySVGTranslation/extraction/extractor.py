@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Any
 
 from lxml import etree  # type: ignore
 
@@ -50,7 +51,7 @@ def get_english_default_texts(text_elements, case_insensitive):
 def extract(
     svg_file_path: str | Path,
     case_insensitive: bool = True,
-):
+) -> dict[str, Any]:
     """
     Extract translation strings from an SVG file into a structured dictionary.
 
