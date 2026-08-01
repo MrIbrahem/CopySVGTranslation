@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from .injector import inject
 
-logger = logging.getLogger("CopySVGTranslation")
+logger = logging.getLogger(__name__)
 
 
 def start_injects(

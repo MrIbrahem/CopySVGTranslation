@@ -1,6 +1,6 @@
 import logging
 
-logger = logging.getLogger("CopySVGTranslation")
+logger = logging.getLogger(__name__)
 
 
 def make_title_translations(new: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:

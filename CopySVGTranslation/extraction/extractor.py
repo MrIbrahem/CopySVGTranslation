@@ -9,7 +9,7 @@ from ..text_utils import normalize_text
 from ..titles import make_title_translations
 from ..titles_new import make_new_title_translations
 
-logger = logging.getLogger("CopySVGTranslation")
+logger = logging.getLogger(__name__)
 
 
 def get_english_default_texts(text_elements, case_insensitive):

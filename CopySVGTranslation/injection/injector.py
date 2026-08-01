@@ -19,7 +19,7 @@ from .utils import (
     get_target_path,
 )
 
-logger = logging.getLogger("CopySVGTranslation")
+logger = logging.getLogger(__name__)
 
 
 def generate_unique_id(base_id: str, lang: str, existing_ids: set[str]) -> str:

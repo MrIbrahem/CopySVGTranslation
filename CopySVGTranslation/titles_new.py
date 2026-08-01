@@ -1,7 +1,7 @@
 import logging
 import re
 
-logger = logging.getLogger("CopySVGTranslation")
+logger = logging.getLogger(__name__)
 
 
 def match_year(text):

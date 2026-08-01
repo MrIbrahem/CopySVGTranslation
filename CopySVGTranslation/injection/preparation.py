@@ -11,7 +11,7 @@ from lxml import etree # type: ignore
 
 from .utils import SvgNestedTspanExceptionError, SvgStructureExceptionError
 
-logger = logging.getLogger("CopySVGTranslation")
+logger = logging.getLogger(__name__)
 
 SVG_NS = "http://www.w3.org/2000/svg"
 XMLNS_ATTR = "{http://www.w3.org/2000/xmlns/}xmlns"

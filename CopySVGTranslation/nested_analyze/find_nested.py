@@ -5,7 +5,7 @@ from pathlib import Path
 
 from lxml import etree
 
-logger = logging.getLogger("CopySVGTranslation")
+logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"
 
 
