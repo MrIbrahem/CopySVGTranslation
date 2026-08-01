@@ -333,3 +333,12 @@ def inject(
         return tree, stats
 
     return tree
+
+
+__all__ = [
+    "generate_unique_id",
+    "load_all_mappings",
+    "work_on_switches",
+    "sort_switch_texts",
+    "inject",
+]

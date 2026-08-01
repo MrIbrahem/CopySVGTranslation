@@ -120,3 +120,11 @@ def get_new_titles_translations(
             titles_translations[text] = {lang: value.replace("{year}", year) for lang, value in translations.items()}
 
     return titles_translations
+
+
+__all__ = [
+    "match_year",
+    "replace_year",
+    "make_new_title_translations",
+    "get_new_titles_translations",
+]

@@ -26,3 +26,9 @@ def extract_text_from_node(node) -> list[str]:
         return [tspan.text.strip() if tspan.text else "" for tspan in tspans]
 
     return [node.text.strip()] if node.text else [""]
+
+
+__all__ = [
+    "normalize_text",
+    "extract_text_from_node",
+]

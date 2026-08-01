@@ -345,3 +345,12 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> tup
         tree.write(str(svg_file_path), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
     return tree, root
+
+
+__all__ = [
+    "normalize_lang",
+    "get_text_content",
+    "clone_element",
+    "reorder_texts",
+    "make_translation_ready",
+]

@@ -102,3 +102,11 @@ def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_pr
         logger.error(f"Failed to write fixed svg file to: {str(new_path)}")
     # ---
     return False
+
+
+__all__ = [
+    "flatten_text",
+    "fix_nested_tspans",
+    "match_nested_tags",
+    "fix_nested_file",
+]

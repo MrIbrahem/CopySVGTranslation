@@ -101,3 +101,9 @@ def svg_extract_and_injects(
         save_result=save_result,
         **kwargs,
     )
+
+
+__all__ = [
+    "svg_extract_and_inject",
+    "svg_extract_and_injects",
+]

@@ -108,3 +108,11 @@ def get_target_path(
     target_path.parent.mkdir(parents=True, exist_ok=True)
 
     return target_path
+
+
+__all__ = [
+    "SvgStructureExceptionError",
+    "SvgNestedTspanExceptionError",
+    "file_langs",
+    "get_target_path",
+]

@@ -80,3 +80,9 @@ def get_titles_translations(
                 titles_translations[text] = {lang: f"{value} {year}" for lang, value in translations.items()}
 
     return titles_translations
+
+
+__all__ = [
+    "make_title_translations",
+    "get_titles_translations",
+]
