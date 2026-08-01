@@ -9,6 +9,6 @@ TODO: write tests
 
 
 from CopySVGTranslation.extraction.extractor import (
-    get_english_default_texts,
     extract,
+    get_english_default_texts,
 )

@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from lxml import etree # type: ignore
+from lxml import etree  # type: ignore
 
 from ..text_utils import normalize_text
 from ..titles import make_title_translations
@@ -145,6 +145,7 @@ def extract(
     translations["title_new"] = make_new_title_translations(translations["new"])
 
     return translations
+
 
 __all__ = [
     "extract",

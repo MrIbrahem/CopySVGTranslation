@@ -10,8 +10,8 @@ TODO: write tests
 
 
 from CopySVGTranslation.injection.utils import (
-    SvgStructureExceptionError,
     SvgNestedTspanExceptionError,
+    SvgStructureExceptionError,
     file_langs,
     get_target_path,
 )
