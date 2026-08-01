@@ -10,9 +10,12 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from CopySVGTranslation import generate_unique_id, inject, normalize_text, start_injects
 from CopySVGTranslation.injection import (
     SvgStructureExceptionError,
+    generate_unique_id,
+    inject,
+    make_translation_ready,
+    start_injects,
 )
 from CopySVGTranslation.injection.injector import load_all_mappings
 from CopySVGTranslation.injection.preparation import (
@@ -21,6 +24,7 @@ from CopySVGTranslation.injection.preparation import (
     make_translation_ready,
     normalize_lang,
 )
+from CopySVGTranslation.text_utils import normalize_text
 
 # -------------------------------
 # Text utility tests

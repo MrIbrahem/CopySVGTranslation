@@ -6,7 +6,8 @@ import logging
 import tempfile
 from pathlib import Path
 
-from CopySVGTranslation import extract, make_translation_ready
+from CopySVGTranslation import extract
+from CopySVGTranslation.injection import make_translation_ready
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

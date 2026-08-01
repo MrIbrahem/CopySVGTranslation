@@ -6,7 +6,7 @@ pytest tests/preparation/test_preparation.py
 
 from pathlib import Path
 
-from CopySVGTranslation import make_translation_ready
+from CopySVGTranslation.injection import make_translation_ready
 
 FIXTURES_DIR = Path(__file__).parent
 

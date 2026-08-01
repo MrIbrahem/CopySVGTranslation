@@ -5,7 +5,8 @@ python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/inject.py
 import logging
 from pathlib import Path
 
-from CopySVGTranslation import inject, make_translation_ready
+from CopySVGTranslation import inject
+from CopySVGTranslation.injection import inject, make_translation_ready
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

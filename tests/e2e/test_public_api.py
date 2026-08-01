@@ -6,14 +6,10 @@ from pathlib import Path
 
 # Test that the public API is importable
 import CopySVGTranslation
-from CopySVGTranslation import (
-    extract,
-    generate_unique_id,
-    inject,
-    normalize_text,
-    start_injects,
-    svg_extract_and_inject,
-)
+from CopySVGTranslation.extraction import extract
+from CopySVGTranslation.injection import generate_unique_id, inject, start_injects
+from CopySVGTranslation.text_utils import normalize_text
+from CopySVGTranslation.workflows import svg_extract_and_inject
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 

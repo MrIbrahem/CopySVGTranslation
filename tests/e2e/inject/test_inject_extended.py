@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from CopySVGTranslation import inject, start_injects
+from CopySVGTranslation.injection import inject, start_injects
 
 
 class TestStartInjectsEdgeCases(unittest.TestCase):

@@ -2,12 +2,13 @@
 
 from lxml import etree
 
-from CopySVGTranslation import extract, inject, normalize_text
+from CopySVGTranslation.extraction import extract
 from CopySVGTranslation.injection import (
     SvgStructureExceptionError,
+    inject,
 )
 from CopySVGTranslation.injection.preparation import clone_element, get_text_content, normalize_lang
-from CopySVGTranslation.text_utils import extract_text_from_node
+from CopySVGTranslation.text_utils import extract_text_from_node, normalize_text
 
 # -------------------------------
 # Text utility tests

@@ -5,8 +5,10 @@ python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/nested.py
 import logging
 from pathlib import Path
 
-from CopySVGTranslation import make_translation_ready
-from CopySVGTranslation.injection import SvgNestedTspanExceptionError
+from CopySVGTranslation.injection import (
+    SvgNestedTspanExceptionError,
+    make_translation_ready,
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
