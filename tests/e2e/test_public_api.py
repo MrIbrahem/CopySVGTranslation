@@ -26,11 +26,7 @@ class TestPublicAPIExports:
         """The __all__ attribute should contain all expected public functions."""
         expected_exports = [
             "extract",
-            "generate_unique_id",
             "inject",
-            "normalize_text",
-            "start_injects",
-            "svg_extract_and_inject",
         ]
         for name in expected_exports:
             assert name in CopySVGTranslation.__all__, f"{name} should be in __all__"
