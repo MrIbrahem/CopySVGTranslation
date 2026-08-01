@@ -231,12 +231,14 @@ class TestExtractFunction:
     def test_extract_case_insensitive_default(self):
         """extract should be case insensitive by default."""
         result = extract(FIXTURES_DIR / "source.svg")
+        assert result is not None
         # Should have lowercase keys
         assert "population 2020" in result["new"]
 
     def test_extract_with_arabic_translations(self):
         """extract should properly extract Arabic translations."""
         result = extract(FIXTURES_DIR / "source.svg")
+        assert result is not None
         assert "ar" in result["new"]["population 2020"]
         assert result["new"]["population 2020"]["ar"] == "السكان 2020"
 

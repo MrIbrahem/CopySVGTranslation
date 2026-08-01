@@ -6,7 +6,7 @@ import logging
 from pathlib import Path
 
 from CopySVGTranslation import inject
-from CopySVGTranslation.injection import inject, make_translation_ready
+from CopySVGTranslation.injection import make_translation_ready
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

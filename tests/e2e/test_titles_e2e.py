@@ -34,6 +34,7 @@ class TestExtractYearHandling(unittest.TestCase):
         svg_path.write_text(svg_content, encoding="utf-8")
 
         result = extract(svg_path)
+        assert result is not None
 
         # Should create title mapping for year-suffixed text
         assert isinstance(result["title"], dict)

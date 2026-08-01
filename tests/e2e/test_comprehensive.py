@@ -8,20 +8,19 @@ import json
 from pathlib import Path
 
 import pytest
-from lxml import etree
+from lxml import etree  # type: ignore
 
 from CopySVGTranslation.injection import (
     SvgStructureExceptionError,
     generate_unique_id,
     inject,
+    load_all_mappings,
     make_translation_ready,
     start_injects,
 )
-from CopySVGTranslation.injection.injector import load_all_mappings
 from CopySVGTranslation.injection.preparation import (
     clone_element,
     get_text_content,
-    make_translation_ready,
     normalize_lang,
 )
 from CopySVGTranslation.text_utils import normalize_text

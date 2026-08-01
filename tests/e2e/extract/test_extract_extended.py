@@ -80,6 +80,7 @@ class TestExtractEdgeCases(unittest.TestCase):
 
         result = extract(svg_path, case_insensitive=True)
 
+        assert result is not None
         assert "new" in result
 
         # Keys should be lowercase
