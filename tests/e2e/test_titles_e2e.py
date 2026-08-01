@@ -3,10 +3,11 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
-import pytest
 import shutil
 import tempfile
 from pathlib import Path
+
+import pytest
 
 from CopySVGTranslation import extract
 
@@ -19,8 +20,9 @@ class TestExtractYearHandling:
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
 
-    def tearDown(self):
+        yield
         """Clean up test fixtures."""
+        # Clean up temporary files
         shutil.rmtree(self.test_dir)
 
     def test_extract_detects_year_suffix(self):

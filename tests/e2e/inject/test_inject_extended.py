@@ -3,16 +3,17 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
-import pytest
 import json
 import shutil
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from CopySVGTranslation.injection import inject, start_injects
 
 
-class TestStartInjectsEdgeCases:
+class TestSetup:
     """Test suite for start_injects edge cases."""
 
     @pytest.fixture(autouse=True)
@@ -22,9 +23,14 @@ class TestStartInjectsEdgeCases:
         self.output_dir = self.test_dir / "output"
         self.output_dir.mkdir()
 
-    def tearDown(self):
+        yield
         """Clean up test fixtures."""
+        # Clean up temporary files
         shutil.rmtree(self.test_dir)
+
+
+class TestStartInjectsEdgeCases(TestSetup):
+    """Test suite for start_injects edge cases."""
 
     def test_start_injects_empty_file_list(self):
         """Test start_injects with empty file list."""
@@ -111,17 +117,8 @@ class TestStartInjectsEdgeCases:
         assert isinstance(result["files"], dict)
 
 
-class TestInjectEdgeCases:
+class TestInjectEdgeCases(TestSetup):
     """Test suite for inject function edge cases."""
-
-    @pytest.fixture(autouse=True)
-    def setUp(self):
-        """Set up test fixtures."""
-        self.test_dir = Path(tempfile.mkdtemp())
-
-    def tearDown(self):
-        """Clean up test fixtures."""
-        shutil.rmtree(self.test_dir)
 
     def test_inject_with_invalid_svg_structure(self):
         """Test inject with invalid SVG structure."""

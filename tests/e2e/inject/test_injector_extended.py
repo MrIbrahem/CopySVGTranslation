@@ -3,13 +3,13 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
-import pytest
 import json
 import shutil
 import tempfile
 from pathlib import Path
 
-from lxml import etree # type: ignore
+import pytest
+from lxml import etree  # type: ignore
 
 from CopySVGTranslation.injection.injector import (
     load_all_mappings,
@@ -19,7 +19,7 @@ from CopySVGTranslation.injection.injector import (
 from CopySVGTranslation.injection.utils import get_target_path
 
 
-class TestGetTargetPath:
+class TestSetup:
     """Test suite for get_target_path function."""
 
     @pytest.fixture(autouse=True)
@@ -29,9 +29,13 @@ class TestGetTargetPath:
         self.svg_path = self.test_dir / "source.svg"
         self.svg_path.write_text("<svg></svg>", encoding="utf-8")
 
-    def tearDown(self):
+        yield
         """Clean up test fixtures."""
+        # Clean up temporary files
         shutil.rmtree(self.test_dir)
+
+
+class TestGetTargetPath(TestSetup):
 
     def test_get_target_path_with_output_file(self):
         """Test get_target_path when output_file is specified."""
@@ -72,17 +76,8 @@ class TestGetTargetPath:
         assert result.parent.exists() is True
 
 
-class TestWorkOnSwitches:
+class TestWorkOnSwitches(TestSetup):
     """Test suite for work_on_switches function."""
-
-    @pytest.fixture(autouse=True)
-    def setUp(self):
-        """Set up test fixtures."""
-        self.test_dir = Path(tempfile.mkdtemp())
-
-    def tearDown(self):
-        """Clean up test fixtures."""
-        shutil.rmtree(self.test_dir)
 
     def test_work_on_switches_basic(self):
         """Test basic switch processing."""
@@ -165,7 +160,7 @@ class TestWorkOnSwitches:
         assert stats["processed_switches"] >= 0
 
 
-class TestSortSwitchTexts:
+class TestSortSwitchTexts(TestSetup):
     """Test suite for sort_switch_texts function."""
 
     def test_sort_switch_texts_basic(self):
@@ -211,17 +206,8 @@ class TestSortSwitchTexts:
         assert len(texts) == 1
 
 
-class TestLoadAllMappingsEdgeCases:
+class TestLoadAllMappingsEdgeCases(TestSetup):
     """Test suite for load_all_mappings edge cases."""
-
-    @pytest.fixture(autouse=True)
-    def setUp(self):
-        """Set up test fixtures."""
-        self.test_dir = Path(tempfile.mkdtemp())
-
-    def tearDown(self):
-        """Clean up test fixtures."""
-        shutil.rmtree(self.test_dir)
 
     def test_load_all_mappings_empty_list(self):
         """Test loading with empty file list."""

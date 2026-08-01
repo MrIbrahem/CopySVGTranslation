@@ -3,12 +3,12 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
-import pytest
 import shutil
 import tempfile
 from pathlib import Path
 
-from lxml import etree # type: ignore
+import pytest
+from lxml import etree  # type: ignore
 
 from CopySVGTranslation.injection import (
     SvgStructureExceptionError,
@@ -171,8 +171,9 @@ class TestMakeTranslationReadyEdgeCases:
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
 
-    def tearDown(self):
+        yield
         """Clean up test fixtures."""
+        # Clean up temporary files
         shutil.rmtree(self.test_dir)
 
     def test_make_translation_ready_with_tref(self):

@@ -2,13 +2,13 @@
 Unit tests for the SVG translation tool.
 """
 
-import pytest
 import json
 import shutil
 import tempfile
 from pathlib import Path
 
-from lxml import etree # type: ignore
+import pytest
+from lxml import etree  # type: ignore
 
 from CopySVGTranslation.extraction import extract
 from CopySVGTranslation.injection import generate_unique_id, inject
@@ -100,7 +100,7 @@ class TestSVGTranslate:
             "title": {},
         }
 
-    def tearDown(self):
+        yield
         """Clean up test fixtures."""
         # Clean up temporary files
         shutil.rmtree(self.test_dir)

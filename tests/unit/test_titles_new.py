@@ -1,6 +1,5 @@
 """ """
 
-
 from CopySVGTranslation.titles_new import get_new_titles_translations, make_new_title_translations
 
 
@@ -84,7 +83,6 @@ class TestGetNewTitlesTranslations:
         result = get_new_titles_translations(all_mappings_title, default_texts)
         assert result == {"COVID-19 pandemic 1990": {"ar": "جائحة كوفيد 1990", "es": "Pandemia de COVID-19 1990"}}
 
-
     def test_missing_mapping(self):
         all_mappings_title = {"Population {year}": {"ar": "السكان {year}", "es": "Population {year}"}}
         default_texts = ["Unknown 2020"]
@@ -114,9 +112,9 @@ class TestGetNewTitlesTranslations:
         default_texts = ["Pandemic 2020", "Unknown 2021", "Pandemic 2022"]
         result = get_new_titles_translations(all_mappings_title, default_texts)
         assert result == {
-                "Pandemic 2020": {"ar": "جائحة 2020", "ko": "2020년 팬데믹", "fr": ""},
-                "Pandemic 2022": {"ar": "جائحة 2022", "ko": "2022년 팬데믹", "fr": ""},
-            }
+            "Pandemic 2020": {"ar": "جائحة 2020", "ko": "2020년 팬데믹", "fr": ""},
+            "Pandemic 2022": {"ar": "جائحة 2022", "ko": "2022년 팬데믹", "fr": ""},
+        }
 
     def test_multiple_occurrences_of_year(self):
         all_mappings_title = {"pandemic 2020 in {year}": {"ar": "جائحة 2020 {year}"}}
