@@ -183,10 +183,10 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureExceptionError) as ctx:
+        with pytest.raises(SvgStructureExceptionError) as exc_info:
             make_translation_ready(svg_path)
 
-        assert "tref" in str(ctx.exception)
+        assert "tref" in str(exc_info.value)
 
     def test_make_translation_ready_with_css_ids(self):
         """Test that CSS with ID selectors raises exception."""
@@ -197,10 +197,10 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureExceptionError) as ctx:
+        with pytest.raises(SvgStructureExceptionError) as exc_info:
             make_translation_ready(svg_path)
 
-        assert "css" in str(ctx.exception).lower()
+        assert "css" in str(exc_info.value).lower()
 
     def test_make_translation_ready_with_dollar_sign(self):
         """Test that text with dollar signs raises exception."""
@@ -210,10 +210,10 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureExceptionError) as ctx:
+        with pytest.raises(SvgStructureExceptionError) as exc_info:
             make_translation_ready(svg_path)
 
-        assert "dollar" in str(ctx.exception).lower()
+        assert "dollar" in str(exc_info.value).lower()
 
     def test_make_translation_ready_nested_tspans(self):
         """Test that nested tspans raise exception."""
@@ -223,10 +223,10 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureExceptionError) as ctx:
+        with pytest.raises(SvgStructureExceptionError) as exc_info:
             make_translation_ready(svg_path)
 
-        assert "nested" in str(ctx.exception).lower()
+        assert "nested" in str(exc_info.value).lower()
 
     def test_make_translation_ready_wraps_raw_text(self):
         """Test that raw text in text elements is wrapped in tspans."""
@@ -279,10 +279,10 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureExceptionError) as ctx:
+        with pytest.raises(SvgStructureExceptionError) as exc_info:
             make_translation_ready(svg_path)
 
-        assert "lang" in str(ctx.exception).lower()
+        assert "lang" in str(exc_info.value).lower()
 
     def test_make_translation_ready_splits_comma_langs(self):
         """Test that comma-separated languages are split."""
@@ -311,7 +311,7 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with self.assertRaises(SvgStructureExceptionError) as ctx:
+        with pytest.raises(SvgStructureExceptionError) as exc_info:
             make_translation_ready(svg_path)
 
-        assert "id" in str(ctx.exception).lower()
+        assert "id" in str(exc_info.value).lower()

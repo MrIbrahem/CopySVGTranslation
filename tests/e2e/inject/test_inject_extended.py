@@ -57,7 +57,7 @@ class TestStartInjectsEdgeCases:
 
         result = start_injects([str(svg_path)], translations, self.output_dir)
 
-        self.assertGreaterEqual(result["nested_files"], 0)
+        assert result["nested_files"] >= 0
 
     def test_start_injects_tracks_no_changes(self):
         """Test that start_injects tracks files with no changes."""

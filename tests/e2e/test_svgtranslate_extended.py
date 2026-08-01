@@ -386,7 +386,7 @@ class TestSVGTranslate:
         assert "processed_switches" in stats
         assert "inserted_translations" in stats
         assert "updated_translations" in stats
-        self.assertGreaterEqual(stats["processed_switches"], 0)
+        assert stats["processed_switches"] >= 0
 
     def test_extract_and_inject_roundtrip(self):
         """Test that extract and inject work together in a roundtrip."""

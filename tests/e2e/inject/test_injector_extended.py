@@ -162,7 +162,7 @@ class TestWorkOnSwitches:
         stats = work_on_switches(root, existing_ids, mappings, case_insensitive=True)
 
         # Year suffix logic should be applied
-        self.assertGreaterEqual(stats["processed_switches"], 0)
+        assert stats["processed_switches"] >= 0
 
 
 class TestSortSwitchTexts:
