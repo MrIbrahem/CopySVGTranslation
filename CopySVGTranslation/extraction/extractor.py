@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from lxml import etree
+from lxml import etree # type: ignore
 
 from ..text_utils import normalize_text
 from ..titles import make_title_translations
@@ -48,7 +48,7 @@ def get_english_default_texts(text_elements, case_insensitive):
 
 
 def extract(
-    svg_file_path,
+    svg_file_path: str | Path,
     case_insensitive: bool = True,
 ):
     """
@@ -145,3 +145,7 @@ def extract(
     translations["title_new"] = make_new_title_translations(translations["new"])
 
     return translations
+
+__all__ = [
+    "extract",
+]
