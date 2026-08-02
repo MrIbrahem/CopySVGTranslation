@@ -52,7 +52,7 @@ def _reorder_texts(root: etree._Element):
             sw.append(t)
 
 
-def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> tuple[etree._ElementTree, etree._Element]:
+def make_translation_ready(svg_file_path: Path) -> tuple[etree._ElementTree, etree._Element]:
     """Prepare an SVG file for translation and return its tree and root."""
     svg_file_path = Path(str(svg_file_path))
     if not svg_file_path.exists():
@@ -321,10 +321,6 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> tup
 
     # Final reorder
     _reorder_texts(root)
-
-    # Optionally write back to file
-    if write_back:
-        tree.write(str(svg_file_path), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
     return tree, root
 

@@ -47,7 +47,10 @@ svg_file.write_text(
     encoding="utf-8",
 )
 
-make_translation_ready(svg_file, write_back=True)
+tree, root = make_translation_ready(svg_file)
+
+# write to file
+tree.write(str(svg_file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
 result = extract(svg_file)
 

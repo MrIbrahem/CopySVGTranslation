@@ -185,7 +185,7 @@ class SVGTranslationInjector:
 
     def _parse_svg(self, inject_path) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
         try:
-            tree, root = make_translation_ready(inject_path, write_back=False)
+            tree, root = make_translation_ready(inject_path)
             return tree, root
 
         except SvgNestedTspanExceptionError as exc:

@@ -35,7 +35,10 @@ class Testinject:
 
         data = {"new": {"lang none": {"la": "lang la"}}}
 
-        make_translation_ready(file, True)
+        tree, root = make_translation_ready(file)
+
+        # write to file
+        tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
         _result = inject(inject_file=file, all_mappings=data, save_result=True, pretty_print=False)
         file_text = file.read_text(encoding="utf-8")
@@ -50,7 +53,10 @@ class Testinject:
 
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
 
-        make_translation_ready(file, True)
+        tree, root = make_translation_ready(file)
+
+        # write to file
+        tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
         _result = inject(inject_file=file, all_mappings=data, save_result=True, overwrite=True, pretty_print=False)
         file_text = file.read_text(encoding="utf-8")
@@ -66,7 +72,7 @@ class Testinject:
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
 
         with pytest.raises(SvgStructureExceptionError) as excinfo:
-            make_translation_ready(file, True)
+            make_translation_ready(file)
         assert str(excinfo.value) == "structure-error-multiple-text-same-lang: ['la']"
 
     @pytest.mark.parametrize(
@@ -110,7 +116,7 @@ class Testinject:
         file = self.getsvgfilefromstring(temp_dir, text)
 
         with pytest.raises(exc_type) as excinfo:
-            make_translation_ready(file, True)
+            make_translation_ready(file)
 
         assert excinfo.value.code == code
         assert excinfo.value.extra == extra
