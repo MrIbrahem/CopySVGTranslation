@@ -1,11 +1,11 @@
 import textwrap
 from pathlib import Path
 
+from CopySVGTranslation.injection.worker import inject
 from CopySVGTranslation.utils.elements_utils import (
     file_langs,
     tree_langs,
 )
-from CopySVGTranslation.injection.svg_injector import inject
 
 
 def write_svg(tmp_path: Path, content: str) -> Path:

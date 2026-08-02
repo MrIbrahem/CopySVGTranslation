@@ -7,5 +7,4 @@ import json
 
 from CopySVGTranslation.injection.svg_injector import (
     SVGTranslationInjector,
-    inject,
 )
