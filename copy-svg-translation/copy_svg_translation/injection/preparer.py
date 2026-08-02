@@ -27,7 +27,7 @@ class SvgPreparationPipeline:
             ReorderTexts(config),
         ]
 
-    def run(self, path: Path) -> tuple[etree._ElementTree, etree._Element]:
+    def run(self, path: Path) -> tuple[etree._ElementTree[etree._Element], etree._Element]:
         ctx = PreparationContext(path=path, config=self.config)
         for step in self.steps:
             step.execute(ctx)
