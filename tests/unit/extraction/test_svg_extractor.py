@@ -46,7 +46,7 @@ def test_extract_with_string_path() -> None:
         "trsvg15": "It arises when certain cells in the brain, responsible\n            for producing a chemical called dopamine, become damaged or die. Dopamine helps regulate",
         "trsvg16": "muscle movements, and its deficiency in Parkinson's\n            leads to symptoms like tremors (shaking), stiffness, and difficulty with balance and\n            coordination.",
         "trsvg17": "As the disease progresses, it can also bring about\n            changes in speech, sleep problems, depression, memory difficulties, and fatigue.\n            Treatments like",
-        "trsvg18": "medication, devices, and therapies can help manage\n            symptoms and improve quality of life for those with Parkinson's."
+        "trsvg18": "medication, devices, and therapies can help manage\n            symptoms and improve quality of life for those with Parkinson's.",
     }
 
     assert result["new"] == {

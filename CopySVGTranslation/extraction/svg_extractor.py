@@ -1,6 +1,7 @@
 """Utilities for extracting translation data from SVG files."""
 
 import logging
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -11,6 +12,19 @@ from ..titles import make_title_translations
 from ..titles_new import make_new_title_translations
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class Translations:
+    """Container for extracted SVG translation data."""
+
+    new: dict[str, dict[str, str]] = field(default_factory=dict)
+    title: dict[str, Any] = field(default_factory=dict)
+    title_new: dict[str, Any] = field(default_factory=dict)
+    tspans_by_id: dict[str, str] = field(default_factory=dict)
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
 
 
 class SVGTranslationExtractor:
@@ -25,15 +39,9 @@ class SVGTranslationExtractor:
         """
         self.svg_file_path = Path(str(svg_file_path))
         self.case_insensitive = case_insensitive
-        self.translations = {
-            "new": {},
-            "title": {},
-            "title_new": {},
-            "tspans_by_id": {},
-        }
+        self.translations = Translations()
 
-    @staticmethod
-    def get_english_default_texts(text_elements, case_insensitive):
+    def get_english_default_texts(self, text_elements):
         """
         Collect the default (source) English texts from text elements that
         do not have a systemLanguage attribute, along with a mapping of
@@ -58,12 +66,11 @@ class SVGTranslationExtractor:
                 }
                 default_tspans_by_id.update(tspans_by_id)
                 text_contents = [tspan.text.strip() for tspan in tspans if tspan.text]
-                # ---
             else:
                 text_contents = [text_elem.text.strip()] if text_elem.text else [""]
 
-            default_texts = [normalize_text(text, case_insensitive) for text in text_contents]
-            # for text in default_texts: key = text.lower() if case_insensitive else text
+            default_texts = [normalize_text(text, self.case_insensitive) for text in text_contents]
+            # for text in default_texts: key = text.lower() if self.case_insensitive else text
             new_keys.extend(default_texts)
 
         logger.debug(f"new_keys: {len(new_keys):,}, default_tspans_by_id: {len(default_tspans_by_id):,}")
@@ -72,11 +79,10 @@ class SVGTranslationExtractor:
 
         return new_keys, default_tspans_by_id
 
-    @staticmethod
     def process_switch_translations(
+        self,
         text_elements,
         default_tspans_by_id: dict[str, str],
-        new_translations: dict[str, dict[str, str]],
     ) -> dict[str, list[str]]:
         """
         Process the text elements that carry a systemLanguage attribute
@@ -88,13 +94,12 @@ class SVGTranslationExtractor:
             text_elements: <text> elements inside a switch element.
             default_tspans_by_id: Mapping of id -> corresponding default
                 English text.
-            new_translations: The main dictionary (translations["new"])
-                to be updated in place.
 
         Returns:
             dict: Mapping of system language -> list of normalized texts
             for that language.
         """
+        new_translations = self.translations.new
         switch_translations: dict[str, list[str]] = {}
 
         for text_elem in text_elements:
@@ -138,6 +143,26 @@ class SVGTranslationExtractor:
 
         return switch_translations
 
+    def process_switches(self, root: etree.Element) -> None:
+        # Find all switch elements
+        switches = root.xpath("//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"})
+        logger.debug(f"Found {len(switches)} switch elements")
+
+        for switch in switches:
+            # Find all text elements within this switch
+            text_elements = switch.xpath("./svg:text", namespaces={"svg": "http://www.w3.org/2000/svg"})
+
+            if not text_elements:
+                continue
+
+            new_keys, default_tspans_by_id = self.get_english_default_texts(text_elements)
+
+            self.translations.tspans_by_id.update(default_tspans_by_id)
+
+            self.translations.new.update({x: {} for x in new_keys if x not in self.translations.new})
+
+            self.process_switch_translations(text_elements, default_tspans_by_id)
+
     def extract(self) -> dict[str, Any] | None:
         """
         Extract translation strings from an SVG file into a structured dictionary.
@@ -170,31 +195,11 @@ class SVGTranslationExtractor:
             return None
         root = tree.getroot()
 
-        # Find all switch elements
-        switches = root.xpath("//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"})
-        logger.debug(f"Found {len(switches)} switch elements")
+        self.process_switches(root)
+        self.translations.title = make_title_translations(self.translations.new)
+        self.translations.title_new = make_new_title_translations(self.translations.new)
 
-        tspans_by_id = self.translations["tspans_by_id"]
-
-        for switch in switches:
-            # Find all text elements within this switch
-            text_elements = switch.xpath("./svg:text", namespaces={"svg": "http://www.w3.org/2000/svg"})
-
-            if not text_elements:
-                continue
-
-            new_keys, default_tspans_by_id = self.get_english_default_texts(text_elements, self.case_insensitive)
-
-            tspans_by_id.update(default_tspans_by_id)
-
-            self.translations["new"].update({x: {} for x in new_keys if x not in self.translations["new"]})
-
-            self.process_switch_translations(text_elements, default_tspans_by_id, self.translations["new"])
-
-        self.translations["title"] = make_title_translations(self.translations["new"])
-        self.translations["title_new"] = make_new_title_translations(self.translations["new"])
-
-        return self.translations
+        return self.translations.to_json()
 
 
 def extract(
