@@ -23,7 +23,7 @@ def inject(
     overwrite: bool = False,
     save_result: bool = False,
     return_stats: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> tuple[Any, Any] | Any:
     """
     Legacy function-style wrapper around SVGTranslationInjector, kept for

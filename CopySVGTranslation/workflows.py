@@ -6,6 +6,7 @@ import json
 import logging
 from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
 
 from .extraction import extract
 from .injection import inject
@@ -85,7 +86,7 @@ def svg_extract_and_injects(
     inject_file: Path | str,
     output_dir: Path | None = None,
     save_result: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ):
     """Inject provided translations into a single SVG file."""
     inject_path = Path(str(inject_file))
