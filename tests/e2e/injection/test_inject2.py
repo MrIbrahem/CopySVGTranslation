@@ -16,22 +16,29 @@ from CopySVGTranslation.injection.exceptions import (
     SvgStructureExceptionError,
 )
 
-
 class Testinject:
     """Comprehensive tests for text utility functions."""
+
+    def normalize(self, file_text):
+        return "".join([x.strip() for x in file_text.splitlines()])
 
     def getsvgfilefromstring(self, temp_dir, text):
 
         file = temp_dir / "file.svg"
-        file.write_text(text, encoding="utf-8")
+        file.write_text(text.strip(), encoding="utf-8")
 
         return file
 
     def test_inject(self, temp_dir):
-        file = self.getsvgfilefromstring(
-            temp_dir,
-            '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text>lang none</text></switch></svg>',
-        )
+        source_xml = """
+            <?xml version="1.0"?>
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <switch>
+                    <text>lang none</text>
+                </switch>
+            </svg>
+        """
+        file = self.getsvgfilefromstring(temp_dir, source_xml)
 
         data = {"new": {"lang none": {"la": "lang la"}}}
 
@@ -40,16 +47,54 @@ class Testinject:
         # write to file
         tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
-        _result = inject(inject_file=file, all_mappings=data, save_result=True, pretty_print=False)
-        file_text = file.read_text(encoding="utf-8")
-        expected = """<?xml version='1.0' encoding='UTF-8'?>\n<svg xmlns="http://www.w3.org/2000/svg"><switch><text id="trsvg2-la" systemLanguage="la"><tspan id="trsvg1-la">lang la</tspan></text><text id="trsvg2"><tspan id="trsvg1">lang none</tspan></text></switch></svg>"""
-        assert file_text == expected
-
-    def testaddstexttoswitch(self, temp_dir):
-        file = self.getsvgfilefromstring(
-            temp_dir,
-            """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text systemLanguage="la">lang la</text><text>lang none</text></switch></svg>""",
+        _result = inject(
+            inject_file=file,
+            all_mappings=data,
+            save_result=True,
+            pretty_print=False,
         )
+        file_text = file.read_text(encoding="utf-8")
+        expected = """
+            <?xml version='1.0' encoding='UTF-8'?>
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <switch>
+                    <text id="trsvg2-la" systemLanguage="la">
+                        <tspan id="trsvg1-la">lang la</tspan>
+                    </text>
+                    <text id="trsvg2">
+                        <tspan id="trsvg1">lang none</tspan>
+                    </text>
+                </switch>
+            </svg>
+            """
+        normalized_text = self.normalize(file_text)
+
+        assert normalized_text == self.normalize(expected)
+
+    def test_adds_text_to_switch(self, temp_dir):
+        source_xml = """
+            <?xml version="1.0"?>
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <switch>
+                    <text systemLanguage="la">lang la</text>
+                    <text>lang none</text>
+                </switch>
+            </svg>
+        """
+        expected = """
+            <?xml version='1.0' encoding='UTF-8'?>
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <switch>
+                    <text systemLanguage="la" id="trsvg3">
+                        <tspan id="trsvg1">lang la (new)</tspan>
+                    </text>
+                    <text id="trsvg4">
+                        <tspan id="trsvg2">lang none</tspan>
+                    </text>
+                </switch>
+            </svg>
+        """
+        file = self.getsvgfilefromstring(temp_dir, source_xml)
 
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
 
@@ -58,16 +103,30 @@ class Testinject:
         # write to file
         tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
-        _result = inject(inject_file=file, all_mappings=data, save_result=True, overwrite=True, pretty_print=False)
-        file_text = file.read_text(encoding="utf-8")
-        expected = """<?xml version='1.0' encoding='UTF-8'?>\n<svg xmlns="http://www.w3.org/2000/svg"><switch><text systemLanguage="la" id="trsvg3"><tspan id="trsvg1">lang la (new)</tspan></text><text id="trsvg4"><tspan id="trsvg2">lang none</tspan></text></switch></svg>"""
-        assert file_text == expected
-
-    def testaddstexttoswitchsamelang(self, temp_dir):
-        file = self.getsvgfilefromstring(
-            temp_dir,
-            """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch id="testswitch"><text systemLanguage="la">lang la (1)</text><text systemLanguage="la">lang la (2)</text><text>lang none</text></switch></svg>""",
+        _result = inject(
+            inject_file=file,
+            all_mappings=data,
+            save_result=True,
+            overwrite=True,
+            pretty_print=False,
         )
+        file_text = file.read_text(encoding="utf-8")
+        normalized_text = self.normalize(file_text)
+
+        assert normalized_text == self.normalize(expected)
+
+    def test_adds_text_to_switch_samelang(self, temp_dir):
+        source_xml = """
+            <?xml version="1.0"?>
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <switch id="testswitch">
+                    <text systemLanguage="la">lang la (1)</text>
+                    <text systemLanguage="la">lang la (2)</text>
+                    <text>lang none</text>
+                </switch>
+            </svg>
+        """
+        file = self.getsvgfilefromstring(temp_dir, source_xml)
 
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
 
