@@ -54,11 +54,16 @@ class SVGTranslationInjector:
     def work_on_switches(
         self,
         root: etree._Element,
-        existing_ids: set[str],
         mappings: Mapping,
+        existing_ids: set[str] | None = None,
     ) -> None:
         """Process ``<switch>`` elements and insert or update translations."""
         svg_ns = {"svg": "http://www.w3.org/2000/svg"}
+
+        if not existing_ids:
+            # Collect all existing IDs to ensure uniqueness
+            # existing_ids = {elem.get('id') for elem in root.xpath('//*[@id]') if elem.get('id')}
+            existing_ids = set(root.xpath("//@id"))
 
         switches = root.xpath("//svg:switch", namespaces=svg_ns)
         logger.debug(f"Found {len(switches)} switch elements")
@@ -179,6 +184,45 @@ class SVGTranslationInjector:
 
             self.new_stats.processed_switches += 1
 
+    def _parse_svg(self, inject_path) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
+        try:
+            tree, root = make_translation_ready(inject_path, write_back=False)
+            return tree, root
+
+        except SvgNestedTspanExceptionError as exc:
+            self.new_stats.error = "nested_tspan_error"
+
+        except SvgStructureExceptionError as exc:
+            self.new_stats.error = str(exc)
+
+        except etree.XMLSyntaxError as exc:
+            logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
+            self.new_stats.error = str(exc)
+
+        except (OSError, Exception) as exc:
+            logger.error("Failed to parse SVG file: %s", exc)
+            self.new_stats.error = str(exc)
+
+        return None, None
+
+    def _fix_old_switches(self, root) -> None:
+        # Fix old <svg:switch> tags if present
+        for elem in root.findall(".//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"}):
+            elem.tag = "switch"
+            sort_switch_texts(elem)
+
+    def _update_data(self, before_languages: set[str], after_languages: set[str]) -> None:
+        new_languages = after_languages - before_languages
+
+        self.new_stats.all_languages = len(after_languages)
+        self.new_stats.new_languages = len(new_languages)
+        self.new_stats.new_languages_list = sorted(new_languages)
+
+        logger.debug(f"Processed {self.new_stats.processed_switches} switches")
+        logger.debug(f"Inserted {self.new_stats.inserted_translations} translations")
+        logger.debug(f"Updated {self.new_stats.updated_translations} translations")
+        logger.debug(f"Skipped {self.new_stats.skipped_translations} existing translations")
+
     def inject(
         self,
         inject_file: Path | str,
@@ -203,43 +247,18 @@ class SVGTranslationInjector:
         logger.debug(f"Injecting translations into {inject_path}")
 
         # Parse SVG as XML
-        try:
-            tree, root = make_translation_ready(inject_path, write_back=False)
-        except SvgNestedTspanExceptionError as exc:
-            self.new_stats.error = "nested_tspan_error"
-            return self.result
+        tree, root = self._parse_svg(inject_path)
 
-        except SvgStructureExceptionError as exc:
-            self.new_stats.error = str(exc)
-            return self.result
-
-        except etree.XMLSyntaxError as exc:
-            logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
-            self.new_stats.error = str(exc)
-            return self.result
-
-        except (OSError, Exception) as exc:
-            logger.error("Failed to parse SVG file: %s", exc)
-            self.new_stats.error = str(exc)
+        if tree is None or root is None:
             return self.result
 
         self.result.tree = tree
-        # Collect all existing IDs to ensure uniqueness
-        # existing_ids = {elem.get('id') for elem in root.xpath('//*[@id]') if elem.get('id')}
-        existing_ids = set(root.xpath("//@id"))
 
         before_languages = file_langs(inject_path)
 
-        self.work_on_switches(
-            root,
-            existing_ids,
-            all_mappings,
-        )
+        self.work_on_switches(root=root, mappings=all_mappings)
 
-        # Fix old <svg:switch> tags if present
-        for elem in root.findall(".//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"}):
-            elem.tag = "switch"
-            sort_switch_texts(elem)
+        self._fix_old_switches(root=root)
 
         after_languages = set()
         if save_result:
@@ -258,16 +277,7 @@ class SVGTranslationInjector:
         else:
             after_languages = tree_langs(tree)
 
-        new_languages = after_languages - before_languages
-
-        self.new_stats.all_languages = len(after_languages)
-        self.new_stats.new_languages = len(new_languages)
-        self.new_stats.new_languages_list = sorted(new_languages)
-
-        logger.debug(f"Processed {self.new_stats.processed_switches} switches")
-        logger.debug(f"Inserted {self.new_stats.inserted_translations} translations")
-        logger.debug(f"Updated {self.new_stats.updated_translations} translations")
-        logger.debug(f"Skipped {self.new_stats.skipped_translations} existing translations")
+        self._update_data(before_languages, after_languages)
 
         return self.result
 
