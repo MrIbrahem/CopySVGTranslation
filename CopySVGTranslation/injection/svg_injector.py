@@ -94,7 +94,7 @@ class SVGTranslationInjector:
                 default_node = text_elem
                 break
 
-            if not default_texts or not default_node:
+            if not default_texts or default_node is None:
                 continue
 
             # titles_translations = get_titles_translations(all_mappings_title, default_texts)
