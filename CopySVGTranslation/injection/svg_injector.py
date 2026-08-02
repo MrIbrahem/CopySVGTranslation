@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
-from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
 
 from lxml import etree
 
@@ -25,53 +23,10 @@ from .exceptions import (
     SvgNestedTspanExceptionError,
     SvgStructureExceptionError,
 )
+from .objects import InjectorData, InjectorStats
 from .preparation import make_translation_ready
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class InjectorStats:
-    """
-    {
-        "all_languages": 0,
-        "new_languages": 0,
-        "processed_switches": 0,
-        "inserted_translations": 0,
-        "skipped_translations": 0,
-        "updated_translations": 0,
-        "error": "",
-    }"""
-
-    all_languages: int = 0
-    new_languages: int = 0
-
-    processed_switches: int = 0
-    inserted_translations: int = 0
-    skipped_translations: int = 0
-    updated_translations: int = 0
-
-    new_languages_list: list[str] = field(default_factory=list)
-    error: str = ""
-
-    def to_json(self) -> dict[str, Any]:
-        return asdict(self)
-
-
-@dataclass
-class InjectorData:
-    """Container for SVG data."""
-
-    tree: etree._ElementTree | None = None
-    new_stats: InjectorStats = field(default_factory=InjectorStats)
-
-    def to_json(self) -> dict[str, Any]:
-        new_stats = self.new_stats.to_json()
-        return {
-            "tree": self.tree,
-            "new_stats": new_stats,
-            "error": new_stats["error"],
-        }
 
 
 class SVGTranslationInjector:
@@ -94,6 +49,7 @@ class SVGTranslationInjector:
         self.overwrite = overwrite
         self.pretty_print = pretty_print
         self.result = InjectorData()
+        self.new_stats: InjectorStats = self.result.new_stats
 
     def work_on_switches(
         self,
@@ -164,7 +120,7 @@ class SVGTranslationInjector:
 
             for lang in all_langs:
                 if lang in existing_languages and not self.overwrite:
-                    self.result.new_stats.skipped_translations += 1
+                    self.new_stats.skipped_translations += 1
                     continue
 
                 # Create or update node
@@ -182,7 +138,7 @@ class SVGTranslationInjector:
                             elif lookup_key in available_translations and lang in available_translations[lookup_key]:
                                 tspan.text = available_translations[lookup_key][lang]
 
-                        self.result.new_stats.updated_translations += 1
+                        self.new_stats.updated_translations += 1
                         break
                     continue
 
@@ -219,9 +175,9 @@ class SVGTranslationInjector:
                     new_node.text = all_mappings.get(key, {}).get(lang, english_text)
 
                 switch.append(new_node)
-                self.result.new_stats.inserted_translations += 1
+                self.new_stats.inserted_translations += 1
 
-            self.result.new_stats.processed_switches += 1
+            self.new_stats.processed_switches += 1
 
     def inject(
         self,
@@ -236,12 +192,12 @@ class SVGTranslationInjector:
 
         if not inject_path.exists():
             logger.error(f"SVG file not found: {inject_path}")
-            self.result.new_stats.error = "File does not exist"
+            self.new_stats.error = "File does not exist"
             return self.result
 
         if not all_mappings:
             logger.error("No valid mappings found")
-            self.result.new_stats.error = "No valid mappings found"
+            self.new_stats.error = "No valid mappings found"
             return self.result
 
         logger.debug(f"Injecting translations into {inject_path}")
@@ -250,21 +206,21 @@ class SVGTranslationInjector:
         try:
             tree, root = make_translation_ready(inject_path, write_back=False)
         except SvgNestedTspanExceptionError as exc:
-            self.result.new_stats.error = "nested_tspan_error"
+            self.new_stats.error = "nested_tspan_error"
             return self.result
 
         except SvgStructureExceptionError as exc:
-            self.result.new_stats.error = str(exc)
+            self.new_stats.error = str(exc)
             return self.result
 
         except etree.XMLSyntaxError as exc:
             logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
-            self.result.new_stats.error = str(exc)
+            self.new_stats.error = str(exc)
             return self.result
 
         except (OSError, Exception) as exc:
             logger.error("Failed to parse SVG file: %s", exc)
-            self.result.new_stats.error = str(exc)
+            self.new_stats.error = str(exc)
             return self.result
 
         self.result.tree = tree
@@ -304,14 +260,14 @@ class SVGTranslationInjector:
 
         new_languages = after_languages - before_languages
 
-        self.result.new_stats.all_languages = len(after_languages)
-        self.result.new_stats.new_languages = len(new_languages)
-        self.result.new_stats.new_languages_list = sorted(new_languages)
+        self.new_stats.all_languages = len(after_languages)
+        self.new_stats.new_languages = len(new_languages)
+        self.new_stats.new_languages_list = sorted(new_languages)
 
-        logger.debug(f"Processed {self.result.new_stats.processed_switches} switches")
-        logger.debug(f"Inserted {self.result.new_stats.inserted_translations} translations")
-        logger.debug(f"Updated {self.result.new_stats.updated_translations} translations")
-        logger.debug(f"Skipped {self.result.new_stats.skipped_translations} existing translations")
+        logger.debug(f"Processed {self.new_stats.processed_switches} switches")
+        logger.debug(f"Inserted {self.new_stats.inserted_translations} translations")
+        logger.debug(f"Updated {self.new_stats.updated_translations} translations")
+        logger.debug(f"Skipped {self.new_stats.skipped_translations} existing translations")
 
         return self.result
 
