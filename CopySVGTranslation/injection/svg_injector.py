@@ -274,28 +274,39 @@ class SVGTranslationInjector:
         self._fix_old_switches(root=root)
 
         after_languages = tree_langs(tree)
-
-        if save_result:
-            if target_path is None:
-                logger.error("save_result is True but no target_path was provided")
-                self.new_stats.error = "No target path provided"
-                return self.result
-            try:
-                tree.write(
-                    str(target_path),
-                    encoding="utf-8",
-                    xml_declaration=True,
-                    pretty_print=self.pretty_print,
-                )
-                logger.debug(f"Saved modified SVG to {target_path}")
-            except OSError as e:
-                logger.error(f"Failed writing {inject_path.name}: {e}")
-                self.new_stats.error = f"Failed writing {inject_path.name}: {e}"
-                self.result.tree = None
-
         self._update_data(before_languages, after_languages)
 
+        if not save_result:
+            self._update_data(before_languages, after_languages)
+            return self.result
+
+        self.save_svg_to_target(target_path, inject_path.name, tree)
+
         return self.result
+
+    def save_svg_to_target(
+        self,
+        target_path: Path | None,
+        inject_file_name: str,
+        tree: etree._ElementTree,
+        ) -> None:
+        if target_path is None:
+            logger.error("save_result is True but no target_path was provided")
+            self.new_stats.error = "No target path provided"
+            return
+
+        try:
+            tree.write(
+                str(target_path),
+                encoding="utf-8",
+                xml_declaration=True,
+                pretty_print=self.pretty_print,
+            )
+            logger.debug(f"Saved modified SVG to {target_path}")
+        except OSError as e:
+            logger.error(f"Failed writing {inject_file_name}: {e}")
+            self.new_stats.error = f"Failed writing {inject_file_name}: {e}"
+            self.result.tree = None
 
 
 __all__ = [
