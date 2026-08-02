@@ -52,6 +52,56 @@ def _reorder_texts(root: etree._Element):
             sw.append(t)
 
 
+def _check_style_elements(root) -> None:
+    styles = root.findall(".//{%s}style" % SVG_NS)
+    css_simple_re = re.compile(r"^([^{]+\{[^}]*\})*[^{]+$")
+
+    for s in styles:
+        css = s.text or ""
+        if "#" in css:
+            if not css_simple_re.match(css):
+                raise SvgStructureExceptionError("structure-error-css-too-complex", None, [s.get("id", "")])
+            # split selectors roughly and ensure no '#' in selectors portion
+            selectors = re.split(r"\{[^}]*\}", css)
+            for selector in selectors:
+                if "#" in selector:
+                    raise SvgStructureExceptionError("structure-error-css-has-ids", None, [s.get("id", "")])
+
+
+def _process_text_elements(root):
+    texts = root.findall(".//{%s}text" % SVG_NS)
+    for text in texts:
+        content = get_text_content(text)
+        if re.search(r"\$[0-9]+", content):
+            raise SvgStructureExceptionError("structure-error-text-contains-dollar", text, [content])
+
+        # normalize systemLanguage if present
+        if text.get("systemLanguage"):
+            text.set("systemLanguage", normalize_lang(text.get("systemLanguage")))
+
+        parent = text.getparent()
+        if parent is None or (parent.tag not in ({f"{{{SVG_NS}}}switch", "switch"})):
+            # Create a switch element in the SVG namespace and move the text into it
+            switch = etree.Element("{%s}switch" % SVG_NS)
+            parent_of_text = parent
+            if parent_of_text is None:
+                raise SvgStructureExceptionError("structure-error-no-parent-for-text", text, text)
+            # insert switch before text
+            idx = list(parent_of_text).index(text)
+            parent_of_text.insert(idx, switch)
+            switch.append(text)
+
+        # move style from text to switch (parent)
+        if text.get("style"):
+            switch_parent = text.getparent()
+            if switch_parent is not None:
+                switch_parent.set("style", text.get("style"))
+
+        # verify that children of text are only tspans or text nodes
+        for child in text:
+            if child.tag not in ({f"{{{SVG_NS}}}tspan", "tspan"}):
+                raise SvgStructureExceptionError("structure-error-non-tspan-inside-text", child, child)
+
 def make_translation_ready(svg_file_path: Path) -> tuple[etree._ElementTree, etree._Element]:
     """Prepare an SVG file for translation and return its tree and root."""
     svg_file_path = Path(str(svg_file_path))
@@ -70,7 +120,7 @@ def make_translation_ready(svg_file_path: Path) -> tuple[etree._ElementTree, etr
         root.set(XMLNS_ATTR, SVG_NS)
         default_ns = SVG_NS
 
-    ns = {"svg": SVG_NS}
+    # ns = {"svg": SVG_NS}
 
     # Check for any <text> elements
     texts = root.findall(".//{%s}text" % SVG_NS)
@@ -79,18 +129,7 @@ def make_translation_ready(svg_file_path: Path) -> tuple[etree._ElementTree, etr
         return tree, root
 
     # Check <style> elements for IDs and syntactic complexity
-    styles = root.findall(".//{%s}style" % SVG_NS)
-    css_simple_re = re.compile(r"^([^{]+\{[^}]*\})*[^{]+$")
-    for s in styles:
-        css = s.text or ""
-        if "#" in css:
-            if not css_simple_re.match(css):
-                raise SvgStructureExceptionError("structure-error-css-too-complex", None, [s.get("id", "")])
-            # split selectors roughly and ensure no '#' in selectors portion
-            selectors = re.split(r"\{[^}]*\}", css)
-            for selector in selectors:
-                if "#" in selector:
-                    raise SvgStructureExceptionError("structure-error-css-has-ids", None, [s.get("id", "")])
+    _check_style_elements(root)
 
     translatable_nodes: list[etree._Element] = []
 
@@ -136,21 +175,6 @@ def make_translation_ready(svg_file_path: Path) -> tuple[etree._ElementTree, etr
                 ids_in_use.append(next_id)
                 existing_ids.add(candidate)
                 return candidate
-
-    def allocate_clone_id(base_id: str | None, lang: str) -> str:
-        """Allocate a unique identifier for a cloned ``<text>`` node."""
-        if base_id and re.match(r"^trsvg[0-9]+$", base_id):
-            return allocate_trsvg_id()
-        if base_id:
-            base_candidate = f"{base_id}-{lang}"
-            candidate = base_candidate
-            suffix = 1
-            while candidate in existing_ids:
-                suffix += 1
-                candidate = f"{base_candidate}-{suffix}"
-            existing_ids.add(candidate)
-            return candidate
-        return allocate_trsvg_id()
 
     # Process text elements: wrap raw text nodes into <tspan>
     texts = root.findall(".//{%s}text" % SVG_NS)
@@ -228,40 +252,24 @@ def make_translation_ready(svg_file_path: Path) -> tuple[etree._ElementTree, etr
             node.set("id", new_id)
 
     # Second pass on text elements for extra checks and switch creation
-    texts = root.findall(".//{%s}text" % SVG_NS)
-    for text in texts:
-        content = get_text_content(text)
-        if re.search(r"\$[0-9]+", content):
-            raise SvgStructureExceptionError("structure-error-text-contains-dollar", text, [content])
-
-        # normalize systemLanguage if present
-        if text.get("systemLanguage"):
-            text.set("systemLanguage", normalize_lang(text.get("systemLanguage")))
-
-        parent = text.getparent()
-        if parent is None or (parent.tag not in ({f"{{{SVG_NS}}}switch", "switch"})):
-            # Create a switch element in the SVG namespace and move the text into it
-            switch = etree.Element("{%s}switch" % SVG_NS)
-            parent_of_text = parent
-            if parent_of_text is None:
-                raise SvgStructureExceptionError("structure-error-no-parent-for-text", text, text)
-            # insert switch before text
-            idx = list(parent_of_text).index(text)
-            parent_of_text.insert(idx, switch)
-            switch.append(text)
-
-        # move style from text to switch (parent)
-        if text.get("style"):
-            switch_parent = text.getparent()
-            if switch_parent is not None:
-                switch_parent.set("style", text.get("style"))
-
-        # verify that children of text are only tspans or text nodes
-        for child in text:
-            if child.tag not in ({f"{{{SVG_NS}}}tspan", "tspan"}):
-                raise SvgStructureExceptionError("structure-error-non-tspan-inside-text", child, child)
+    _process_text_elements(root)
 
     # Process all switches: split comma-separated systemLanguage values
+    def allocate_clone_id(base_id: str | None, lang: str) -> str:
+        """Allocate a unique identifier for a cloned ``<text>`` node."""
+        if base_id and re.match(r"^trsvg[0-9]+$", base_id):
+            return allocate_trsvg_id()
+        if base_id:
+            base_candidate = f"{base_id}-{lang}"
+            candidate = base_candidate
+            suffix = 1
+            while candidate in existing_ids:
+                suffix += 1
+                candidate = f"{base_candidate}-{suffix}"
+            existing_ids.add(candidate)
+            return candidate
+        return allocate_trsvg_id()
+
     switches = root.findall(".//{%s}switch" % SVG_NS)
     for sw in switches:
         # gather existing languages for duplicate detection
@@ -324,8 +332,6 @@ def make_translation_ready(svg_file_path: Path) -> tuple[etree._ElementTree, etr
 
     return tree, root
 
-
 __all__ = [
-    "get_text_content",
     "make_translation_ready",
 ]

@@ -10,6 +10,7 @@ FIXTURES_DIR = Path(__file__).parent.parent / "tests_files/example"
 
 pytestmark = [pytest.mark.skip] if not FIXTURES_DIR.exists() else [pytest.mark.unit]
 
+
 class TestIntegrationWorkflows:
 
     @pytest.fixture(autouse=True)
