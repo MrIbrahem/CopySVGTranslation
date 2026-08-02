@@ -39,6 +39,7 @@ def svg_extract_and_inject(
     """
     extract_path = Path(str(extract_file))
     inject_path = Path(str(inject_file))
+    target_path = output_file
 
     translations = extract(extract_path, case_insensitive=True)
     all_mappings = translations
@@ -50,7 +51,6 @@ def svg_extract_and_inject(
         logger.error(f"Failed to extract translations from {extract_path}")
         return None
 
-    target_path = output_file
 
     if not target_path:
         output_dir = inject_path.parent / "translated"
