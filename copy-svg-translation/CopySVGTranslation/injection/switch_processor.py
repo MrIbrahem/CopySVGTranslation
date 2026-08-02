@@ -1,0 +1,100 @@
+# injection/switch_processor.py
+from __future__ import annotations
+
+import logging
+from lxml import etree
+
+from ..config import TranslationConfig
+from ..core.mapping import TranslationMapping
+from ..core.switch_node import SwitchNode
+from ..core.text_node import TextNode
+from ..result import InjectorStats
+from ..titles.year_handler import YearTitleHandler
+from .id_manager import IdManager
+from .translation_applier import TranslationApplier
+
+logger = logging.getLogger(__name__)
+SVG_NS = "http://www.w3.org/2000/svg"
+
+
+class SwitchProcessor:
+    def __init__(
+        self,
+        config: TranslationConfig,
+        id_manager: IdManager,
+        applier: TranslationApplier,
+        year_handler: YearTitleHandler | None = None,
+    ) -> None:
+        self.config = config
+        self.id_manager = id_manager
+        self.applier = applier
+        self.year_handler = year_handler or YearTitleHandler(config)
+
+    def process(
+        self,
+        switch_element: etree._Element,
+        mapping: TranslationMapping,
+        stats: InjectorStats,
+    ) -> None:
+        switch = SwitchNode(switch_element)
+        default = switch.fallback()
+        if default is None:
+            return
+
+        default_texts = default.texts(
+            normalize=True,
+            case_insensitive=self.config.case_insensitive,
+        )
+        if not any(default_texts):
+            return
+
+        stats.processed_switches += 1
+
+        # Enrich mapping with year-title logic
+        working_mapping = self.year_handler.enrich_mapping_for_switch(
+            mapping,
+            default_texts,
+            case_insensitive=self.config.case_insensitive,
+        )
+
+        # Collect translation mappings per-language for this fallback
+        langs_to_process = working_mapping.all_languages()
+
+        # Gather existing translation nodes
+        existing_langs = switch.existing_languages()
+
+        for lang in langs_to_process:
+            # Build target translation dict
+            translations_for_lang: dict[str, str] = {}
+            has_any_translation = False
+            for src in default_texts:
+                resolved = working_mapping.lookup(src, case_insensitive=self.config.case_insensitive)
+                trans = resolved.get(lang)
+                if trans is not None:
+                    translations_for_lang[src] = trans
+                    has_any_translation = True
+                else:
+                    translations_for_lang[src] = src  # fallback to default text segment
+
+            if not has_any_translation:
+                continue
+
+            existing_node = switch.find_by_language(lang)
+            res = self.applier.apply_language(
+                default.element,
+                default_texts,
+                lang,
+                translations_for_lang,
+                existing_node.element if existing_node is not None else None,
+            )
+
+            if res.action == "inserted" and res.node is not None:
+                switch.append(TextNode(res.node))
+                stats.inserted_translations += 1
+            elif res.action == "updated":
+                stats.updated_translations += 1
+            elif res.action == "skipped":
+                stats.skipped_translations += 1
+
+        # Sort the switch elements deterministically
+        switch.reorder(put_fallback_last=True)
