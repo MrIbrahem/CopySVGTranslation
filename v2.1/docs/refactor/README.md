@@ -12,23 +12,24 @@ copy_svg_translation/
 │
 ├── core/
 │   ├── __init__.py
-│   ├── models.py               # Domain models
-│   ├── text_node.py
-│   ├── switch_node.py
-│   └── mapping.py
+│   ├── models.py               # Domain models - Shared small types / enums if needed
+│   ├── text_node.py            # TextNode
+│   ├── switch_node.py          # SwitchNode
+│   └── mapping.py              # TranslationEntry + TranslationMapping
 │
 ├── extraction/
 │   ├── __init__.py
-│   ├── extractor.py
-│   └── strategies.py
+│   ├── extractor.py           # SVGTranslationExtractor
+│   └── strategies.py          # Matching strategies (how default text links to translations)
 │
 ├── injection/
 │   ├── __init__.py
-│   ├── preparer.py
-│   ├── injector.py
-│   ├── id_manager.py
-│   └── steps/                  # Preparation pipeline steps
-│       ├── __init__.py
+│   ├── preparer.py              # SvgPreparationPipeline
+│   ├── injector.py              # SVGTranslationInjector (orchestrator only)
+│   ├── id_manager.py            # IdManager
+│   ├── switch_processor.py      # SwitchProcessor  ← replaces most of work_on_switches
+│   ├── translation_applier.py   # TranslationApplier
+│   └── steps/                   # Preparation only (runs before injection)
 │       ├── base.py
 │       ├── load.py
 │       ├── validate.py
@@ -39,22 +40,22 @@ copy_svg_translation/
 │
 ├── nested/
 │   ├── __init__.py
-│   ├── detector.py
-│   └── flattener.py            # Prefer style-preserving version
+│   ├── detector.py             # NestedTspanDetector
+│   └── flattener.py            # NestedTspanFlattener - Prefer style-preserving version
 │
 ├── titles/
 │   ├── __init__.py
-│   └── year_handler.py         # Single unified year logic
+│   └── year_handler.py         # YearTitleHandler (single unified implementation)
 │
 ├── io/
 │   ├── __init__.py
-│   ├── svg_document.py
-│   └── mapping_store.py
+│   ├── svg_document.py         # SvgDocument – load / save / root access
+│   └── mapping_store.py        # MappingStore – load / merge / save JSON mappings
 │
 ├── utils/
 │   ├── __init__.py
 │   ├── text.py                 # normalize_text, normalize_lang
-│   └── xml.py                  # thin lxml helpers
+│   └── xml.py                  # thin lxml / SVG helpers
 │
 └── legacy/                     # Temporary compatibility layer
     ├── __init__.py
