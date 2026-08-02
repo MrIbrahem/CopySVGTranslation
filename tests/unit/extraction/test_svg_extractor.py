@@ -1,6 +1,6 @@
 # ruff: noqa: F401
 """
-Unit tests for CopySVGTranslation/extraction/extractor.py module.
+Unit tests for CopySVGTranslation/extraction/svg_extractor.py module.
 
 Functions to test: extract
 
@@ -11,7 +11,7 @@ TODO: write tests
 import json
 from pathlib import Path
 
-from CopySVGTranslation.extraction.extractor import (
+from CopySVGTranslation.extraction.svg_extractor import (
     extract,
 )
 
