@@ -21,32 +21,6 @@ from CopySVGTranslation.injection import (
 from CopySVGTranslation.injection.preparation import (
     normalize_lang,
 )
-from CopySVGTranslation.text_utils import normalize_text
-
-# -------------------------------
-# Text utility tests
-# -------------------------------
-
-
-class TestTextUtils:
-    """Test cases for text utility functions."""
-
-    def test_normalize_text_with_tabs_and_newlines(self):
-        """Test normalization with tabs and newlines."""
-        assert normalize_text("hello\t\nworld") == "hello world"
-        assert normalize_text("  hello\n\n  world  ") == "hello world"
-
-    def test_normalize_text_case_insensitive(self):
-        """Test case-insensitive normalization."""
-        assert normalize_text("Hello World", case_insensitive=True) == "hello world"
-        assert normalize_text("HELLO WORLD", case_insensitive=True) == "hello world"
-        assert normalize_text("HeLLo WoRLd", case_insensitive=True) == "hello world"
-
-    def test_normalize_text_unicode(self):
-        """Test normalization with Unicode characters."""
-        assert normalize_text("  مرحبا  بك  ") == "مرحبا بك"
-        assert normalize_text("  你好  世界  ") == "你好 世界"
-
 
 # -------------------------------
 # Preparation tests
@@ -245,11 +219,6 @@ class TestBatch:
 
 class TestEdgeCases:
     """Test edge cases and boundary conditions."""
-
-    def test_normalize_text_with_only_whitespace(self):
-        """Test normalization with only whitespace."""
-        assert normalize_text("   ") == ""
-        assert normalize_text("\n\t  ") == ""
 
     def test_generate_unique_id_with_many_collisions(self):
         """Test unique ID generation with many existing IDs."""

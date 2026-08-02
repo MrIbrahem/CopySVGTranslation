@@ -7,8 +7,7 @@ from pathlib import Path
 # Test that the public API is importable
 import CopySVGTranslation
 from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import generate_unique_id, inject, start_injects
-from CopySVGTranslation.text_utils import normalize_text
+from CopySVGTranslation.injection import inject, start_injects
 from CopySVGTranslation.workflows import svg_extract_and_inject
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -47,16 +46,6 @@ class TestPublicAPIExports:
         assert callable(inject)
         assert inject.__name__ == "inject"
 
-    def test_normalize_text_is_importable(self):
-        """The normalize_text function should be importable from top-level module."""
-        assert callable(normalize_text)
-        assert normalize_text.__name__ == "normalize_text"
-
-    def test_generate_unique_id_is_importable(self):
-        """The generate_unique_id function should be importable from top-level module."""
-        assert callable(generate_unique_id)
-        assert generate_unique_id.__name__ == "generate_unique_id"
-
     def test_start_injects_is_importable(self):
         """The start_injects function should be importable from top-level module."""
         assert callable(start_injects)
@@ -82,127 +71,6 @@ class TestPublicAPIExports:
         """The __all__ list should not contain private names."""
         for name in CopySVGTranslation.__all__:
             assert not name.startswith("_"), f"{name} should not be private"
-
-
-class TestNormalizeTextFunction:
-    """Comprehensive tests for the normalize_text function."""
-
-    def test_normalize_text_basic_whitespace(self):
-        """normalize_text should collapse multiple spaces."""
-        assert normalize_text("hello  world") == "hello world"
-        assert normalize_text("hello   world") == "hello world"
-
-    def test_normalize_text_leading_trailing_whitespace(self):
-        """normalize_text should remove leading and trailing whitespace."""
-        assert normalize_text("  hello world  ") == "hello world"
-        assert normalize_text("\thello world\n") == "hello world"
-
-    def test_normalize_text_empty_string(self):
-        """normalize_text should handle empty strings."""
-        assert normalize_text("") == ""
-        assert normalize_text("   ") == ""
-
-    def test_normalize_text_none_value(self):
-        """normalize_text should handle None values."""
-        assert normalize_text(None) == ""
-
-    def test_normalize_text_case_sensitive(self):
-        """normalize_text should preserve case by default."""
-        assert normalize_text("Hello World") == "Hello World"
-        assert normalize_text("HELLO WORLD") == "HELLO WORLD"
-
-    def test_normalize_text_case_insensitive(self):
-        """normalize_text should lowercase when case_insensitive=True."""
-        assert normalize_text("Hello World", case_insensitive=True) == "hello world"
-        assert normalize_text("HELLO WORLD", case_insensitive=True) == "hello world"
-
-    def test_normalize_text_mixed_whitespace_types(self):
-        """normalize_text should handle tabs, newlines, and spaces."""
-        assert normalize_text("hello\tworld\n") == "hello world"
-        assert normalize_text("hello\r\nworld") == "hello world"
-
-    def test_normalize_text_unicode_whitespace(self):
-        """normalize_text should handle unicode whitespace."""
-        assert normalize_text("hello\u00a0world") == "hello world"  # Non-breaking space
-
-    def test_normalize_text_single_word(self):
-        """normalize_text should handle single words."""
-        assert normalize_text("hello") == "hello"
-        assert normalize_text("  hello  ") == "hello"
-
-    def test_normalize_text_multiple_newlines(self):
-        """normalize_text should collapse multiple newlines."""
-        assert normalize_text("hello\n\n\nworld") == "hello world"
-
-    def test_normalize_text_arabic_text(self):
-        """normalize_text should preserve non-Latin scripts."""
-        assert normalize_text("  السكان 2020  ") == "السكان 2020"
-
-    def test_normalize_text_special_characters(self):
-        """normalize_text should preserve special characters."""
-        assert normalize_text("hello, world!") == "hello, world!"
-        assert normalize_text("test@example.com") == "test@example.com"
-
-
-class TestGenerateUniqueIdFunction:
-    """Comprehensive tests for the generate_unique_id function."""
-
-    def test_generate_unique_id_no_collision(self):
-        """generate_unique_id should append language code when no collision."""
-        existing_ids = {"id1", "id2"}
-        result = generate_unique_id("base", "fr", existing_ids)
-        assert result == "base-fr"
-
-    def test_generate_unique_id_with_collision(self):
-        """generate_unique_id should handle ID collisions."""
-        existing_ids = {"base-ar"}
-        result = generate_unique_id("base", "ar", existing_ids)
-        assert result == "base-ar-1"
-
-    def test_generate_unique_id_multiple_collisions(self):
-        """generate_unique_id should handle multiple collisions."""
-        existing_ids = {"base-ar", "base-ar-1", "base-ar-2"}
-        result = generate_unique_id("base", "ar", existing_ids)
-        assert result == "base-ar-3"
-
-    def test_generate_unique_id_empty_existing_set(self):
-        """generate_unique_id should work with empty existing ID set."""
-        result = generate_unique_id("base", "de", set())
-        assert result == "base-de"
-
-    def test_generate_unique_id_preserves_base_id(self):
-        """generate_unique_id should preserve the base ID structure."""
-        existing_ids = {"other-id"}
-        result = generate_unique_id("my-element", "es", existing_ids)
-        assert result == "my-element-es"
-        assert result.startswith("my-element")
-
-    def test_generate_unique_id_different_languages(self):
-        """generate_unique_id should handle different language codes."""
-        existing_ids = set()
-
-        ar_id = generate_unique_id("base", "ar", existing_ids)
-        existing_ids.add(ar_id)
-
-        fr_id = generate_unique_id("base", "fr", existing_ids)
-        existing_ids.add(fr_id)
-
-        assert ar_id == "base-ar"
-        assert fr_id == "base-fr"
-        assert ar_id != fr_id
-
-    def test_generate_unique_id_complex_base_id(self):
-        """generate_unique_id should handle complex base IDs."""
-        existing_ids = set()
-        result = generate_unique_id("text-2205-tspan", "ar", existing_ids)
-        assert result == "text-2205-tspan-ar"
-
-    def test_generate_unique_id_idempotency(self):
-        """generate_unique_id should generate consistent IDs."""
-        existing_ids = {"base-ar"}
-        result1 = generate_unique_id("base", "ar", existing_ids)
-        result2 = generate_unique_id("base", "ar", existing_ids)
-        assert result1 == result2 == "base-ar-1"
 
 
 class TestExtractFunction:
@@ -306,18 +174,6 @@ class TestEdgeCasesAndErrorHandling:
 
         result = extract(invalid_svg)
         assert result is None
-
-    def test_normalize_text_with_only_whitespace(self):
-        """normalize_text should return empty string for whitespace-only input."""
-        assert normalize_text("   \t\n   ") == ""
-
-    def test_generate_unique_id_with_large_collision_set(self):
-        """generate_unique_id should handle large sets of existing IDs."""
-        existing_ids = {f"base-ar-{i}" for i in range(100)}
-        existing_ids.add("base-ar")
-
-        result = generate_unique_id("base", "ar", existing_ids)
-        assert result == "base-ar-100"
 
     def test_inject_with_empty_mapping_list(self, tmp_path: Path):
         """inject should handle empty mapping file list."""

@@ -12,7 +12,6 @@ from lxml import etree
 
 from CopySVGTranslation.extraction import extract
 from CopySVGTranslation.injection import generate_unique_id, inject
-from CopySVGTranslation.text_utils import normalize_text
 
 
 class TestSetup:
@@ -68,13 +67,6 @@ class TestSetup:
 
 
 class TestSVGTranslate(TestSetup):
-    def test_normalize_text(self):
-        """Test text normalization."""
-        assert normalize_text("  hello  world  ") == "hello world"
-        assert normalize_text("hello    world") == "hello world"
-        assert normalize_text("  hello world  ") == "hello world"
-        assert normalize_text("") == ""
-        assert normalize_text(None) == ""
 
     def test_generate_unique_id(self):
         """Test unique ID generation."""

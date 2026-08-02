@@ -8,8 +8,8 @@ from pathlib import Path
 
 from lxml import etree
 
-from ..text_utils import extract_text_from_node, normalize_text
 from ..titles_new import get_new_titles_translations
+from ..utils import extract_text_from_node, normalize_text
 from .exceptions import (
     SvgNestedTspanExceptionError,
     SvgStructureExceptionError,

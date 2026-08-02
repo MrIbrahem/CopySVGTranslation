@@ -1,7 +1,7 @@
 """
 Unit tests for CopySVGTranslation/injection/utils.py module.
 
-Functions to test: file_langs, get_target_path
+Functions to test: file_langs
 
 TODO: write tests
 """

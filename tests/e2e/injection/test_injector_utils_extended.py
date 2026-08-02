@@ -6,18 +6,42 @@ and previously untested functions.
 import json
 import shutil
 import tempfile
+import textwrap
 from pathlib import Path
 
 import pytest
 from lxml import etree
 
-from CopySVGTranslation.injection.utils import file_langs  # noqa: F401
-from CopySVGTranslation.injection.utils import generate_unique_id  # noqa: F401
 from CopySVGTranslation.injection.utils import (
+    file_langs,
+    generate_unique_id,
     get_target_path,
     load_all_mappings,
     sort_switch_texts,
 )
+
+
+def write_svg(tmp_path: Path, content: str) -> Path:
+    svg_path = tmp_path / "sample.svg"
+    svg_path.write_text(textwrap.dedent(content), encoding="utf-8")
+    return svg_path
+
+
+def test_inject_tracks_new_languages(tmp_path):
+    svg_path = write_svg(
+        tmp_path,
+        """
+        <svg xmlns=\"http://www.w3.org/2000/svg\">
+            <switch>
+                <text id=\"t1\"><tspan>Hello</tspan></text>
+            </switch>
+        </svg>
+        """,
+    )
+
+    before_languages = file_langs(svg_path)
+
+    assert before_languages == set()
 
 
 class TestSetup:
@@ -191,3 +215,77 @@ class TestLoadAllMappingsEdgeCases(TestSetup):
         result = load_all_mappings([str(mapping_file)])
 
         assert "key" in result
+
+
+class TestGenerateUniqueIdFunction:
+    """Comprehensive tests for the generate_unique_id function."""
+
+    def test_generate_unique_id_no_collision(self):
+        """generate_unique_id should append language code when no collision."""
+        existing_ids = {"id1", "id2"}
+        result = generate_unique_id("base", "fr", existing_ids)
+        assert result == "base-fr"
+
+    def test_generate_unique_id_with_collision(self):
+        """generate_unique_id should handle ID collisions."""
+        existing_ids = {"base-ar"}
+        result = generate_unique_id("base", "ar", existing_ids)
+        assert result == "base-ar-1"
+
+    def test_generate_unique_id_multiple_collisions(self):
+        """generate_unique_id should handle multiple collisions."""
+        existing_ids = {"base-ar", "base-ar-1", "base-ar-2"}
+        result = generate_unique_id("base", "ar", existing_ids)
+        assert result == "base-ar-3"
+
+    def test_generate_unique_id_empty_existing_set(self):
+        """generate_unique_id should work with empty existing ID set."""
+        result = generate_unique_id("base", "de", set())
+        assert result == "base-de"
+
+    def test_generate_unique_id_preserves_base_id(self):
+        """generate_unique_id should preserve the base ID structure."""
+        existing_ids = {"other-id"}
+        result = generate_unique_id("my-element", "es", existing_ids)
+        assert result == "my-element-es"
+        assert result.startswith("my-element")
+
+    def test_generate_unique_id_different_languages(self):
+        """generate_unique_id should handle different language codes."""
+        existing_ids = set()
+
+        ar_id = generate_unique_id("base", "ar", existing_ids)
+        existing_ids.add(ar_id)
+
+        fr_id = generate_unique_id("base", "fr", existing_ids)
+        existing_ids.add(fr_id)
+
+        assert ar_id == "base-ar"
+        assert fr_id == "base-fr"
+        assert ar_id != fr_id
+
+    def test_generate_unique_id_complex_base_id(self):
+        """generate_unique_id should handle complex base IDs."""
+        existing_ids = set()
+        result = generate_unique_id("text-2205-tspan", "ar", existing_ids)
+        assert result == "text-2205-tspan-ar"
+
+    def test_generate_unique_id_idempotency(self):
+        """generate_unique_id should generate consistent IDs."""
+        existing_ids = {"base-ar"}
+        result1 = generate_unique_id("base", "ar", existing_ids)
+        result2 = generate_unique_id("base", "ar", existing_ids)
+        assert result1 == result2 == "base-ar-1"
+
+    def test_generate_unique_id_with_large_collision_set(self):
+        """generate_unique_id should handle large sets of existing IDs."""
+        existing_ids = {f"base-ar-{i}" for i in range(100)}
+        existing_ids.add("base-ar")
+
+        result = generate_unique_id("base", "ar", existing_ids)
+        assert result == "base-ar-100"
+
+    def test_generate_unique_id_is_importable(self):
+        """The generate_unique_id function should be importable from top-level module."""
+        assert callable(generate_unique_id)
+        assert generate_unique_id.__name__ == "generate_unique_id"

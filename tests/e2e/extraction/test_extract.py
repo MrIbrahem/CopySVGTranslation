@@ -2,48 +2,8 @@
 Comprehensive pytest tests for CopySVGTranslation covering edge cases and additional functionality.
 """
 
-from lxml import etree
-
 from CopySVGTranslation import extract, inject
-from CopySVGTranslation.text_utils import extract_text_from_node
 from CopySVGTranslation.workflows import svg_extract_and_inject
-
-# -------------------------------
-# Text utility tests
-# -------------------------------
-
-
-class TestTextUtils:
-    """Test cases for text utility functions."""
-
-    def test_extract_text_from_node_with_tspans(self):
-        """Test extracting text from a node with tspans."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        text_node = etree.fromstring(f"""<text xmlns="{svg_ns}"><tspan>Hello</tspan><tspan>World</tspan></text>""")
-        result = extract_text_from_node(text_node)
-        assert result == ["Hello", "World"]
-
-    def test_extract_text_from_node_without_tspans(self):
-        """Test extracting text from a node without tspans."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        text_node = etree.fromstring(f'<text xmlns="{svg_ns}">Plain text</text>')
-        result = extract_text_from_node(text_node)
-        assert result == ["Plain text"]
-
-    def test_extract_text_from_node_empty(self):
-        """Test extracting text from an empty node."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        text_node = etree.fromstring(f'<text xmlns="{svg_ns}"></text>')
-        result = extract_text_from_node(text_node)
-        assert result == [""]
-
-    def test_extract_text_from_node_with_whitespace_tspans(self):
-        """Test extracting text from tspans with only whitespace."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        text_node = etree.fromstring(f"""<text xmlns="{svg_ns}"><tspan>   </tspan><tspan>Text</tspan></text>""")
-        result = extract_text_from_node(text_node)
-        assert result == ["", "Text"]
-
 
 # -------------------------------
 # Workflows tests

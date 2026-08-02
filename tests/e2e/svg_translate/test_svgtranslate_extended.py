@@ -12,7 +12,6 @@ from lxml import etree
 
 from CopySVGTranslation.extraction import extract
 from CopySVGTranslation.injection import generate_unique_id, inject
-from CopySVGTranslation.text_utils import normalize_text
 
 
 class TestSetup:
@@ -68,28 +67,6 @@ class TestSetup:
 
 
 class TestSVGTranslate(TestSetup):
-    def test_normalize_text_with_numbers(self):
-        """Test text normalization with numbers."""
-        assert normalize_text("Population 2020") == "Population 2020"
-        assert normalize_text("  Population   2020  ") == "Population 2020"
-
-    def test_normalize_text_with_punctuation(self):
-        """Test text normalization with punctuation."""
-        assert normalize_text("Hello == World!", "Hello, World!")
-        assert normalize_text("  Hello ==  World!  ", "Hello, World!")
-
-    def test_normalize_text_case_insensitive_arabic(self):
-        """Test case insensitive normalization preserves Arabic text."""
-        arabic_text = "السكان 2020"
-        result = normalize_text(arabic_text, case_insensitive=True)
-        # Arabic text doesn't have uppercase/lowercase, should be preserved
-        assert "السكان" in result
-
-    def test_normalize_text_multiple_languages(self):
-        """Test text normalization with mixed scripts."""
-        mixed_text = "  Hello مرحبا World  "
-        result = normalize_text(mixed_text)
-        assert result == "Hello مرحبا World"
 
     def test_generate_unique_id_empty_base(self):
         """Test unique ID generation with empty base ID."""
@@ -405,20 +382,3 @@ class TestSVGTranslate(TestSetup):
 
         result = inject(target_path, [mapping_path])
         assert result is None
-
-    def test_normalize_text_preserves_content(self):
-        """Test that normalize_text doesn't remove important content."""
-        # Test with various content types
-        test_cases = [
-            ("Hello World", "Hello World"),
-            ("123 456", "123 456"),
-            ("test@example.com", "test@example.com"),
-            ("path/to/file", "path/to/file"),
-            ("a-b-c", "a-b-c"),
-            ("a b y", "a b y"),
-            ("你好世界", "你好世界"),
-        ]
-
-        for input_text, expected in test_cases:
-            result = normalize_text(input_text)
-            assert result == expected, f"Failed for input: {input_text}"

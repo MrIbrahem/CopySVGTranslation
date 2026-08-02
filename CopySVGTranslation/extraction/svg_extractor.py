@@ -7,9 +7,9 @@ from typing import Any
 
 from lxml import etree
 
-from ..text_utils import normalize_text
 from ..titles import make_title_translations
 from ..titles_new import make_new_title_translations
+from ..utils import normalize_text
 
 logger = logging.getLogger(__name__)
 

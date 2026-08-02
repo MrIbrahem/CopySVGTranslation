@@ -6,7 +6,7 @@ import pytest
 from CopySVGTranslation import extract, inject
 from CopySVGTranslation.workflows import svg_extract_and_inject
 
-FIXTURES_DIR = Path(__file__).parent
+FIXTURES_DIR = Path(__file__).parent.parent / "tests_files/example"
 
 
 class TestIntegrationWorkflows:
