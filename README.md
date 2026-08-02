@@ -142,7 +142,7 @@ from CopySVGTranslation import SVGTranslationInjector
 injector = SVGTranslationInjector(
     case_insensitive: bool = True,
     overwrite: bool = False,
-    pretty_print: bool = True,
+    pretty_print: bool | None = None,
 )
 
 result: InjectorData = injector.inject(

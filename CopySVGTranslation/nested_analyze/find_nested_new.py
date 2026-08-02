@@ -141,7 +141,7 @@ def match_nested_tags(source_file: Path) -> list:
     return result
 
 
-def fix_nested_file(source_file: Path, new_path: Path | None = None, pretty_print: bool = True) -> bool:
+def fix_nested_file(source_file: Path, new_path: Path | None = None, pretty_print: bool | None = None) -> bool:
     """
     !
     """

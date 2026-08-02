@@ -143,7 +143,7 @@ class TestSVGTranslationInjectorInit:
         inj = SVGTranslationInjector()
         assert inj.case_insensitive is True
         assert inj.overwrite is False
-        assert inj.pretty_print is True
+        assert inj.pretty_print is None
 
     def test_custom_parameters(self):
         inj = SVGTranslationInjector(case_insensitive=False, overwrite=True, pretty_print=False)

@@ -82,7 +82,7 @@ def inject(
     overwrite: bool = False,
     save_result: bool = False,
     return_stats: bool = False,
-    pretty_print: bool = True,
+    pretty_print: bool | None = None,
 ) -> tuple[Any, Any] | Any:
     """
     Deprecated. Use SVGTranslationService.inject() instead.
@@ -210,7 +210,7 @@ def svg_extract_and_injects(
     output_dir: Path | None = None,
     save_result: bool = False,
     overwrite: bool = False,
-    pretty_print: bool = True,
+    pretty_print: bool | None = None,
 ) -> Any:
     """
     Deprecated. Use SVGTranslationService.inject() instead.

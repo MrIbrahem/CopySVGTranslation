@@ -35,7 +35,7 @@ class SVGTranslationInjector:
         self,
         case_insensitive: bool = True,
         overwrite: bool = False,
-        pretty_print: bool = True,
+        pretty_print: bool | None = None,
     ) -> None:
         """
         Parameters:
@@ -274,13 +274,13 @@ class SVGTranslationInjector:
         self._fix_old_switches(root=root)
 
         after_languages = tree_langs(tree)
-        self._update_data(before_languages, after_languages)
 
         if not save_result:
             self._update_data(before_languages, after_languages)
             return self.result
 
         self.save_svg_to_target(target_path, inject_path.name, tree)
+        self._update_data(before_languages, after_languages)
 
         return self.result
 

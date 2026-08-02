@@ -220,7 +220,7 @@ class TranslationConfig:
     overwrite: bool = False
     """If True, update existing language nodes instead of skipping them."""
 
-    pretty_print: bool = True
+    pretty_print: bool | None = None
     """Pretty-print the output SVG when saving."""
 
     # --- Nested tspan handling ---
