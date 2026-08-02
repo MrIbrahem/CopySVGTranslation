@@ -1,4 +1,5 @@
-# legacy/inject.py
+"""Helpers for injecting translations into SVG files."""
+
 from __future__ import annotations
 
 import warnings
