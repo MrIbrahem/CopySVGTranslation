@@ -1,4 +1,4 @@
-****Titles Package Design**
+\***\*Titles Package Design**
 
 ```
 titles/
@@ -14,18 +14,18 @@ This package replaces the old dual modules (`titles.py` + `titles_new.py`) with 
 
 Many chart/title strings look like:
 
-- `"COVID-19 pandemic 2020"`
-- `"2020 COVID-19 pandemic"`
+-   `"COVID-19 pandemic 2020"`
+-   `"2020 COVID-19 pandemic"`
 
 When the same title appears in another file with a **different year**, we still want to reuse the translated part and only substitute the year.
 
 `YearTitleHandler` does two jobs:
 
-1. **At extraction time** — turn concrete year titles into templates 
- (`"COVID-19 pandemic 2020"` → `"COVID-19 pandemic {year}"`)
+1. **At extraction time** — turn concrete year titles into templates
+   (`"COVID-19 pandemic 2020"` → `"COVID-19 pandemic {year}"`)
 
-2. **At injection time** — expand templates back to the year used in the target file 
- (`"COVID-19 pandemic {year}"` + year `1990` → `"COVID-19 pandemic 1990"`)
+2. **At injection time** — expand templates back to the year used in the target file
+   (`"COVID-19 pandemic {year}"` + year `1990` → `"COVID-19 pandemic 1990"`)
 
 ---
 
@@ -231,17 +231,18 @@ __all__ = ["YearTitleHandler"]
 
 ### How it integrates
 
-| Stage | Who calls it | What happens |
-|-------|--------------|--------------|
-| **Extraction** | `SVGTranslationExtractor` (after building `mapping.new`) | `handler.build_templates(mapping)` → fills `mapping.title_new` |
-| **Injection** | `SwitchProcessor` (once per switch, after finding default texts) | `working = handler.enrich_mapping_for_switch(mapping, default_texts)` then uses `working` for lookups |
-| **Config** | `TranslationConfig.enable_year_titles` | Turns the whole feature on/off |
+| Stage          | Who calls it                                                     | What happens                                                                                          |
+| -------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Extraction** | `SVGTranslationExtractor` (after building `mapping.new`)         | `handler.build_templates(mapping)` → fills `mapping.title_new`                                        |
+| **Injection**  | `SwitchProcessor` (once per switch, after finding default texts) | `working = handler.enrich_mapping_for_switch(mapping, default_texts)` then uses `working` for lookups |
+| **Config**     | `TranslationConfig.enable_year_titles`                           | Turns the whole feature on/off                                                                        |
 
 ---
 
 ### Example lifecycle
 
 **Extraction (source file has year 2020):**
+
 ```text
 "COVID-19 pandemic 2020" / ar → "جائحة كوفيد 2020"
  ↓ build_templates()
@@ -249,6 +250,7 @@ title_new["COVID-19 pandemic {year}"]["ar"] = "جائحة كوفيد {year}"
 ```
 
 **Injection (target file has year 1990):**
+
 ```text
 default_texts = ["COVID-19 pandemic 1990"]
  ↓ expand_for_texts()
@@ -266,4 +268,4 @@ working.new["covid-19 pandemic 1990"]["ar"] = "جائحة كوفيد 1990"
 5. **Case handling** — respects `case_insensitive` from the caller/config.
 6. **Testable** — pure string logic; no SVG or filesystem dependencies.
 
-This keeps year-title support isolated, predictable, and easy to evolve later (e.g. supporting years in the middle of a string if needed). 
+This keeps year-title support isolated, predictable, and easy to evolve later (e.g. supporting years in the middle of a string if needed).

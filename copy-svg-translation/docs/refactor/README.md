@@ -1,9 +1,9 @@
-**CopySVGTranslation – Modern Class-Based Redesign**
+**copy_svg_translation – Modern Class-Based Redesign**
 
 ### 1. Proposed Detailed File Structure + Class Names
 
 ```
-CopySVGTranslation/
+copy_svg_translation/
 ├── __init__.py                 # Public API only
 ├── config.py
 ├── service.py                  # Main high-level facade
@@ -65,27 +65,27 @@ CopySVGTranslation/
 
 #### Key Classes (proposed)
 
-| Module | Class | Responsibility |
-|--------|-------|----------------|
-| `config.py` | `TranslationConfig` | All settings (case_insensitive, overwrite, pretty_print, auto_save, paths, etc.) |
-| `result.py` | `OperationResult[T]` | Unified success/failure + data + stats + warnings |
-| `result.py` | `InjectorStats` | Keep (slightly cleaned) |
-| `core/models.py` | `TranslationEntry` | One source text → {lang: translation} |
-| `core/models.py` | `TranslationMapping` | Full mapping (`new`, `title`, `title_new`, …) |
-| `core/text_node.py` | `TextNode` | Wrapper around `<text>` / `<tspan>` |
-| `core/switch_node.py` | `SwitchNode` | Wrapper around `<switch>` |
-| `extraction/extractor.py` | `SVGTranslationExtractor` | Extract only |
-| `extraction/strategies.py` | `TspanIdMatchingStrategy` | How to match default ↔ translated tspans |
-| `injection/preparer.py` | `SvgPreparationPipeline` | Runs ordered steps |
-| `injection/steps/base.py` | `PreparationStep` (ABC) | Base for each step |
-| `injection/injector.py` | `SVGTranslationInjector` | Inject into prepared document |
-| `injection/id_manager.py` | `IdManager` | Unique ID generation & tracking |
-| `nested/flattener.py` | `NestedTspanFlattener` | Style-preserving preferred |
-| `nested/detector.py` | `NestedTspanDetector` | Find problematic nodes |
-| `titles/year_handler.py` | `YearTitleHandler` | Unify old + new title logic |
-| `io/svg_document.py` | `SvgDocument` | Load / save / root access |
-| `io/mapping_store.py` | `MappingStore` | Load / merge / save JSON mappings |
-| `service.py` | `SVGTranslationService` | **Main public facade** |
+| Module                     | Class                     | Responsibility                                                                   |
+| -------------------------- | ------------------------- | -------------------------------------------------------------------------------- |
+| `config.py`                | `TranslationConfig`       | All settings (case_insensitive, overwrite, pretty_print, auto_save, paths, etc.) |
+| `result.py`                | `OperationResult[T]`      | Unified success/failure + data + stats + warnings                                |
+| `result.py`                | `InjectorStats`           | Keep (slightly cleaned)                                                          |
+| `core/models.py`           | `TranslationEntry`        | One source text → {lang: translation}                                            |
+| `core/models.py`           | `TranslationMapping`      | Full mapping (`new`, `title`, `title_new`, …)                                    |
+| `core/text_node.py`        | `TextNode`                | Wrapper around `<text>` / `<tspan>`                                              |
+| `core/switch_node.py`      | `SwitchNode`              | Wrapper around `<switch>`                                                        |
+| `extraction/extractor.py`  | `SVGTranslationExtractor` | Extract only                                                                     |
+| `extraction/strategies.py` | `TspanIdMatchingStrategy` | How to match default ↔ translated tspans                                         |
+| `injection/preparer.py`    | `SvgPreparationPipeline`  | Runs ordered steps                                                               |
+| `injection/steps/base.py`  | `PreparationStep` (ABC)   | Base for each step                                                               |
+| `injection/injector.py`    | `SVGTranslationInjector`  | Inject into prepared document                                                    |
+| `injection/id_manager.py`  | `IdManager`               | Unique ID generation & tracking                                                  |
+| `nested/flattener.py`      | `NestedTspanFlattener`    | Style-preserving preferred                                                       |
+| `nested/detector.py`       | `NestedTspanDetector`     | Find problematic nodes                                                           |
+| `titles/year_handler.py`   | `YearTitleHandler`        | Unify old + new title logic                                                      |
+| `io/svg_document.py`       | `SvgDocument`             | Load / save / root access                                                        |
+| `io/mapping_store.py`      | `MappingStore`            | Load / merge / save JSON mappings                                                |
+| `service.py`               | `SVGTranslationService`   | **Main public facade**                                                           |
 
 ---
 
@@ -101,9 +101,9 @@ CopySVGTranslation/
 4. Add `TranslationConfig` and start using it inside the service.
 5. Unify error handling: convert internal `None` + `error` strings into `OperationResult`.
 6. Keep public API backward-compatible:
-   ```python
-   from CopySVGTranslation import extract, inject, SVGTranslationService
-   ```
+    ```python
+    from copy_svg_translation import extract, inject, SVGTranslationService
+    ```
 
 **Exit criteria:** All existing tests pass; new service works as thin wrapper.
 
@@ -135,12 +135,12 @@ CopySVGTranslation/
 3. Make file I/O explicit only (no automatic `data/` or `translated/` folders unless configured).
 4. Improve logging (structured, consistent levels).
 5. Finalize public API in `__init__.py`:
-   ```python
-   from .service import SVGTranslationService
-   from .config import TranslationConfig
-   from .result import OperationResult, InjectorStats
-   from .core.models import TranslationMapping
-   ```
+    ```python
+    from .service import SVGTranslationService
+    from .config import TranslationConfig
+    from .result import OperationResult, InjectorStats
+    from .core.models import TranslationMapping
+    ```
 6. Optional: simple CLI that uses `SVGTranslationService`.
 7. Documentation + migration guide for users of the old functions.
 
@@ -152,7 +152,7 @@ CopySVGTranslation/
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import SVGTranslationService, TranslationConfig
+from copy_svg_translation import SVGTranslationService, TranslationConfig
 
 config = TranslationConfig(
     case_insensitive=True,
@@ -189,7 +189,8 @@ result = service.extract_and_inject(
 4. Extractor rewrite
 5. Phase 3 cleanup
 
-----
+---
+
 **Full Design: `TranslationConfig` + `SVGTranslationService`**
 
 ### 1. `TranslationConfig`
@@ -668,7 +669,7 @@ class SVGTranslationService:
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import SVGTranslationService, TranslationConfig
+from copy_svg_translation import SVGTranslationService, TranslationConfig
 
 # Default config
 service = SVGTranslationService()
@@ -712,13 +713,12 @@ result = service.extract_and_inject(
 
 ### 5. Design Notes
 
-| Decision | Rationale |
-|----------|-----------|
-| Single `TranslationConfig` | Avoid long parameter lists; easy to extend and pass around |
-| `OperationResult[T]` | Consistent success/failure handling; no more mixed `None` / exceptions / error strings |
-| Lazy collaborators | Faster startup; easier testing (can inject mocks later) |
-| `extract_and_inject` as first-class method | Covers the most common user workflow cleanly |
-| Explicit `save` / `output` | No surprise writes to `cwd/data` or `cwd/translated` |
-| `with_updates()` on config | Convenient immutable-style changes |
-| `prepare_only` | Useful for cleaning SVGs without translation |
-
+| Decision                                   | Rationale                                                                              |
+| ------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Single `TranslationConfig`                 | Avoid long parameter lists; easy to extend and pass around                             |
+| `OperationResult[T]`                       | Consistent success/failure handling; no more mixed `None` / exceptions / error strings |
+| Lazy collaborators                         | Faster startup; easier testing (can inject mocks later)                                |
+| `extract_and_inject` as first-class method | Covers the most common user workflow cleanly                                           |
+| Explicit `save` / `output`                 | No surprise writes to `cwd/data` or `cwd/translated`                                   |
+| `with_updates()` on config                 | Convenient immutable-style changes                                                     |
+| `prepare_only`                             | Useful for cleaning SVGs without translation                                           |

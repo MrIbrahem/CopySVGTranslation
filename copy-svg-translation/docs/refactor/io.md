@@ -7,7 +7,7 @@ io/
 └── mapping_store.py     # MappingStore – load / merge / save JSON mappings
 ```
 
-This layer is the **only** place that touches the filesystem.  
+This layer is the **only** place that touches the filesystem.
 Everything else (core, extraction, injection, service) works with in-memory objects.
 
 ---
@@ -251,12 +251,12 @@ __all__ = [
 
 ### How the rest of the system uses IO
 
-| Caller | Usage |
-|--------|--------|
-| **SvgPreparationPipeline** (`LoadDocument` step) | `SvgDocument.load(path)` → puts `tree` / `root` into `PreparationContext` |
-| **SVGTranslationInjector** | Receives an already-loaded tree (or loads via `SvgDocument` if needed); calls `doc.save()` when `save=True` |
-| **SVGTranslationService** | Uses `MappingStore` for `load_mapping` / `save_mapping` and for optional auto-save of extracted mappings |
-| **Legacy workflows** | Can be re-implemented as thin wrappers around `MappingStore` + `SvgDocument` |
+| Caller                                           | Usage                                                                                                       |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **SvgPreparationPipeline** (`LoadDocument` step) | `SvgDocument.load(path)` → puts `tree` / `root` into `PreparationContext`                                   |
+| **SVGTranslationInjector**                       | Receives an already-loaded tree (or loads via `SvgDocument` if needed); calls `doc.save()` when `save=True` |
+| **SVGTranslationService**                        | Uses `MappingStore` for `load_mapping` / `save_mapping` and for optional auto-save of extracted mappings    |
+| **Legacy workflows**                             | Can be re-implemented as thin wrappers around `MappingStore` + `SvgDocument`                                |
 
 ---
 

@@ -1,15 +1,15 @@
-**New Injection Design**  
+**New Injection Design**
 (How the large `work_on_switches` is broken down)
 
 In the current code, `work_on_switches` does too many things at once:
 
-- Finds the default (fallback) text node  
-- Builds available translations (including year-title logic)  
-- Decides whether to skip / update / insert  
-- Clones nodes and tspans  
-- Generates IDs  
-- Writes the translated text  
-- Updates stats  
+-   Finds the default (fallback) text node
+-   Builds available translations (including year-title logic)
+-   Decides whether to skip / update / insert
+-   Clones nodes and tspans
+-   Generates IDs
+-   Writes the translated text
+-   Updates stats
 
 In the new design this responsibility is split into clear, testable pieces.
 
@@ -39,13 +39,13 @@ injection/
 
 ### Responsibilities
 
-| Component | Role |
-|-----------|------|
+| Component                  | Role                                                                                                                                                           |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **SvgPreparationPipeline** | Runs the `steps/` pipeline once. Guarantees a clean, well-structured SVG (every text inside a switch, tspans present, IDs assigned, languages split, ordered). |
-| **IdManager** | Single source of truth for generating and tracking unique IDs. |
-| **SwitchProcessor** | Iterates over all `<switch>` elements and coordinates the work for one switch. |
-| **TranslationApplier** | Pure logic: given a default node + mapping + language → produce the new/updated `<text>` node. |
-| **SVGTranslationInjector** | Thin orchestrator: prepare → process switches → fix/sort → collect stats → optionally save. |
+| **IdManager**              | Single source of truth for generating and tracking unique IDs.                                                                                                 |
+| **SwitchProcessor**        | Iterates over all `<switch>` elements and coordinates the work for one switch.                                                                                 |
+| **TranslationApplier**     | Pure logic: given a default node + mapping + language → produce the new/updated `<text>` node.                                                                 |
+| **SVGTranslationInjector** | Thin orchestrator: prepare → process switches → fix/sort → collect stats → optionally save.                                                                    |
 
 ---
 
@@ -212,14 +212,14 @@ class SvgPreparationPipeline:
 
 Each step is small and focused:
 
-| Step | Old location | New job |
-|------|----------------|---------|
-| `LoadDocument` | `_load_document` | Parse + ensure namespace |
-| `ValidateStructure` | `_check_style_elements`, `_check_no_trefs`, nested check | Raise structured errors |
-| `NormalizeTspans` | `_wrap_loose_text...` + nested handling | Guarantee every text piece is in a tspan |
-| `AssignIds` | `_assign_missing_ids` + IdManager | All translatable nodes have stable IDs |
-| `SplitLanguages` | `_split_switch_languages` | One language per `<text>` |
-| `ReorderTexts` | `_reorder_texts` | Deterministic order (fallback last) |
+| Step                | Old location                                             | New job                                  |
+| ------------------- | -------------------------------------------------------- | ---------------------------------------- |
+| `LoadDocument`      | `_load_document`                                         | Parse + ensure namespace                 |
+| `ValidateStructure` | `_check_style_elements`, `_check_no_trefs`, nested check | Raise structured errors                  |
+| `NormalizeTspans`   | `_wrap_loose_text...` + nested handling                  | Guarantee every text piece is in a tspan |
+| `AssignIds`         | `_assign_missing_ids` + IdManager                        | All translatable nodes have stable IDs   |
+| `SplitLanguages`    | `_split_switch_languages`                                | One language per `<text>`                |
+| `ReorderTexts`      | `_reorder_texts`                                         | Deterministic order (fallback last)      |
 
 ---
 

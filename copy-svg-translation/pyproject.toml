@@ -1,28 +1,17 @@
-**`pyproject.toml` for CopySVGTranslation (v2 redesign)**
 
-```toml
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "copy-svg-translation"
-version = "2.0.0"
+version = "2.0.1"
 description = "Extract translations from SVG files and inject them into others"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [
-    { name = "Your Name", email = "you@example.com" },
-]
-keywords = [
-    "svg",
-    "translation",
-    "i18n",
-    "l10n",
-    "switch",
-    "systemLanguage",
-]
+authors = [{ name = "Your Name", email = "you@example.com" }]
+keywords = ["svg", "translation", "i18n", "l10n", "switch", "systemLanguage"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -38,9 +27,7 @@ classifiers = [
     "Topic :: Text Processing :: Markup :: XML",
     "Typing :: Typed",
 ]
-dependencies = [
-    "lxml>=4.9",
-]
+dependencies = ["lxml>=4.9"]
 
 [project.optional-dependencies]
 dev = [
@@ -54,26 +41,26 @@ dev = [
 # cli = []
 
 [project.urls]
-Homepage = "https://github.com/yourname/CopySVGTranslation"
-Documentation = "https://github.com/yourname/CopySVGTranslation#readme"
-Changelog = "https://github.com/yourname/CopySVGTranslation/blob/main/CHANGELOG.md"
-Repository = "https://github.com/yourname/CopySVGTranslation"
-Issues = "https://github.com/yourname/CopySVGTranslation/issues"
+Homepage = "https://github.com/yourname/copy_svg_translation"
+Documentation = "https://github.com/yourname/copy_svg_translation#readme"
+Changelog = "https://github.com/yourname/copy_svg_translation/blob/main/CHANGELOG.md"
+Repository = "https://github.com/yourname/copy_svg_translation"
+Issues = "https://github.com/yourname/copy_svg_translation/issues"
 
 # Optional CLI entry point (uncomment when ready)
 # [project.scripts]
-# svg-translate = "CopySVGTranslation.cli:main"
+# svg-translate = "copy_svg_translation.cli:main"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["CopySVGTranslation*"]
+include = ["copy_svg_translation*"]
 exclude = ["tests*", "docs*"]
 
 [tool.setuptools.package-data]
-CopySVGTranslation = ["py.typed"]
+copy_svg_translation = ["py.typed"]
 
 # ---------------------------------------------------------------------------
 # Pytest
@@ -81,29 +68,23 @@ CopySVGTranslation = ["py.typed"]
 [tool.pytest.ini_options]
 minversion = "7.0"
 testpaths = ["tests"]
-addopts = [
-    "-ra",
-    "--strict-markers",
-    "--strict-config",
-]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
 markers = [
     "todo: tests not yet implemented / work in progress",
     "legacy: tests for the deprecated function API",
 ]
 filterwarnings = [
     # Surface our own deprecations during tests
-    "default::DeprecationWarning:CopySVGTranslation",
+    "default::DeprecationWarning:copy_svg_translation",
 ]
 
 # ---------------------------------------------------------------------------
 # Coverage
 # ---------------------------------------------------------------------------
 [tool.coverage.run]
-source = ["CopySVGTranslation"]
+source = ["copy_svg_translation"]
 branch = true
-omit = [
-    "CopySVGTranslation/legacy/*",
-]
+omit = ["copy_svg_translation/legacy/*"]
 
 [tool.coverage.report]
 show_missing = true
@@ -120,25 +101,25 @@ exclude_lines = [
 [tool.ruff]
 target-version = "py310"
 line-length = 100
-src = ["CopySVGTranslation", "tests"]
+src = ["copy_svg_translation", "tests"]
 
 [tool.ruff.lint]
 select = [
-    "E",      # pycodestyle errors
-    "W",      # pycodestyle warnings
-    "F",      # pyflakes
-    "I",      # isort
-    "B",      # flake8-bugbear
-    "UP",     # pyupgrade
-    "SIM",    # flake8-simplify
-    "RUF",    # ruff-specific
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific
 ]
 ignore = [
-    "E501",   # line length handled by formatter
+    "E501", # line length handled by formatter
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["CopySVGTranslation"]
+known-first-party = ["copy_svg_translation"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -149,7 +130,7 @@ indent-style = "space"
 # ---------------------------------------------------------------------------
 [tool.mypy]
 python_version = "3.10"
-packages = ["CopySVGTranslation"]
+packages = ["copy_svg_translation"]
 strict = true
 warn_return_any = true
 warn_unused_configs = true
@@ -162,62 +143,6 @@ module = ["lxml.*"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = ["CopySVGTranslation.legacy.*"]
+module = ["copy_svg_translation.legacy.*"]
 # Legacy wrappers can be less strict while they exist
 disallow_untyped_defs = false
-```
-
----
-
-### Companion files (minimal)
-
-**`CopySVGTranslation/py.typed`** (empty file)  
-Marks the package as typed for clients.
-
-**`MANIFEST.in`** (optional if using setuptools package-data only)
-
-```text
-recursive-include CopySVGTranslation *.py
-include README.md
-include LICENSE
-include CHANGELOG.md
-include pyproject.toml
-```
-
----
-
-### Common commands
-
-```bash
-# editable install with dev tools
-pip install -e ".[dev]"
-
-# build sdist + wheel
-python -m build
-
-# tests
-pytest
-
-# lint / format
-ruff check .
-ruff format .
-
-# types
-mypy CopySVGTranslation
-```
-
----
-
-### Notes
-
-| Setting | Why |
-|---------|-----|
-| `name = "copy-svg-translation"` | Conventional PyPI name (hyphens) |
-| Import package `CopySVGTranslation` | Matches your existing code layout |
-| `requires-python = ">=3.10"` | Fits modern typing (`X \| Y`, `slots=True`, etc.) |
-| `lxml>=4.9` | Only hard runtime dependency |
-| Legacy excluded from coverage | Avoids treating temporary shims as core code |
-| `py.typed` | Enables type checking for downstream users |
-| Version `2.0.0` | Signals the class-based redesign + deprecations |
-
-Adjust `authors`, URLs, and license to match the real project before publishing.

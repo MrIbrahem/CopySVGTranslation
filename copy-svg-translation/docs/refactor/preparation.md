@@ -6,12 +6,12 @@ Preparation is the stage that makes an SVG safe and consistent **before** any tr
 
 After the pipeline finishes we have:
 
-- Every `<text>` lives inside a `<switch>`
-- Every piece of translatable text is wrapped in a `<tspan>`
-- No unsupported nested `<tspan>`s (or they have been handled according to the configured strategy)
-- Every translatable node has a unique `id`
-- `systemLanguage` values are normalized and split (one language per `<text>`)
-- Children of every `<switch>` are in a deterministic order (fallback last)
+-   Every `<text>` lives inside a `<switch>`
+-   Every piece of translatable text is wrapped in a `<tspan>`
+-   No unsupported nested `<tspan>`s (or they have been handled according to the configured strategy)
+-   Every translatable node has a unique `id`
+-   `systemLanguage` values are normalized and split (one language per `<text>`)
+-   Children of every `<switch>` are in a deterministic order (fallback last)
 
 ---
 
@@ -92,14 +92,14 @@ class SvgPreparationPipeline:
 
 ### Step Details
 
-| Step | File | Responsibility | Old code it replaces |
-|------|------|----------------|----------------------|
-| **LoadDocument** | `load.py` | Parse the file, ensure a root element and a sane default namespace | `_load_document` |
-| **ValidateStructure** | `validate.py` | Reject `<tref>`, overly complex CSS with `#`, texts containing `$N`, and nested tspans according to `config.nested_strategy` | `_check_style_elements`, `_check_no_trefs`, part of nested checks |
-| **NormalizeTspans** | `normalize_tspans.py` | Wrap loose text into `<tspan>`, handle nested elements (`preserve_style` / `flatten` / `raise`), remove empty nodes | `_wrap_loose_text_into_tspans` + nested flattener |
-| **AssignIds** | `assign_ids.py` | Collect existing IDs, assign `trsvgN` to nodes that lack an id, clean invalid IDs | `_collect_existing_ids` + `_assign_missing_ids` + part of `_clean_ids...` |
-| **SplitLanguages** | `split_languages.py` | Expand `systemLanguage="ar,fr"` into separate `<text>` nodes with new IDs | `_split_switch_languages` |
-| **ReorderTexts** | `reorder.py` | Deterministically order children of every `<switch>` (languages first, fallback last) | `_reorder_texts` |
+| Step                  | File                  | Responsibility                                                                                                               | Old code it replaces                                                      |
+| --------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **LoadDocument**      | `load.py`             | Parse the file, ensure a root element and a sane default namespace                                                           | `_load_document`                                                          |
+| **ValidateStructure** | `validate.py`         | Reject `<tref>`, overly complex CSS with `#`, texts containing `$N`, and nested tspans according to `config.nested_strategy` | `_check_style_elements`, `_check_no_trefs`, part of nested checks         |
+| **NormalizeTspans**   | `normalize_tspans.py` | Wrap loose text into `<tspan>`, handle nested elements (`preserve_style` / `flatten` / `raise`), remove empty nodes          | `_wrap_loose_text_into_tspans` + nested flattener                         |
+| **AssignIds**         | `assign_ids.py`       | Collect existing IDs, assign `trsvgN` to nodes that lack an id, clean invalid IDs                                            | `_collect_existing_ids` + `_assign_missing_ids` + part of `_clean_ids...` |
+| **SplitLanguages**    | `split_languages.py`  | Expand `systemLanguage="ar,fr"` into separate `<text>` nodes with new IDs                                                    | `_split_switch_languages`                                                 |
+| **ReorderTexts**      | `reorder.py`          | Deterministically order children of every `<switch>` (languages first, fallback last)                                        | `_reorder_texts`                                                          |
 
 ---
 
@@ -139,8 +139,8 @@ for switch in root.xpath("//svg:switch", ...):
     self.switch_processor.process(switch, mapping, stats)
 ```
 
-- Preparation knows **nothing** about translations.  
-- Injection **assumes** the SVG is already clean and does not repeat preparation work.
+-   Preparation knows **nothing** about translations.
+-   Injection **assumes** the SVG is already clean and does not repeat preparation work.
 
 ---
 

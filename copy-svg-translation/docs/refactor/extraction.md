@@ -43,7 +43,7 @@ Inside one `<switch>` you typically have:
 </switch>
 ```
 
-We need a reliable way to know that `trsvg1-ar` corresponds to `trsvg1` (“Hello”).  
+We need a reliable way to know that `trsvg1-ar` corresponds to `trsvg1` (“Hello”).
 Different SVGs use different conventions, so matching is pluggable.
 
 ---
@@ -386,21 +386,21 @@ TranslationMapping
 
 ### Design notes
 
-| Decision | Rationale |
-|----------|-----------|
-| Strategy pattern for matching | Real SVGs differ (some have good ids, some don’t) |
-| `ByTspanId` first, then `ByPosition` | Best accuracy when ids exist; still works when they don’t |
-| Returns `TranslationMapping` directly | No more ad-hoc dicts / `ExtractorData` error strings |
-| Uses `TextNode` / `SwitchNode` | Same domain language as injection |
-| Year templates built at the end | Keeps extractor focused; title logic stays in `titles/` |
-| Config-driven | `case_insensitive`, `enable_year_titles`, etc. |
+| Decision                              | Rationale                                                 |
+| ------------------------------------- | --------------------------------------------------------- |
+| Strategy pattern for matching         | Real SVGs differ (some have good ids, some don’t)         |
+| `ByTspanId` first, then `ByPosition`  | Best accuracy when ids exist; still works when they don’t |
+| Returns `TranslationMapping` directly | No more ad-hoc dicts / `ExtractorData` error strings      |
+| Uses `TextNode` / `SwitchNode`        | Same domain language as injection                         |
+| Year templates built at the end       | Keeps extractor focused; title logic stays in `titles/`   |
+| Config-driven                         | `case_insensitive`, `enable_year_titles`, etc.            |
 
 ---
 
 ### Extension points
 
-- Add `ByExactTextOrderStrategy` or fuzzy matching later without touching the extractor.
-- Inject a custom `MatchingStrategy` in tests or for a specific corpus.
-- Expose strategy choice on `TranslationConfig` later if needed (`matching_strategy: str = "composite"`).
+-   Add `ByExactTextOrderStrategy` or fuzzy matching later without touching the extractor.
+-   Inject a custom `MatchingStrategy` in tests or for a specific corpus.
+-   Expose strategy choice on `TranslationConfig` later if needed (`matching_strategy: str = "composite"`).
 
 This completes the extraction side in a way that mirrors the clean injection design.
