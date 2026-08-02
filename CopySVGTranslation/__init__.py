@@ -8,7 +8,6 @@ __all__ = [
     # main API
     "SVGTranslationInjector",
     "SVGTranslationExtractor",
-    # new API returns dataclass
     "inject",  # to be deprecated
     "extract",  # to be deprecated
     # dataclasses
