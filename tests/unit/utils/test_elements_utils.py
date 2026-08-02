@@ -15,6 +15,7 @@ from lxml import etree
 
 from CopySVGTranslation.utils.elements_utils import (
     extract_root_languages,
+    extract_text_from_node,
     file_langs,
     sort_switch_texts,
     tree_langs,
@@ -140,3 +141,114 @@ class TestSortSwitchTexts(TestSetup):
 
         texts = switch.findall(".//{http://www.w3.org/2000/svg}text")
         assert len(texts) == 1
+
+
+class TestTextUtils:
+    """Test cases for text utility functions."""
+
+    def test_extract_text_from_node_with_tspans(self):
+        """Test extracting text from a node with tspans."""
+        svg_ns = "http://www.w3.org/2000/svg"
+        text_node = etree.fromstring(f"""<text xmlns="{svg_ns}"><tspan>Hello</tspan><tspan>World</tspan></text>""")
+        result = extract_text_from_node(text_node)
+        assert result == ["Hello", "World"]
+
+    def test_extract_text_from_node_without_tspans(self):
+        """Test extracting text from a node without tspans."""
+        svg_ns = "http://www.w3.org/2000/svg"
+        text_node = etree.fromstring(f'<text xmlns="{svg_ns}">Plain text</text>')
+        result = extract_text_from_node(text_node)
+        assert result == ["Plain text"]
+
+    def test_extract_text_from_node_empty(self):
+        """Test extracting text from an empty node."""
+        svg_ns = "http://www.w3.org/2000/svg"
+        text_node = etree.fromstring(f'<text xmlns="{svg_ns}"></text>')
+        result = extract_text_from_node(text_node)
+        assert result == [""]
+
+    def test_extract_text_from_node_with_whitespace_tspans(self):
+        """Test extracting text from tspans with only whitespace."""
+        svg_ns = "http://www.w3.org/2000/svg"
+        text_node = etree.fromstring(f"""<text xmlns="{svg_ns}"><tspan>   </tspan><tspan>Text</tspan></text>""")
+        result = extract_text_from_node(text_node)
+        assert result == ["", "Text"]
+
+
+class TestExtractTextFromNode:
+    """Test suite for extract_text_from_node function."""
+
+    def test_extract_from_text_with_tspans(self):
+        """Test extraction from text element with tspan children."""
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
+            <tspan>First</tspan>
+            <tspan>Second</tspan>
+        </text>"""
+        node = etree.fromstring(xml)
+        result = extract_text_from_node(node)
+
+        assert result == ["First", "Second"]
+
+    def test_extract_from_text_without_tspans(self):
+        """Test extraction from text element without tspans."""
+        xml = '<text xmlns="http://www.w3.org/2000/svg">Direct text</text>'
+        node = etree.fromstring(xml)
+        result = extract_text_from_node(node)
+
+        assert result == ["Direct text"]
+
+    def test_extract_from_text_with_empty_tspans(self):
+        """Test extraction with empty tspan elements."""
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
+            <tspan></tspan>
+            <tspan>Content</tspan>
+        </text>"""
+        node = etree.fromstring(xml)
+        result = extract_text_from_node(node)
+
+        assert result == ["", "Content"]
+
+    def test_extract_from_text_with_whitespace_tspans(self):
+        """Test extraction handles whitespace in tspans."""
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
+            <tspan>  Spaces  </tspan>
+            <tspan>	Tabs	</tspan>
+        </text>"""
+        node = etree.fromstring(xml)
+        result = extract_text_from_node(node)
+
+        assert result == ["Spaces", "Tabs"]
+
+    def test_extract_from_empty_text_node(self):
+        """Test extraction from empty text node."""
+        xml = '<text xmlns="http://www.w3.org/2000/svg"></text>'
+        node = etree.fromstring(xml)
+        result = extract_text_from_node(node)
+
+        assert result == [""]
+
+    def test_extract_with_unicode_content(self):
+        """Test extraction with Unicode content."""
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
+            <tspan>مرحبا</tspan>
+            <tspan>你好</tspan>
+            <tspan>Привет</tspan>
+        </text>"""
+        node = etree.fromstring(xml)
+        result = extract_text_from_node(node)
+
+        assert result == ["مرحبا", "你好", "Привет"]
+
+    def test_extract_text_from_node_with_multiple_tspans(self):
+        """Test extracting text from node with multiple tspans."""
+        svg_ns = "http://www.w3.org/2000/svg"
+        text_node = etree.fromstring(f'<text xmlns="{svg_ns}"><tspan>Hello</tspan><tspan>World</tspan></text>')
+        result = extract_text_from_node(text_node)
+        assert result == ["Hello", "World"]
+
+    def test_extract_text_from_node_plain_text(self):
+        """Test extracting plain text from node without tspans."""
+        svg_ns = "http://www.w3.org/2000/svg"
+        text_node = etree.fromstring(f'<text xmlns="{svg_ns}">Plain text</text>')
+        result = extract_text_from_node(text_node)
+        assert result == ["Plain text"]

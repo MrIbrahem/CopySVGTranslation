@@ -9,31 +9,13 @@ from pathlib import Path
 
 from lxml import etree
 
+from ..utils import normalize_lang
 from .exceptions import SvgNestedTspanExceptionError, SvgStructureExceptionError
 
 logger = logging.getLogger(__name__)
 
 SVG_NS = "http://www.w3.org/2000/svg"
 XMLNS_ATTR = "{http://www.w3.org/2000/xmlns/}xmlns"
-
-
-def normalize_lang(lang: str) -> str:
-    """
-    Normalize a language tag to a simple IETF-like form.
-    This is a lightweight normalizer not a full BCP47 parser.
-    Examples:
-      'en_us' -> 'en-US'
-      'EN' -> 'en'
-      'pt-br' -> 'pt-BR'
-    """
-    if not lang:
-        return lang
-    pieces = re.split(r"[_\-\s]+", lang.strip())
-    primary = pieces[0].lower()
-    if len(pieces) > 1:
-        rest = "-".join(p.upper() if len(p) == 2 else p.title() for p in pieces[1:])
-        return f"{primary}-{rest}"
-    return primary
 
 
 def get_text_content(el: etree._Element) -> str:
@@ -348,7 +330,6 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> tup
 
 
 __all__ = [
-    "normalize_lang",
     "get_text_content",
     "make_translation_ready",
 ]

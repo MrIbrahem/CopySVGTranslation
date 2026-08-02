@@ -3,41 +3,10 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
-from lxml import etree
-
-from CopySVGTranslation.utils import extract_text_from_node, normalize_text
-
-
-class TestTextUtils:
-    """Test cases for text utility functions."""
-
-    def test_extract_text_from_node_with_tspans(self):
-        """Test extracting text from a node with tspans."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        text_node = etree.fromstring(f"""<text xmlns="{svg_ns}"><tspan>Hello</tspan><tspan>World</tspan></text>""")
-        result = extract_text_from_node(text_node)
-        assert result == ["Hello", "World"]
-
-    def test_extract_text_from_node_without_tspans(self):
-        """Test extracting text from a node without tspans."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        text_node = etree.fromstring(f'<text xmlns="{svg_ns}">Plain text</text>')
-        result = extract_text_from_node(text_node)
-        assert result == ["Plain text"]
-
-    def test_extract_text_from_node_empty(self):
-        """Test extracting text from an empty node."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        text_node = etree.fromstring(f'<text xmlns="{svg_ns}"></text>')
-        result = extract_text_from_node(text_node)
-        assert result == [""]
-
-    def test_extract_text_from_node_with_whitespace_tspans(self):
-        """Test extracting text from tspans with only whitespace."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        text_node = etree.fromstring(f"""<text xmlns="{svg_ns}"><tspan>   </tspan><tspan>Text</tspan></text>""")
-        result = extract_text_from_node(text_node)
-        assert result == ["", "Text"]
+from CopySVGTranslation.utils.text_utils import (
+    normalize_lang,
+    normalize_text,
+)
 
 
 class TestTextUtils2:
@@ -182,71 +151,6 @@ class TestNormalizeTextFunction:
         assert normalize_text("test@example.com") == "test@example.com"
 
 
-class TestExtractTextFromNode:
-    """Test suite for extract_text_from_node function."""
-
-    def test_extract_from_text_with_tspans(self):
-        """Test extraction from text element with tspan children."""
-        xml = """<text xmlns="http://www.w3.org/2000/svg">
-            <tspan>First</tspan>
-            <tspan>Second</tspan>
-        </text>"""
-        node = etree.fromstring(xml)
-        result = extract_text_from_node(node)
-
-        assert result == ["First", "Second"]
-
-    def test_extract_from_text_without_tspans(self):
-        """Test extraction from text element without tspans."""
-        xml = '<text xmlns="http://www.w3.org/2000/svg">Direct text</text>'
-        node = etree.fromstring(xml)
-        result = extract_text_from_node(node)
-
-        assert result == ["Direct text"]
-
-    def test_extract_from_text_with_empty_tspans(self):
-        """Test extraction with empty tspan elements."""
-        xml = """<text xmlns="http://www.w3.org/2000/svg">
-            <tspan></tspan>
-            <tspan>Content</tspan>
-        </text>"""
-        node = etree.fromstring(xml)
-        result = extract_text_from_node(node)
-
-        assert result == ["", "Content"]
-
-    def test_extract_from_text_with_whitespace_tspans(self):
-        """Test extraction handles whitespace in tspans."""
-        xml = """<text xmlns="http://www.w3.org/2000/svg">
-            <tspan>  Spaces  </tspan>
-            <tspan>	Tabs	</tspan>
-        </text>"""
-        node = etree.fromstring(xml)
-        result = extract_text_from_node(node)
-
-        assert result == ["Spaces", "Tabs"]
-
-    def test_extract_from_empty_text_node(self):
-        """Test extraction from empty text node."""
-        xml = '<text xmlns="http://www.w3.org/2000/svg"></text>'
-        node = etree.fromstring(xml)
-        result = extract_text_from_node(node)
-
-        assert result == [""]
-
-    def test_extract_with_unicode_content(self):
-        """Test extraction with Unicode content."""
-        xml = """<text xmlns="http://www.w3.org/2000/svg">
-            <tspan>مرحبا</tspan>
-            <tspan>你好</tspan>
-            <tspan>Привет</tspan>
-        </text>"""
-        node = etree.fromstring(xml)
-        result = extract_text_from_node(node)
-
-        assert result == ["مرحبا", "你好", "Привет"]
-
-
 class TestTextUtilsComprehensive:
     """Comprehensive tests for text utility functions."""
 
@@ -265,16 +169,72 @@ class TestTextUtilsComprehensive:
         assert normalize_text("  مرحبا  بك  ") == "مرحبا بك"
         assert normalize_text("  你好  世界  ") == "你好 世界"
 
-    def test_extract_text_from_node_with_multiple_tspans(self):
-        """Test extracting text from node with multiple tspans."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        text_node = etree.fromstring(f'<text xmlns="{svg_ns}"><tspan>Hello</tspan><tspan>World</tspan></text>')
-        result = extract_text_from_node(text_node)
-        assert result == ["Hello", "World"]
 
-    def test_extract_text_from_node_plain_text(self):
-        """Test extracting plain text from node without tspans."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        text_node = etree.fromstring(f'<text xmlns="{svg_ns}">Plain text</text>')
-        result = extract_text_from_node(text_node)
-        assert result == ["Plain text"]
+class TestNormalizeLang:
+    """Test suite for normalize_lang function."""
+
+    def test_normalize_lang_simple(self):
+        """Test normalizing simple language codes."""
+        assert normalize_lang("en") == "en"
+        assert normalize_lang("AR") == "ar"
+        assert normalize_lang("FR") == "fr"
+
+    def test_normalize_lang_with_region(self):
+        """Test normalizing language codes with regions."""
+        assert normalize_lang("en_US") == "en-US"
+        assert normalize_lang("en-GB") == "en-GB"
+        assert normalize_lang("zh_CN") == "zh-CN"
+        assert normalize_lang("en-US") == "en-US"
+        assert normalize_lang("en_us") == "en-US"
+        assert normalize_lang("pt_br") == "pt-BR"
+        assert normalize_lang("zh-cn") == "zh-CN"
+
+    def test_normalize_lang_complex(self):
+        """Test normalizing complex language codes."""
+        assert normalize_lang("en_US_POSIX") == "en-US-Posix"
+        assert normalize_lang("sr_Latn_RS") == "sr-Latn-RS"
+
+    def test_normalize_lang_empty(self):
+        """Test normalizing empty language code."""
+        assert normalize_lang("") == ""
+        assert normalize_lang(None) is None
+
+    def test_normalize_lang_simple_codes(self):
+        """Test normalizing simple language codes."""
+        assert normalize_lang("en") == "en"
+        assert normalize_lang("AR") == "ar"
+        assert normalize_lang("FR") == "fr"
+
+    def test_normalize_lang_with_region_codes(self):
+        """Test normalizing language codes with regions."""
+        assert normalize_lang("en_US") == "en-US"
+        assert normalize_lang("en-GB") == "en-GB"
+        assert normalize_lang("zh_CN") == "zh-CN"
+
+    def test_normalize_lang_complex_codes(self):
+        """Test normalizing complex language codes."""
+        assert normalize_lang("en_US_POSIX") == "en-US-Posix"
+
+    def test_normalize_lang_simple_code(self):
+        """Test normalization of simple language code."""
+        assert normalize_lang("EN") == "en"
+        assert normalize_lang("FR") == "fr"
+        assert normalize_lang("ar") == "ar"
+
+    def test_normalize_lang_complex_format(self):
+        """Test normalization with complex format."""
+        assert normalize_lang("en-us-variant") == "en-US-Variant"
+
+    def test_normalize_lang_empty_string(self):
+        """Test normalization of empty string."""
+        assert normalize_lang("") == ""
+
+    def test_normalize_lang_with_whitespace(self):
+        """Test normalization handles whitespace."""
+        assert normalize_lang("  en-US  ") == "en-US"
+        assert normalize_lang("en us") == "en-US"
+
+    def test_normalize_lang_hyphen_variations(self):
+        """Test different hyphen/underscore variations."""
+        assert normalize_lang("en-GB") == "en-GB"
+        assert normalize_lang("en_GB") == "en-GB"

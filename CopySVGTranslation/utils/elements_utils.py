@@ -95,9 +95,19 @@ def sort_switch_texts(elem):
     return elem
 
 
+def extract_text_from_node(node) -> list[str]:
+    """Extract text content from an SVG ``<text>`` element, honouring ``<tspan>``."""
+    tspans = node.xpath("./svg:tspan", namespaces={"svg": "http://www.w3.org/2000/svg"})
+    if tspans:
+        return [tspan.text.strip() if tspan.text else "" for tspan in tspans]
+
+    return [node.text.strip()] if node.text else [""]
+
+
 __all__ = [
     "extract_root_languages",
     "tree_langs",
     "file_langs",
     "sort_switch_texts",
+    "extract_text_from_node",
 ]

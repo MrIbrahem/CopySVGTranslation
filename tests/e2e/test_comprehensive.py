@@ -15,9 +15,6 @@ from CopySVGTranslation.injection import (
     inject,
     make_translation_ready,
 )
-from CopySVGTranslation.injection.preparation import (
-    normalize_lang,
-)
 from CopySVGTranslation.utils import (
     generate_unique_id,
     load_all_mappings,
@@ -30,28 +27,6 @@ from CopySVGTranslation.utils import (
 
 class TestPreparation:
     """Test cases for SVG preparation functions."""
-
-    def test_normalize_lang_simple(self):
-        """Test normalizing simple language codes."""
-        assert normalize_lang("en") == "en"
-        assert normalize_lang("AR") == "ar"
-        assert normalize_lang("FR") == "fr"
-
-    def test_normalize_lang_with_region(self):
-        """Test normalizing language codes with regions."""
-        assert normalize_lang("en_US") == "en-US"
-        assert normalize_lang("en-GB") == "en-GB"
-        assert normalize_lang("zh_CN") == "zh-CN"
-
-    def test_normalize_lang_complex(self):
-        """Test normalizing complex language codes."""
-        assert normalize_lang("en_US_POSIX") == "en-US-Posix"
-        assert normalize_lang("sr_Latn_RS") == "sr-Latn-RS"
-
-    def test_normalize_lang_empty(self):
-        """Test normalizing empty language code."""
-        assert normalize_lang("") == ""
-        assert normalize_lang(None) is None
 
     def test_svg_structure_exception(self):
         """Test SvgStructureExceptionError creation."""

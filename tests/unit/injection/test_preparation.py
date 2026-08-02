@@ -14,43 +14,7 @@ from CopySVGTranslation.injection.exceptions import (
 )
 from CopySVGTranslation.injection.preparation import (
     make_translation_ready,
-    normalize_lang,
 )
-
-
-class TestNormalizeLang:
-    """Test suite for normalize_lang function."""
-
-    def test_normalize_lang_simple_code(self):
-        """Test normalization of simple language code."""
-        assert normalize_lang("EN") == "en"
-        assert normalize_lang("FR") == "fr"
-        assert normalize_lang("ar") == "ar"
-
-    def test_normalize_lang_with_region(self):
-        """Test normalization with region code."""
-        assert normalize_lang("en-US") == "en-US"
-        assert normalize_lang("en_us") == "en-US"
-        assert normalize_lang("pt_br") == "pt-BR"
-        assert normalize_lang("zh-cn") == "zh-CN"
-
-    def test_normalize_lang_complex_format(self):
-        """Test normalization with complex format."""
-        assert normalize_lang("en-us-variant") == "en-US-Variant"
-
-    def test_normalize_lang_empty_string(self):
-        """Test normalization of empty string."""
-        assert normalize_lang("") == ""
-
-    def test_normalize_lang_with_whitespace(self):
-        """Test normalization handles whitespace."""
-        assert normalize_lang("  en-US  ") == "en-US"
-        assert normalize_lang("en us") == "en-US"
-
-    def test_normalize_lang_hyphen_variations(self):
-        """Test different hyphen/underscore variations."""
-        assert normalize_lang("en-GB") == "en-GB"
-        assert normalize_lang("en_GB") == "en-GB"
 
 
 class TestMakeTranslationReadyEdgeCases:
