@@ -54,6 +54,11 @@ class SvgTranslationPreparer:
     # ------------------------------------------------------------------
     def prepare(self) -> tuple[etree._ElementTree, etree._Element]:
         """Run all preparation steps and return the resulting tree and root."""
+        # Reset per-run state to ensure idempotent behavior
+        self.translatable_nodes = []
+        self.existing_ids = set()
+        self.ids_in_use = [0]
+
         self._load_document()
 
         # Check for any <text> elements

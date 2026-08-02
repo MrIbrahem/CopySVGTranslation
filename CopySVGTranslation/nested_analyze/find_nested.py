@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from pathlib import Path
 
 from lxml import etree
@@ -77,6 +78,13 @@ def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_pr
     """
     # ---
     svg_file_path = Path(svg_file_path)
+    if new_path is None:
+        warnings.warn(
+            "Calling fix_nested_file without new_path is deprecated. "
+            "Pass an explicit output path to avoid overwriting the input file.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
     new_path = Path(new_path or svg_file_path)
     # ---
     parser = etree.XMLParser(remove_blank_text=False)
