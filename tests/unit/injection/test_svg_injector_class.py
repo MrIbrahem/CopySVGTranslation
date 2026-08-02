@@ -13,6 +13,7 @@ from CopySVGTranslation.injection.objects import InjectorData, InjectorStats
 from CopySVGTranslation.injection.svg_injector import SVGTranslationInjector
 
 SVG_NS = "http://www.w3.org/2000/svg"
+SVG_NSMAP = {"svg": SVG_NS}
 
 
 # ---------------------------------------------------------------------------
@@ -30,10 +31,21 @@ def _write_svg(tmp_path: Path, inner: str, name: str = "test.svg") -> Path:
     return p
 
 
-def _count_lang_nodes(tree: etree._ElementTree, lang: str) -> int:
-    """Count <text systemLanguage="lang"> nodes in a parsed tree."""
-    root = tree.getroot()
-    return len(root.xpath(f'//*[@systemLanguage="{lang}"]'))
+def _count_lang_nodes(root: etree._Element, lang: str) -> int:
+    """Count <text systemLanguage="lang"> nodes (namespace-aware)."""
+    return len(root.xpath(f'.//svg:text[@systemLanguage="{lang}"]', namespaces=SVG_NSMAP))
+
+
+def _get_ar_text(root: etree._Element) -> str | None:
+    """Return text content of the first Arabic tspan (namespace-aware)."""
+    tspans = root.xpath('//svg:text[@systemLanguage="ar"]/svg:tspan', namespaces=SVG_NSMAP)
+    return tspans[0].text if tspans else None
+
+
+def _get_default_texts(root: etree._Element) -> list[str]:
+    """Return tspan text content of default (no systemLanguage) text nodes."""
+    tspans = root.xpath('//svg:text[not(@systemLanguage)]/svg:tspan/text()', namespaces=SVG_NSMAP)
+    return tspans
 
 
 # ===========================================================================
@@ -217,7 +229,7 @@ class TestSVGTranslationInjectorBasic:
         result = inj.inject(inject_file=svg, all_mappings=mappings)
 
         root = result.tree.getroot()
-        default_texts = root.xpath('//text[not(@systemLanguage)]/tspan/text()')
+        default_texts = _get_default_texts(root)
         assert "Hello" in default_texts
 
 
@@ -325,8 +337,8 @@ class TestSVGTranslationInjectorOverwrite:
         result = inj.inject(inject_file=svg, all_mappings=mappings)
         root = result.tree.getroot()
 
-        ar_tspan = root.xpath('//text[@systemLanguage="ar"]/tspan')[0]
-        assert ar_tspan.text == "New Arabic"
+        ar_text = _get_ar_text(root)
+        assert ar_text == "New Arabic"
 
     def test_mixed_insert_and_skip(self, tmp_path: Path):
         inner = """
@@ -559,7 +571,7 @@ class TestWorkOnSwitches:
 
         inj.work_on_switches(root, mappings={"new": {"hello": {"ar": "مرحبا"}}}, existing_ids=existing_ids)
 
-        ar_nodes = root.xpath('//text[@systemLanguage="ar"]')
+        ar_nodes = root.xpath('.//svg:text[@systemLanguage="ar"]', namespaces=SVG_NSMAP)
         assert len(ar_nodes) == 1
 
     def test_generates_unique_ids(self):
@@ -577,13 +589,13 @@ class TestWorkOnSwitches:
             existing_ids=existing_ids,
         )
 
-        ar_id = root.xpath('//text[@systemLanguage="ar"]/@id')[0]
-        fr_id = root.xpath('//text[@systemLanguage="fr"]/@id')[0]
+        ar_id = root.xpath('.//svg:text[@systemLanguage="ar"]/@id', namespaces=SVG_NSMAP)[0]
+        fr_id = root.xpath('.//svg:text[@systemLanguage="fr"]/@id', namespaces=SVG_NSMAP)[0]
         assert ar_id != fr_id
         assert ar_id.startswith("t0")
         assert fr_id.startswith("t0")
 
-    def test_tspan_ids_are_unique(self):
+    def test_newly_generated_ids_are_unique(self):
         root = self._make_root("""
             <switch>
                 <text id="t0"><tspan id="t0">Hello</tspan></text>
@@ -598,9 +610,17 @@ class TestWorkOnSwitches:
             existing_ids=existing_ids,
         )
 
-        all_ids = set(root.xpath("//@id"))
-        # All IDs must be unique
-        assert len(all_ids) == len(root.xpath("//*[@id]"))
+        # Collect only the newly added <text> nodes (those with systemLanguage)
+        new_text_ids = root.xpath('.//svg:text[@systemLanguage]/@id', namespaces=SVG_NSMAP)
+        new_tspan_ids = root.xpath('.//svg:text[@systemLanguage]/svg:tspan/@id', namespaces=SVG_NSMAP)
+
+        # Newly generated IDs should not collide with the original IDs
+        for new_id in list(new_text_ids) + list(new_tspan_ids):
+            assert new_id not in {"t0"}, f"New ID '{new_id}' collides with existing ID"
+
+        # Newly generated text and tspan IDs should differ from each other
+        all_new = list(new_text_ids) + list(new_tspan_ids)
+        assert len(all_new) == len(set(all_new))
 
     def test_no_match_skips_switch(self):
         root = self._make_root("""
@@ -613,7 +633,7 @@ class TestWorkOnSwitches:
         inj.work_on_switches(root, mappings={"new": {"hello": {"ar": "مرحبا"}}})
 
         # No new nodes should be added
-        ar_nodes = root.xpath('//text[@systemLanguage="ar"]')
+        ar_nodes = root.xpath('.//svg:text[@systemLanguage="ar"]', namespaces=SVG_NSMAP)
         assert len(ar_nodes) == 0
         assert inj.new_stats.processed_switches == 0
 
@@ -674,11 +694,11 @@ class TestExtractorInjectorE2E:
         assert inject_result.new_stats.inserted_translations == 3  # ar + fr for Hello, ar for Goodbye
         assert output_svg.exists()
 
-        # Verify output
+        # Verify output (text/tspan elements stay in SVG namespace)
         tree = etree.parse(str(output_svg))
         root = tree.getroot()
-        assert len(root.xpath('//text[@systemLanguage="ar"]')) == 2
-        assert len(root.xpath('//text[@systemLanguage="fr"]')) == 1
+        assert len(root.xpath('.//svg:text[@systemLanguage="ar"]', namespaces=SVG_NSMAP)) == 2
+        assert len(root.xpath('.//svg:text[@systemLanguage="fr"]', namespaces=SVG_NSMAP)) == 1
 
     def test_extract_inject_preserves_content(self, tmp_path: Path):
         from CopySVGTranslation.extraction.svg_extractor import SVGTranslationExtractor
@@ -712,5 +732,5 @@ class TestExtractorInjectorE2E:
 
         tree = etree.parse(str(output_svg))
         root = tree.getroot()
-        ar_text = root.xpath('//text[@systemLanguage="ar"]/tspan/text()')[0]
+        ar_text = root.xpath('.//svg:text[@systemLanguage="ar"]/svg:tspan/text()', namespaces=SVG_NSMAP)[0]
         assert ar_text == "ترجمة دقيقة"
