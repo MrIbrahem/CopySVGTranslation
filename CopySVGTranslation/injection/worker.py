@@ -7,7 +7,7 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
-from ..utils.injection_utils import get_target_path, load_all_mappings
+from ..utils.injection_utils import load_all_mappings
 from .svg_injector import InjectorData, SVGTranslationInjector
 
 logger = logging.getLogger(__name__)
@@ -23,26 +23,26 @@ def inject(
     overwrite: bool = False,
     save_result: bool = False,
     return_stats: bool = False,
-    **kwargs: Any,
+    pretty_print: bool = True,
 ) -> tuple[Any, Any] | Any:
     """
     Legacy function-style wrapper around SVGTranslationInjector, kept for
     backward compatibility with existing callers.
     """
-    if not inject_file and kwargs.get("svg_file_path"):
-        inject_file = kwargs["svg_file_path"]
-
-    if not all_mappings and kwargs.get("translations"):
-        all_mappings = kwargs["translations"]
-
     if not all_mappings and mapping_files:
         mapping_files = list(mapping_files)
         all_mappings = load_all_mappings(mapping_files)
 
-    pretty_print = kwargs.get("pretty_print", True)
-
     inject_path = Path(str(inject_file))
-    target_path = get_target_path(output_file, output_dir, inject_path) if save_result else None
+    target_path: Path | None = None
+
+    if save_result:
+        if output_file:
+            target_path = Path(str(output_file))
+        elif output_dir:
+            target_path = Path(str(output_dir)) / inject_path.name
+        else:
+            target_path = inject_path.parent / "translated" / inject_path.name
 
     injector = SVGTranslationInjector(
         case_insensitive=case_insensitive,
