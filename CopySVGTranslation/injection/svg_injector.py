@@ -23,7 +23,7 @@ from .exceptions import (
     SvgStructureExceptionError,
 )
 from .objects import InjectorData, InjectorStats
-from .preparation import SvgTranslationPreparer # make_translation_ready
+from .preparation import SvgTranslationPreparer  # make_translation_ready
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Any
 
-from ..titles_workers import make_new_title_translations, make_title_translations
 from .svg_extractor import SVGTranslationExtractor
 
 
@@ -32,10 +31,6 @@ def extract(
     result = extractor.extract()
     if not result:
         return None
-
-    if result.new:
-        result.title = make_title_translations(result.new)
-        result.title_new = make_new_title_translations(result.new)
 
     # { "new": {}, "tspans_by_id": {}, "title": { }, "title_new": { } }
     return result.to_json()

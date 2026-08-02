@@ -7,6 +7,7 @@ from typing import Any
 
 from lxml import etree
 
+from ..titles_workers import make_new_title_translations, make_title_translations
 from ..utils import normalize_text
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ class Translations:
     tspans_by_id: dict[str, str] = field(default_factory=dict)
     title: dict[str, Any] = field(default_factory=dict)
     title_new: dict[str, Any] = field(default_factory=dict)
+    error: str = ""
 
     def to_json(self) -> dict[str, Any]:
         return asdict(self)
@@ -160,6 +162,48 @@ class SVGTranslationExtractor:
             self.translations.new.update({x: {} for x in new_keys if x not in self.translations.new})
 
             self.process_switch_translations(text_elements, default_tspans_by_id)
+
+        if self.translations.new:
+            self.translations.title = make_title_translations(self.translations.new)
+            self.translations.title_new = make_new_title_translations(self.translations.new)
+
+    def extract_file_translations(self) -> Translations:
+        """
+        Extract translation strings from an SVG file into a structured dictionary.
+
+        Parses the SVG, collects default (source) text and corresponding
+        translations found in sibling text elements with a systemLanguage
+        attribute, and returns a mapping suitable for localization workflows.
+        Title-like entries that end with a four-digit year are separated
+        into a "title" section with the year removed.
+
+        Returns:
+            Translations: A dictionary containing extracted translations (may
+            include a "new" mapping of source text to per-language
+            translations and a "title" mapping), or None if the file does
+            not exist or could not be parsed.
+        """
+        if not self.svg_file_path.exists():
+            logger.error(f"SVG file not found: {self.svg_file_path}")
+            self.translations.error = "File not found"
+            return self.translations
+
+        logger.debug(f"Extracting translations from {self.svg_file_path}")
+
+        # Parse SVG as XML
+        parser = etree.XMLParser(remove_blank_text=True)
+
+        try:
+            tree = etree.parse(str(self.svg_file_path), parser)
+        except (etree.XMLSyntaxError, OSError) as exc:
+            logger.error(f"Failed to parse SVG file {self.svg_file_path}: {exc}")
+            self.translations.error = "Failed to parse SVG file"
+            return self.translations
+
+        root = tree.getroot()
+
+        self.process_switches(root)
+        return self.translations
 
     def extract(self) -> Translations | None:
         """
