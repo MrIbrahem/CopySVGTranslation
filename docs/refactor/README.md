@@ -297,6 +297,21 @@ class InjectorStats:
     updated_translations: int = 0
     languages_before: list[str] = field(default_factory=list)
     languages_after: list[str] = field(default_factory=list)
+    error: str = ""
+
+    def to_json(self) -> dict[str, Any]:
+        """Serialize stats to a JSON-compatible dictionary."""
+        return {
+            "all_languages": self.all_languages,
+            "new_languages": self.new_languages,
+            "processed_switches": self.processed_switches,
+            "inserted_translations": self.inserted_translations,
+            "skipped_translations": self.skipped_translations,
+            "updated_translations": self.updated_translations,
+            "languages_before": self.languages_before,
+            "languages_after": self.languages_after,
+            "error": self.error,
+        }
 
 
 @dataclass(slots=True)
@@ -428,10 +443,10 @@ class SVGTranslationService:
         warnings: list[str] = []
 
         if save_mapping:
-            out = self._resolve_mapping_output(svg_path, save_mapping)
             try:
+                out = self._resolve_mapping_output(svg_path, save_mapping)
                 self._get_mapping_store().save(mapping, out)
-            except Exception as exc:
+            except (OSError, Exception) as exc:
                 warnings.append(f"Failed to save mapping: {exc}")
 
         return OperationResult.ok(data=mapping, warnings=warnings)
@@ -473,10 +488,11 @@ class SVGTranslationService:
 
         try:
             normalized = TranslationMapping.from_any(mapping)
+            resolved_output = self._resolve_output_path(output) if output else None
             tree, stats = self._get_injector().inject(
                 svg_path,
                 normalized,
-                target_path=Path(output) if output else None,
+                target_path=resolved_output,
                 save=should_save,
             )
         except Exception as exc:
@@ -517,11 +533,22 @@ class SVGTranslationService:
                 warnings=extract_result.warnings,
             )
 
-        return self.inject(
+        inject_result = self.inject(
             target,
             extract_result.data,
             output=output,
             save=save,
+        )
+
+        # Merge warnings from extract_result into inject_result
+        merged_warnings = extract_result.warnings + inject_result.warnings
+        return OperationResult(
+            success=inject_result.success,
+            data=inject_result.data,
+            stats=inject_result.stats,
+            error=inject_result.error,
+            error_code=inject_result.error_code,
+            warnings=merged_warnings,
         )
 
     def prepare_only(
@@ -540,7 +567,8 @@ class SVGTranslationService:
         try:
             tree = self._get_injector().prepare(svg_path)
             if output:
-                self._save_tree(tree, Path(output))
+                resolved_output = self._resolve_output_path(output)
+                self._save_tree(tree, resolved_output)
             return OperationResult.ok(data=tree)
         except Exception as exc:
             return OperationResult.fail(
@@ -595,6 +623,16 @@ class SVGTranslationService:
             self._mapping_store = MappingStore(self.config)
         return self._mapping_store
 
+    def _resolve_output_path(self, output: Path | str) -> Path:
+        """
+        Resolve output path for SVG files, applying output_dir only when
+        the given path is a bare filename (no directory component).
+        """
+        output = Path(output)
+        if output.parent == Path(".") and self.config.output_dir is not None:
+            return self.config.output_dir / output
+        return output
+
     def _resolve_mapping_output(
         self,
         svg_path: Path,
@@ -603,7 +641,12 @@ class SVGTranslationService:
         if isinstance(save_mapping, (str, Path)):
             return Path(save_mapping)
 
-        base_dir = self.config.mapping_output_dir or Path.cwd() / "data"
+        if self.config.mapping_output_dir is None:
+            raise ValueError(
+                "mapping_output_dir is not configured; cannot resolve mapping output path"
+            )
+
+        base_dir = self.config.mapping_output_dir
         if self.config.create_parents:
             base_dir.mkdir(parents=True, exist_ok=True)
         return base_dir / f"{svg_path.name}.json"
