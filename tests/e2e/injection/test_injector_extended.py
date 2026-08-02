@@ -23,13 +23,12 @@ def work_on_switches(
 ) -> dict:
     """Process ``<switch>`` elements and insert or update translations."""
     injector = SVGTranslationInjector(case_insensitive=case_insensitive, overwrite=overwrite)
-    stats = injector.work_on_switches(
+    injector.work_on_switches(
         root,
         existing_ids,
         mappings,
     )
-    if stats is None:
-        stats = injector.result.new_stats.to_json()
+    stats = injector.result.new_stats.to_json()
     return stats
 
 
