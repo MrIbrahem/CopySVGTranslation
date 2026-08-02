@@ -72,7 +72,7 @@ class SVGTranslationInjector:
 
         all_mappings_title = mappings.get("title", {})
         all_mappings_title_new = mappings.get("title_new", {})
-        all_mappings = mappings.get("new", mappings)
+        all_mappings = dict(mappings.get("new", mappings))
 
         for switch in switches:
             text_elements = switch.xpath("./svg:text", namespaces=svg_ns)

@@ -99,7 +99,6 @@ class SVGTranslationExtractor:
             dict: Mapping of system language -> list of normalized texts
             for that language.
         """
-        new_translations = self.translations.new
         switch_translations: dict[str, list[str]] = {}
 
         for text_elem in text_elements:
@@ -137,9 +136,10 @@ class SVGTranslationExtractor:
                 if not english_text:
                     continue
 
-                store_key = english_text if english_text in new_translations else english_text.lower()
-                if store_key in new_translations:
-                    new_translations[store_key][system_lang] = normalized_translation
+                # store_key = english_text if english_text in new_translations else english_text.lower()
+                store_key = normalize_text(english_text, self.case_insensitive)
+                if store_key in self.translations.new:
+                    self.translations.new[store_key][system_lang] = normalized_translation
 
         return switch_translations
 
@@ -158,8 +158,10 @@ class SVGTranslationExtractor:
             new_keys, default_tspans_by_id = self.get_english_default_texts(text_elements)
 
             self.translations.tspans_by_id.update(default_tspans_by_id)
-
-            self.translations.new.update({x: {} for x in new_keys if x not in self.translations.new})
+            for x in new_keys:
+                store_key = normalize_text(x, self.case_insensitive)
+                if store_key not in self.translations.new:
+                    self.translations.new[store_key] = {}
 
             self.process_switch_translations(text_elements, default_tspans_by_id)
 
