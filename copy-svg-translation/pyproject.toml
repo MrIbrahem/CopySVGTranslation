@@ -67,6 +67,7 @@ copy_svg_translation = ["py.typed"]
 # ---------------------------------------------------------------------------
 [tool.pytest.ini_options]
 minversion = "7.0"
+pythonpath = ["."]
 testpaths = ["tests"]
 addopts = ["-ra", "--strict-markers", "--strict-config"]
 markers = [
