@@ -92,7 +92,8 @@ def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_pr
     root = fix_nested_tspans(root)
     # ---
     # NOTE: <a tags can also be nested inside <tspan>, so fix those too
-    # https://svgtranslate.toolforge.org/ result: This file has unexpected content within a text element. Only tspan elements should be used within text.
+    # https://svgtranslate.toolforge.org/ result: This file has unexpected content within a text element.
+    # Only tspan elements should be used within text.
     root = fix_nested_tspans(root, "a")
     # ---
     try:
@@ -105,8 +106,6 @@ def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_pr
 
 
 __all__ = [
-    "flatten_text",
-    "fix_nested_tspans",
     "match_nested_tags",
     "fix_nested_file",
 ]
