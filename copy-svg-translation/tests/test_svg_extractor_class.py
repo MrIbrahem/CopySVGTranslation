@@ -214,7 +214,7 @@ class TestSVGTranslationExtractorExtract:
         """
         svg = _write_svg(tmp_path, inner)
         ext = SVGTranslationExtractor()
-        result = ext.extract(svg)
+        ext.extract(svg)
 
         # Without tspan children the text node content is used directly.
         # The key may not appear in "new" if there's no tspan id to match,
