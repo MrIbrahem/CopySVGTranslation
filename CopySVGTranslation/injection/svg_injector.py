@@ -29,7 +29,12 @@ logger = logging.getLogger(__name__)
 class SVGTranslationInjector:
     """Injects translations into SVG files."""
 
-    def __init__(self, case_insensitive: bool = True, overwrite: bool = False):
+    def __init__(
+        self,
+        case_insensitive: bool = True,
+        overwrite: bool = False,
+        pretty_print: bool = True,
+    ):
         """
         Parameters:
             case_insensitive (bool): If True, translation lookups are
@@ -39,6 +44,7 @@ class SVGTranslationInjector:
         """
         self.case_insensitive = case_insensitive
         self.overwrite = overwrite
+        self.pretty_print = pretty_print
 
     def work_on_switches(
         self,
@@ -182,18 +188,13 @@ class SVGTranslationInjector:
     def inject(
         self,
         inject_file: Path | str,
-        mapping_files: Iterable[Path | str] | None = None,
         all_mappings: Mapping | None = None,
         output_file: Path | None = None,
         output_dir: Path | None = None,
         save_result: bool = False,
         return_stats: bool = False,
-        **kwargs,
     ):
         """Inject translations into the provided SVG file."""
-
-        if not inject_file and kwargs.get("svg_file_path"):
-            inject_file = kwargs["svg_file_path"]
 
         inject_path = Path(str(inject_file))
 
@@ -201,13 +202,6 @@ class SVGTranslationInjector:
             logger.error(f"SVG file not found: {inject_path}")
             error = {"error": "File does not exist"}
             return (None, error) if return_stats else None
-
-        if not all_mappings and kwargs.get("translations"):
-            all_mappings = kwargs["translations"]
-
-        if not all_mappings and mapping_files:
-            mapping_files = list(mapping_files)
-            all_mappings = load_all_mappings(mapping_files)
 
         if not all_mappings:
             logger.error("No valid mappings found")
@@ -259,7 +253,7 @@ class SVGTranslationInjector:
                     str(target_path),
                     encoding="utf-8",
                     xml_declaration=True,
-                    pretty_print=kwargs.get("pretty_print", True),
+                    pretty_print=self.pretty_print,
                 )
                 after_languages = file_langs(target_path)
                 logger.debug(f"Saved modified SVG to {target_path}")
@@ -300,16 +294,31 @@ def inject(
     Legacy function-style wrapper around SVGTranslationInjector, kept for
     backward compatibility with existing callers.
     """
-    injector = SVGTranslationInjector(case_insensitive=case_insensitive, overwrite=overwrite)
+    if not inject_file and kwargs.get("svg_file_path"):
+        inject_file = kwargs["svg_file_path"]
+
+    if not all_mappings and kwargs.get("translations"):
+        all_mappings = kwargs["translations"]
+
+    if not all_mappings and mapping_files:
+        mapping_files = list(mapping_files)
+        all_mappings = load_all_mappings(mapping_files)
+
+    pretty_print = kwargs.get("pretty_print", True)
+
+    injector = SVGTranslationInjector(
+        case_insensitive=case_insensitive,
+        overwrite=overwrite,
+        pretty_print=pretty_print,
+    )
+
     return injector.inject(
         inject_file,
-        mapping_files=mapping_files,
         all_mappings=all_mappings,
         output_file=output_file,
         output_dir=output_dir,
         save_result=save_result,
         return_stats=return_stats,
-        **kwargs,
     )
 
 
