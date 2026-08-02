@@ -2,10 +2,12 @@
 
 from .exceptions import SvgNestedTspanExceptionError, SvgStructureExceptionError
 from .preparation import make_translation_ready
-from .svg_injector import SVGTranslationInjector
-from .worker import inject
+from .svg_injector import InjectorData, SVGTranslationInjector
+from .worker import inject, perform_svg_injection
 
 __all__ = [
+    "InjectorData",
+    "perform_svg_injection",
     "inject",
     "SVGTranslationInjector",
     "make_translation_ready",
