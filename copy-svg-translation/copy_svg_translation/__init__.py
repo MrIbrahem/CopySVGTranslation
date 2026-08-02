@@ -7,7 +7,7 @@ Extract translations from SVG files and inject them into others.
 
 from __future__ import annotations
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 from .config import TranslationConfig
 from .core.mapping import TranslationEntry, TranslationMapping
