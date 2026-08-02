@@ -6,9 +6,10 @@ import logging
 import tempfile
 from pathlib import Path
 
-from CopySVGTranslation import extract, make_translation_ready
+from CopySVGTranslation import extract
+from CopySVGTranslation.injection import make_translation_ready
 
-logger = logging.getLogger("CopySVGTranslation")
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 console = logging.StreamHandler()
@@ -46,7 +47,10 @@ svg_file.write_text(
     encoding="utf-8",
 )
 
-make_translation_ready(svg_file, write_back=True)
+tree, root = make_translation_ready(svg_file)
+
+# write to file
+tree.write(str(svg_file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
 result = extract(svg_file)
 

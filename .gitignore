@@ -6,3 +6,5 @@ data/source.svg.json
 tests/example/برمت.txt
 /tests/tests_files
 .coverage
+/_works_files
+CopySVGTranslation/injection/preparation_backup.py

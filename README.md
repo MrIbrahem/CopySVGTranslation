@@ -11,6 +11,7 @@ This tool requires Python 3.10+. Install the lightweight core dependencies with:
 ```bash
 pip install CopySVGTranslation
 ```
+
 ## Usage
 
 ### Extracting and injecting in a single step
@@ -88,11 +89,11 @@ An example of the modern format:
 
 ```json
 {
-  "new": {
-    "but are connected in anti-phase": {
-      "ar": "لكنها موصولة بمرحلتين متعاكستين."
+    "new": {
+        "but are connected in anti-phase": {
+            "ar": "لكنها موصولة بمرحلتين متعاكستين."
+        }
     }
-  }
 }
 ```
 
@@ -144,6 +145,7 @@ translations = extract(
     case_insensitive=True,
 )
 ```
+
 ### Extracted JSON
 
 ```json
@@ -170,9 +172,9 @@ translations = extract(
 }
 ```
 
-
 ### Injection Example
-- TODO
+
+-   TODO
 
 ## Testing
 
@@ -187,20 +189,23 @@ python -m pytest tests -v
 ### Text Normalization
 
 The tool normalizes text by:
-- Trimming leading and trailing whitespace
-- Replacing multiple internal whitespace characters with a single space
-- Optionally converting to lowercase for case-insensitive matching
+
+-   Trimming leading and trailing whitespace
+-   Replacing multiple internal whitespace characters with a single space
+-   Optionally converting to lowercase for case-insensitive matching
 
 ### ID Generation
 
 When adding new translation nodes, the tool generates unique IDs by:
-- Taking the existing ID and appending the language code (e.g., `text2213` becomes `text2213-ar`)
-- If the generated ID already exists, appending a numeric suffix until unique (e.g., `text2213-ar-1`)
+
+-   Taking the existing ID and appending the language code (e.g., `text2213` becomes `text2213-ar`)
+-   If the generated ID already exists, appending a numeric suffix until unique (e.g., `text2213-ar-1`)
 
 ## Error Handling
 
 The tool includes comprehensive error handling for:
-- Missing input files
-- Invalid XML structure
-- Missing required attributes
-- File permission issues
+
+-   Missing input files
+-   Invalid XML structure
+-   Missing required attributes
+-   File permission issues

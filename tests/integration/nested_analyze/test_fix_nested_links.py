@@ -9,7 +9,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 # ---------- Helpers ----------
 
 
-def _wrap_svg(inner: str, width: int, height: int) -> str:
+def _wrap_svg(inner: str, width: int = 100, height: int = 100) -> str:
     return f'<svg xmlns="{SVG_NS}" version="1.1" width="{width}" height="{height}">{inner}</svg>'
 
 

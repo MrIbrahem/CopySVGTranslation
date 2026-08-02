@@ -10,42 +10,15 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from CopySVGTranslation import generate_unique_id, inject, normalize_text, start_injects
 from CopySVGTranslation.injection import (
     SvgStructureExceptionError,
-)
-from CopySVGTranslation.injection.injector import load_all_mappings
-from CopySVGTranslation.injection.preparation import (
-    clone_element,
-    get_text_content,
+    inject,
     make_translation_ready,
-    normalize_lang,
 )
-
-# -------------------------------
-# Text utility tests
-# -------------------------------
-
-
-class TestTextUtils:
-    """Test cases for text utility functions."""
-
-    def test_normalize_text_with_tabs_and_newlines(self):
-        """Test normalization with tabs and newlines."""
-        assert normalize_text("hello\t\nworld") == "hello world"
-        assert normalize_text("  hello\n\n  world  ") == "hello world"
-
-    def test_normalize_text_case_insensitive(self):
-        """Test case-insensitive normalization."""
-        assert normalize_text("Hello World", case_insensitive=True) == "hello world"
-        assert normalize_text("HELLO WORLD", case_insensitive=True) == "hello world"
-        assert normalize_text("HeLLo WoRLd", case_insensitive=True) == "hello world"
-
-    def test_normalize_text_unicode(self):
-        """Test normalization with Unicode characters."""
-        assert normalize_text("  مرحبا  بك  ") == "مرحبا بك"
-        assert normalize_text("  你好  世界  ") == "你好 世界"
-
+from CopySVGTranslation.utils import (
+    generate_unique_id,
+    load_all_mappings,
+)
 
 # -------------------------------
 # Preparation tests
@@ -54,45 +27,6 @@ class TestTextUtils:
 
 class TestPreparation:
     """Test cases for SVG preparation functions."""
-
-    def test_normalize_lang_simple(self):
-        """Test normalizing simple language codes."""
-        assert normalize_lang("en") == "en"
-        assert normalize_lang("AR") == "ar"
-        assert normalize_lang("FR") == "fr"
-
-    def test_normalize_lang_with_region(self):
-        """Test normalizing language codes with regions."""
-        assert normalize_lang("en_US") == "en-US"
-        assert normalize_lang("en-GB") == "en-GB"
-        assert normalize_lang("zh_CN") == "zh-CN"
-
-    def test_normalize_lang_complex(self):
-        """Test normalizing complex language codes."""
-        assert normalize_lang("en_US_POSIX") == "en-US-Posix"
-        assert normalize_lang("sr_Latn_RS") == "sr-Latn-RS"
-
-    def test_normalize_lang_empty(self):
-        """Test normalizing empty language code."""
-        assert normalize_lang("") == ""
-        assert normalize_lang(None) is None
-
-    def test_get_text_content(self):
-        """Test getting text content from elements."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        element = etree.fromstring(f"""<text xmlns="{svg_ns}">Hello <tspan>World</tspan> Test</text>""")
-        result = get_text_content(element)
-        assert "Hello" in result
-        assert "World" in result
-
-    def test_clone_element(self):
-        """Test cloning an element."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        original = etree.fromstring(f'<text xmlns="{svg_ns}" id="test">Content</text>')
-        cloned = clone_element(original)
-        assert original.get("id") == cloned.get("id")
-        assert original.text == cloned.text
-        assert original is not cloned
 
     def test_svg_structure_exception(self):
         """Test SvgStructureExceptionError creation."""
@@ -210,62 +144,12 @@ class TestInjector:
 
 
 # -------------------------------
-# Batch tests
-# -------------------------------
-
-
-class TestBatch:
-    """Test cases for batch processing functions."""
-
-    def test_start_injects_single_file(self, temp_dir):
-        """Test batch injection with a single file."""
-        svg_file = temp_dir / "test.svg"
-        out_dir = temp_dir / "out"
-        out_dir.mkdir()
-        svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
-        svg_file.write_text(svg_content, encoding="utf-8")
-        translations = {"new": {"hello": {"ar": "مرحبا"}}}
-        result = start_injects([svg_file], translations, out_dir, overwrite=False)
-        assert result["success"] == 1
-        assert result["failed"] == 0
-
-    def test_start_injects_multiple_files(self, temp_dir):
-        """Test batch injection with multiple files."""
-        svg1 = temp_dir / "test1.svg"
-        svg2 = temp_dir / "test2.svg"
-        out_dir = temp_dir / "out"
-        out_dir.mkdir()
-        svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
-        svg1.write_text(svg_content, encoding="utf-8")
-        svg2.write_text(svg_content, encoding="utf-8")
-        translations = {"new": {"hello": {"ar": "مرحبا"}}}
-        result = start_injects([svg1, svg2], translations, out_dir)
-        assert result["success"] == 2
-        assert "test1.svg" in result["files"]
-        assert "test2.svg" in result["files"]
-
-    def test_start_injects_with_nonexistent_file(self, temp_dir):
-        """Test batch injection with nonexistent file."""
-        out_dir = temp_dir / "out"
-        out_dir.mkdir()
-        translations = {"new": {"hello": {"ar": "مرحبا"}}}
-        result = start_injects([temp_dir / "nonexistent.svg"], translations, out_dir)
-        assert result["success"] == 0
-        assert result["failed"] == 1
-
-
-# -------------------------------
 # Edge case tests
 # -------------------------------
 
 
 class TestEdgeCases:
     """Test edge cases and boundary conditions."""
-
-    def test_normalize_text_with_only_whitespace(self):
-        """Test normalization with only whitespace."""
-        assert normalize_text("   ") == ""
-        assert normalize_text("\n\t  ") == ""
 
     def test_generate_unique_id_with_many_collisions(self):
         """Test unique ID generation with many existing IDs."""

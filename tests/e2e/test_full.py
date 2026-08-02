@@ -7,7 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation import extract, inject, svg_extract_and_inject
+from CopySVGTranslation.extraction import extract
+from CopySVGTranslation.injection import inject
+from CopySVGTranslation.workflows import svg_extract_and_inject
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 

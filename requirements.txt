@@ -1,2 +1,2 @@
 lxml
-tqdm
+# lxml-stubs # For type stubs
