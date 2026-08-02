@@ -71,4 +71,5 @@ class TranslationConfig:
     def with_updates(self, **kwargs) -> TranslationConfig:
         """Return a new config with the given fields replaced."""
         from dataclasses import replace
+
         return replace(self, **kwargs)

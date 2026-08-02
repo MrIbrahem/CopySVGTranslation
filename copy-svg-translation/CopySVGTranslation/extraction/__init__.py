@@ -1,10 +1,10 @@
 # extraction/__init__.py
 from .extractor import SVGTranslationExtractor
 from .strategies import (
-    MatchingStrategy,
-    ByTspanIdStrategy,
     ByPositionStrategy,
+    ByTspanIdStrategy,
     CompositeMatchingStrategy,
+    MatchingStrategy,
 )
 
 __all__ = [

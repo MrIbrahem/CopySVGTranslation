@@ -8,6 +8,7 @@ from typing import Any, Iterator, Mapping
 @dataclass(slots=True, frozen=True)
 class TranslationEntry:
     """One source string and its per-language translations."""
+
     source: str
     translations: Mapping[str, str] = field(default_factory=dict)
 
@@ -23,6 +24,7 @@ class TranslationMapping:
     """
     Full mapping produced by extraction and consumed by injection.
     """
+
     new: dict[str, dict[str, str]] = field(default_factory=dict)
     title: dict[str, dict[str, str]] = field(default_factory=dict)
     title_new: dict[str, dict[str, str]] = field(default_factory=dict)

@@ -10,7 +10,7 @@ from lxml import etree
 
 from .config import TranslationConfig
 from .core.mapping import TranslationMapping
-from .result import InjectResult, InjectorStats, OperationResult
+from .result import InjectorStats, InjectResult, OperationResult
 
 logger = logging.getLogger(__name__)
 
@@ -192,18 +192,21 @@ class SVGTranslationService:
     def _get_extractor(self):
         if self._extractor is None:
             from .extraction.extractor import SVGTranslationExtractor
+
             self._extractor = SVGTranslationExtractor(self.config)
         return self._extractor
 
     def _get_injector(self):
         if self._injector is None:
             from .injection.injector import SVGTranslationInjector
+
             self._injector = SVGTranslationInjector(self.config)
         return self._injector
 
     def _get_mapping_store(self):
         if self._mapping_store is None:
             from .io.mapping_store import MappingStore
+
             self._mapping_store = MappingStore(self.config)
         return self._mapping_store
 
@@ -222,9 +225,7 @@ class SVGTranslationService:
             return Path(save_mapping)
 
         if self.config.mapping_output_dir is None:
-            raise ValueError(
-                "mapping_output_dir is not configured; cannot resolve mapping output path"
-            )
+            raise ValueError("mapping_output_dir is not configured; cannot resolve mapping output path")
 
         base_dir = self.config.mapping_output_dir
         if self.config.create_parents:

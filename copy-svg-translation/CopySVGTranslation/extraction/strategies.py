@@ -15,6 +15,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 @dataclass(slots=True)
 class SegmentMatch:
     """One matched pair: default segment ↔ translated segment."""
+
     default_text: str
     translated_text: str
     default_id: str | None = None
@@ -99,9 +100,7 @@ class ByPositionStrategy(MatchingStrategy):
         *,
         case_insensitive: bool = True,
     ) -> list[SegmentMatch]:
-        default_texts = default_node.texts(
-            normalize=True, case_insensitive=case_insensitive
-        )
+        default_texts = default_node.texts(normalize=True, case_insensitive=case_insensitive)
         translated_texts = translated_node.texts(normalize=True, case_insensitive=False)
 
         matches: list[SegmentMatch] = []

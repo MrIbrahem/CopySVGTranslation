@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+
 from lxml import etree
 
 from ..config import TranslationConfig

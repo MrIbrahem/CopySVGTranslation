@@ -5,11 +5,11 @@ from lxml import etree
 
 from ...exceptions import (
     SvgContainsTrefError,
-    SvgCssTooComplexError,
     SvgCssHasIdsError,
+    SvgCssTooComplexError,
     SvgTextContainsDollarError,
 )
-from .base import PreparationStep, PreparationContext
+from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
 

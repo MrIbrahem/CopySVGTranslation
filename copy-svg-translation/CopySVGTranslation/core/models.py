@@ -5,8 +5,8 @@ from enum import Enum
 from typing import TypeAlias
 
 from .mapping import TranslationEntry, TranslationMapping
-from .text_node import TextNode
 from .switch_node import SwitchNode
+from .text_node import TextNode
 
 
 class NestedStrategy(str, Enum):

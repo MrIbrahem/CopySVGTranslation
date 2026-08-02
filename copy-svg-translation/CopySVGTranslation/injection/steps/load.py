@@ -4,7 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from ...io.svg_document import SvgDocument
-from .base import PreparationStep, PreparationContext
+from .base import PreparationContext, PreparationStep
 
 
 class LoadDocument(PreparationStep):

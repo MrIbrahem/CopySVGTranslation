@@ -14,6 +14,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 @dataclass(slots=True)
 class SwitchNode:
     """Domain wrapper over an SVG <switch> element."""
+
     element: etree._Element
 
     def text_nodes(self) -> list[TextNode]:
@@ -52,6 +53,7 @@ class SwitchNode:
         def sort_key(n: TextNode):
             lang = n.language or "fallback"
             import re
+
             m = re.search(r"trsvg(\d+)", n.id or "")
             num = int(m.group(1)) if m else 10**9
             is_fallback = 0 if n.is_fallback else 1

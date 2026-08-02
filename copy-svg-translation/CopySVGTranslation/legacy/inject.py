@@ -28,8 +28,7 @@ def inject(
     Deprecated. Use SVGTranslationService.inject() instead.
     """
     warnings.warn(
-        "CopySVGTranslation.inject() is deprecated. "
-        "Use SVGTranslationService.inject() instead.",
+        "CopySVGTranslation.inject() is deprecated. Use SVGTranslationService.inject() instead.",
         DeprecationWarning,
         stacklevel=2,
     )

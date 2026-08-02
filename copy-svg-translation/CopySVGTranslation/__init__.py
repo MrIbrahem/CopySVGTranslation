@@ -10,28 +10,24 @@ from __future__ import annotations
 __version__ = "2.0.0"
 
 from .config import TranslationConfig
-from .service import SVGTranslationService
-
-from .result import OperationResult, InjectorStats
-from .core.mapping import TranslationMapping, TranslationEntry
-
+from .core.mapping import TranslationEntry, TranslationMapping
 from .exceptions import (
+    ConfigurationError,
     CopySVGTranslationError,
-    SvgStructureError,
+    MappingError,
+    SvgIOError,
     SvgNestedTspanError,
     SvgParseError,
-    SvgIOError,
-    MappingError,
-    ConfigurationError,
+    SvgStructureError,
 )
-
 from .extraction import SVGTranslationExtractor
-from .injection import SVGTranslationInjector, SvgPreparationPipeline
-from .titles import YearTitleHandler
-from .nested import NestedTspanDetector, NestedTspanFlattener
-from .io import SvgDocument, MappingStore
-
+from .injection import SvgPreparationPipeline, SVGTranslationInjector
+from .io import MappingStore, SvgDocument
 from .legacy import extract, inject, svg_extract_and_inject
+from .nested import NestedTspanDetector, NestedTspanFlattener
+from .result import InjectorStats, OperationResult
+from .service import SVGTranslationService
+from .titles import YearTitleHandler
 
 __all__ = [
     "__version__",

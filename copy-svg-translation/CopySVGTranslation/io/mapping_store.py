@@ -53,11 +53,7 @@ class MappingStore:
         indent: int = 2,
     ) -> Path:
         path = Path(path)
-        create = (
-            self.config.create_parents
-            if create_parents is None
-            else create_parents
-        )
+        create = self.config.create_parents if create_parents is None else create_parents
 
         if create:
             path.parent.mkdir(parents=True, exist_ok=True)

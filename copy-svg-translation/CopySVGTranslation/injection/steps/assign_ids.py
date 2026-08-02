@@ -5,7 +5,7 @@ from lxml import etree
 
 from ...exceptions import SvgInvalidIdError
 from ...utils.xml import collect_ids
-from .base import PreparationStep, PreparationContext
+from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -19,6 +19,7 @@ class AssignIds(PreparationStep):
         existing_ids = collect_ids(ctx.root)
         if ctx.id_manager is None:
             from ..id_manager import IdManager
+
             ctx.id_manager = IdManager(existing_ids)
         else:
             ctx.id_manager.register_many(existing_ids)

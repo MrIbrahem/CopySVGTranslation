@@ -54,8 +54,12 @@ class SvgNestedTspanError(SvgStructureError):
         node_text: str | None = None,
     ) -> None:
         self.node_text = node_text
-        super().__init__(message, code="structure-error-nested-tspans-not-supported",
-                         element=element, extra=extra)
+        super().__init__(
+            message,
+            code="structure-error-nested-tspans-not-supported",
+            element=element,
+            extra=extra,
+        )
 
     def node_preview(self) -> str:
         if not self.node_text:

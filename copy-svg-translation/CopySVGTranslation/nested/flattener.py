@@ -87,16 +87,10 @@ class NestedTspanFlattener:
         Convert nested tspans into sibling tspans so styling is kept.
         """
         for parent in root.findall(f".//{{{SVG_NS}}}text"):
-            direct_tspans = [
-                child for child in parent
-                if child.tag == f"{{{SVG_NS}}}tspan"
-            ]
+            direct_tspans = [child for child in parent if child.tag == f"{{{SVG_NS}}}tspan"]
 
             for tspan in direct_tspans:
-                nested_children = [
-                    child for child in tspan
-                    if child.tag == f"{{{SVG_NS}}}{tag}"
-                ]
+                nested_children = [child for child in tspan if child.tag == f"{{{SVG_NS}}}{tag}"]
                 if not nested_children:
                     continue
 

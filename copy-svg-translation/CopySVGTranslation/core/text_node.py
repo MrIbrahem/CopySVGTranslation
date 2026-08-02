@@ -17,6 +17,7 @@ class TextNode:
     Thin domain wrapper over an SVG <text> or <tspan> element.
     Does not own the element – it only provides a convenient API.
     """
+
     element: etree._Element
 
     @property
@@ -77,4 +78,5 @@ class TextNode:
     def clone(self) -> TextNode:
         """Deep clone the underlying element and wrap it."""
         import copy
+
         return TextNode(copy.deepcopy(self.element))

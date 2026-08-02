@@ -25,9 +25,7 @@ class SVGTranslationInjector:
         self.config = config
         self.id_manager = IdManager()
         self.applier = TranslationApplier(config, self.id_manager)
-        self.switch_processor = SwitchProcessor(
-            config, self.id_manager, self.applier, YearTitleHandler(config)
-        )
+        self.switch_processor = SwitchProcessor(config, self.id_manager, self.applier, YearTitleHandler(config))
         self.preparer = SvgPreparationPipeline(config)
 
     def inject(

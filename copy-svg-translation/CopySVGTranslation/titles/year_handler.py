@@ -98,10 +98,7 @@ class YearTitleHandler:
         if not self.enabled or not mapping.title_new:
             return {}
 
-        templates = {
-            (k.lower() if case_insensitive else k): v
-            for k, v in mapping.title_new.items()
-        }
+        templates = {(k.lower() if case_insensitive else k): v for k, v in mapping.title_new.items()}
 
         expanded: dict[str, dict[str, str]] = {}
 
@@ -119,10 +116,7 @@ class YearTitleHandler:
             if not trans_templates:
                 continue
 
-            expanded[text] = {
-                lang: self.apply_year(tmpl, year)
-                for lang, tmpl in trans_templates.items()
-            }
+            expanded[text] = {lang: self.apply_year(tmpl, year) for lang, tmpl in trans_templates.items()}
 
         return expanded
 

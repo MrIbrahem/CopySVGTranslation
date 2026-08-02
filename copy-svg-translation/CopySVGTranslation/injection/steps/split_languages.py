@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import copy
+
 from lxml import etree
 
 from ...utils.text import split_lang_list
-from .base import PreparationStep, PreparationContext
+from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
 

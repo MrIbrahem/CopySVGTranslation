@@ -68,10 +68,7 @@ def sort_switch_children(
     Deterministically reorder <text> children of a <switch>.
     Fallback (no systemLanguage) goes last by default.
     """
-    texts = [
-        c for c in switch
-        if isinstance(c.tag, str) and is_svg_element(c, "text")
-    ]
+    texts = [c for c in switch if isinstance(c.tag, str) and is_svg_element(c, "text")]
 
     def sort_key(el: etree._Element):
         lang = el.get("systemLanguage") or "fallback"
