@@ -20,7 +20,6 @@ from ..utils import (
 )
 from ..utils.injection_utils import (
     generate_unique_id,
-    get_target_path,
 )
 from .exceptions import (
     SvgNestedTspanExceptionError,
@@ -104,14 +103,6 @@ class SVGTranslationInjector:
     ) -> dict:
         """Process ``<switch>`` elements and insert or update translations."""
         svg_ns = {"svg": "http://www.w3.org/2000/svg"}
-        stats = {
-            "all_languages": 0,
-            "new_languages": 0,
-            "processed_switches": 0,
-            "inserted_translations": 0,
-            "skipped_translations": 0,
-            "updated_translations": 0,
-        }
 
         switches = root.xpath("//svg:switch", namespaces=svg_ns)
         logger.debug(f"Found {len(switches)} switch elements")
@@ -173,7 +164,7 @@ class SVGTranslationInjector:
 
             for lang in all_langs:
                 if lang in existing_languages and not self.overwrite:
-                    stats["skipped_translations"] += 1
+                    self.result.new_stats.skipped_translations += 1
                     continue
 
                 # Create or update node
@@ -191,7 +182,7 @@ class SVGTranslationInjector:
                             elif lookup_key in available_translations and lang in available_translations[lookup_key]:
                                 tspan.text = available_translations[lookup_key][lang]
 
-                        stats["updated_translations"] += 1
+                        self.result.new_stats.updated_translations += 1
                         break
                     continue
 
@@ -228,11 +219,10 @@ class SVGTranslationInjector:
                     new_node.text = all_mappings.get(key, {}).get(lang, english_text)
 
                 switch.append(new_node)
-                stats["inserted_translations"] += 1
+                self.result.new_stats.inserted_translations += 1
 
-            stats["processed_switches"] += 1
-
-        return stats
+            self.result.new_stats.processed_switches += 1
+        return self.result.new_stats.to_json()
 
     def _inject(
         self,

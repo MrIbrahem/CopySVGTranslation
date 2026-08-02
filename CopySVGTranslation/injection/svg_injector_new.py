@@ -267,6 +267,7 @@ class SVGTranslationInjector:
             self.result.new_stats.error = str(exc)
             return self.result
 
+        self.result.tree = tree
         # Collect all existing IDs to ensure uniqueness
         # existing_ids = {elem.get('id') for elem in root.xpath('//*[@id]') if elem.get('id')}
         existing_ids = set(root.xpath("//@id"))
