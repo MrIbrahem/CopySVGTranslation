@@ -8,7 +8,7 @@ from pathlib import Path
 
 from lxml import etree
 
-from ..titles_new import get_new_titles_translations
+from ..titles_workers import get_new_titles_translations
 from ..utils import extract_text_from_node, normalize_text
 from .elements_utils import (
     file_langs,
@@ -97,7 +97,6 @@ class SVGTranslationInjector:
             if not default_texts or default_node is None:
                 continue
 
-            # titles_translations = get_titles_translations(all_mappings_title, default_texts)
             new_titles_translations = get_new_titles_translations(all_mappings_title_new, default_texts)
 
             # all_mappings.update(titles_translations)

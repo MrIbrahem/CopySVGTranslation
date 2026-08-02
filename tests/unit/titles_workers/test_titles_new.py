@@ -1,6 +1,9 @@
 """ """
 
-from CopySVGTranslation.titles_new import get_new_titles_translations, make_new_title_translations
+from CopySVGTranslation.titles_workers import (
+    get_new_titles_translations,
+    make_new_title_translations,
+)
 
 
 class TestTitlesNew:

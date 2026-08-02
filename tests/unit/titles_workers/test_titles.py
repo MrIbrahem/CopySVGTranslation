@@ -1,6 +1,9 @@
 """ """
 
-from CopySVGTranslation.titles import get_titles_translations, make_title_translations
+from CopySVGTranslation.titles_workers import (
+    get_titles_translations,
+    make_title_translations,
+)
 
 
 class TestExtractYearHandling:

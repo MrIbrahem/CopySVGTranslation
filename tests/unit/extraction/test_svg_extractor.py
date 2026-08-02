@@ -8,12 +8,10 @@ TODO: write tests
 """
 
 
-import json
 from pathlib import Path
 
-from CopySVGTranslation.extraction.svg_extractor import (
-    extract,
-)
+from CopySVGTranslation.extraction import extract
+from CopySVGTranslation.extraction.svg_extractor import SVGTranslationExtractor
 
 FIXTURES_DIR = Path(__file__).parent.parent.parent
 

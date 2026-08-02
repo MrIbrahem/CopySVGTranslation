@@ -7,8 +7,6 @@ from typing import Any
 
 from lxml import etree
 
-from ..titles import make_title_translations
-from ..titles_new import make_new_title_translations
 from ..utils import normalize_text
 
 logger = logging.getLogger(__name__)
@@ -19,9 +17,9 @@ class Translations:
     """Container for extracted SVG translation data."""
 
     new: dict[str, dict[str, str]] = field(default_factory=dict)
+    tspans_by_id: dict[str, str] = field(default_factory=dict)
     title: dict[str, Any] = field(default_factory=dict)
     title_new: dict[str, Any] = field(default_factory=dict)
-    tspans_by_id: dict[str, str] = field(default_factory=dict)
 
     def to_json(self) -> dict[str, Any]:
         return asdict(self)
@@ -163,7 +161,7 @@ class SVGTranslationExtractor:
 
             self.process_switch_translations(text_elements, default_tspans_by_id)
 
-    def extract(self) -> dict[str, Any] | None:
+    def extract(self) -> Translations | None:
         """
         Extract translation strings from an SVG file into a structured dictionary.
 
@@ -174,7 +172,7 @@ class SVGTranslationExtractor:
         into a "title" section with the year removed.
 
         Returns:
-            dict | None: A dictionary containing extracted translations (may
+            Translations: A dictionary containing extracted translations (may
             include a "new" mapping of source text to per-language
             translations and a "title" mapping), or None if the file does
             not exist or could not be parsed.
@@ -193,41 +191,13 @@ class SVGTranslationExtractor:
         except (etree.XMLSyntaxError, OSError) as exc:
             logger.error(f"Failed to parse SVG file {self.svg_file_path}: {exc}")
             return None
+
         root = tree.getroot()
 
         self.process_switches(root)
-        self.translations.title = make_title_translations(self.translations.new)
-        self.translations.title_new = make_new_title_translations(self.translations.new)
-
-        return self.translations.to_json()
-
-
-def extract(
-    svg_file_path: str | Path,
-    case_insensitive: bool = True,
-) -> dict[str, Any] | None:
-    """
-    Legacy function-style wrapper around SVGTranslationExtractor, kept for
-    backward compatibility with existing callers.
-
-    Parameters:
-        svg_file_path (str | Path): Path to the SVG file to process.
-        case_insensitive (bool): If true, treat default text keys
-            case-insensitively by lowercasing them.
-
-    Returns:
-        dict | None: A dictionary containing extracted translations, or
-        None if the file does not exist or could not be parsed.
-    """
-    extractor = SVGTranslationExtractor(
-        svg_file_path,
-        case_insensitive=case_insensitive,
-    )
-    result = extractor.extract()
-    return result
+        return self.translations
 
 
 __all__ = [
     "SVGTranslationExtractor",
-    "extract",
 ]
