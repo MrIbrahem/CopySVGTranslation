@@ -1,9 +1,9 @@
-**CopySVGTranslation – Modern Class-Based Redesign**
+**copy_svg_translation – Modern Class-Based Redesign**
 
 ### 1. Proposed Detailed File Structure + Class Names
 
 ```
-CopySVGTranslation/
+copy_svg_translation/
 ├── __init__.py                 # Public API only
 ├── config.py
 ├── service.py                  # Main high-level facade
@@ -102,7 +102,7 @@ CopySVGTranslation/
 5. Unify error handling: convert internal `None` + `error` strings into `OperationResult`.
 6. Keep public API backward-compatible:
     ```python
-    from CopySVGTranslation import extract, inject, SVGTranslationService
+    from copy_svg_translation import extract, inject, SVGTranslationService
     ```
 
 **Exit criteria:** All existing tests pass; new service works as thin wrapper.
@@ -152,7 +152,7 @@ CopySVGTranslation/
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import SVGTranslationService, TranslationConfig
+from copy_svg_translation import SVGTranslationService, TranslationConfig
 
 config = TranslationConfig(
     case_insensitive=True,
@@ -669,7 +669,7 @@ class SVGTranslationService:
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import SVGTranslationService, TranslationConfig
+from copy_svg_translation import SVGTranslationService, TranslationConfig
 
 # Default config
 service = SVGTranslationService()

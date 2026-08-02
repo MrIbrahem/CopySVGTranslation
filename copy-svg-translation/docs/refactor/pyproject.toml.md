@@ -1,4 +1,4 @@
-**`pyproject.toml` for CopySVGTranslation (v2 redesign)**
+**`pyproject.toml` for copy_svg_translation (v2 redesign)**
 
 ```toml
 [build-system]
@@ -54,26 +54,26 @@ dev = [
 # cli = []
 
 [project.urls]
-Homepage = "https://github.com/yourname/CopySVGTranslation"
-Documentation = "https://github.com/yourname/CopySVGTranslation#readme"
-Changelog = "https://github.com/yourname/CopySVGTranslation/blob/main/CHANGELOG.md"
-Repository = "https://github.com/yourname/CopySVGTranslation"
-Issues = "https://github.com/yourname/CopySVGTranslation/issues"
+Homepage = "https://github.com/yourname/copy_svg_translation"
+Documentation = "https://github.com/yourname/copy_svg_translation#readme"
+Changelog = "https://github.com/yourname/copy_svg_translation/blob/main/CHANGELOG.md"
+Repository = "https://github.com/yourname/copy_svg_translation"
+Issues = "https://github.com/yourname/copy_svg_translation/issues"
 
 # Optional CLI entry point (uncomment when ready)
 # [project.scripts]
-# svg-translate = "CopySVGTranslation.cli:main"
+# svg-translate = "copy_svg_translation.cli:main"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["CopySVGTranslation*"]
+include = ["copy_svg_translation*"]
 exclude = ["tests*", "docs*"]
 
 [tool.setuptools.package-data]
-CopySVGTranslation = ["py.typed"]
+copy_svg_translation = ["py.typed"]
 
 # ---------------------------------------------------------------------------
 # Pytest
@@ -92,17 +92,17 @@ markers = [
 ]
 filterwarnings = [
     # Surface our own deprecations during tests
-    "default::DeprecationWarning:CopySVGTranslation",
+    "default::DeprecationWarning:copy_svg_translation",
 ]
 
 # ---------------------------------------------------------------------------
 # Coverage
 # ---------------------------------------------------------------------------
 [tool.coverage.run]
-source = ["CopySVGTranslation"]
+source = ["copy_svg_translation"]
 branch = true
 omit = [
-    "CopySVGTranslation/legacy/*",
+    "copy_svg_translation/legacy/*",
 ]
 
 [tool.coverage.report]
@@ -120,7 +120,7 @@ exclude_lines = [
 [tool.ruff]
 target-version = "py310"
 line-length = 100
-src = ["CopySVGTranslation", "tests"]
+src = ["copy_svg_translation", "tests"]
 
 [tool.ruff.lint]
 select = [
@@ -138,7 +138,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["CopySVGTranslation"]
+known-first-party = ["copy_svg_translation"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -149,7 +149,7 @@ indent-style = "space"
 # ---------------------------------------------------------------------------
 [tool.mypy]
 python_version = "3.10"
-packages = ["CopySVGTranslation"]
+packages = ["copy_svg_translation"]
 strict = true
 warn_return_any = true
 warn_unused_configs = true
@@ -162,7 +162,7 @@ module = ["lxml.*"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = ["CopySVGTranslation.legacy.*"]
+module = ["copy_svg_translation.legacy.*"]
 # Legacy wrappers can be less strict while they exist
 disallow_untyped_defs = false
 ```
@@ -171,13 +171,13 @@ disallow_untyped_defs = false
 
 ### Companion files (minimal)
 
-**`CopySVGTranslation/py.typed`** (empty file)
+**`copy_svg_translation/py.typed`** (empty file)
 Marks the package as typed for clients.
 
 **`MANIFEST.in`** (optional if using setuptools package-data only)
 
 ```text
-recursive-include CopySVGTranslation *.py
+recursive-include copy_svg_translation *.py
 include README.md
 include LICENSE
 include CHANGELOG.md
@@ -203,7 +203,7 @@ ruff check .
 ruff format .
 
 # types
-mypy CopySVGTranslation
+mypy copy_svg_translation
 ```
 
 ---
@@ -213,7 +213,7 @@ mypy CopySVGTranslation
 | Setting                             | Why                                               |
 | ----------------------------------- | ------------------------------------------------- |
 | `name = "copy-svg-translation"`     | Conventional PyPI name (hyphens)                  |
-| Import package `CopySVGTranslation` | Matches your existing code layout                 |
+| Import package `copy_svg_translation` | Matches your existing code layout                 |
 | `requires-python = ">=3.10"`        | Fits modern typing (`X \| Y`, `slots=True`, etc.) |
 | `lxml>=4.9`                         | Only hard runtime dependency                      |
 | Legacy excluded from coverage       | Avoids treating temporary shims as core code      |

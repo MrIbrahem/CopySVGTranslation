@@ -1,17 +1,17 @@
 **Package Root `__init__.py` — Public API**
 
 ```python
-# CopySVGTranslation/__init__.py
+# copy_svg_translation/__init__.py
 """
-CopySVGTranslation
+copy_svg_translation
 ------------------
 Extract translations from SVG files and inject them into others.
 
 Modern entry point:
-    from CopySVGTranslation import SVGTranslationService, TranslationConfig
+    from copy_svg_translation import SVGTranslationService, TranslationConfig
 
 Legacy functions (deprecated):
-    from CopySVGTranslation import extract, inject
+    from copy_svg_translation import extract, inject
 """
 
 from __future__ import annotations
@@ -93,7 +93,7 @@ __all__ = [
 **Recommended (new code):**
 
 ```python
-from CopySVGTranslation import (
+from copy_svg_translation import (
     SVGTranslationService,
     TranslationConfig,
     OperationResult,
@@ -104,7 +104,7 @@ from CopySVGTranslation import (
 **Advanced / library integration:**
 
 ```python
-from CopySVGTranslation import (
+from copy_svg_translation import (
     SVGTranslationExtractor,
     SVGTranslationInjector,
     SvgPreparationPipeline,
@@ -118,7 +118,7 @@ from CopySVGTranslation import (
 **Legacy (still works, emits deprecation warnings):**
 
 ```python
-from CopySVGTranslation import extract, inject, svg_extract_and_inject
+from copy_svg_translation import extract, inject, svg_extract_and_inject
 ```
 
 ---
@@ -132,7 +132,7 @@ from CopySVGTranslation import extract, inject, svg_extract_and_inject
 | Exceptions exported at top level                  | Callers can catch specific errors easily                              |
 | Advanced classes still public                     | Power users and tests can reach them without deep imports             |
 | Legacy kept in `__all__` for now                  | Backward compatibility during migration                               |
-| Explicit `__all__`                                | Controls `from CopySVGTranslation import *` and documents the surface |
+| Explicit `__all__`                                | Controls `from copy_svg_translation import *` and documents the surface |
 
 ---
 

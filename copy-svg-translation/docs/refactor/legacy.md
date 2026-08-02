@@ -37,7 +37,7 @@ def extract(
     Returns a plain dict (or None on failure), matching the old API.
     """
     warnings.warn(
-        "CopySVGTranslation.extract() is deprecated. "
+        "copy_svg_translation.extract() is deprecated. "
         "Use SVGTranslationService.extract() instead.",
         DeprecationWarning,
         stacklevel=2,
@@ -91,7 +91,7 @@ def inject(
     Legacy function-style wrapper kept for backward compatibility.
     """
     warnings.warn(
-        "CopySVGTranslation.inject() is deprecated. "
+        "copy_svg_translation.inject() is deprecated. "
         "Use SVGTranslationService.inject() instead.",
         DeprecationWarning,
         stacklevel=2,
@@ -180,7 +180,7 @@ def svg_extract_and_inject(
     Deprecated. Use SVGTranslationService.extract_and_inject() instead.
     """
     warnings.warn(
-        "CopySVGTranslation.svg_extract_and_inject() is deprecated. "
+        "copy_svg_translation.svg_extract_and_inject() is deprecated. "
         "Use SVGTranslationService.extract_and_inject() instead.",
         DeprecationWarning,
         stacklevel=2,
@@ -221,7 +221,7 @@ def svg_extract_and_injects(
     Deprecated. Use SVGTranslationService.inject() instead.
     """
     warnings.warn(
-        "CopySVGTranslation.svg_extract_and_injects() is deprecated. "
+        "copy_svg_translation.svg_extract_and_injects() is deprecated. "
         "Use SVGTranslationService.inject() instead.",
         DeprecationWarning,
         stacklevel=2,
@@ -285,14 +285,14 @@ All of them emit `DeprecationWarning`.
 ### Migration message for users
 
 ```text
-DeprecationWarning: CopySVGTranslation.extract() is deprecated.
+DeprecationWarning: copy_svg_translation.extract() is deprecated.
 Use SVGTranslationService.extract() instead.
 ```
 
 Recommended replacement:
 
 ```python
-from CopySVGTranslation import SVGTranslationService, TranslationConfig
+from copy_svg_translation import SVGTranslationService, TranslationConfig
 
 service = SVGTranslationService(TranslationConfig(case_insensitive=True))
 result = service.extract("file.svg")

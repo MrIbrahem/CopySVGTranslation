@@ -232,6 +232,6 @@ Lower layers **raise**; the service (or CLI) **catches** and converts to `Operat
 2. **Optional `element` / `extra` / `node_text`** — useful for diagnostics without forcing every caller to pass them.
 3. **Narrow subclasses** — callers can catch `SvgNestedTspanError` specifically or all `SvgStructureError`s at once.
 4. **No dependency on lxml in the exception definitions** — `element` is typed as `Any`.
-5. **Single module** — easy to import: `from CopySVGTranslation.exceptions import SvgNestedTspanError`.
+5. **Single module** — easy to import: `from copy_svg_translation.exceptions import SvgNestedTspanError`.
 
 This replaces the old ad-hoc mix of `None` returns, string `error` fields, and two custom exception classes with a consistent hierarchy.
