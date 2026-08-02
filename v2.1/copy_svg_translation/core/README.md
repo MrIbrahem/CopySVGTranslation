@@ -1,7 +1,7 @@
 # Core
 
-This directory contains the core module of the project.
+This package contains the core models, mapping logic, and node handling for SVG translation.
 
-For detailed documentation, including architecture, design decisions, and the ongoing refactor, see:
+For detailed documentation, including architecture and design decisions, see:
 
-→ [Core Documentation](../docs/refactor/core.md)
+→ [Core Documentation](../../docs/refactor/core.md)
