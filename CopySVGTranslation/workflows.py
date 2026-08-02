@@ -2,16 +2,14 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from .utils import load_all_mappings
-
 from .extraction import extract
 from .injection import InjectorData, SVGTranslationInjector, inject
+from .utils import load_all_mappings
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +21,7 @@ def svg_extract_and_inject(
     data_output_file: Path | None = None,
     overwrite: bool | None = None,
     save_result: bool = False,
+    pretty_print: bool | None = None,
 ) -> Any:
     """
     Extract translations from one SVG and inject them into another.
@@ -44,7 +43,7 @@ def svg_extract_and_inject(
     translations = extract(extract_path, case_insensitive=True)
     all_mappings = translations
 
-    if data_output_file:
+    if not all_mappings and data_output_file:
         all_mappings = load_all_mappings([data_output_file])
 
     if not all_mappings:
@@ -54,7 +53,7 @@ def svg_extract_and_inject(
     target_path = output_file
 
     if not target_path:
-        output_dir = Path.cwd() / "translated"
+        output_dir = inject_path.parent / "translated"
         output_dir.mkdir(parents=True, exist_ok=True)
         target_path = output_dir / inject_path.name
 
@@ -64,6 +63,7 @@ def svg_extract_and_inject(
         output_file=target_path,
         overwrite=bool(overwrite),
         save_result=save_result,
+        pretty_print=pretty_print,
         return_stats=True,
     )
 
@@ -81,7 +81,7 @@ def svg_extract_and_injects(
     output_dir: Path | None = None,
     save_result: bool = False,
     overwrite: bool | None = None,
-    pretty_print: bool = True,
+    pretty_print: bool | None = None,
 ) -> Any:
     """
     Inject provided translations into a single SVG file.

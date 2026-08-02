@@ -3,7 +3,6 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
-import json
 import shutil
 import tempfile
 from pathlib import Path

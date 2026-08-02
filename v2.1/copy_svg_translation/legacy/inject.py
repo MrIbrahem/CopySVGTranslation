@@ -52,7 +52,7 @@ def inject(
         elif output_dir:
             target = Path(output_dir) / inject_path.name
         else:
-            target = Path.cwd() / "translated" / inject_path.name
+            target = inject_path.parent / "translated" / inject_path.name
 
     config = TranslationConfig(
         case_insensitive=case_insensitive,

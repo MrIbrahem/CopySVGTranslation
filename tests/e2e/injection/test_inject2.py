@@ -40,7 +40,12 @@ class Testinject:
         # write to file
         tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
-        _result = inject(inject_file=file, all_mappings=data, save_result=True, pretty_print=False)
+        _result = inject(
+            inject_file=file,
+            all_mappings=data,
+            save_result=True,
+            pretty_print=False,
+        )
         file_text = file.read_text(encoding="utf-8")
         expected = """<?xml version='1.0' encoding='UTF-8'?>\n<svg xmlns="http://www.w3.org/2000/svg"><switch><text id="trsvg2-la" systemLanguage="la"><tspan id="trsvg1-la">lang la</tspan></text><text id="trsvg2"><tspan id="trsvg1">lang none</tspan></text></switch></svg>"""
         assert file_text == expected
@@ -58,7 +63,13 @@ class Testinject:
         # write to file
         tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
-        _result = inject(inject_file=file, all_mappings=data, save_result=True, overwrite=True, pretty_print=False)
+        _result = inject(
+            inject_file=file,
+            all_mappings=data,
+            save_result=True,
+            overwrite=True,
+            pretty_print=False,
+        )
         file_text = file.read_text(encoding="utf-8")
         expected = """<?xml version='1.0' encoding='UTF-8'?>\n<svg xmlns="http://www.w3.org/2000/svg"><switch><text systemLanguage="la" id="trsvg3"><tspan id="trsvg1">lang la (new)</tspan></text><text id="trsvg4"><tspan id="trsvg2">lang none</tspan></text></switch></svg>"""
         assert file_text == expected

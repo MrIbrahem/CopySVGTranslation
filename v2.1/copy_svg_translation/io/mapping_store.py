@@ -71,5 +71,5 @@ class MappingStore:
 
     def default_mapping_path(self, svg_path: Path) -> Path:
         """Return the conventional path for a mapping extracted from an SVG."""
-        base_dir = self.config.mapping_output_dir or Path.cwd() / "data"
+        base_dir = self.config.mapping_output_dir or svg_path.parent / "data"
         return base_dir / f"{svg_path.name}.json"
