@@ -142,6 +142,7 @@ def test_fix_keeps_attributes_on_outer_tspan(temp_dir: Path):
     parser = etree.XMLParser(remove_blank_text=True)
     root = etree.parse(str(p), parser).getroot()
     t = root.find(f".//{{{SVG_NS}}}tspan")
+    assert t is not None
     assert t.get("x") == "10" and t.get("y") == "20" and t.get("class") == "c"
     assert t.text == "AB"
 
@@ -154,6 +155,7 @@ def test_fix_clears_tail_of_fixed_tspan(temp_dir: Path):
     parser = etree.XMLParser(remove_blank_text=True)
     root = etree.parse(str(p), parser).getroot()
     t = root.find(f".//{{{SVG_NS}}}tspan")
+    assert t is not None
     assert t.tail is None
 
 
@@ -163,6 +165,7 @@ def test_fix_deeply_nested_concatenation_is_linear(temp_dir: Path):
     parser = etree.XMLParser(remove_blank_text=True)
     root = etree.parse(str(p), parser).getroot()
     t = root.find(f".//{{{SVG_NS}}}tspan")
+    assert t is not None
     assert t.text == "01234"
 
 
