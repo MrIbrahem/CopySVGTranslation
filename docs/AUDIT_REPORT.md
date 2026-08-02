@@ -83,7 +83,7 @@ Ordered by leverage (impact ÷ effort, discounted by confidence and fix-risk).
     ```python
     ext = SVGTranslationExtractor(file_a)
     r1 = ext.extract()  # keys = ['hello']
-    ext.svg_file_path = file_b
+    ext.source_file = file_b
     r2 = ext.extract()  # keys = ['hello', 'world'] — r1 is also mutated!
     ```
 -   **Effort**: S — reset `self.translations` at the start of `extract()`.
@@ -186,12 +186,12 @@ Ordered by leverage (impact ÷ effort, discounted by confidence and fix-risk).
 
 ### [BUG-06] `fix_nested_file` overwrites input file by default (LOW impact)
 
--   **Evidence**: `CopySVGTranslation/nested_analyze/find_nested.py:86` and `find_nested_new.py:151` — `new_path = Path(new_path or svg_file_path)` means when `new_path` is `None` (the default), the function overwrites the input file in place.
+-   **Evidence**: `CopySVGTranslation/nested_analyze/find_nested.py:86` and `find_nested_new.py:151` — `new_path = Path(new_path or source_file)` means when `new_path` is `None` (the default), the function overwrites the input file in place.
 -   **Impact**: Destructive operation by default. A caller who forgets to pass `new_path` silently loses the original file. This is especially dangerous because the function flattens nested tspans, which is a lossy transformation (styling information is discarded in the old implementation).
 -   **Effort**: S — make `new_path` required, or raise when it's not provided.
 -   **Risk**: MED — existing callers may depend on the overwrite behavior. Add a deprecation warning first.
 -   **Confidence**: HIGH.
--   **Fix sketch**: Change signature to `fix_nested_file(svg_file_path: Path, new_path: Path, ...)` making `new_path` required. Or add a `overwrite_input: bool = False` parameter.
+-   **Fix sketch**: Change signature to `fix_nested_file(source_file: Path, new_path: Path, ...)` making `new_path` required. Or add a `overwrite_input: bool = False` parameter.
 
 ---
 

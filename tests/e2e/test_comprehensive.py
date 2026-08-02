@@ -115,7 +115,7 @@ class TestInjector:
         assert result == "text-123-fr"
 
     def test_inject_with_all_mappings_parameter(self, temp_dir):
-        """Test inject using all_mappings parameter instead of mapping_files."""
+        """Test inject using all_mappings parameter."""
         svg_path = temp_dir / "test.svg"
         svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="text1"><tspan>Hello</tspan></text></switch></svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")

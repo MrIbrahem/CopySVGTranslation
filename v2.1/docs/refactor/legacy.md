@@ -27,7 +27,7 @@ from ..service import SVGTranslationService
 
 
 def extract(
-    svg_file_path: str | Path,
+    source_file: str | Path,
     case_insensitive: bool = True,
 ) -> dict[str, Any] | None:
     """
@@ -45,7 +45,7 @@ def extract(
 
     config = TranslationConfig(case_insensitive=case_insensitive)
     service = SVGTranslationService(config)
-    result = service.extract(svg_file_path)
+    result = service.extract(source_file)
 
     if not result.success or result.data is None:
         return None
@@ -75,7 +75,6 @@ from ..utils.xml import tree_languages  # only if needed for stats shape
 
 def inject(
     inject_file: Path | str | None = None,
-    mapping_files: Iterable[Path | str] | None = None,
     all_mappings: Mapping | None = None,
     case_insensitive: bool = True,
     output_file: Path | None = None,
@@ -83,7 +82,7 @@ def inject(
     overwrite: bool = False,
     save_result: bool = False,
     return_stats: bool = False,
-    **kwargs: Any,
+    pretty_print: bool = True,
 ) -> tuple[Any, Any] | Any:
     """
     Deprecated. Use SVGTranslationService.inject() instead.
@@ -98,11 +97,6 @@ def inject(
     )
 
     # ---- normalize legacy argument aliases ----
-    if inject_file is None and kwargs.get("svg_file_path"):
-        inject_file = kwargs["svg_file_path"]
-
-    if all_mappings is None and kwargs.get("translations"):
-        all_mappings = kwargs["translations"]
 
     if inject_file is None:
         return (None, {"error": "No inject file provided"}) if return_stats else None
@@ -130,7 +124,7 @@ def inject(
     config = TranslationConfig(
         case_insensitive=case_insensitive,
         overwrite=overwrite,
-        pretty_print=kwargs.get("pretty_print", True),
+        pretty_print=pretty_print,
         auto_save=False,
     )
     service = SVGTranslationService(config)
@@ -215,7 +209,8 @@ def svg_extract_and_injects(
     inject_file: Path | str,
     output_dir: Path | None = None,
     save_result: bool = False,
-    **kwargs: Any,
+    overwrite: bool = False,
+    pretty_print: bool = True,
 ) -> Any:
     """
     Deprecated. Use SVGTranslationService.inject() instead.
@@ -234,7 +229,8 @@ def svg_extract_and_injects(
         all_mappings=translations,
         output_dir=output_dir,
         save_result=save_result,
-        **kwargs,
+        overwrite=overwrite,
+        pretty_print=pretty_print,
     )
 ```
 
@@ -277,7 +273,7 @@ All of them emit `DeprecationWarning`.
 1. **No duplicated business logic** — every legacy function only adapts arguments and calls `SVGTranslationService`.
 2. **Same return types as before** — dict / None / ElementTree / (tree, stats) so existing code does not break.
 3. **Visible deprecation** — `warnings.warn(..., DeprecationWarning)`.
-4. **Argument aliases preserved** — `svg_file_path`, `translations`, etc. still accepted.
+4. **Argument aliases preserved** — `source_file`, `translations`, etc. still accepted.
 5. **Easy to delete** — in Phase 3, remove the `legacy/` package and drop the exports from the root `__init__.py`.
 
 ---

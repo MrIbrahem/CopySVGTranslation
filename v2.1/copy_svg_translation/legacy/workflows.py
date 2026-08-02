@@ -53,7 +53,8 @@ def svg_extract_and_injects(
     inject_file: Path | str,
     output_dir: Path | None = None,
     save_result: bool = False,
-    **kwargs: Any,
+    overwrite: bool = False,
+    pretty_print: bool = True,
 ) -> Any:
     """
     Deprecated. Use SVGTranslationService.inject() instead.
@@ -71,5 +72,13 @@ def svg_extract_and_injects(
         all_mappings=translations,
         output_dir=output_dir,
         save_result=save_result,
-        **kwargs,
+        overwrite=overwrite,
+        pretty_print=pretty_print,
     )
+
+
+
+__all__ = [
+    "svg_extract_and_inject",
+    "svg_extract_and_injects",
+]

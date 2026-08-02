@@ -176,7 +176,7 @@ class TestExtractorStateIsolation:
         assert "world" not in r1.new
 
         # Reuse same instance for file B
-        ext.svg_file_path = svg_b
+        ext.source_file = svg_b
         r2 = ext.extract()
         assert "world" in r2.new
         assert "hello" not in r2.new, "Keys from file A leaked into file B extraction"
@@ -228,7 +228,7 @@ class TestExtractorStateIsolation:
         r1 = ext.extract()
         assert "t-unique-a" in r1.tspans_by_id
 
-        ext.svg_file_path = svg_b
+        ext.source_file = svg_b
         r2 = ext.extract()
         assert "t-unique-b" in r2.tspans_by_id
         assert "t-unique-a" not in r2.tspans_by_id, "tspans_by_id from file A leaked into file B"
@@ -255,7 +255,7 @@ class TestExtractorStateIsolation:
             """,
             name="good.svg",
         )
-        ext.svg_file_path = good_svg
+        ext.source_file = good_svg
         r2 = ext.extract()
         assert r2.error == "", f"Error persisted: {r2.error!r}"
 

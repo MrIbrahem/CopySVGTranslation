@@ -23,7 +23,7 @@ def inject(
     overwrite: bool = False,
     save_result: bool = False,
     return_stats: bool = False,
-    **kwargs: Any,
+    pretty_print: bool = True,
 ) -> tuple[Any, Any] | Any:
     """
     Deprecated. Use SVGTranslationService.inject() instead.
@@ -33,12 +33,6 @@ def inject(
         DeprecationWarning,
         stacklevel=2,
     )
-
-    if inject_file is None and kwargs.get("svg_file_path"):
-        inject_file = kwargs["svg_file_path"]
-
-    if all_mappings is None and kwargs.get("translations"):
-        all_mappings = kwargs["translations"]
 
     if inject_file is None:
         return (None, {"error": "No inject file provided"}) if return_stats else None
@@ -63,7 +57,7 @@ def inject(
     config = TranslationConfig(
         case_insensitive=case_insensitive,
         overwrite=overwrite,
-        pretty_print=kwargs.get("pretty_print", True),
+        pretty_print=pretty_print,
         auto_save=False,
     )
     service = SVGTranslationService(config)

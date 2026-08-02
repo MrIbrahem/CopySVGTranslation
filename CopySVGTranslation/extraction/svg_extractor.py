@@ -30,14 +30,14 @@ class ExtractorData:
 class SVGTranslationExtractor:
     """Extracts translation data from an SVG file."""
 
-    def __init__(self, svg_file_path: str | Path, case_insensitive: bool = True):
+    def __init__(self, source_file: str | Path, case_insensitive: bool = True):
         """
         Parameters:
-            svg_file_path (str | Path): Path to the SVG file to process.
+            source_file (str | Path): Path to the SVG file to process.
             case_insensitive (bool): If True, default text keys are treated
                 case-insensitively (lowercased).
         """
-        self.svg_file_path = Path(str(svg_file_path))
+        self.source_file = Path(str(source_file))
         self.case_insensitive = case_insensitive
         self.translations = ExtractorData()
 
@@ -188,20 +188,20 @@ class SVGTranslationExtractor:
         # Reset state to prevent accumulation across calls
         self.translations = ExtractorData()
 
-        if not self.svg_file_path.exists():
-            logger.error(f"SVG file not found: {self.svg_file_path}")
+        if not self.source_file.exists():
+            logger.error(f"SVG file not found: {self.source_file}")
             self.translations.error = "File not found"
             return self.translations
 
-        logger.debug(f"Extracting translations from {self.svg_file_path}")
+        logger.debug(f"Extracting translations from {self.source_file}")
 
         # Parse SVG as XML
         parser = etree.XMLParser(remove_blank_text=True)
 
         try:
-            tree = etree.parse(str(self.svg_file_path), parser)
+            tree = etree.parse(str(self.source_file), parser)
         except (etree.XMLSyntaxError, OSError) as exc:
-            logger.error(f"Failed to parse SVG file {self.svg_file_path}: {exc}")
+            logger.error(f"Failed to parse SVG file {self.source_file}: {exc}")
             self.translations.error = "Failed to parse SVG file"
             return self.translations
 

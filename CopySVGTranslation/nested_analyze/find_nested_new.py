@@ -107,21 +107,21 @@ def fix_nested_tspans(root, tag=None):
     return root
 
 
-def match_nested_tags(svg_file_path: Path) -> list:
+def match_nested_tags(source_file: Path) -> list:
     """Find <tspan> elements that contain nested <tspan> tags."""
     result = []
-    svg_file_path = Path(svg_file_path)
+    source_file = Path(source_file)
 
-    if not svg_file_path.exists():
-        logger.error(f"File not exists: {svg_file_path}")
+    if not source_file.exists():
+        logger.error(f"File not exists: {source_file}")
         return []
 
     parser = etree.XMLParser(remove_blank_text=True)
 
     try:
-        tree = etree.parse(str(svg_file_path), parser)
+        tree = etree.parse(str(source_file), parser)
     except (etree.XMLSyntaxError, OSError) as exc:
-        logger.error(f"Failed to parse SVG file {svg_file_path}: {exc}")
+        logger.error(f"Failed to parse SVG file {source_file}: {exc}")
         return []
 
     root = tree.getroot()
@@ -141,12 +141,12 @@ def match_nested_tags(svg_file_path: Path) -> list:
     return result
 
 
-def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_print: bool = True) -> bool:
+def fix_nested_file(source_file: Path, new_path: Path | None = None, pretty_print: bool = True) -> bool:
     """
     !
     """
     # ---
-    svg_file_path = Path(svg_file_path)
+    source_file = Path(source_file)
     if new_path is None:
         warnings.warn(
             "Calling fix_nested_file without new_path is deprecated. "
@@ -154,14 +154,14 @@ def fix_nested_file(svg_file_path: Path, new_path: Path | None = None, pretty_pr
             DeprecationWarning,
             stacklevel=2,
         )
-    new_path = Path(new_path or svg_file_path)
+    new_path = Path(new_path or source_file)
     # ---
     parser = etree.XMLParser(remove_blank_text=False)
     # ---
     try:
-        tree = etree.parse(str(svg_file_path), parser)
+        tree = etree.parse(str(source_file), parser)
     except (etree.XMLSyntaxError, OSError) as exc:
-        logger.error(f"Failed to parse SVG file {svg_file_path}: {exc}")
+        logger.error(f"Failed to parse SVG file {source_file}: {exc}")
         return False
     # ---
     root = tree.getroot()

@@ -41,8 +41,8 @@ class SvgTranslationPreparer:
     - <text> elements inside each <switch> are deterministically ordered
     """
 
-    def __init__(self, svg_file_path: Path | str):
-        self.svg_file_path = Path(str(svg_file_path))
+    def __init__(self, source_file: Path | str):
+        self.source_file = Path(str(source_file))
         self.tree: etree._ElementTree
         self.root: etree._Element
         self.existing_ids: set[str] = set()
@@ -64,7 +64,7 @@ class SvgTranslationPreparer:
         # Check for any <text> elements
         texts = self.root.findall(".//{%s}text" % SVG_NS)
         if len(texts) == 0:
-            logger.warning("File %s has nothing to translate", self.svg_file_path)
+            logger.warning("File %s has nothing to translate", self.source_file)
             return self.tree, self.root
 
         self._check_style_elements()
@@ -86,11 +86,11 @@ class SvgTranslationPreparer:
     # ------------------------------------------------------------------
     def _load_document(self) -> None:
         """Parse the SVG file and ensure it has a sane default namespace."""
-        if not self.svg_file_path.exists():
-            raise FileNotFoundError(f"SVG file not found: {self.svg_file_path}")
+        if not self.source_file.exists():
+            raise FileNotFoundError(f"SVG file not found: {self.source_file}")
 
         parser = etree.XMLParser(remove_blank_text=True)
-        self.tree = etree.parse(str(self.svg_file_path), parser)
+        self.tree = etree.parse(str(self.source_file), parser)
         self.root = self.tree.getroot()
         if self.root is None:
             raise SvgStructureExceptionError("structure-error-no-doc-element")
@@ -403,12 +403,12 @@ class SvgTranslationPreparer:
                 sw.append(t)
 
 
-def make_translation_ready(svg_file_path: Path | str) -> tuple[etree._ElementTree, etree._Element]:
+def make_translation_ready(source_file: Path | str) -> tuple[etree._ElementTree, etree._Element]:
     """
     Legacy function-style wrapper around SvgTranslationPreparer, kept for
     backward compatibility with existing callers.
     """
-    return SvgTranslationPreparer(svg_file_path).prepare()
+    return SvgTranslationPreparer(source_file).prepare()
 
 
 __all__ = [

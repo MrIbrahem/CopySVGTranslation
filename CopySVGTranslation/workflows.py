@@ -8,6 +8,8 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from .utils import load_all_mappings
+
 from .extraction import extract
 from .injection import InjectorData, SVGTranslationInjector, inject
 
@@ -21,7 +23,7 @@ def svg_extract_and_inject(
     data_output_file: Path | None = None,
     overwrite: bool | None = None,
     save_result: bool = False,
-):
+) -> Any:
     """
     Extract translations from one SVG and inject them into another.
 
@@ -40,34 +42,26 @@ def svg_extract_and_inject(
     inject_path = Path(str(inject_file))
 
     translations = extract(extract_path, case_insensitive=True)
-    if not translations:
+    all_mappings = translations
+
+    if data_output_file:
+        all_mappings = load_all_mappings([data_output_file])
+
+    if not all_mappings:
         logger.error(f"Failed to extract translations from {extract_path}")
         return None
 
-    if not data_output_file:
-        json_output_dir = Path.cwd() / "data"
-        json_output_dir.mkdir(parents=True, exist_ok=True)
+    target_path = output_file
 
-        data_output_file = json_output_dir / f"{extract_path.name}.json"
-
-    data_output_file = Path(str(data_output_file))
-    data_output_file.parent.mkdir(parents=True, exist_ok=True)
-
-    # Save translations to JSON
-    with open(data_output_file, "w", encoding="utf-8") as handle:
-        json.dump(translations, handle, indent=2, ensure_ascii=False)
-
-    logger.debug(f"Saved translations to {data_output_file}")
-
-    if not output_file:
+    if not target_path:
         output_dir = Path.cwd() / "translated"
         output_dir.mkdir(parents=True, exist_ok=True)
-        output_file = output_dir / inject_path.name
+        target_path = output_dir / inject_path.name
 
     tree, stats = inject(
         inject_path,
-        mapping_files=[data_output_file],
-        output_file=output_file,
+        all_mappings=all_mappings,
+        output_file=target_path,
         overwrite=bool(overwrite),
         save_result=save_result,
         return_stats=True,
@@ -86,8 +80,9 @@ def svg_extract_and_injects(
     inject_file: Path | str,
     output_dir: Path | None = None,
     save_result: bool = False,
-    **kwargs: Any,
-):
+    overwrite: bool | None = None,
+    pretty_print: bool = True,
+) -> Any:
     """
     Inject provided translations into a single SVG file.
     """
@@ -96,14 +91,14 @@ def svg_extract_and_injects(
 
     if save_result:
         if output_dir:
-            target_path = Path(output_dir) / inject_path.name
+            target_path = Path(str(output_dir)) / inject_path.name
         else:
-            target_path = Path.cwd() / "translated" / inject_path.name
+            target_path = inject_path.parent / "translated" / inject_path.name
 
     injector = SVGTranslationInjector(
         case_insensitive=True,
-        overwrite=bool(kwargs.get("overwrite")),
-        pretty_print=bool(kwargs.get("pretty_print")),
+        overwrite=overwrite,
+        pretty_print=pretty_print,
     )
 
     data: InjectorData = injector.inject(
@@ -116,6 +111,7 @@ def svg_extract_and_injects(
     # stats = data.new_stats.to_json()
 
     return data.tree
+
 
 __all__ = [
     "svg_extract_and_inject",

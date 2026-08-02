@@ -10,7 +10,7 @@ from ..service import SVGTranslationService
 
 
 def extract(
-    svg_file_path: str | Path,
+    source_file: str | Path,
     case_insensitive: bool = True,
 ) -> dict[str, Any] | None:
     """
@@ -24,7 +24,7 @@ def extract(
 
     config = TranslationConfig(case_insensitive=case_insensitive)
     service = SVGTranslationService(config)
-    result = service.extract(svg_file_path)
+    result = service.extract(source_file)
 
     if not result.success or result.data is None:
         return None

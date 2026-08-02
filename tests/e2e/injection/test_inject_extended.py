@@ -59,25 +59,6 @@ class TestInjectEdgeCases(TestSetup):
 
         assert result is not None
 
-    def test_inject_both_mapping_files_and_all_mappings(self):
-        """Test that all_mappings takes precedence over mapping_files."""
-        svg_path = self.test_dir / "test.svg"
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch><text id="t1"><tspan>Hello</tspan></text></switch>
-        </svg>"""
-        svg_path.write_text(svg_content, encoding="utf-8")
-
-        mapping_file = self.test_dir / "mapping.json"
-        with open(mapping_file, "w", encoding="utf-8") as f:
-            json.dump({"new": {"hello": {"fr": "Bonjour"}}}, f)
-
-        all_mappings = {"new": {"hello": {"ar": "مرحبا"}}}
-
-        result = inject(svg_path, mapping_files=[mapping_file], all_mappings=all_mappings)
-
-        # all_mappings should be used
-        assert result is not None
-
     def test_inject_save_result_creates_output_file(self):
         """Test that save_result=True creates the output file."""
         svg_path = self.test_dir / "test.svg"

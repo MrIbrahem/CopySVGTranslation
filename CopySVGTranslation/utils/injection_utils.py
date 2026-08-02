@@ -28,14 +28,13 @@ def get_target_path(
     Returns:
         Path: The resolved filesystem path for the output SVG file.
     """
-    if output_dir:
-        output_dir = Path(str(output_dir))
-
     if output_file:
         target_path = Path(str(output_file))
+    elif output_dir:
+        target_path = Path(str(output_dir)) / inject_path.name
     else:
-        save_dir = output_dir or inject_path.parent
-        target_path = save_dir / inject_path.name
+        target_path = inject_path.parent / inject_path.name
+
     target_path.parent.mkdir(parents=True, exist_ok=True)
 
     return target_path

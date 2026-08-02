@@ -7,7 +7,7 @@ from .svg_extractor import SVGTranslationExtractor
 
 
 def extract(
-    svg_file_path: str | Path,
+    source_file: str | Path,
     case_insensitive: bool = True,
 ) -> dict[str, Any] | None:
     """
@@ -15,7 +15,7 @@ def extract(
     backward compatibility with existing callers.
 
     Parameters:
-        svg_file_path (str | Path): Path to the SVG file to process.
+        source_file (str | Path): Path to the SVG file to process.
         case_insensitive (bool): If true, treat default text keys
             case-insensitively by lowercasing them.
 
@@ -24,7 +24,7 @@ def extract(
         None if the file does not exist or could not be parsed.
     """
     extractor = SVGTranslationExtractor(
-        svg_file_path,
+        source_file=source_file,
         case_insensitive=case_insensitive,
     )
 

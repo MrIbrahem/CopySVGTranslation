@@ -289,7 +289,7 @@ class SVGTranslationInjector:
         target_path: Path | None,
         inject_file_name: str,
         tree: etree._ElementTree,
-        ) -> None:
+    ) -> None:
         if target_path is None:
             logger.error("save_result is True but no target_path was provided")
             self.new_stats.error = "No target path provided"
