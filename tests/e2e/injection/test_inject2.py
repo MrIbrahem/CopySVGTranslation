@@ -16,6 +16,7 @@ from CopySVGTranslation.injection.exceptions import (
     SvgStructureExceptionError,
 )
 
+
 class Testinject:
     """Comprehensive tests for text utility functions."""
 

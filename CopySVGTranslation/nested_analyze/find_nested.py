@@ -67,7 +67,8 @@ def match_nested_tags(source_file: Path) -> list:
         element_children = [c for c in tspan if isinstance(c.tag, str)]
         if element_children:
             # Add string representation of nested element to results
-            result.append(etree.tostring(tspan, pretty_print=False).decode("utf-8"))
+            tspan_str = etree.tostring(tspan, pretty_print=False).decode("utf-8")
+            result.append(tspan_str)
 
     return result
 
@@ -105,7 +106,8 @@ def fix_nested_file(source_file: Path, new_path: Path | None = None, pretty_prin
     root = fix_nested_tspans(root, "a")
     # ---
     try:
-        new_path.write_text(etree.tostring(root, encoding="unicode", pretty_print=pretty_print), encoding="utf-8")
+        _str = etree.tostring(root, encoding="unicode", pretty_print=pretty_print)
+        new_path.write_text(_str, encoding="utf-8")
         return True
     except Exception:
         logger.error(f"Failed to write fixed svg file to: {str(new_path)}")

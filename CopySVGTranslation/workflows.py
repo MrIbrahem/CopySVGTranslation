@@ -51,7 +51,6 @@ def svg_extract_and_inject(
         logger.error(f"Failed to extract translations from {extract_path}")
         return None
 
-
     if not target_path:
         output_dir = inject_path.parent / "translated"
         output_dir.mkdir(parents=True, exist_ok=True)
