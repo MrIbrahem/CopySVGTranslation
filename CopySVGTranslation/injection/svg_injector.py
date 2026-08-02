@@ -9,22 +9,23 @@ from pathlib import Path
 from lxml import etree
 
 from ..titles_workers import get_new_titles_translations
-from ..utils import extract_text_from_node, normalize_text
-from .elements_utils import (
+from ..utils import (
+    extract_text_from_node,
     file_langs,
+    normalize_text,
     sort_switch_texts,
     tree_langs,
+)
+from ..utils.injection_utils import (
+    generate_unique_id,
+    get_target_path,
+    load_all_mappings,
 )
 from .exceptions import (
     SvgNestedTspanExceptionError,
     SvgStructureExceptionError,
 )
 from .preparation import make_translation_ready
-from .utils import (
-    generate_unique_id,
-    get_target_path,
-    load_all_mappings,
-)
 
 logger = logging.getLogger(__name__)
 

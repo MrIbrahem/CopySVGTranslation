@@ -8,7 +8,7 @@ TODO: write tests
 
 import json
 
-from CopySVGTranslation.injection.utils import (
+from CopySVGTranslation.utils.injection_utils import (
     generate_unique_id,
     get_target_path,
     load_all_mappings,

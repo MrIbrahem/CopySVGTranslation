@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from CopySVGTranslation.injection.elements_utils import (
+from CopySVGTranslation.utils.elements_utils import (
     extract_root_languages,
     file_langs,
     sort_switch_texts,

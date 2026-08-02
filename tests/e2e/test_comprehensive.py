@@ -12,13 +12,15 @@ from lxml import etree
 
 from CopySVGTranslation.injection import (
     SvgStructureExceptionError,
-    generate_unique_id,
     inject,
-    load_all_mappings,
     make_translation_ready,
 )
 from CopySVGTranslation.injection.preparation import (
     normalize_lang,
+)
+from CopySVGTranslation.utils import (
+    generate_unique_id,
+    load_all_mappings,
 )
 
 # -------------------------------
