@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class Translations:
+class ExtractorData:
     """Container for extracted SVG translation data."""
 
     new: dict[str, dict[str, str]] = field(default_factory=dict)
@@ -39,7 +39,7 @@ class SVGTranslationExtractor:
         """
         self.svg_file_path = Path(str(svg_file_path))
         self.case_insensitive = case_insensitive
-        self.translations = Translations()
+        self.translations = ExtractorData()
 
     def get_english_default_texts(self, text_elements):
         """
@@ -169,7 +169,7 @@ class SVGTranslationExtractor:
             self.translations.title = make_title_translations(self.translations.new)
             self.translations.title_new = make_new_title_translations(self.translations.new)
 
-    def extract(self) -> Translations:
+    def extract(self) -> ExtractorData:
         """
         Extract translation strings from an SVG file into a structured dictionary.
 

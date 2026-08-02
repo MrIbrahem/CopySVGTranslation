@@ -1,6 +1,6 @@
 """Public API for the CopySVGTranslation package."""
 
-from .extraction import SVGTranslationExtractor, Translations, extract
+from .extraction import ExtractorData, SVGTranslationExtractor, extract
 from .injection import InjectorData, SVGTranslationInjector, inject
 from .nested_analyze import fix_nested_file, match_nested_tags
 
@@ -12,7 +12,7 @@ __all__ = [
     "inject",  # to be deprecated
     "extract",  # to be deprecated
     # dataclasses
-    "Translations",
+    "ExtractorData",
     "InjectorData",
     # others
     "match_nested_tags",
