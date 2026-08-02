@@ -11,7 +11,8 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import generate_unique_id, inject
+from CopySVGTranslation.injection import inject
+from CopySVGTranslation.utils import generate_unique_id
 
 
 class TestSetup:
