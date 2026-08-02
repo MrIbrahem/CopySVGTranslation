@@ -17,7 +17,8 @@ class InjectorStats:
     {
         "all_languages": 0,
         "new_languages": 0,
-        "new_languages_list": [],
+        "languages_before": [],
+        "languages_after": [],
         "processed_switches": 0,
         "inserted_translations": 0,
         "skipped_translations": 0,
@@ -33,7 +34,8 @@ class InjectorStats:
     skipped_translations: int = 0
     updated_translations: int = 0
 
-    new_languages_list: list[str] = field(default_factory=list)
+    languages_before: list[str] = field(default_factory=list)
+    languages_after: list[str] = field(default_factory=list)
     error: str = ""
 
     def to_json(self) -> dict[str, Any]:

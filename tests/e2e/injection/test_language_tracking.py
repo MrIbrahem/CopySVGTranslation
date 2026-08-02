@@ -42,7 +42,7 @@ def test_inject_tracks_new_languages(tmp_path):
     assert after_languages == {"ar", "fr"}
     assert stats["all_languages"] == 2
     assert stats["new_languages"] == 2
-    assert stats["new_languages_list"] == ["ar", "fr"]
+    assert stats["languages_after"] == ["ar", "fr"]
 
 
 def test_inject_tracks_only_truly_new_languages(tmp_path):
@@ -69,7 +69,7 @@ def test_inject_tracks_only_truly_new_languages(tmp_path):
 
     assert stats["all_languages"] == 2
     assert stats["new_languages"] == 1
-    assert stats["new_languages_list"] == ["fr"]
+    assert stats["languages_after"] == ["fr"]
 
 
 def test_file_langs_handles_element_tree(tmp_path):

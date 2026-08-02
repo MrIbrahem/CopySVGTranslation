@@ -11,7 +11,6 @@ from lxml import etree
 from ..titles_workers import get_new_titles_translations
 from ..utils import (
     extract_text_from_node,
-    file_langs,
     normalize_text,
     sort_switch_texts,
     tree_langs,
@@ -216,7 +215,7 @@ class SVGTranslationInjector:
 
         self.new_stats.all_languages = len(after_languages)
         self.new_stats.new_languages = len(new_languages)
-        self.new_stats.new_languages_list = sorted(new_languages)
+        self.new_stats.languages_after = sorted(new_languages)
 
         logger.debug(f"Processed {self.new_stats.processed_switches} switches")
         logger.debug(f"Inserted {self.new_stats.inserted_translations} translations")
@@ -254,13 +253,16 @@ class SVGTranslationInjector:
 
         self.result.tree = tree
 
-        before_languages = file_langs(inject_path)
+        # before_languages = file_langs(inject_path)
+        before_languages = tree_langs(tree)
+        self.new_stats.languages_before = sorted(before_languages)
 
         self.work_on_switches(root=root, mappings=all_mappings)
 
         self._fix_old_switches(root=root)
 
-        after_languages = set()
+        after_languages = tree_langs(tree)
+
         if save_result:
             try:
                 tree.write(
@@ -269,13 +271,10 @@ class SVGTranslationInjector:
                     xml_declaration=True,
                     pretty_print=self.pretty_print,
                 )
-                after_languages = file_langs(target_path)
                 logger.debug(f"Saved modified SVG to {target_path}")
             except Exception as e:
                 logger.error(f"Failed writing {inject_path.name}: {e}")
                 tree = None
-        else:
-            after_languages = tree_langs(tree)
 
         self._update_data(before_languages, after_languages)
 
