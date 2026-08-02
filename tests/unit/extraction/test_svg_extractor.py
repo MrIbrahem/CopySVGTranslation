@@ -6,7 +6,6 @@ Functions to test: extract
 
 from pathlib import Path
 
-import json
 import pytest
 
 from CopySVGTranslation.extraction import extract
@@ -97,40 +96,22 @@ def test_extract_with_string_path_zz() -> None:
     }
 
     assert result["new"] == {
-        "parkinson's disease prevalence, 1990": {
-            "dag": "Parkinson's doro yɔlibu biɛɣigu ni, yuuni 1990 puli ni"
-        },
+        "parkinson's disease prevalence, 1990": {"dag": "Parkinson's doro yɔlibu biɛɣigu ni, yuuni 1990 puli ni"},
         "estimated number of people with parkinson's disease¹ per 100,000 people.": {
             "dag": "Salo kalinli ban daa mali Parkinson's doro ŋɔ daadam 100,000 kalinli li."
         },
-        "no data": {
-            "dag": "Lahabali kani"
-        },
+        "no data": {"dag": "Lahabali kani"},
         "0": {},
-        "50": {
-            "dag": "50"
-        },
-        "100": {
-            "dag": "100"
-        },
-        "150": {
-            "dag": "150"
-        },
-        "200": {
-            "dag": "200"
-        },
-        "250": {
-            "dag": "250"
-        },
-        "300": {
-            "dag": "300"
-        },
+        "50": {"dag": "50"},
+        "100": {"dag": "100"},
+        "150": {"dag": "150"},
+        "200": {"dag": "200"},
+        "250": {"dag": "250"},
+        "300": {"dag": "300"},
         "data source: ihme, global burden of disease (2025)": {
             "dag": "Lahabali ni yina shɛli: IHME, Global Burden of Disease ( yuuni2025)"
         },
-        "ourworldindata.org/causes-of-death | cc by": {
-            "dag": "OurWorldinData.org/causes-of-death | CC BY"
-        },
+        "ourworldindata.org/causes-of-death | cc by": {"dag": "OurWorldinData.org/causes-of-death | CC BY"},
         "1. parkinson's disease parkinson's disease is a brain condition that affects movement control. symptoms usually begin gradually and worsen over time,": {
             "dag": "Parkinson's doro ŋɔ nyɛla zuɣupuri ni doro din damdi daadam chandi. Di nahingbana tooi piligiri baalim hali n ti mali ti kpe yɔɣu saha shɛli."
         },
@@ -148,7 +129,7 @@ def test_extract_with_string_path_zz() -> None:
         },
         "medication, devices, and therapies can help manage symptoms and improve quality of life for those with parkinson's.": {
             "dag": "Tilahi valibu bee zahimbu kpatuɣa mini tibbu soya din pahi nyɛla din tooi soŋsim baligi doro ŋɔ nahingbana ka kpaŋsi alaafee biɛɣigu n ti niro ŋun mali Parkinson's doro ŋɔ."
-        }
+        },
     }
 
     assert result["title_new"] == {}

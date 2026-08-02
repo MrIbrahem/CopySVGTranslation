@@ -86,7 +86,13 @@ class TestExtractYearHandling:
         result = extract(svg_path)
 
         assert result is not None
-        assert result == {"new": {"value 42": {}}, "title": {}, "title_new": {}, "tspans_by_id": {"t1": "Value 42"}, "error":""}
+        assert result == {
+            "new": {"value 42": {}},
+            "title": {},
+            "title_new": {},
+            "tspans_by_id": {"t1": "Value 42"},
+            "error": "",
+        }
 
     def test_extract_title(self):
         """Test year suffix handling with multiple languages."""
