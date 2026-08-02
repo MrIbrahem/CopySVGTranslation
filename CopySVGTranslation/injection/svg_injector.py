@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from collections.abc import Iterable, Mapping
 from pathlib import Path
@@ -11,82 +10,20 @@ from lxml import etree
 
 from ..text_utils import extract_text_from_node, normalize_text
 from ..titles_new import get_new_titles_translations
-from .preparation import make_translation_ready
-from .utils import (
+from .exceptions import (
     SvgNestedTspanExceptionError,
     SvgStructureExceptionError,
+)
+from .preparation import make_translation_ready
+from .utils import (
     file_langs,
+    generate_unique_id,
     get_target_path,
+    load_all_mappings,
+    sort_switch_texts,
 )
 
 logger = logging.getLogger(__name__)
-
-
-def generate_unique_id(base_id: str, lang: str, existing_ids: set[str]) -> str:
-    """Generate a unique identifier by appending the language and a counter."""
-    new_id = f"{base_id}-{lang}"
-
-    # If the base ID with language is unique, use it
-    if new_id not in existing_ids:
-        return new_id
-
-    # Otherwise, add numeric suffix until unique
-    counter = 1
-    while f"{new_id}-{counter}" in existing_ids:
-        counter += 1
-
-    return f"{new_id}-{counter}"
-
-
-def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
-    """Load and merge translation mapping JSON files into a single dictionary."""
-    all_mappings: dict = {}
-
-    for mapping_file in mapping_files:
-        mapping_path = Path(str(mapping_file))
-
-        if not mapping_path.exists():
-            logger.warning(f"Mapping file not found: {mapping_path}")
-            continue
-
-        try:
-            with open(mapping_path, "r", encoding="utf-8") as f:
-                mappings = json.load(f)
-        except Exception as exc:
-            logger.error(f"Error loading mapping file {mapping_path}: {exc}")
-            continue
-
-        for key, value in mappings.items():
-            all_mappings.setdefault(key, {}).update(value)
-
-        logger.debug("Loaded mappings from %s, entries: %s", mapping_path, len(mappings))
-
-    return all_mappings
-
-
-def sort_switch_texts(elem):
-    """
-    Sort <text> elements inside each <switch> so that elements
-    without systemLanguage attribute come last.
-    """
-    ns = {"svg": "http://www.w3.org/2000/svg"}
-
-    # Iterate over all <switch> elements
-    # Get all <text> elements
-    texts = elem.findall("svg:text", namespaces=ns)
-
-    # Separate those with systemLanguage and those without
-    without_lang = [t for t in texts if t.get("systemLanguage") is None]
-
-    # Clear switch content
-    for t in without_lang:
-        elem.remove(t)
-
-    # Re-insert <text> elements: first with language, then without
-    for t in without_lang:
-        elem.append(t)
-
-    return elem
 
 
 class SVGTranslationInjector:
@@ -376,27 +313,7 @@ def inject(
     )
 
 
-def work_on_switches(
-    root: etree._Element,
-    existing_ids: set[str],
-    mappings: Mapping,
-    case_insensitive: bool = True,
-    overwrite: bool = False,
-) -> dict:
-    """Process ``<switch>`` elements and insert or update translations."""
-    injector = SVGTranslationInjector(case_insensitive=case_insensitive, overwrite=overwrite)
-    return injector.work_on_switches(
-        root,
-        existing_ids,
-        mappings,
-    )
-
-
 __all__ = [
-    "generate_unique_id",
-    "load_all_mappings",
-    "work_on_switches",
-    "sort_switch_texts",
     "SVGTranslationInjector",
     "inject",
 ]

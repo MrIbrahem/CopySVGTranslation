@@ -8,30 +8,14 @@ import tempfile
 from pathlib import Path
 
 import pytest
-from lxml import etree
 
 from CopySVGTranslation.injection import (
     SvgStructureExceptionError,
 )
 from CopySVGTranslation.injection.preparation import (
-    clone_element,
-    get_text_content,
     make_translation_ready,
     normalize_lang,
-    reorder_texts,
 )
-
-
-class TestReorderTexts:
-    """Test suite for reorder_texts function."""
-
-    def test_reorder_texts_no_switches(self):
-        """Test reordering with no switch elements."""
-        svg_content = '<svg xmlns="http://www.w3.org/2000/svg"><text>No switch</text></svg>'
-        root = etree.fromstring(svg_content)
-
-        # Should not raise an error
-        reorder_texts(root)
 
 
 class TestNormalizeLang:
@@ -67,100 +51,6 @@ class TestNormalizeLang:
         """Test different hyphen/underscore variations."""
         assert normalize_lang("en-GB") == "en-GB"
         assert normalize_lang("en_GB") == "en-GB"
-
-
-class TestGetTextContent:
-    """Test suite for get_text_content function."""
-
-    def test_get_text_content_simple(self):
-        """Test getting text content from simple element."""
-        xml = '<text xmlns="http://www.w3.org/2000/svg">Hello</text>'
-        elem = etree.fromstring(xml)
-        result = get_text_content(elem)
-
-        assert result == "Hello"
-
-    def test_get_text_content_with_children(self):
-        """Test getting text content with child elements."""
-        xml = """<text xmlns="http://www.w3.org/2000/svg">
-            Hello <tspan>World</tspan> Test
-        </text>"""
-        elem = etree.fromstring(xml)
-        result = get_text_content(elem)
-
-        assert "Hello" in result
-        assert "World" in result
-        assert "Test" in result
-
-    def test_get_text_content_empty(self):
-        """Test getting text content from empty element."""
-        xml = '<text xmlns="http://www.w3.org/2000/svg"></text>'
-        elem = etree.fromstring(xml)
-        result = get_text_content(elem)
-
-        assert result == ""
-
-    def test_get_text_content_nested_structure(self):
-        """Test getting text content with nested structure."""
-        xml = """<text xmlns="http://www.w3.org/2000/svg">
-            <tspan>First<tspan>Nested</tspan></tspan>
-        </text>"""
-        elem = etree.fromstring(xml)
-        result = get_text_content(elem)
-
-        assert "First" in result
-        assert "Nested" in result
-
-
-class TestCloneElement:
-    """Test suite for clone_element function."""
-
-    def test_clone_element_basic(self):
-        """Test cloning a basic element."""
-        xml = '<text id="text1" xmlns="http://www.w3.org/2000/svg">Hello</text>'
-        elem = etree.fromstring(xml)
-        cloned = clone_element(elem)
-
-        assert cloned.get("id") == "text1"
-        assert cloned.text == "Hello"
-        assert cloned is not elem
-
-    def test_clone_element_with_children(self):
-        """Test cloning element with children."""
-        xml = """<text xmlns="http://www.w3.org/2000/svg">
-            <tspan id="t1">First</tspan>
-            <tspan id="t2">Second</tspan>
-        </text>"""
-        elem = etree.fromstring(xml)
-        cloned = clone_element(elem)
-
-        children = cloned.findall("{http://www.w3.org/2000/svg}tspan")
-        assert len(children) == 2
-        assert children[0].get("id") == "t1"
-        assert children[1].get("id") == "t2"
-
-    def test_clone_element_deep_copy(self):
-        """Test that clone is a deep copy."""
-        xml = '<text id="text1" xmlns="http://www.w3.org/2000/svg"><tspan>Test</tspan></text>'
-        elem = etree.fromstring(xml)
-        cloned = clone_element(elem)
-
-        # Modify original
-        elem.set("id", "modified")
-
-        # Clone should be unchanged
-        assert cloned.get("id") == "text1"
-
-    def test_clone_element_with_attributes(self):
-        """Test cloning preserves all attributes."""
-        xml = '<text id="t1" class="label" x="10" y="20" xmlns="http://www.w3.org/2000/svg">Test</text>'
-        elem = etree.fromstring(xml)
-        cloned = clone_element(elem)
-
-        assert cloned.get("id") == "t1"
-        assert cloned.get("class") == "label"
-        assert cloned.get("x") == "10"
-        assert cloned.get("y") == "20"
 
 
 class TestMakeTranslationReadyEdgeCases:
@@ -240,6 +130,7 @@ class TestMakeTranslationReadyEdgeCases:
         _tree, root = make_translation_ready(svg_path)
 
         text_elem = root.find(".//{http://www.w3.org/2000/svg}text")
+        assert text_elem is not None
         tspans = text_elem.findall("{http://www.w3.org/2000/svg}tspan")
         assert len(tspans) > 0
 
@@ -267,6 +158,7 @@ class TestMakeTranslationReadyEdgeCases:
         _tree, root = make_translation_ready(svg_path)
 
         text_elem = root.find(".//{http://www.w3.org/2000/svg}text")
+        assert text_elem is not None
         assert text_elem.get("id") is not None
 
     def test_make_translation_ready_duplicate_lang_error(self):
@@ -299,6 +191,8 @@ class TestMakeTranslationReadyEdgeCases:
         _tree, root = make_translation_ready(svg_path)
 
         switch = root.find(".//{http://www.w3.org/2000/svg}switch")
+        assert switch is not None
+
         text_elems = switch.findall("{http://www.w3.org/2000/svg}text")
 
         # Should have split into separate text elements

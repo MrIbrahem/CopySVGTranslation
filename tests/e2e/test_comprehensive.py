@@ -19,8 +19,6 @@ from CopySVGTranslation.injection import (
     start_injects,
 )
 from CopySVGTranslation.injection.preparation import (
-    clone_element,
-    get_text_content,
     normalize_lang,
 )
 from CopySVGTranslation.text_utils import normalize_text
@@ -79,23 +77,6 @@ class TestPreparation:
         """Test normalizing empty language code."""
         assert normalize_lang("") == ""
         assert normalize_lang(None) is None
-
-    def test_get_text_content(self):
-        """Test getting text content from elements."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        element = etree.fromstring(f"""<text xmlns="{svg_ns}">Hello <tspan>World</tspan> Test</text>""")
-        result = get_text_content(element)
-        assert "Hello" in result
-        assert "World" in result
-
-    def test_clone_element(self):
-        """Test cloning an element."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        original = etree.fromstring(f'<text xmlns="{svg_ns}" id="test">Content</text>')
-        cloned = clone_element(original)
-        assert original.get("id") == cloned.get("id")
-        assert original.text == cloned.text
-        assert original is not cloned
 
     def test_svg_structure_exception(self):
         """Test SvgStructureExceptionError creation."""

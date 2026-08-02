@@ -11,17 +11,16 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from CopySVGTranslation.injection.svg_injector import (
+from CopySVGTranslation.injection.utils import file_langs  # noqa: F401
+from CopySVGTranslation.injection.utils import generate_unique_id  # noqa: F401
+from CopySVGTranslation.injection.utils import (
+    get_target_path,
     load_all_mappings,
     sort_switch_texts,
-    work_on_switches,
 )
-from CopySVGTranslation.injection.utils import get_target_path
 
 
 class TestSetup:
-    """Test suite for get_target_path function."""
-
     @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up test fixtures."""
@@ -76,90 +75,6 @@ class TestGetTargetPath(TestSetup):
         assert result.parent.exists() is True
 
 
-class TestWorkOnSwitches(TestSetup):
-    """Test suite for work_on_switches function."""
-
-    def test_work_on_switches_basic(self):
-        """Test basic switch processing."""
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch>
-                <text id="text1"><tspan>Hello</tspan></text>
-            </switch>
-        </svg>"""
-        root = etree.fromstring(svg_content)
-        existing_ids = {"text1"}
-        mappings = {"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}}
-
-        stats = work_on_switches(root, existing_ids, mappings, case_insensitive=True)
-
-        assert stats["processed_switches"] == 1
-        assert stats["inserted_translations"] == 2
-
-    def test_work_on_switches_no_overwrite(self):
-        """Test switch processing without overwriting existing translations."""
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch>
-                <text id="text1-ar" systemLanguage="ar"><tspan>مرحبا</tspan></text>
-                <text id="text1"><tspan>Hello</tspan></text>
-            </switch>
-        </svg>"""
-        root = etree.fromstring(svg_content)
-        existing_ids = {"text1", "text1-ar"}
-        mappings = {"new": {"hello": {"ar": "مرحبا جديد", "fr": "Bonjour"}}}
-
-        stats = work_on_switches(root, existing_ids, mappings, overwrite=False)
-
-        assert stats["skipped_translations"] == 1
-        assert stats["inserted_translations"] == 1
-
-    def test_work_on_switches_with_overwrite(self):
-        """Test switch processing with overwriting existing translations."""
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch>
-                <text id="text1-ar" systemLanguage="ar"><tspan>Old</tspan></text>
-                <text id="text1"><tspan>Hello</tspan></text>
-            </switch>
-        </svg>"""
-        root = etree.fromstring(svg_content)
-        existing_ids = {"text1", "text1-ar"}
-        mappings = {"new": {"hello": {"ar": "New"}}}
-
-        stats = work_on_switches(root, existing_ids, mappings, overwrite=True)
-
-        assert stats["updated_translations"] == 1
-
-    def test_work_on_switches_case_sensitive(self):
-        """Test switch processing with case-sensitive matching."""
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch>
-                <text id="text1"><tspan>Hello</tspan></text>
-            </switch>
-        </svg>"""
-        root = etree.fromstring(svg_content)
-        existing_ids = {"text1"}
-        mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
-
-        stats = work_on_switches(root, existing_ids, mappings, case_insensitive=False)
-
-        assert stats["inserted_translations"] == 1
-
-    def test_work_on_switches_with_year_suffix(self):
-        """Test switch processing with year suffix handling."""
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch>
-                <text id="text1"><tspan>Population 2020</tspan></text>
-            </switch>
-        </svg>"""
-        root = etree.fromstring(svg_content)
-        existing_ids = {"text1"}
-        mappings = {"title": {"Population ": {"ar": "السكان ", "fr": "Population "}}, "new": {}}
-
-        stats = work_on_switches(root, existing_ids, mappings, case_insensitive=True)
-
-        # Year suffix logic should be applied
-        assert stats["processed_switches"] >= 0
-
-
 class TestSortSwitchTexts(TestSetup):
     """Test suite for sort_switch_texts function."""
 
@@ -174,6 +89,7 @@ class TestSortSwitchTexts(TestSetup):
         </svg>"""
         root = etree.fromstring(svg_content)
         switch = root.find(".//{http://www.w3.org/2000/svg}switch")
+        assert switch is not None
 
         sort_switch_texts(switch)
 
@@ -186,6 +102,7 @@ class TestSortSwitchTexts(TestSetup):
         svg_content = '<svg xmlns="http://www.w3.org/2000/svg"><switch></switch></svg>'
         root = etree.fromstring(svg_content)
         switch = root.find(".//{http://www.w3.org/2000/svg}switch")
+        assert switch is not None
 
         # Should not raise an error
         sort_switch_texts(switch)
@@ -199,6 +116,7 @@ class TestSortSwitchTexts(TestSetup):
         </svg>"""
         root = etree.fromstring(svg_content)
         switch = root.find(".//{http://www.w3.org/2000/svg}switch")
+        assert switch is not None
 
         sort_switch_texts(switch)
 

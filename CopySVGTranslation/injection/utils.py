@@ -2,45 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import logging
+from collections.abc import Iterable
 from pathlib import Path
 
 from lxml import etree
 
 logger = logging.getLogger(__name__)
-
-
-class SvgStructureExceptionError(Exception):
-    """Raised when SVG structure is unsuitable for translation."""
-
-    def __init__(self, code: str, element=None, extra=None):
-        """Store structured error details for later reporting.
-
-        Parameters:
-            code (str): Machine-readable error code describing the structural
-                issue encountered.
-            element: Optional XML element related to the error (for diagnostics).
-            extra: Optional supplemental data used to enrich the exception
-                message.
-        """
-        self.code = code
-        self.element = element
-        self.extra = extra
-        msg = code
-        if extra:
-            msg += ": " + str(extra)
-        super().__init__(msg)
-
-
-class SvgNestedTspanExceptionError(SvgStructureExceptionError):
-    """Raised when encountering nested ``<tspan>`` elements."""
-
-    def __init__(self, element=None, extra=None, node_text=None):
-        self.node_text = node_text
-        super().__init__("structure-error-nested-tspans-not-supported", element, extra)
-
-    def node(self):
-        return " ".join(str(self.node_text).strip().split())
 
 
 def file_langs(
@@ -110,9 +79,77 @@ def get_target_path(
     return target_path
 
 
+def generate_unique_id(base_id: str, lang: str, existing_ids: set[str]) -> str:
+    """Generate a unique identifier by appending the language and a counter."""
+    new_id = f"{base_id}-{lang}"
+
+    # If the base ID with language is unique, use it
+    if new_id not in existing_ids:
+        return new_id
+
+    # Otherwise, add numeric suffix until unique
+    counter = 1
+    while f"{new_id}-{counter}" in existing_ids:
+        counter += 1
+
+    return f"{new_id}-{counter}"
+
+
+def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
+    """Load and merge translation mapping JSON files into a single dictionary."""
+    all_mappings: dict = {}
+
+    for mapping_file in mapping_files:
+        mapping_path = Path(str(mapping_file))
+
+        if not mapping_path.exists():
+            logger.warning(f"Mapping file not found: {mapping_path}")
+            continue
+
+        try:
+            with open(mapping_path, "r", encoding="utf-8") as f:
+                mappings = json.load(f)
+        except Exception as exc:
+            logger.error(f"Error loading mapping file {mapping_path}: {exc}")
+            continue
+
+        for key, value in mappings.items():
+            all_mappings.setdefault(key, {}).update(value)
+
+        logger.debug("Loaded mappings from %s, entries: %s", mapping_path, len(mappings))
+
+    return all_mappings
+
+
+def sort_switch_texts(elem):
+    """
+    Sort <text> elements inside each <switch> so that elements
+    without systemLanguage attribute come last.
+    """
+    ns = {"svg": "http://www.w3.org/2000/svg"}
+
+    # Iterate over all <switch> elements
+    # Get all <text> elements
+    texts = elem.findall("svg:text", namespaces=ns)
+
+    # Separate those with systemLanguage and those without
+    without_lang = [t for t in texts if t.get("systemLanguage") is None]
+
+    # Clear switch content
+    for t in without_lang:
+        elem.remove(t)
+
+    # Re-insert <text> elements: first with language, then without
+    for t in without_lang:
+        elem.append(t)
+
+    return elem
+
+
 __all__ = [
-    "SvgStructureExceptionError",
-    "SvgNestedTspanExceptionError",
     "file_langs",
     "get_target_path",
+    "generate_unique_id",
+    "load_all_mappings",
+    "sort_switch_texts",
 ]

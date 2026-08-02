@@ -9,7 +9,7 @@ from pathlib import Path
 
 from lxml import etree
 
-from .utils import SvgNestedTspanExceptionError, SvgStructureExceptionError
+from .exceptions import SvgNestedTspanExceptionError, SvgStructureExceptionError
 
 logger = logging.getLogger(__name__)
 
@@ -41,12 +41,12 @@ def get_text_content(el: etree._Element) -> str:
     return "".join(el.itertext())
 
 
-def clone_element(el: etree._Element) -> etree._Element:
+def _clone_element(el: etree._Element) -> etree._Element:
     """Deep-clone an element."""
     return copy.deepcopy(el)
 
 
-def reorder_texts(root: etree._Element):
+def _reorder_texts(root: etree._Element):
     """
     Simple deterministic reordering: for every <switch>, sort child <text> elements
     by numeric part of their id if present, otherwise keep original order.
@@ -327,7 +327,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> tup
             for real in real_langs[1:]:
                 if real in existing_langs:
                     raise SvgStructureExceptionError("structure-error-multiple-text-same-lang", sw, [real])
-                cloned = clone_element(child)
+                cloned = _clone_element(child)
                 if real == "fallback":
                     cloned.attrib.pop("systemLanguage", None)
                 else:
@@ -338,7 +338,7 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> tup
                 sw.append(cloned)
 
     # Final reorder
-    reorder_texts(root)
+    _reorder_texts(root)
 
     # Optionally write back to file
     if write_back:
@@ -350,7 +350,5 @@ def make_translation_ready(svg_file_path: Path, write_back: bool = False) -> tup
 __all__ = [
     "normalize_lang",
     "get_text_content",
-    "clone_element",
-    "reorder_texts",
     "make_translation_ready",
 ]

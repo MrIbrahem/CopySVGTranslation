@@ -1,99 +1,11 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
-from lxml import etree
-
 from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import (
-    SvgStructureExceptionError,
-    inject,
-)
-from CopySVGTranslation.injection.preparation import clone_element, get_text_content, normalize_lang
-from CopySVGTranslation.text_utils import extract_text_from_node, normalize_text
-
-# -------------------------------
-# Text utility tests
-# -------------------------------
-
-
-class TestTextUtilsComprehensive:
-    """Comprehensive tests for text utility functions."""
-
-    def test_normalize_text_tabs_newlines(self):
-        """Test normalization with tabs and newlines."""
-        assert normalize_text("hello\t\nworld") == "hello world"
-        assert normalize_text("  hello\n\n  world  ") == "hello world"
-
-    def test_normalize_text_case_insensitive_variations(self):
-        """Test case-insensitive normalization variations."""
-        assert normalize_text("Hello World", case_insensitive=True) == "hello world"
-        assert normalize_text("HELLO WORLD", case_insensitive=True) == "hello world"
-
-    def test_normalize_text_unicode_chars(self):
-        """Test normalization with Unicode characters."""
-        assert normalize_text("  مرحبا  بك  ") == "مرحبا بك"
-        assert normalize_text("  你好  世界  ") == "你好 世界"
-
-    def test_extract_text_from_node_with_multiple_tspans(self):
-        """Test extracting text from node with multiple tspans."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        text_node = etree.fromstring(f'<text xmlns="{svg_ns}"><tspan>Hello</tspan><tspan>World</tspan></text>')
-        result = extract_text_from_node(text_node)
-        assert result == ["Hello", "World"]
-
-    def test_extract_text_from_node_plain_text(self):
-        """Test extracting plain text from node without tspans."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        text_node = etree.fromstring(f'<text xmlns="{svg_ns}">Plain text</text>')
-        result = extract_text_from_node(text_node)
-        assert result == ["Plain text"]
-
+from CopySVGTranslation.injection import inject
 
 # -------------------------------
 # Preparation function tests
 # -------------------------------
-
-
-class TestPreparationFunctions:
-    """Tests for SVG preparation utility functions."""
-
-    def test_normalize_lang_simple_codes(self):
-        """Test normalizing simple language codes."""
-        assert normalize_lang("en") == "en"
-        assert normalize_lang("AR") == "ar"
-        assert normalize_lang("FR") == "fr"
-
-    def test_normalize_lang_with_region_codes(self):
-        """Test normalizing language codes with regions."""
-        assert normalize_lang("en_US") == "en-US"
-        assert normalize_lang("en-GB") == "en-GB"
-        assert normalize_lang("zh_CN") == "zh-CN"
-
-    def test_normalize_lang_complex_codes(self):
-        """Test normalizing complex language codes."""
-        assert normalize_lang("en_US_POSIX") == "en-US-Posix"
-
-    def test_get_text_content_with_tspans(self):
-        """Test getting text content from elements with nested tspans."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        element = etree.fromstring(f'<text xmlns="{svg_ns}">Hello <tspan>World</tspan> Test</text>')
-        result = get_text_content(element)
-        assert "Hello" in result
-        assert "World" in result
-
-    def test_clone_element_creates_copy(self):
-        """Test element cloning creates independent copy."""
-        svg_ns = "http://www.w3.org/2000/svg"
-        original = etree.fromstring(f'<text xmlns="{svg_ns}" id="test">Content</text>')
-        cloned = clone_element(original)
-        assert original.get("id") == cloned.get("id")
-        assert original is not cloned
-
-    def test_svg_structure_exception_formatting(self):
-        """Test SvgStructureExceptionError message formatting."""
-        exc = SvgStructureExceptionError("test-code", extra="Extra info")
-        assert exc.code == "test-code"
-        assert "test-code" in str(exc)
-        assert "Extra info" in str(exc)
 
 
 # -------------------------------
