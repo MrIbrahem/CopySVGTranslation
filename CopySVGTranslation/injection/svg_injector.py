@@ -206,7 +206,7 @@ class SVGTranslationInjector:
             logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
             self.new_stats.error = str(exc)
 
-        except (OSError, Exception) as exc:
+        except Exception as exc:
             logger.error("Failed to parse SVG file: %s", exc)
             self.new_stats.error = str(exc)
 
@@ -238,6 +238,10 @@ class SVGTranslationInjector:
         save_result: bool = False,
     ) -> InjectorData:
         """Inject translations into the provided SVG file."""
+
+        # Reset state to prevent accumulation across calls
+        self.result = InjectorData()
+        self.new_stats = self.result.new_stats
 
         inject_path = Path(str(inject_file))
 
@@ -284,7 +288,7 @@ class SVGTranslationInjector:
                     pretty_print=self.pretty_print,
                 )
                 logger.debug(f"Saved modified SVG to {target_path}")
-            except Exception as e:
+            except OSError as e:
                 logger.error(f"Failed writing {inject_path.name}: {e}")
                 self.new_stats.error = f"Failed writing {inject_path.name}: {e}"
                 self.result.tree = None

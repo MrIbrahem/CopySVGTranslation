@@ -185,6 +185,9 @@ class SVGTranslationExtractor:
             translations and a "title" mapping), or None if the file does
             not exist or could not be parsed.
         """
+        # Reset state to prevent accumulation across calls
+        self.translations = ExtractorData()
+
         if not self.svg_file_path.exists():
             logger.error(f"SVG file not found: {self.svg_file_path}")
             self.translations.error = "File not found"
