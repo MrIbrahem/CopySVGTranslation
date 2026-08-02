@@ -16,7 +16,6 @@ from CopySVGTranslation.injection import (
     inject,
     load_all_mappings,
     make_translation_ready,
-    start_injects,
 )
 from CopySVGTranslation.injection.preparation import (
     normalize_lang,
@@ -165,51 +164,6 @@ class TestInjector:
         tree, stats = inject(svg_path, all_mappings=mappings, case_insensitive=False, return_stats=True)
         assert tree is not None
         assert stats["inserted_translations"] == 1
-
-
-# -------------------------------
-# Batch tests
-# -------------------------------
-
-
-class TestBatch:
-    """Test cases for batch processing functions."""
-
-    def test_start_injects_single_file(self, temp_dir):
-        """Test batch injection with a single file."""
-        svg_file = temp_dir / "test.svg"
-        out_dir = temp_dir / "out"
-        out_dir.mkdir()
-        svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
-        svg_file.write_text(svg_content, encoding="utf-8")
-        translations = {"new": {"hello": {"ar": "مرحبا"}}}
-        result = start_injects([svg_file], translations, out_dir, overwrite=False)
-        assert result["success"] == 1
-        assert result["failed"] == 0
-
-    def test_start_injects_multiple_files(self, temp_dir):
-        """Test batch injection with multiple files."""
-        svg1 = temp_dir / "test1.svg"
-        svg2 = temp_dir / "test2.svg"
-        out_dir = temp_dir / "out"
-        out_dir.mkdir()
-        svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
-        svg1.write_text(svg_content, encoding="utf-8")
-        svg2.write_text(svg_content, encoding="utf-8")
-        translations = {"new": {"hello": {"ar": "مرحبا"}}}
-        result = start_injects([svg1, svg2], translations, out_dir)
-        assert result["success"] == 2
-        assert "test1.svg" in result["files"]
-        assert "test2.svg" in result["files"]
-
-    def test_start_injects_with_nonexistent_file(self, temp_dir):
-        """Test batch injection with nonexistent file."""
-        out_dir = temp_dir / "out"
-        out_dir.mkdir()
-        translations = {"new": {"hello": {"ar": "مرحبا"}}}
-        result = start_injects([temp_dir / "nonexistent.svg"], translations, out_dir)
-        assert result["success"] == 0
-        assert result["failed"] == 1
 
 
 # -------------------------------

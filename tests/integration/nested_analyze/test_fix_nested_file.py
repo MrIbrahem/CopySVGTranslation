@@ -10,13 +10,13 @@ SVG_NS = "http://www.w3.org/2000/svg"
 # ---------- Helpers ----------
 
 
-def _wrap_svg(inner: str) -> str:
-    return f'<svg xmlns="{SVG_NS}" version="1.1" width="100" height="100">{inner}</svg>'
+def _wrap_svg(inner: str, width: int = 100, height: int = 100) -> str:
+    return f'<svg xmlns="{SVG_NS}" version="1.1" width="{width}" height="{height}">{inner}</svg>'
 
 
-def _write_svg(tmp_dir: Path, inner_svg: str, name: str = "test.svg") -> Path:
+def _write_svg(tmp_dir: Path, inner_svg: str, name: str = "test.svg", width: int = 100, height: int = 100) -> Path:
     p = tmp_dir / name
-    p.write_text(_wrap_svg(inner_svg), encoding="utf-8")
+    p.write_text(_wrap_svg(inner_svg, width, height), encoding="utf-8")
     return p
 
 

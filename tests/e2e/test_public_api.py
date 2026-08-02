@@ -7,7 +7,7 @@ from pathlib import Path
 # Test that the public API is importable
 import CopySVGTranslation
 from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import inject, start_injects
+from CopySVGTranslation.injection import inject
 from CopySVGTranslation.workflows import svg_extract_and_inject
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -45,11 +45,6 @@ class TestPublicAPIExports:
         """The inject function should be importable from top-level module."""
         assert callable(inject)
         assert inject.__name__ == "inject"
-
-    def test_start_injects_is_importable(self):
-        """The start_injects function should be importable from top-level module."""
-        assert callable(start_injects)
-        assert start_injects.__name__ == "start_injects"
 
     def test_svg_extract_and_inject_is_importable(self):
         """The svg_extract_and_inject function should be importable from top-level module."""

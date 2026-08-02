@@ -12,7 +12,6 @@ from CopySVGTranslation.injection import (
     SvgStructureExceptionError,
     inject,
     make_translation_ready,
-    start_injects,
 )
 
 
@@ -113,16 +112,3 @@ class Testinject:
 
         assert excinfo.value.code == code
         assert excinfo.value.extra == extra
-
-    def test_start_injects_counts_nested_tspans(self, temp_dir):
-        nested_svg = '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><text><tspan>foo <tspan>bar</tspan></tspan></text></svg>'
-        file = self.getsvgfilefromstring(temp_dir, nested_svg)
-
-        result = start_injects(
-            [str(file)],
-            translations={"new": {"dummy": {"la": "value"}}},
-            output_dir_translated=temp_dir,
-        )
-
-        assert result["nested_files"] == 1
-        assert file.name in result["nested_files_list"]

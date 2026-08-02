@@ -10,12 +10,10 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.injection import inject, start_injects
+from CopySVGTranslation.injection import inject
 
 
 class TestSetup:
-    """Test suite for start_injects edge cases."""
-
     @pytest.fixture(autouse=True)
     def setUp(self):
         """Set up test fixtures."""
@@ -27,94 +25,6 @@ class TestSetup:
         """Clean up test fixtures."""
         # Clean up temporary files
         shutil.rmtree(self.test_dir)
-
-
-class TestStartInjectsEdgeCases(TestSetup):
-    """Test suite for start_injects edge cases."""
-
-    def test_start_injects_empty_file_list(self):
-        """Test start_injects with empty file list."""
-        translations = {"new": {"hello": {"ar": "مرحبا"}}}
-
-        result = start_injects([], translations, self.output_dir)
-
-        assert result["success"] == 0
-        assert result["failed"] == 0
-
-    def test_start_injects_nonexistent_files(self):
-        """Test start_injects with nonexistent files."""
-        translations = {"new": {"hello": {"ar": "مرحبا"}}}
-        files = [str(self.test_dir / "nonexistent.svg")]
-
-        result = start_injects(files, translations, self.output_dir)
-
-        assert result["success"] == 0
-        assert result["failed"] > 0
-
-    def test_start_injects_tracks_nested_files(self):
-        """Test that start_injects tracks nested tspan errors."""
-        svg_path = self.test_dir / "nested.svg"
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <text><tspan>Outer<tspan>Nested</tspan></tspan></text>
-        </svg>"""
-        svg_path.write_text(svg_content, encoding="utf-8")
-
-        translations = {"new": {"outer": {"ar": "مرحبا"}}}
-
-        result = start_injects([str(svg_path)], translations, self.output_dir)
-
-        assert result["nested_files"] >= 0
-
-    def test_start_injects_tracks_no_changes(self):
-        """Test that start_injects tracks files with no changes."""
-        svg_path = self.test_dir / "test.svg"
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch>
-                <text id="text1-ar" systemLanguage="ar"><tspan>مرحبا</tspan></text>
-                <text id="text1"><tspan>Hello</tspan></text>
-            </switch>
-        </svg>"""
-        svg_path.write_text(svg_content, encoding="utf-8")
-
-        translations = {"new": {"hello": {"ar": "مرحبا"}}}
-
-        result = start_injects([str(svg_path)], translations, self.output_dir, overwrite=False)
-
-        # Should track files with no changes
-        assert "no_changes" in result
-
-    def test_start_injects_with_overwrite(self):
-        """Test start_injects with overwrite option."""
-        svg_path = self.test_dir / "test.svg"
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch>
-                <text id="text1-ar" systemLanguage="ar"><tspan>Old</tspan></text>
-                <text id="text1"><tspan>Hello</tspan></text>
-            </switch>
-        </svg>"""
-        svg_path.write_text(svg_content, encoding="utf-8")
-
-        translations = {"new": {"hello": {"ar": "New"}}}
-
-        result = start_injects([str(svg_path)], translations, self.output_dir, overwrite=True)
-
-        # Should process the file
-        assert "files" in result
-
-    def test_start_injects_returns_file_stats(self):
-        """Test that start_injects returns per-file statistics."""
-        svg_path = self.test_dir / "test.svg"
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch><text id="t1"><tspan>Hello</tspan></text></switch>
-        </svg>"""
-        svg_path.write_text(svg_content, encoding="utf-8")
-
-        translations = {"new": {"hello": {"ar": "مرحبا"}}}
-
-        result = start_injects([str(svg_path)], translations, self.output_dir)
-
-        assert "files" in result
-        assert isinstance(result["files"], dict)
 
 
 class TestInjectEdgeCases(TestSetup):

@@ -18,7 +18,7 @@ class TestIntegrationWorkflows:
         tree, _root = make_translation_ready(FIXTURES_DIR / "before_translate.svg", write_back=False)
         tree.write(str(svg_new), pretty_print=True, xml_declaration=True, encoding="utf-8")
         assert svg_new.exists()
-        assert tree.getroot().tag.endswith("svg")
+        assert str(tree.getroot().tag).endswith("svg")
 
 
 class TestPreparationFunctions:
