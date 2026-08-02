@@ -27,8 +27,8 @@ class TestTextUtils2:
 
     def test_normalize_text_with_punctuation(self):
         """Test text normalization with punctuation."""
-        assert normalize_text("Hello == World!", "Hello, World!")
-        assert normalize_text("  Hello ==  World!  ", "Hello, World!")
+        assert normalize_text("Hello, World!") == "Hello, World!"
+        assert normalize_text("  Hello,  World!  ") == "Hello, World!"
 
     def test_normalize_text_is_importable(self):
         """The normalize_text function should be importable from top-level module."""

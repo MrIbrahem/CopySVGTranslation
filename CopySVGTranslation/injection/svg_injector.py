@@ -135,6 +135,13 @@ class SVGTranslationInjector:
 
                         tspans = text_elem.xpath("./svg:tspan", namespaces=svg_ns)
                         for i, tspan in enumerate(tspans):
+                            if i >= len(default_texts):
+                                logger.warning(
+                                    "Language node '%s' has more tspans than the default node; stopping at %d",
+                                    lang,
+                                    i,
+                                )
+                                break
                             english_text = default_texts[i]
                             lookup_key = english_text.lower() if self.case_insensitive else english_text
                             if english_text in available_translations and lang in available_translations[english_text]:
@@ -266,6 +273,10 @@ class SVGTranslationInjector:
         after_languages = tree_langs(tree)
 
         if save_result:
+            if target_path is None:
+                logger.error("save_result is True but no target_path was provided")
+                self.new_stats.error = "No target path provided"
+                return self.result
             try:
                 tree.write(
                     str(target_path),
@@ -276,7 +287,8 @@ class SVGTranslationInjector:
                 logger.debug(f"Saved modified SVG to {target_path}")
             except Exception as e:
                 logger.error(f"Failed writing {inject_path.name}: {e}")
-                tree = None
+                self.new_stats.error = f"Failed writing {inject_path.name}: {e}"
+                self.result.tree = None
 
         self._update_data(before_languages, after_languages)
 

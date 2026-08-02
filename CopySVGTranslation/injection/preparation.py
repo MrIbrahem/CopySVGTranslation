@@ -273,8 +273,16 @@ class SvgTranslationPreparer:
                 raise SvgStructureExceptionError("structure-error-text-contains-dollar", text, [content])
 
             # normalize systemLanguage if present
-            if text.get("systemLanguage"):
-                text.set("systemLanguage", normalize_lang(text.get("systemLanguage")))
+            # if text.get("systemLanguage"):
+            #     text.set("systemLanguage", normalize_lang(text.get("systemLanguage")))
+
+            # normalize systemLanguage if present
+            language_attr = text.get("systemLanguage")
+            if language_attr:
+                normalized = ",".join(
+                    normalize_lang(part) for part in re.split(r"\s*,\s*", language_attr.strip()) if part
+                )
+                text.set("systemLanguage", normalized)
 
             parent = text.getparent()
             if parent is None or (parent.tag not in ({f"{{{SVG_NS}}}switch", "switch"})):

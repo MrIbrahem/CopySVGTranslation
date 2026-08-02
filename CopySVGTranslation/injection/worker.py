@@ -43,7 +43,7 @@ def perform_svg_injection(
 
 
 def inject(
-    inject_file: Path | str,
+    inject_file: Path | str | None = None,
     mapping_files: Iterable[Path | str] | None = None,
     all_mappings: Mapping | None = None,
     case_insensitive: bool = True,
@@ -71,7 +71,7 @@ def inject(
     pretty_print = kwargs.get("pretty_print", True)
 
     inject_path = Path(str(inject_file))
-    target_path = get_target_path(output_file, output_dir, inject_path)
+    target_path = get_target_path(output_file, output_dir, inject_path) if save_result else None
 
     result: InjectorData = perform_svg_injection(
         inject_file=inject_file,
