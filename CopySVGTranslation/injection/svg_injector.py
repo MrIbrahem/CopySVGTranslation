@@ -23,7 +23,7 @@ from .exceptions import (
     SvgStructureExceptionError,
 )
 from .objects import InjectorData, InjectorStats
-from .preparation import SvgTranslationPreparer  # make_translation_ready
+from .preparation import SvgTranslationPreparer
 
 logger = logging.getLogger(__name__)
 
@@ -192,7 +192,6 @@ class SVGTranslationInjector:
 
     def _parse_svg(self, inject_path) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
         try:
-            # tree, root = make_translation_ready(inject_path)
             preparer = SvgTranslationPreparer(inject_path)
             tree, root = preparer.prepare()
             return tree, root

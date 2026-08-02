@@ -13,35 +13,6 @@ from .svg_injector import InjectorData, SVGTranslationInjector
 logger = logging.getLogger(__name__)
 
 
-def perform_svg_injection(
-    *,
-    inject_file: Path | str,
-    all_mappings: Mapping | None = None,
-    case_insensitive: bool = True,
-    target_path: Path | None = None,
-    overwrite: bool = False,
-    save_result: bool = False,
-    pretty_print: bool = True,
-) -> InjectorData:
-    """
-    Legacy function-style wrapper around SVGTranslationInjector, kept for
-    backward compatibility with existing callers.
-    """
-    injector = SVGTranslationInjector(
-        case_insensitive=case_insensitive,
-        overwrite=overwrite,
-        pretty_print=pretty_print,
-    )
-
-    data: InjectorData = injector.inject(
-        inject_file,
-        all_mappings=all_mappings,
-        save_result=save_result,
-        target_path=target_path,
-    )
-    return data
-
-
 def inject(
     inject_file: Path | str | None = None,
     mapping_files: Iterable[Path | str] | None = None,
@@ -73,14 +44,17 @@ def inject(
     inject_path = Path(str(inject_file))
     target_path = get_target_path(output_file, output_dir, inject_path) if save_result else None
 
-    result: InjectorData = perform_svg_injection(
-        inject_file=inject_file,
+    injector = SVGTranslationInjector(
         case_insensitive=case_insensitive,
         overwrite=overwrite,
-        all_mappings=all_mappings,
-        target_path=target_path,
-        save_result=save_result,
         pretty_print=pretty_print,
+    )
+
+    result: InjectorData = injector.inject(
+        inject_file,
+        all_mappings=all_mappings,
+        save_result=save_result,
+        target_path=target_path,
     )
 
     if return_stats:

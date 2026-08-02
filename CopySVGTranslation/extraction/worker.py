@@ -29,7 +29,7 @@ def extract(
     )
 
     result = extractor.extract()
-    if not result:
+    if result.error:
         return None
 
     # { "new": {}, "tspans_by_id": {}, "title": { }, "title_new": { } }
