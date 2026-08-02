@@ -5,7 +5,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-from lxml import etree  # type: ignore
+from lxml import etree
 
 from ..text_utils import normalize_text
 from ..titles import make_title_translations

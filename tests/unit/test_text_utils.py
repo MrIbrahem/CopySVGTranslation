@@ -3,7 +3,7 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
-from lxml import etree  # type: ignore
+from lxml import etree
 
 from CopySVGTranslation.text_utils import extract_text_from_node
 

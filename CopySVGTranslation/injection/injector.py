@@ -7,7 +7,7 @@ import logging
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 
-from lxml import etree  # type: ignore
+from lxml import etree
 
 from ..text_utils import extract_text_from_node, normalize_text
 from ..titles_new import get_new_titles_translations
@@ -37,7 +37,6 @@ def generate_unique_id(base_id: str, lang: str, existing_ids: set[str]) -> str:
 
     return f"{new_id}-{counter}"
 
-
 def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
     """Load and merge translation mapping JSON files into a single dictionary."""
     all_mappings: dict = {}
@@ -63,6 +62,29 @@ def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
 
     return all_mappings
 
+def sort_switch_texts(elem):
+    """
+    Sort <text> elements inside each <switch> so that elements
+    without systemLanguage attribute come last.
+    """
+    ns = {"svg": "http://www.w3.org/2000/svg"}
+
+    # Iterate over all <switch> elements
+    # Get all <text> elements
+    texts = elem.findall("svg:text", namespaces=ns)
+
+    # Separate those with systemLanguage and those without
+    without_lang = [t for t in texts if t.get("systemLanguage") is None]
+
+    # Clear switch content
+    for t in without_lang:
+        elem.remove(t)
+
+    # Re-insert <text> elements: first with language, then without
+    for t in without_lang:
+        elem.append(t)
+
+    return elem
 
 def work_on_switches(
     root: etree._Element,
@@ -203,32 +225,6 @@ def work_on_switches(
         stats["processed_switches"] += 1
 
     return stats
-
-
-def sort_switch_texts(elem):
-    """
-    Sort <text> elements inside each <switch> so that elements
-    without systemLanguage attribute come last.
-    """
-    ns = {"svg": "http://www.w3.org/2000/svg"}
-
-    # Iterate over all <switch> elements
-    # Get all <text> elements
-    texts = elem.findall("svg:text", namespaces=ns)
-
-    # Separate those with systemLanguage and those without
-    without_lang = [t for t in texts if t.get("systemLanguage") is None]
-
-    # Clear switch content
-    for t in without_lang:
-        elem.remove(t)
-
-    # Re-insert <text> elements: first with language, then without
-    for t in without_lang:
-        elem.append(t)
-
-    return elem
-
 
 def inject(
     inject_file: Path | str,

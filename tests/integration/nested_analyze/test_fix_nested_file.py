@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from lxml import etree  # type: ignore
+from lxml import etree
 
 from CopySVGTranslation.nested_analyze.find_nested import fix_nested_file, match_nested_tags
 
