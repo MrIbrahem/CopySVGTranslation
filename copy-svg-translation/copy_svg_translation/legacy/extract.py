@@ -17,7 +17,7 @@ def extract(
     Deprecated. Use SVGTranslationService.extract() instead.
     """
     warnings.warn(
-        "CopySVGTranslation.extract() is deprecated. Use SVGTranslationService.extract() instead.",
+        "copy_svg_translation.extract() is deprecated. Use SVGTranslationService.extract() instead.",
         DeprecationWarning,
         stacklevel=2,
     )

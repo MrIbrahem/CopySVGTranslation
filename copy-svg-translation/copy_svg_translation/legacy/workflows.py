@@ -22,7 +22,7 @@ def svg_extract_and_inject(
     Deprecated. Use SVGTranslationService.extract_and_inject() instead.
     """
     warnings.warn(
-        "CopySVGTranslation.svg_extract_and_inject() is deprecated. "
+        "copy_svg_translation.svg_extract_and_inject() is deprecated. "
         "Use SVGTranslationService.extract_and_inject() instead.",
         DeprecationWarning,
         stacklevel=2,
@@ -59,7 +59,7 @@ def svg_extract_and_injects(
     Deprecated. Use SVGTranslationService.inject() instead.
     """
     warnings.warn(
-        "CopySVGTranslation.svg_extract_and_injects() is deprecated. " "Use SVGTranslationService.inject() instead.",
+        "copy_svg_translation.svg_extract_and_injects() is deprecated. " "Use SVGTranslationService.inject() instead.",
         DeprecationWarning,
         stacklevel=2,
     )

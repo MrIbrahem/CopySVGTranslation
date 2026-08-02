@@ -1,6 +1,6 @@
 # __init__.py
 """
-CopySVGTranslation
+copy_svg_translation
 ------------------
 Extract translations from SVG files and inject them into others.
 """
