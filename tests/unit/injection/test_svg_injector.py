@@ -2,7 +2,7 @@
 
 import json
 
-from CopySVGTranslation.injection.injector import generate_unique_id, load_all_mappings
+from CopySVGTranslation.injection.svg_injector import generate_unique_id, load_all_mappings
 
 
 class TestGenerateUniqueId:

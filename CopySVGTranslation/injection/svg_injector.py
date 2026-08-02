@@ -37,6 +37,7 @@ def generate_unique_id(base_id: str, lang: str, existing_ids: set[str]) -> str:
 
     return f"{new_id}-{counter}"
 
+
 def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
     """Load and merge translation mapping JSON files into a single dictionary."""
     all_mappings: dict = {}
@@ -62,6 +63,7 @@ def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
 
     return all_mappings
 
+
 def sort_switch_texts(elem):
     """
     Sort <text> elements inside each <switch> so that elements
@@ -85,6 +87,7 @@ def sort_switch_texts(elem):
         elem.append(t)
 
     return elem
+
 
 def work_on_switches(
     root: etree._Element,
@@ -225,6 +228,7 @@ def work_on_switches(
         stats["processed_switches"] += 1
 
     return stats
+
 
 def inject(
     inject_file: Path | str,

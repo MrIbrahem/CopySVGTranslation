@@ -3,7 +3,7 @@ from pathlib import Path
 
 from lxml import etree
 
-from CopySVGTranslation.injection.injector import inject
+from CopySVGTranslation.injection.svg_injector import inject
 from CopySVGTranslation.injection.utils import file_langs
 
 

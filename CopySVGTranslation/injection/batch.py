@@ -9,7 +9,7 @@ from typing import Any
 
 from tqdm import tqdm
 
-from .injector import inject
+from .svg_injector import inject
 
 logger = logging.getLogger(__name__)
 

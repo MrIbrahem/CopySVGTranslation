@@ -1,13 +1,13 @@
 """Injection phase helpers for CopySVGTranslation."""
 
 from .batch import start_injects
-from .injector import (
+from .preparation import make_translation_ready
+from .svg_injector import (
     generate_unique_id,
     inject,
     load_all_mappings,
     work_on_switches,
 )
-from .preparation import make_translation_ready
 from .utils import SvgNestedTspanExceptionError, SvgStructureExceptionError
 
 __all__ = [
