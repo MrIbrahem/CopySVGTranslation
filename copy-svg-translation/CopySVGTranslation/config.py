@@ -10,7 +10,7 @@ from typing import Literal
 class TranslationConfig:
     """
     Central configuration for all SVG translation operations.
-    Immutable by convention – create a new instance to change settings.
+    Immutable by convention - create a new instance to change settings.
     """
 
     # --- Matching / lookup ---

@@ -1,8 +1,8 @@
 # core/switch_node.py
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Iterator
 
 from lxml import etree
 

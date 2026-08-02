@@ -1,8 +1,8 @@
 # core/text_node.py
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Iterator
 
 from lxml import etree
 
@@ -15,7 +15,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 class TextNode:
     """
     Thin domain wrapper over an SVG <text> or <tspan> element.
-    Does not own the element – it only provides a convenient API.
+    Does not own the element - it only provides a convenient API.
     """
 
     element: etree._Element
@@ -50,10 +50,7 @@ class TextNode:
         Prefer direct child <tspan>s; fall back to the element's own text.
         """
         tspans = self.tspans()
-        if tspans:
-            raw = [t.text or "" for t in tspans]
-        else:
-            raw = [self.element.text or ""]
+        raw = [t.text or "" for t in tspans] if tspans else [self.element.text or ""]
 
         if not normalize:
             return raw

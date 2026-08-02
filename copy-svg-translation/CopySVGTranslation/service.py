@@ -10,7 +10,7 @@ from lxml import etree
 
 from .config import TranslationConfig
 from .core.mapping import TranslationMapping
-from .result import InjectorStats, InjectResult, OperationResult
+from .result import InjectResult, OperationResult
 
 logger = logging.getLogger(__name__)
 
@@ -221,7 +221,7 @@ class SVGTranslationService:
         svg_path: Path,
         save_mapping: bool | Path,
     ) -> Path:
-        if isinstance(save_mapping, (str, Path)):
+        if isinstance(save_mapping, str | Path):
             return Path(save_mapping)
 
         if self.config.mapping_output_dir is None:

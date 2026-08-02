@@ -1,8 +1,6 @@
 # injection/steps/assign_ids.py
 from __future__ import annotations
 
-from lxml import etree
-
 from ...exceptions import SvgInvalidIdError
 from ...utils.xml import collect_ids
 from .base import PreparationContext, PreparationStep

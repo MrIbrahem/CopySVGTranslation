@@ -8,9 +8,9 @@ from .strategies import (
 )
 
 __all__ = [
-    "SVGTranslationExtractor",
-    "MatchingStrategy",
-    "ByTspanIdStrategy",
     "ByPositionStrategy",
+    "ByTspanIdStrategy",
     "CompositeMatchingStrategy",
+    "MatchingStrategy",
+    "SVGTranslationExtractor",
 ]

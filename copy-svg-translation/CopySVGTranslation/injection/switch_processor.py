@@ -62,7 +62,7 @@ class SwitchProcessor:
         langs_to_process = working_mapping.all_languages()
 
         # Gather existing translation nodes
-        existing_langs = switch.existing_languages()
+        switch.existing_languages()
 
         for lang in langs_to_process:
             # Build target translation dict

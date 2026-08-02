@@ -1,8 +1,6 @@
 # injection/steps/load.py
 from __future__ import annotations
 
-from pathlib import Path
-
 from ...io.svg_document import SvgDocument
 from .base import PreparationContext, PreparationStep
 

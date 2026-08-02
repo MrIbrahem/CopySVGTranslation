@@ -35,10 +35,7 @@ def svg_extract_and_inject(
     service = SVGTranslationService(config)
 
     save_mapping: bool | Path | None = False
-    if data_output_file is not None:
-        save_mapping = Path(data_output_file)
-    else:
-        save_mapping = True
+    save_mapping = Path(data_output_file) if data_output_file is not None else True
 
     result = service.extract_and_inject(
         source=extract_file,

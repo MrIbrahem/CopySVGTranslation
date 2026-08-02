@@ -5,9 +5,9 @@ from .switch_node import SwitchNode
 from .text_node import TextNode
 
 __all__ = [
+    "NestedStrategy",
+    "SwitchNode",
+    "TextNode",
     "TranslationEntry",
     "TranslationMapping",
-    "TextNode",
-    "SwitchNode",
-    "NestedStrategy",
 ]

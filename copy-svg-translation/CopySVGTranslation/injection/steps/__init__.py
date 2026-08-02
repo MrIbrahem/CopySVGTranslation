@@ -8,12 +8,12 @@ from .split_languages import SplitLanguages
 from .validate import ValidateStructure
 
 __all__ = [
-    "PreparationStep",
-    "PreparationContext",
-    "LoadDocument",
-    "ValidateStructure",
-    "NormalizeTspans",
     "AssignIds",
-    "SplitLanguages",
+    "LoadDocument",
+    "NormalizeTspans",
+    "PreparationContext",
+    "PreparationStep",
     "ReorderTexts",
+    "SplitLanguages",
+    "ValidateStructure",
 ]

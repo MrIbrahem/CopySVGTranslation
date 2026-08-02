@@ -1,8 +1,6 @@
 # injection/steps/validate.py
 from __future__ import annotations
 
-from lxml import etree
-
 from ...exceptions import (
     SvgContainsTrefError,
     SvgCssHasIdsError,
