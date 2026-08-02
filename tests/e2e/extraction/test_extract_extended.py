@@ -89,6 +89,14 @@ class TestExtractEdgeCases:
         # Keys should be lowercase
         assert any(key.islower() for key in result["new"].keys()) is True
 
+        assert result == {
+            "new": {"hello": {"ar": "مرحبا"}},
+            "tspans_by_id": {"t1": "HELLO"},
+            "title": {},
+            "title_new": {},
+            "error": "",
+        }
+
     def test_extract_preserves_empty_tspan_text(self):
         """Test extraction handles empty tspan text."""
         svg_path = self.test_dir / "test.svg"
@@ -102,6 +110,7 @@ class TestExtractEdgeCases:
         result = extract(svg_path)
 
         assert result is not None
+        assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "error": ""}
 
     def test_extract_with_base_id_fallback(self):
         """Test extraction with base_id lookup fallback."""
@@ -117,3 +126,10 @@ class TestExtractEdgeCases:
         result = extract(svg_path)
 
         assert result is not None
+        assert result == {
+            "new": {"hello": {"ar": "مرحبا"}},
+            "tspans_by_id": {"TEXT1": "Hello"},
+            "title": {},
+            "title_new": {},
+            "error": "",
+        }

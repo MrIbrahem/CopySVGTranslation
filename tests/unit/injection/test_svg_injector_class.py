@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 from lxml import etree
 
 from CopySVGTranslation.injection.objects import InjectorData, InjectorStats
@@ -44,7 +43,7 @@ def _get_ar_text(root: etree._Element) -> str | None:
 
 def _get_default_texts(root: etree._Element) -> list[str]:
     """Return tspan text content of default (no systemLanguage) text nodes."""
-    tspans = root.xpath('//svg:text[not(@systemLanguage)]/svg:tspan/text()', namespaces=SVG_NSMAP)
+    tspans = root.xpath("//svg:text[not(@systemLanguage)]/svg:tspan/text()", namespaces=SVG_NSMAP)
     return tspans
 
 
@@ -446,7 +445,7 @@ class TestSVGTranslationInjectorSave:
         # Should parse without error
         tree = etree.parse(str(target))
         root = tree.getroot()
-        assert root.tag == "svg" or root.tag.endswith("}svg")
+        assert root.tag == "{http://www.w3.org/2000/svg}svg"
 
 
 # ===========================================================================
@@ -561,11 +560,13 @@ class TestWorkOnSwitches:
         return etree.fromstring(_wrap_svg(inner))
 
     def test_inserts_translation_nodes(self):
-        root = self._make_root("""
+        root = self._make_root(
+            """
             <switch>
                 <text id="t0"><tspan id="t0">Hello</tspan></text>
             </switch>
-        """)
+        """
+        )
         inj = SVGTranslationInjector()
         existing_ids = set(root.xpath("//@id"))
 
@@ -575,11 +576,13 @@ class TestWorkOnSwitches:
         assert len(ar_nodes) == 1
 
     def test_generates_unique_ids(self):
-        root = self._make_root("""
+        root = self._make_root(
+            """
             <switch>
                 <text id="t0"><tspan id="t0">Hello</tspan></text>
             </switch>
-        """)
+        """
+        )
         inj = SVGTranslationInjector()
         existing_ids = set(root.xpath("//@id"))
 
@@ -596,11 +599,13 @@ class TestWorkOnSwitches:
         assert fr_id.startswith("t0")
 
     def test_newly_generated_ids_are_unique(self):
-        root = self._make_root("""
+        root = self._make_root(
+            """
             <switch>
                 <text id="t0"><tspan id="t0">Hello</tspan></text>
             </switch>
-        """)
+        """
+        )
         inj = SVGTranslationInjector()
         existing_ids = set(root.xpath("//@id"))
 
@@ -611,8 +616,8 @@ class TestWorkOnSwitches:
         )
 
         # Collect only the newly added <text> nodes (those with systemLanguage)
-        new_text_ids = root.xpath('.//svg:text[@systemLanguage]/@id', namespaces=SVG_NSMAP)
-        new_tspan_ids = root.xpath('.//svg:text[@systemLanguage]/svg:tspan/@id', namespaces=SVG_NSMAP)
+        new_text_ids = root.xpath(".//svg:text[@systemLanguage]/@id", namespaces=SVG_NSMAP)
+        new_tspan_ids = root.xpath(".//svg:text[@systemLanguage]/svg:tspan/@id", namespaces=SVG_NSMAP)
 
         # Newly generated IDs should not collide with the original IDs
         for new_id in list(new_text_ids) + list(new_tspan_ids):
@@ -623,11 +628,13 @@ class TestWorkOnSwitches:
         assert len(all_new) == len(set(all_new))
 
     def test_no_match_skips_switch(self):
-        root = self._make_root("""
+        root = self._make_root(
+            """
             <switch>
                 <text id="t0"><tspan id="t0">Goodbye</tspan></text>
             </switch>
-        """)
+        """
+        )
         inj = SVGTranslationInjector()
 
         inj.work_on_switches(root, mappings={"new": {"hello": {"ar": "مرحبا"}}})

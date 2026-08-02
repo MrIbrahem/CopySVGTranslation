@@ -4,9 +4,8 @@ Unit tests for SVGTranslationExtractor class and ExtractorData dataclass.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
-
-import pytest
 
 from CopySVGTranslation.extraction.svg_extractor import (
     ExtractorData,
@@ -56,6 +55,8 @@ class TestExtractorData:
         assert "title" in result
         assert "title_new" in result
         assert "error" in result
+
+        assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "error": ""}
 
     def test_to_json_reflects_data(self):
         data = ExtractorData(
@@ -342,7 +343,6 @@ class TestExtractorDataToJson:
         assert isinstance(data["error"], str)
 
     def test_to_json_is_serializable(self, tmp_path: Path):
-        import json
 
         inner = """
             <switch>

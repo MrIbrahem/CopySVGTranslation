@@ -10,7 +10,6 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 
-import pytest
 from lxml import etree
 
 # ---------------------------------------------------------------------------
@@ -365,9 +364,9 @@ class TestPreparerIdempotency:
         preparer.prepare()
         count_after_second = len(preparer.translatable_nodes)
 
-        assert count_after_first == count_after_second, (
-            f"translatable_nodes grew from {count_after_first} to {count_after_second}"
-        )
+        assert (
+            count_after_first == count_after_second
+        ), f"translatable_nodes grew from {count_after_first} to {count_after_second}"
 
     def test_existing_ids_do_not_accumulate(self, tmp_path: Path):
         """existing_ids should have the same count after each prepare() call."""
@@ -386,9 +385,7 @@ class TestPreparerIdempotency:
         preparer.prepare()
         ids_after_second = set(preparer.existing_ids)
 
-        assert ids_after_first == ids_after_second, (
-            f"existing_ids changed: {ids_after_first} → {ids_after_second}"
-        )
+        assert ids_after_first == ids_after_second, f"existing_ids changed: {ids_after_first} → {ids_after_second}"
 
     def test_ids_in_use_reset(self, tmp_path: Path):
         """ids_in_use should be reset between prepare() calls."""
@@ -408,9 +405,7 @@ class TestPreparerIdempotency:
         preparer.prepare()
         ids_after_second = list(preparer.ids_in_use)
 
-        assert ids_after_first == ids_after_second, (
-            f"ids_in_use changed: {ids_after_first} → {ids_after_second}"
-        )
+        assert ids_after_first == ids_after_second, f"ids_in_use changed: {ids_after_first} → {ids_after_second}"
 
 
 # ===========================================================================
@@ -436,9 +431,8 @@ class TestFixNestedFileDeprecation:
 
             deprecation_warnings = [x for x in w if issubclass(x.category, DeprecationWarning)]
             assert len(deprecation_warnings) >= 1, "Expected DeprecationWarning when new_path is None"
-            assert "new_path" in str(deprecation_warnings[0].message).lower() or "deprecated" in str(
-                deprecation_warnings[0].message
-            ).lower()
+            assert "new_path" in str(deprecation_warnings[0].message).lower()
+            assert "deprecated" in str(deprecation_warnings[0].message).lower()
 
     def test_no_warning_when_new_path_provided(self, tmp_path: Path):
         """Calling fix_nested_file with new_path should not emit a warning."""

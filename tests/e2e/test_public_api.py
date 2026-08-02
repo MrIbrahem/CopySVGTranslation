@@ -81,6 +81,13 @@ class TestExtractFunction:
         result = extract(FIXTURES_DIR / "source.svg")
         assert "new" in result
         assert "title" in result
+        assert result == {
+            "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
+            "tspans_by_id": {"label": "Population 2020"},
+            "title": {"population": {"ar": "السكان"}},
+            "title_new": {"population {year}": {"ar": "السكان {year}"}},
+            "error": "",
+        }
 
     def test_extract_nonexistent_file_returns_none(self):
         """extract should return None for non-existent files."""
@@ -93,6 +100,13 @@ class TestExtractFunction:
         assert result is not None
         # Should have lowercase keys
         assert "population 2020" in result["new"]
+        assert result == {
+            "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
+            "tspans_by_id": {"label": "Population 2020"},
+            "title": {"population": {"ar": "السكان"}},
+            "title_new": {"population {year}": {"ar": "السكان {year}"}},
+            "error": "",
+        }
 
     def test_extract_with_arabic_translations(self):
         """extract should properly extract Arabic translations."""
@@ -100,6 +114,13 @@ class TestExtractFunction:
         assert result is not None
         assert "ar" in result["new"]["population 2020"]
         assert result["new"]["population 2020"]["ar"] == "السكان 2020"
+        assert result == {
+            "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
+            "tspans_by_id": {"label": "Population 2020"},
+            "title": {"population": {"ar": "السكان"}},
+            "title_new": {"population {year}": {"ar": "السكان {year}"}},
+            "error": "",
+        }
 
 
 class TestIntegrationWorkflows:
@@ -160,7 +181,7 @@ class TestEdgeCasesAndErrorHandling:
 
         result = extract(empty_svg)
         # Should either return None or empty dict depending on implementation
-        assert result is None or isinstance(result, dict)
+        assert result is None
 
     def test_extract_with_invalid_xml(self, tmp_path: Path):
         """extract should handle invalid XML gracefully."""
@@ -177,7 +198,7 @@ class TestEdgeCasesAndErrorHandling:
 
         result = inject(target_svg, [])
         # Should return None or handle gracefully
-        assert result is None or result is not None
+        assert result is None
 
 
 class TestAPIConsistency:

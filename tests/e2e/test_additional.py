@@ -49,6 +49,13 @@ class TestExtractorEdgeCases:
         result = extract(svg)
         assert result is not None
         assert "new" in result
+        assert result == {
+            "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}},
+            "tspans_by_id": {"s": "Hello"},
+            "title": {},
+            "title_new": {},
+            "error": "",
+        }
 
     def test_extract_empty_svg_gracefully(self, temp_dir):
         """Test extract handles empty SVG gracefully."""
@@ -56,6 +63,7 @@ class TestExtractorEdgeCases:
         svg.write_text('<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"></svg>', encoding="utf-8")
         result = extract(svg)
         assert result is not None
+        assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "error": ""}
 
 
 # -------------------------------

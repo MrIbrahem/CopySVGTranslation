@@ -68,6 +68,8 @@ class TestInjector:
         assert "new" in result
         assert result["new"]["hello"]["ar"] == "مرحبا"
 
+        assert result == {"new": {"hello": {"ar": "مرحبا"}}}
+
     def test_load_all_mappings_multiple_files(self, temp_dir):
         """Test loading multiple mapping files."""
         m1 = temp_dir / "m1.json"
@@ -77,6 +79,8 @@ class TestInjector:
         result = load_all_mappings([m1, m2])
         assert "key1" in result
         assert "key2" in result
+
+        assert result == {"key1": {"value": 1}, "key2": {"value": 2}}
 
     def test_load_all_mappings_nonexistent_file(self, temp_dir):
         """Test loading with nonexistent file."""
@@ -141,6 +145,18 @@ class TestInjector:
         tree, stats = inject(svg_path, all_mappings=mappings, case_insensitive=False, return_stats=True)
         assert tree is not None
         assert stats["inserted_translations"] == 1
+
+        assert stats == {
+            "all_languages": 1,
+            "new_languages": 1,
+            "processed_switches": 1,
+            "inserted_translations": 1,
+            "skipped_translations": 0,
+            "updated_translations": 0,
+            "languages_before": [],
+            "languages_after": ["ar"],
+            "error": "",
+        }
 
 
 # -------------------------------

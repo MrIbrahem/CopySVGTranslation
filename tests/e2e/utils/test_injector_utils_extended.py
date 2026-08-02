@@ -114,6 +114,11 @@ class TestLoadAllMappingsEdgeCases(TestSetup):
         assert "new" in result
         assert "title" in result
 
+        assert result == {
+            "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}},
+            "title": {"Population ": {"ar": "السكان ", "fr": "Population "}},
+        }
+
     def test_load_all_mappings_merge_overlapping_keys(self):
         """Test merging mappings with overlapping keys."""
         m1 = self.test_dir / "m1.json"
@@ -130,6 +135,8 @@ class TestLoadAllMappingsEdgeCases(TestSetup):
         assert "lang1" in result["key"]
         assert "lang2" in result["key"]
 
+        assert result == {"key": {"lang1": "value1", "lang2": "value2"}}
+
     def test_load_all_mappings_string_paths(self):
         """Test loading with string paths instead of Path objects."""
         mapping_file = self.test_dir / "test.json"
@@ -139,6 +146,8 @@ class TestLoadAllMappingsEdgeCases(TestSetup):
         result = load_all_mappings([str(mapping_file)])
 
         assert "key" in result
+
+        assert result == {"key": {"value": "test"}}
 
 
 class TestGenerateUniqueIdFunction:

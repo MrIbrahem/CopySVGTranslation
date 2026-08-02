@@ -306,8 +306,7 @@ def test_extract_empty_svg(tmp_path: Path) -> None:
 
     result = extract(empty_svg)
 
-    # Should return a dict (possibly with empty structures) or None
-    assert result is None or isinstance(result, dict)
+    assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "error": ""}
 
 
 def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
@@ -338,9 +337,13 @@ def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
 
     assert result is not None
     # Should have translations for ar, fr, and es
-    if "new" in result and "hello" in result["new"]:
-        translations = result["new"]["hello"]
-        assert "ar" in translations or "fr" in translations or "es" in translations
+    assert result == {
+        "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour", "es": "Hola"}},
+        "tspans_by_id": {"label": "Hello"},
+        "title": {},
+        "title_new": {},
+        "error": "",
+    }
 
 
 def test_svg_extract_and_inject_with_overwrite_true(tmp_path: Path, target_svg: Path) -> None:
@@ -379,14 +382,24 @@ def test_inject_with_empty_translations(tmp_path: Path, target_svg: Path) -> Non
     """inject should handle empty translation dictionaries gracefully."""
     empty_translations = {"new": {}, "title": {}}
 
-    result = inject(
+    tree, stats = inject(
         inject_file=target_svg,
         all_mappings=empty_translations,
         save_result=False,
+        return_stats=True,
     )
 
-    # Should handle gracefully and return a result (even if no translations were applied)
-    assert result is not None or result is None  # Either outcome is acceptable
+    assert stats == {
+        "all_languages": 0,
+        "new_languages": 0,
+        "processed_switches": 0,
+        "inserted_translations": 0,
+        "skipped_translations": 0,
+        "updated_translations": 0,
+        "languages_before": [],
+        "languages_after": [],
+        "error": "",
+    }
 
 
 def test_extract_with_case_insensitive_true() -> None:
@@ -398,12 +411,13 @@ def test_extract_with_case_insensitive_true() -> None:
     result = extract(FIXTURES_DIR / "source.svg", case_insensitive=True)
 
     assert result is not None
-    # Keys should be lowercase
-    if "new" in result:
-        for key in result["new"].keys():
-            if isinstance(key, str):
-                # Text keys should be lowercase
-                assert key == key.lower()
+    assert result == {
+        "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
+        "tspans_by_id": {"label": "Population 2020"},
+        "title": {"population": {"ar": "السكان"}},
+        "title_new": {"population {year}": {"ar": "السكان {year}"}},
+        "error": "",
+    }
 
 
 def test_extract_with_case_insensitive_false(tmp_path: Path) -> None:
@@ -426,9 +440,13 @@ def test_extract_with_case_insensitive_false(tmp_path: Path) -> None:
 
     result = extract(svg_with_caps, case_insensitive=False)
 
-    # When case_insensitive is False, original case might be preserved
-    # (implementation dependent, so we just check it doesn't crash)
-    assert result is None or isinstance(result, dict)
+    assert result == {
+        "new": {"HELLO WORLD": {"ar": "مرحبا"}},
+        "tspans_by_id": {"label": "HELLO WORLD"},
+        "title": {},
+        "title_new": {},
+        "error": "",
+    }
 
 
 def test_svg_extract_and_inject_creates_parent_directories(tmp_path: Path, target_svg: Path) -> None:
@@ -484,4 +502,17 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
     assert (output2 / target_svg.name).exists()
 
     # Both should have inserted the same number of translations
+
     assert stats1["inserted_translations"] == stats2["inserted_translations"]
+
+    assert stats1 == {
+        "all_languages": 2,
+        "new_languages": 2,
+        "processed_switches": 1,
+        "inserted_translations": 2,
+        "skipped_translations": 0,
+        "updated_translations": 0,
+        "languages_before": [],
+        "languages_after": ["ar", "fr"],
+        "error": "",
+    }

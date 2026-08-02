@@ -41,6 +41,8 @@ class TestLoadAllMappings:
         result = load_all_mappings([mapping_file])
         assert "new" in result
 
+        assert result == {"new": {"hello": {"ar": "مرحبا"}}}
+
     def test_load_all_mappings_multiple_files_merge(self, temp_dir):
         """Test loading and merging multiple mapping files."""
         m1 = temp_dir / "m1.json"

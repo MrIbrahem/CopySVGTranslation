@@ -26,6 +26,7 @@ class TestExtractor:
         result = extract(svg)
         assert result is not None
         assert "new" in result
+        assert result == {"new": {"hello": {}}, "tspans_by_id": {}, "title": {}, "title_new": {}, "error": ""}
         # assert "ar" in result["new"]["hello"]
         # assert "fr" in result["new"]["hello"]
 
@@ -49,8 +50,14 @@ class TestExtractor:
             encoding="utf-8",
         )
         result = extract(svg)
-        print(result)
         assert result is not None
         assert "new" in result
         assert "ar" in result["new"]["hello"]
         assert "fr" in result["new"]["hello"]
+        assert result == {
+            "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}},
+            "tspans_by_id": {"t0": "Hello"},
+            "title": {},
+            "title_new": {},
+            "error": "",
+        }
