@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .extraction import extract
-from .injection import inject
+from .injection import InjectorData, SVGTranslationInjector, inject
 
 logger = logging.getLogger(__name__)
 
@@ -88,21 +88,34 @@ def svg_extract_and_injects(
     save_result: bool = False,
     **kwargs: Any,
 ):
-    """Inject provided translations into a single SVG file."""
+    """
+    Inject provided translations into a single SVG file.
+    """
     inject_path = Path(str(inject_file))
+    target_path: Path | None = None
 
-    if not output_dir and save_result:
-        output_dir = Path.cwd() / "translated"
-        output_dir.mkdir(parents=True, exist_ok=True)
+    if save_result:
+        if output_dir:
+            target_path = Path(output_dir) / inject_path.name
+        else:
+            target_path = Path.cwd() / "translated" / inject_path.name
 
-    return inject(
-        inject_file=inject_path,
-        all_mappings=translations,
-        output_dir=output_dir,
-        save_result=save_result,
-        **kwargs,
+    injector = SVGTranslationInjector(
+        case_insensitive=True,
+        overwrite=bool(kwargs.get("overwrite")),
+        pretty_print=bool(kwargs.get("pretty_print")),
     )
 
+    data: InjectorData = injector.inject(
+        inject_file=inject_path,
+        all_mappings=translations,
+        save_result=save_result,
+        target_path=target_path,
+    )
+
+    # stats = data.new_stats.to_json()
+
+    return data.tree
 
 __all__ = [
     "svg_extract_and_inject",
