@@ -19,20 +19,20 @@ In the new design this responsibility is split into clear, testable pieces.
 
 ```
 injection/
-├── __init__.py
-├── preparer.py              # SvgPreparationPipeline
-├── injector.py              # SVGTranslationInjector (orchestrator only)
-├── id_manager.py            # IdManager
-├── switch_processor.py      # SwitchProcessor  ← replaces most of work_on_switches
-├── translation_applier.py   # TranslationApplier
-└── steps/                   # Preparation only (runs before injection)
-    ├── base.py
-    ├── load.py
-    ├── validate.py
-    ├── normalize_tspans.py
-    ├── assign_ids.py
-    ├── split_languages.py
-    └── reorder.py
+    ├── __init__.py
+    ├── preparer.py              # SvgPreparationPipeline
+    ├── injector.py              # SVGTranslationInjector (orchestrator only)
+    ├── id_manager.py            # IdManager
+    ├── switch_processor.py      # SwitchProcessor  ← replaces most of work_on_switches
+    ├── translation_applier.py   # TranslationApplier
+    └── steps/                   # Preparation only (runs before injection)
+        ├── base.py
+        ├── load.py
+        ├── validate.py
+        ├── normalize_tspans.py
+        ├── assign_ids.py
+        ├── split_languages.py
+        └── reorder.py
 ```
 
 ---
