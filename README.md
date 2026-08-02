@@ -90,9 +90,7 @@ if tree is not None:
     print("Injection completed!")
 ```
 
-The helper stores the extracted phrases under `Path("examples/data.json")` and,
-when `save_result=True`, writes the translated SVG to
-`output_dir=Path("./translated")`.
+`save_result=True`, writes the translated SVG to `inject_file`.
 
 ## API Reference
 
@@ -234,7 +232,7 @@ from CopySVGTranslation import svg_extract_and_injects
 tree = svg_extract_and_injects(
     translations: Mapping,
     inject_file: Path | str,
-    output_dir: Path | None = None,
+    target_path: Path | str,
     save_result: bool = False,
 )
 ```
