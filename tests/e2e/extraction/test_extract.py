@@ -32,8 +32,8 @@ class TestWorkflows:
         result = svg_extract_and_inject(
             source_svg,
             target_svg,
-            output_file=output_svg,
-            data_output_file=data_output,
+            target_path=output_svg,
+            all_mappings_file=data_output,
             save_result=True,
             pretty_print=False,
         )

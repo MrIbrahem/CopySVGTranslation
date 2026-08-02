@@ -13,8 +13,8 @@ from ..service import SVGTranslationService
 def svg_extract_and_inject(
     extract_file: Path | str,
     inject_file: Path | str,
-    output_file: Path | None = None,
-    data_output_file: Path | None = None,
+    target_path: Path | None = None,
+    all_mappings_file: Path | None = None,
     overwrite: bool | None = None,
     save_result: bool = False,
 ) -> Any:
@@ -35,12 +35,12 @@ def svg_extract_and_inject(
     service = SVGTranslationService(config)
 
     save_mapping: bool | Path | None = False
-    save_mapping = Path(data_output_file) if data_output_file is not None else True
+    save_mapping = Path(all_mappings_file) if all_mappings_file is not None else True
 
     result = service.extract_and_inject(
         source=extract_file,
         target=inject_file,
-        output=output_file,
+        output=target_path,
         save_mapping=save_mapping,
         save=save_result,
     )

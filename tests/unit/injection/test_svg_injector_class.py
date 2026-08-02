@@ -378,7 +378,7 @@ class TestSVGTranslationInjectorSave:
         result = inj.inject(
             inject_file=svg,
             all_mappings=mappings,
-            target_path=target,
+            save_path=target,
             save_result=True,
         )
 
@@ -399,7 +399,7 @@ class TestSVGTranslationInjectorSave:
         inj.inject(
             inject_file=svg,
             all_mappings=mappings,
-            target_path=target,
+            save_path=target,
             save_result=False,
         )
 
@@ -419,7 +419,7 @@ class TestSVGTranslationInjectorSave:
             inject_file=svg,
             all_mappings=mappings,
             save_result=True,
-            target_path=None,
+            save_path=None,
         )
 
         assert result.new_stats.error != ""
@@ -438,7 +438,7 @@ class TestSVGTranslationInjectorSave:
         inj.inject(
             inject_file=svg,
             all_mappings=mappings,
-            target_path=target,
+            save_path=target,
             save_result=True,
         )
 
@@ -692,7 +692,7 @@ class TestExtractorInjectorE2E:
         inject_result = injector.inject(
             inject_file=target_svg,
             all_mappings=extract_result.to_json(),
-            target_path=output_svg,
+            save_path=output_svg,
             save_result=True,
         )
 
@@ -733,7 +733,7 @@ class TestExtractorInjectorE2E:
         result = injector.inject(
             inject_file=target_svg,
             all_mappings=data,
-            target_path=output_svg,
+            save_path=output_svg,
             save_result=True,
         )
 

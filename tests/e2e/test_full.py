@@ -30,8 +30,8 @@ def test_svg_extract_and_inject_creates_translation_files(tmp_path: Path, target
     tree = svg_extract_and_inject(
         source_svg,
         target_svg,
-        output_file=output_svg,
-        data_output_file=data_output,
+        target_path=output_svg,
+        all_mappings_file=data_output,
         overwrite=True,
         save_result=True,
         pretty_print=False,
@@ -67,9 +67,9 @@ def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
     assert tree is not None
     assert stats["inserted_translations"] >= 1
 
-    output_file = output_dir / target_svg.name
-    assert output_file.exists(), "The helper should honour the output directory when saving results"
-    content = output_file.read_text(encoding="utf-8")
+    _output_file = output_dir / target_svg.name
+    assert _output_file.exists(), "The helper should honour the output directory when saving results"
+    content = _output_file.read_text(encoding="utf-8")
     assert 'systemLanguage="ar"' in content
     assert "السكان 2020" in content
 
@@ -111,8 +111,8 @@ def test_svg_extract_and_inject_with_pathlib_and_string_paths(tmp_path: Path, ta
     tree = svg_extract_and_inject(
         str(source_svg),  # String path
         str(target_svg),  # String path
-        output_file=str(output_svg),
-        data_output_file=str(data_output),
+        target_path=str(output_svg),
+        all_mappings_file=str(data_output),
         save_result=True,
     )
 
@@ -248,7 +248,7 @@ def test_svg_extract_and_inject_with_overwrite_true(tmp_path: Path, target_svg: 
     tree1 = svg_extract_and_inject(
         source_svg,
         target_svg,
-        output_file=output_svg,
+        target_path=output_svg,
         overwrite=True,
         save_result=True,
     )
@@ -260,7 +260,7 @@ def test_svg_extract_and_inject_with_overwrite_true(tmp_path: Path, target_svg: 
     tree2 = svg_extract_and_inject(
         source_svg,
         target_svg,
-        output_file=output_svg,
+        target_path=output_svg,
         overwrite=True,
         save_result=True,
     )

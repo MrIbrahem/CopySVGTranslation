@@ -66,12 +66,12 @@ class TestInjectEdgeCases(TestSetup):
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        output_file = self.test_dir / "output.svg"
+        _output_file = self.test_dir / "output.svg"
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        inject(svg_path, all_mappings=mappings, output_file=output_file, save_result=True)
+        inject(svg_path, all_mappings=mappings, save_path=_output_file, save_result=True)
 
-        assert output_file.exists() is True
+        assert _output_file.exists() is True
 
     def test_inject_without_save_result_no_file_created(self):
         """Test that save_result=False doesn't create output file."""
@@ -81,9 +81,9 @@ class TestInjectEdgeCases(TestSetup):
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        output_file = self.test_dir / "output.svg"
+        _output_file = self.test_dir / "output.svg"
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        inject(svg_path, all_mappings=mappings, output_file=output_file, save_result=False)
+        inject(svg_path, all_mappings=mappings, save_path=_output_file, save_result=False)
 
-        assert output_file.exists() is False
+        assert _output_file.exists() is False

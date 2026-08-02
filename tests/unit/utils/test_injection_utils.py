@@ -1,4 +1,3 @@
-# ruff: noqa: F401
 """
 Unit tests for CopySVGTranslation/injection/utils.py module.
 
@@ -10,7 +9,6 @@ import json
 
 from CopySVGTranslation.utils.injection_utils import (
     generate_unique_id,
-    get_target_path,
     load_all_mappings,
 )
 

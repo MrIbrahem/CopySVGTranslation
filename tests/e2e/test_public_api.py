@@ -140,8 +140,8 @@ class TestIntegrationWorkflows:
         result = svg_extract_and_inject(
             source_svg,
             target_svg,
-            output_file=output_svg,
-            data_output_file=data_file,
+            target_path=output_svg,
+            all_mappings_file=data_file,
             save_result=True,
         )
 

@@ -77,7 +77,7 @@ def inject(
     inject_file: Path | str | None = None,
     all_mappings: Mapping | None = None,
     case_insensitive: bool = True,
-    output_file: Path | None = None,
+    save_path: Path | None = None,
     output_dir: Path | None = None,
     overwrite: bool = False,
     save_result: bool = False,
@@ -113,8 +113,8 @@ def inject(
     inject_path = Path(str(inject_file))
     target: Path | None = None
     if save_result:
-        if output_file:
-            target = Path(output_file)
+        if save_path:
+            target = Path(save_path)
         elif output_dir:
             target = Path(output_dir) / inject_path.name
         else:
@@ -165,8 +165,8 @@ from ..service import SVGTranslationService
 def svg_extract_and_inject(
     extract_file: Path | str,
     inject_file: Path | str,
-    output_file: Path | None = None,
-    data_output_file: Path | None = None,
+    target_path: Path | None = None,
+    all_mappings_file: Path | None = None,
     overwrite: bool | None = None,
     save_result: bool = False,
 ) -> Any:
@@ -187,8 +187,8 @@ def svg_extract_and_inject(
     service = SVGTranslationService(config)
 
     save_mapping: bool | Path | None = False
-    if data_output_file is not None:
-        save_mapping = Path(data_output_file)
+    if all_mappings_file is not None:
+        save_mapping = Path(all_mappings_file)
     else:
         # old behaviour: always wrote a JSON under cwd/data/
         save_mapping = True
@@ -196,7 +196,7 @@ def svg_extract_and_inject(
     result = service.extract_and_inject(
         source=extract_file,
         target=inject_file,
-        output=output_file,
+        output=target_path,
         save_mapping=save_mapping,
         save=save_result,
     )
@@ -261,7 +261,7 @@ __all__ = [
 | `extract(path)`                   | `dict \| None`        | Same shape as old `to_json()`                                   |
 | `inject(..., return_stats=False)` | `ElementTree \| None` | Same as before                                                  |
 | `inject(..., return_stats=True)`  | `(tree, stats_dict)`  | `stats` includes `error` on failure                             |
-| `svg_extract_and_inject(...)`     | `ElementTree \| None` | Still may write JSON if `data_output_file` or default path used |
+| `svg_extract_and_inject(...)`     | `ElementTree \| None` | Still may write JSON if `all_mappings_file` or default path used |
 | `svg_extract_and_injects(...)`    | same as `inject`      | Thin redirect                                                   |
 
 All of them emit `DeprecationWarning`.

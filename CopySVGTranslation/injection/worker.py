@@ -18,7 +18,7 @@ def inject(
     mapping_files: Iterable[Path | str] | None = None,
     all_mappings: Mapping | None = None,
     case_insensitive: bool = True,
-    output_file: Path | None = None,
+    save_path: Path | None = None,
     output_dir: Path | None = None,
     overwrite: bool = False,
     save_result: bool = False,
@@ -34,15 +34,15 @@ def inject(
         all_mappings = load_all_mappings(mapping_files)
 
     inject_path = Path(str(inject_file))
-    target_path: Path | None = None
+    save_path: Path | None = None
 
     if save_result:
-        if output_file:
-            target_path = Path(str(output_file))
+        if save_path:
+            save_path = Path(str(save_path))
         elif output_dir:
-            target_path = Path(str(output_dir)) / inject_path.name
+            save_path = Path(str(output_dir)) / inject_path.name
         else:
-            target_path = inject_path.parent / "translated" / inject_path.name
+            save_path = inject_path.parent / "translated" / inject_path.name
 
     injector = SVGTranslationInjector(
         case_insensitive=case_insensitive,
@@ -51,10 +51,10 @@ def inject(
     )
 
     result: InjectorData = injector.inject(
-        inject_file,
+        inject_file=inject_file,
         all_mappings=all_mappings,
         save_result=save_result,
-        target_path=target_path,
+        save_path=save_path,
     )
 
     if return_stats:

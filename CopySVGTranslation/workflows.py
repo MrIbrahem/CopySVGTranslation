@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 def svg_extract_and_inject(
     extract_file: Path | str,
     inject_file: Path | str,
-    output_file: Path | None = None,
-    data_output_file: Path | None = None,
+    target_path: Path | None = None,
+    all_mappings_file: Path | None = None,
     overwrite: bool | None = None,
     save_result: bool = False,
     pretty_print: bool | None = None,
@@ -29,37 +29,37 @@ def svg_extract_and_inject(
     Parameters:
         extract_file (Path | str): Path to the SVG file to extract translations from.
         inject_file (Path | str): Path to the SVG file to inject translations into.
-        output_file (Path | None): Optional path for the resulting injected SVG. If omitted, a file with the same name as `inject_file` is created in a `translated` directory under the current working directory.
-        data_output_file (Path | None): Optional path for the JSON file that will store extracted translations. If omitted, a file named after `extract_file` is created in a `data` directory under the current working directory.
+        target_path (Path | None): Optional path for the resulting injected SVG. If omitted, a file with the same name as `inject_file` is created in a `translated` directory under the current working directory.
+        all_mappings_file (Path | None): Optional path for the JSON file that will store extracted translations. If omitted, a file named after `extract_file` is created in a `data` directory under the current working directory.
         overwrite (bool | None): If `True`, existing translation nodes inside the SVG are updated; when `False`, they are left as-is. Ignored for file I/O: when `save_result=True`, the output file is written regardless. `None` is treated as `False`.
-        save_result (bool): If `True`, the injection result will be saved to `output_file`.
+        save_result (bool): If `True`, the injection result will be saved to `target_path`.
 
     Returns:
         ElementTree | None: The parsed tree of the injected SVG when successful, `None` if extraction or injection failed.
     """
     extract_path = Path(str(extract_file))
     inject_path = Path(str(inject_file))
-    target_path = output_file
+    _target_path = target_path
 
     translations = extract(extract_path, case_insensitive=True)
     all_mappings = translations
 
-    if not all_mappings and data_output_file:
-        all_mappings = load_all_mappings([data_output_file])
+    if not all_mappings and all_mappings_file:
+        all_mappings = load_all_mappings([all_mappings_file])
 
     if not all_mappings:
         logger.error(f"Failed to extract translations from {extract_path}")
         return None
 
-    if not target_path:
+    if not _target_path:
         output_dir = inject_path.parent / "translated"
         output_dir.mkdir(parents=True, exist_ok=True)
-        target_path = output_dir / inject_path.name
+        _target_path = output_dir / inject_path.name
 
     tree, stats = inject(
         inject_path,
         all_mappings=all_mappings,
-        output_file=target_path,
+        save_path=_target_path,
         overwrite=bool(overwrite),
         save_result=save_result,
         pretty_print=pretty_print,
@@ -86,13 +86,13 @@ def svg_extract_and_injects(
     Inject provided translations into a single SVG file.
     """
     inject_path = Path(str(inject_file))
-    target_path: Path | None = None
+    _target_path: Path | None = None
 
     if save_result:
         if output_dir:
-            target_path = Path(str(output_dir)) / inject_path.name
+            _target_path = Path(str(output_dir)) / inject_path.name
         else:
-            target_path = inject_path.parent / "translated" / inject_path.name
+            _target_path = inject_path.parent / "translated" / inject_path.name
 
     injector = SVGTranslationInjector(
         case_insensitive=True,
@@ -104,7 +104,7 @@ def svg_extract_and_injects(
         inject_file=inject_path,
         all_mappings=translations,
         save_result=save_result,
-        target_path=target_path,
+        save_path=_target_path,
     )
 
     # stats = data.new_stats.to_json()

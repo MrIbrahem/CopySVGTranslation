@@ -139,7 +139,7 @@ Ordered by leverage (impact ÷ effort, discounted by confidence and fix-risk).
 
 -   **Evidence**: `CopySVGTranslation/workflows.py:30-41` — the function always writes a JSON file and creates directories, even when `save_result=False`. Lines 30-34 create `data/` directory, lines 40-41 unconditionally `json.dump()` to it. Line 46-47 creates `translated/` directory.
 -   **Impact**: Users cannot use this function as a pure in-memory pipeline. Every call writes to the filesystem, which is surprising for a function that accepts `save_result=False`. In serverless/ephemeral environments or when processing many files, this creates unwanted I/O and directory clutter. The function also uses `Path.cwd()` which makes behavior depend on the working directory.
--   **Effort**: M — make the JSON write conditional (add a parameter like `cache_json=True`), and make the `data_output_file` and `output_file` defaults lazy (only create when needed).
+-   **Effort**: M — make the JSON write conditional (add a parameter like `cache_json=True`), and make the `all_mappings_file` and `save_path` defaults lazy (only create when needed).
 -   **Risk**: LOW — additive changes with backward-compatible defaults.
 -   **Confidence**: HIGH.
 -   **Fix sketch**: Add `cache_json: bool = True` parameter. When `cache_json=False`, pass the extracted mappings directly to `inject()` via `all_mappings=` instead of going through a JSON file on disk.

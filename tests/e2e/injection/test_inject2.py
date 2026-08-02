@@ -50,7 +50,7 @@ class Testinject:
 
         _result = inject(
             inject_file=file,
-            output_file=file,
+            save_path=file,
             all_mappings=data,
             save_result=True,
             pretty_print=False,
@@ -107,7 +107,7 @@ class Testinject:
 
         _result = inject(
             inject_file=file,
-            output_file=file,
+            save_path=file,
             all_mappings=data,
             save_result=True,
             overwrite=True,

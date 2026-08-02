@@ -147,7 +147,7 @@ class TestSVGTranslate(TestSetup):
             [mapping_path],
             return_stats=True,
             save_result=True,
-            output_file=no_translations_path,
+            save_path=no_translations_path,
         )
 
         # Verify stats
@@ -246,7 +246,7 @@ class TestSVGTranslate(TestSetup):
             overwrite=True,
             return_stats=True,
             save_result=True,
-            output_file=svg_path,
+            save_path=svg_path,
         )
 
         # Verify stats

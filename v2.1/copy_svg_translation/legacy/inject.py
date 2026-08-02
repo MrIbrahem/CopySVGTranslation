@@ -18,7 +18,7 @@ def inject(
     mapping_files: Iterable[Path | str] | None = None,
     all_mappings: Mapping | None = None,
     case_insensitive: bool = True,
-    output_file: Path | None = None,
+    save_path: Path | None = None,
     output_dir: Path | None = None,
     overwrite: bool = False,
     save_result: bool = False,
@@ -47,8 +47,8 @@ def inject(
     inject_path = Path(str(inject_file))
     target: Path | None = None
     if save_result:
-        if output_file:
-            target = Path(output_file)
+        if save_path:
+            target = Path(save_path)
         elif output_dir:
             target = Path(output_dir) / inject_path.name
         else:

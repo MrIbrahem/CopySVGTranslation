@@ -143,7 +143,7 @@ class SVGTranslationInjector:
         svg_path: Path,
         mapping: TranslationMapping,
         *,
-        target_path: Path | None = None,
+        save_path: Path | None = None,
         save: bool = False,
     ) -> tuple[etree._ElementTree | None, InjectorStats]:
         stats = InjectorStats()
@@ -175,8 +175,8 @@ class SVGTranslationInjector:
         stats.new_languages = len(after - before)
 
         # 7. Save if requested
-        if save and target_path:
-            self._save(tree, target_path)
+        if save and save_path:
+            self._save(tree, save_path)
 
         return tree, stats
 

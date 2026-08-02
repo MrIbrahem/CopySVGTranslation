@@ -71,8 +71,8 @@ class TestSvgExtractAndInject:
         tree = svg_extract_and_inject(
             extract_file=source,
             inject_file=target,
-            output_file=output,
-            data_output_file=data_output,
+            target_path=output,
+            all_mappings_file=data_output,
             save_result=True,
         )
 

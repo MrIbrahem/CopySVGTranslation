@@ -35,8 +35,8 @@ class TestIntegrationWorkflows:
         r = svg_extract_and_inject(
             self.source_svg,
             self.target_svg,
-            output_file=self.output_svg,
-            data_output_file=self.data_file,
+            target_path=self.output_svg,
+            all_mappings_file=self.data_file,
             save_result=True,
         )
         assert r is not None

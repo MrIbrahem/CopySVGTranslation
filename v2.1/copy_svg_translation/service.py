@@ -89,7 +89,7 @@ class SVGTranslationService:
             tree, stats = self._get_injector().inject(
                 svg_path,
                 normalized,
-                target_path=resolved_output,
+                save_path=resolved_output,
                 save=should_save,
             )
         except Exception as exc:

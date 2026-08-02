@@ -60,7 +60,7 @@ translations = {
 result = injector.inject(
     inject_file=Path("examples/target_missing_translations.svg"),
     all_mappings=translations,
-    target_path=Path("translated/target.svg"),
+    save_path=Path("translated/target.svg"),
     save_result=True,
 )
 
@@ -82,7 +82,7 @@ from CopySVGTranslation import svg_extract_and_inject
 tree = svg_extract_and_inject(
     extract_file=Path("examples/source_multilingual.svg"),
     inject_file=Path("examples/target_missing_translations.svg"),
-    data_output_file=Path("examples/data.json"),
+    all_mappings_file=Path("examples/data.json"),
     save_result=True,
 )
 
@@ -146,7 +146,7 @@ injector = SVGTranslationInjector(
 result: InjectorData = injector.inject(
     inject_file: Path | str,
     all_mappings: Mapping | None = None,
-    target_path: Path | None = None,
+    save_path: Path | None = None,
     save_result: bool = False,
 )
 ```
@@ -165,8 +165,8 @@ result: InjectorData = injector.inject(
 | -------------- | ----------------- | ------- | --------------------------------------------------------------- |
 | `inject_file`  | `Path \| str`     | —       | Path to the SVG file to inject translations into.               |
 | `all_mappings` | `Mapping \| None` | `None`  | Translation mapping dictionary (see [Data Model](#data-model)). |
-| `target_path`  | `Path \| None`    | `None`  | Output file path when `save_result=True`.                       |
-| `save_result`  | `bool`            | `False` | If `True`, writes the modified SVG to `target_path`.            |
+| `save_path`    | `Path \| None`    | `None`  | Output file path when `save_result=True`.                       |
+| `save_result`  | `bool`            | `False` | If `True`, writes the modified SVG to `save_path`.              |
 
 **Returns:** `InjectorData` — a dataclass with the following fields:
 
@@ -215,8 +215,8 @@ from CopySVGTranslation import svg_extract_and_inject
 tree = svg_extract_and_inject(
     extract_file: Path | str,
     inject_file: Path | str,
-    output_file: Path | None = None,
-    data_output_file: Path | None = None,
+    target_path: Path | None = None,
+    all_mappings_file: Path | None = None,
     overwrite: bool | None = None,
     save_result: bool = False,
 )
@@ -292,7 +292,7 @@ from CopySVGTranslation import inject
 tree, stats = inject(
     inject_file=Path("target.svg"),
     all_mappings=translations,
-    output_file=Path("translated/target.svg"),
+    save_path=Path("translated/target.svg"),
     save_result=True,
     return_stats=True,
 )
@@ -303,7 +303,7 @@ injector = SVGTranslationInjector(case_insensitive=True, overwrite=False)
 result = injector.inject(
     inject_file=Path("target.svg"),
     all_mappings=translations,
-    target_path=Path("translated/target.svg"),
+    save_path=Path("translated/target.svg"),
     save_result=True,
 )
 tree = result.tree
@@ -467,7 +467,7 @@ translations = {
 result = injector.inject(
     inject_file=Path("target.svg"),
     all_mappings=translations,
-    target_path=Path("translated/target.svg"),
+    save_path=Path("translated/target.svg"),
     save_result=True,
 )
 
