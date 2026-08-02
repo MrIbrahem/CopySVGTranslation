@@ -7,45 +7,7 @@ import logging
 from collections.abc import Iterable
 from pathlib import Path
 
-from lxml import etree
-
 logger = logging.getLogger(__name__)
-
-
-def file_langs(
-    file: Path | str | etree._ElementTree | etree._Element | None,
-) -> set[str]:
-    """Return the list of languages declared in ``systemLanguage`` attributes."""
-
-    languages: set[str] = set()
-    root: etree._Element | None = None
-
-    try:
-        if isinstance(file, etree._ElementTree):
-            root = file.getroot()
-        elif isinstance(file, etree._Element):
-            root = file
-        elif file is not None:
-            svg_path = Path(str(file))
-            parser = etree.XMLParser(remove_blank_text=True)
-            tree = etree.parse(str(svg_path), parser)
-            root = tree.getroot()
-
-        if root is None:
-            return set()
-
-        text_elements = root.xpath(
-            ".//svg:text",
-            namespaces={"svg": "http://www.w3.org/2000/svg"},
-        )
-        for text in text_elements:
-            system_language = text.get("systemLanguage")
-            if system_language:
-                languages.add(system_language)
-    except (etree.XMLSyntaxError, OSError):
-        logger.exception(f"Error parsing SVG file: {file}")
-
-    return languages
 
 
 def get_target_path(
@@ -121,35 +83,8 @@ def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
     return all_mappings
 
 
-def sort_switch_texts(elem):
-    """
-    Sort <text> elements inside each <switch> so that elements
-    without systemLanguage attribute come last.
-    """
-    ns = {"svg": "http://www.w3.org/2000/svg"}
-
-    # Iterate over all <switch> elements
-    # Get all <text> elements
-    texts = elem.findall("svg:text", namespaces=ns)
-
-    # Separate those with systemLanguage and those without
-    without_lang = [t for t in texts if t.get("systemLanguage") is None]
-
-    # Clear switch content
-    for t in without_lang:
-        elem.remove(t)
-
-    # Re-insert <text> elements: first with language, then without
-    for t in without_lang:
-        elem.append(t)
-
-    return elem
-
-
 __all__ = [
-    "file_langs",
     "get_target_path",
     "generate_unique_id",
     "load_all_mappings",
-    "sort_switch_texts",
 ]

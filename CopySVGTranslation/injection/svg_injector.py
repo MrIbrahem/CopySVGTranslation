@@ -10,17 +10,20 @@ from lxml import etree
 
 from ..titles_new import get_new_titles_translations
 from ..utils import extract_text_from_node, normalize_text
+from .elements_utils import (
+    file_langs,
+    sort_switch_texts,
+    tree_langs,
+)
 from .exceptions import (
     SvgNestedTspanExceptionError,
     SvgStructureExceptionError,
 )
 from .preparation import make_translation_ready
 from .utils import (
-    file_langs,
     generate_unique_id,
     get_target_path,
     load_all_mappings,
-    sort_switch_texts,
 )
 
 logger = logging.getLogger(__name__)
@@ -185,14 +188,13 @@ class SVGTranslationInjector:
 
         return stats
 
-    def inject(
+    def _inject(
         self,
         inject_file: Path | str,
         all_mappings: Mapping | None = None,
         output_file: Path | None = None,
         output_dir: Path | None = None,
         save_result: bool = False,
-        return_stats: bool = False,
     ):
         """Inject translations into the provided SVG file."""
 
@@ -200,13 +202,13 @@ class SVGTranslationInjector:
 
         if not inject_path.exists():
             logger.error(f"SVG file not found: {inject_path}")
-            error = {"error": "File does not exist"}
-            return (None, error) if return_stats else None
+            stats = {"error": "File does not exist"}
+            return (None, stats)
 
         if not all_mappings:
             logger.error("No valid mappings found")
-            error = {"error": "No valid mappings found"}
-            return (None, error) if return_stats else None
+            stats = {"error": "No valid mappings found"}
+            return (None, stats)
 
         logger.debug(f"Injecting translations into {inject_path}")
 
@@ -214,19 +216,19 @@ class SVGTranslationInjector:
         try:
             tree, root = make_translation_ready(inject_path, write_back=False)
         except SvgNestedTspanExceptionError as exc:
-            error = {"nested_tspan_error": True, "node": exc.node()}
-            return (None, error) if return_stats else None
+            stats = {"nested_tspan_error": True, "node": exc.node()}
+            return (None, stats)
         except SvgStructureExceptionError as exc:
-            error = {"error": str(exc)}
-            return (None, error) if return_stats else None
+            stats = {"error": str(exc)}
+            return (None, stats)
         except etree.XMLSyntaxError as exc:
             logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
-            error = {"error": str(exc)}
-            return (None, error) if return_stats else None
+            stats = {"error": str(exc)}
+            return (None, stats)
         except (OSError, Exception) as exc:
             logger.error("Failed to parse SVG file: %s", exc)
-            error = {"error": str(exc)}
-            return (None, error) if return_stats else None
+            stats = {"error": str(exc)}
+            return (None, stats)
 
         # Collect all existing IDs to ensure uniqueness
         # existing_ids = {elem.get('id') for elem in root.xpath('//*[@id]') if elem.get('id')}
@@ -261,8 +263,10 @@ class SVGTranslationInjector:
                 logger.error(f"Failed writing {inject_path.name}: {e}")
                 tree = None
         else:
-            after_languages = file_langs(tree)
+            after_languages = tree_langs(tree)
+
         new_languages = after_languages - before_languages
+
         stats["all_languages"] = len(after_languages)
         stats["new_languages"] = len(new_languages)
         stats["new_languages_list"] = sorted(new_languages)
@@ -272,9 +276,26 @@ class SVGTranslationInjector:
         logger.debug(f"Updated {stats['updated_translations']} translations")
         logger.debug(f"Skipped {stats['skipped_translations']} existing translations")
 
+        return tree, stats
+
+    def inject(
+        self,
+        inject_file: Path | str,
+        all_mappings: Mapping | None = None,
+        output_file: Path | None = None,
+        output_dir: Path | None = None,
+        save_result: bool = False,
+        return_stats: bool = False,
+    ):
+        tree, stats = self._inject(
+            inject_file,
+            all_mappings=all_mappings,
+            output_file=output_file,
+            output_dir=output_dir,
+            save_result=save_result,
+        )
         if return_stats:
             return tree, stats
-
         return tree
 
 

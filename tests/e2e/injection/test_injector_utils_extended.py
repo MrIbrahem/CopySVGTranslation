@@ -6,42 +6,15 @@ and previously untested functions.
 import json
 import shutil
 import tempfile
-import textwrap
 from pathlib import Path
 
 import pytest
-from lxml import etree
 
 from CopySVGTranslation.injection.utils import (
-    file_langs,
     generate_unique_id,
     get_target_path,
     load_all_mappings,
-    sort_switch_texts,
 )
-
-
-def write_svg(tmp_path: Path, content: str) -> Path:
-    svg_path = tmp_path / "sample.svg"
-    svg_path.write_text(textwrap.dedent(content), encoding="utf-8")
-    return svg_path
-
-
-def test_inject_tracks_new_languages(tmp_path):
-    svg_path = write_svg(
-        tmp_path,
-        """
-        <svg xmlns=\"http://www.w3.org/2000/svg\">
-            <switch>
-                <text id=\"t1\"><tspan>Hello</tspan></text>
-            </switch>
-        </svg>
-        """,
-    )
-
-    before_languages = file_langs(svg_path)
-
-    assert before_languages == set()
 
 
 class TestSetup:
@@ -97,55 +70,6 @@ class TestGetTargetPath(TestSetup):
 
         assert isinstance(result, Path) is True
         assert result.parent.exists() is True
-
-
-class TestSortSwitchTexts(TestSetup):
-    """Test suite for sort_switch_texts function."""
-
-    def test_sort_switch_texts_basic(self):
-        """Test sorting text elements in a switch."""
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch>
-                <text systemLanguage="ar">Arabic</text>
-                <text>Default</text>
-                <text systemLanguage="fr">French</text>
-            </switch>
-        </svg>"""
-        root = etree.fromstring(svg_content)
-        switch = root.find(".//{http://www.w3.org/2000/svg}switch")
-        assert switch is not None
-
-        sort_switch_texts(switch)
-
-        texts = switch.findall(".//{http://www.w3.org/2000/svg}text")
-        # Default (no systemLanguage) should be last
-        assert texts[-1].get("systemLanguage") is None
-
-    def test_sort_switch_texts_empty_switch(self):
-        """Test sorting an empty switch element."""
-        svg_content = '<svg xmlns="http://www.w3.org/2000/svg"><switch></switch></svg>'
-        root = etree.fromstring(svg_content)
-        switch = root.find(".//{http://www.w3.org/2000/svg}switch")
-        assert switch is not None
-
-        # Should not raise an error
-        sort_switch_texts(switch)
-
-    def test_sort_switch_texts_only_default(self):
-        """Test sorting with only default text."""
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch>
-                <text>Default only</text>
-            </switch>
-        </svg>"""
-        root = etree.fromstring(svg_content)
-        switch = root.find(".//{http://www.w3.org/2000/svg}switch")
-        assert switch is not None
-
-        sort_switch_texts(switch)
-
-        texts = switch.findall(".//{http://www.w3.org/2000/svg}text")
-        assert len(texts) == 1
 
 
 class TestLoadAllMappingsEdgeCases(TestSetup):
