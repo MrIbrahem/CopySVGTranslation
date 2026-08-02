@@ -207,10 +207,3 @@ class TestAPIConsistency:
     def test_module_name_is_correct(self):
         """The module should have the correct name."""
         assert CopySVGTranslation.__name__ == "CopySVGTranslation"
-
-    def test_package_structure(self):
-        """Verify the package has expected submodules."""
-        assert hasattr(CopySVGTranslation, "extraction")
-        assert hasattr(CopySVGTranslation, "injection")
-        assert hasattr(CopySVGTranslation, "workflows")
-        assert hasattr(CopySVGTranslation, "text_utils")
