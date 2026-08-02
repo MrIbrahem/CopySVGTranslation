@@ -12,9 +12,68 @@ This tool requires Python 3.10+. Install the lightweight core dependencies with:
 pip install CopySVGTranslation
 ```
 
-## Usage
+## Quick Start
+
+The recommended API uses the **class-based** `SVGTranslationExtractor` and `SVGTranslationInjector` classes.
+
+### Extract translations from an SVG
+
+```python
+from pathlib import Path
+from CopySVGTranslation import SVGTranslationExtractor
+
+extractor = SVGTranslationExtractor(
+    svg_file_path=Path("examples/source_multilingual.svg"),
+    case_insensitive=True,
+)
+
+result = extractor.extract()
+
+if not result.error:
+    print(result.to_json())
+    # {
+    #     "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}, ...},
+    #     "title": {...},
+    #     "tspans_by_id": {...},
+    #     "title_new": {...},
+    # }
+```
+
+### Inject translations into an SVG
+
+```python
+from pathlib import Path
+from CopySVGTranslation import SVGTranslationInjector
+
+injector = SVGTranslationInjector(
+    case_insensitive=True,
+    overwrite=False,
+    pretty_print=True,
+)
+
+translations = {
+    "new": {
+        "Hello": {"ar": "مرحبًا", "fr": "Bonjour"},
+    }
+}
+
+result = injector.inject(
+    inject_file=Path("examples/target_missing_translations.svg"),
+    all_mappings=translations,
+    target_path=Path("translated/target.svg"),
+    save_result=True,
+)
+
+if not result.new_stats.error:
+    print(f"Inserted: {result.new_stats.inserted_translations}")
+    print(f"Updated:  {result.new_stats.updated_translations}")
+    print(f"Skipped:  {result.new_stats.skipped_translations}")
+    print(f"Languages: {result.new_stats.all_languages}")
+```
 
 ### Extracting and injecting in a single step
+
+For convenience, the high-level workflow functions combine both phases:
 
 ```python
 from pathlib import Path
@@ -23,7 +82,7 @@ from CopySVGTranslation import svg_extract_and_inject
 tree = svg_extract_and_inject(
     extract_file=Path("examples/source_multilingual.svg"),
     inject_file=Path("examples/target_missing_translations.svg"),
-    data_output_file = Path("examples/data.json"),
+    data_output_file=Path("examples/data.json"),
     save_result=True,
 )
 
@@ -33,74 +92,264 @@ if tree is not None:
 
 The helper stores the extracted phrases under `Path("examples/data.json")` and,
 when `save_result=True`, writes the translated SVG to
-`output_dir=Path("./translated")`. If you also need statistics about how many
-translations were inserted, call the lower level injector with
-`return_stats=True`:
+`output_dir=Path("./translated")`.
+
+## API Reference
+
+### `SVGTranslationExtractor`
+
+The primary class for extracting translation data from SVG files.
 
 ```python
-from CopySVGTranslation.injection import inject
+from CopySVGTranslation import SVGTranslationExtractor
 
-tree, stats = inject(
-    inject_file="examples/target_missing_translations.svg",
-    mapping_files=["CopySVGTranslation/data/source_multilingual.svg.json"],
-    output_dir=Path("./translated"),
-    save_result=True,
-    return_stats=True,
+extractor = SVGTranslationExtractor(
+    svg_file_path: str | Path,
+    case_insensitive: bool = True,
 )
 
-print(stats)
+result: ExtractorData = extractor.extract()
 ```
 
-### Injecting with pre-translated data
+**Parameters:**
 
-When you already have the translation JSON, load it and use
-`inject` directly. Important parameters include `overwrite`
-to update existing translations and `output_dir` to control where translated
-files are written.
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `svg_file_path` | `str \| Path` | — | Path to the SVG file to process. |
+| `case_insensitive` | `bool` | `True` | If `True`, default text keys are lowercased for case-insensitive matching. |
+
+**Returns:** `ExtractorData` — a dataclass with the following fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `new` | `dict[str, dict[str, str]]` | Mapping of normalized source text → language code → translation. |
+| `tspans_by_id` | `dict[str, str]` | Mapping of `<tspan>` ID → text content. |
+| `title` | `dict[str, Any]` | Title-like entries (ending with a 4-digit year) with the year removed. |
+| `title_new` | `dict[str, Any]` | New-format title translations. |
+| `error` | `str` | Error message if extraction failed, empty string on success. |
+
+Use `result.to_json()` to get a plain dictionary suitable for JSON serialization.
+
+---
+
+### `SVGTranslationInjector`
+
+The primary class for injecting translations into SVG files.
 
 ```python
-from pathlib import Path
+from CopySVGTranslation import SVGTranslationInjector
+
+injector = SVGTranslationInjector(
+    case_insensitive: bool = True,
+    overwrite: bool = False,
+    pretty_print: bool = True,
+)
+
+result: InjectorData = injector.inject(
+    inject_file: Path | str,
+    all_mappings: Mapping | None = None,
+    target_path: Path | None = None,
+    save_result: bool = False,
+)
+```
+
+**Constructor Parameters:**
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `case_insensitive` | `bool` | `True` | If `True`, translation lookups are case-insensitive. |
+| `overwrite` | `bool` | `False` | If `True`, existing language nodes are updated in place instead of being skipped. |
+| `pretty_print` | `bool` | `True` | If `True`, the output SVG is formatted with indentation. |
+
+**`inject()` Parameters:**
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `inject_file` | `Path \| str` | — | Path to the SVG file to inject translations into. |
+| `all_mappings` | `Mapping \| None` | `None` | Translation mapping dictionary (see [Data Model](#data-model)). |
+| `target_path` | `Path \| None` | `None` | Output file path when `save_result=True`. |
+| `save_result` | `bool` | `False` | If `True`, writes the modified SVG to `target_path`. |
+
+**Returns:** `InjectorData` — a dataclass with the following fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `tree` | `etree._ElementTree \| None` | The parsed (and possibly modified) SVG tree. |
+| `new_stats` | `InjectorStats` | Statistics about the injection run. |
+
+**`InjectorStats` fields:**
+
+| Field | Type | Description |
+|---|---|---|
+| `all_languages` | `int` | Total number of languages in the SVG after injection. |
+| `new_languages` | `int` | Number of new languages added. |
+| `processed_switches` | `int` | Number of `<switch>` elements processed. |
+| `inserted_translations` | `int` | Number of new `<text>` nodes inserted. |
+| `skipped_translations` | `int` | Number of existing translations skipped (not overwritten). |
+| `updated_translations` | `int` | Number of existing translations updated in place. |
+| `languages_before` | `list[str]` | Sorted list of language codes before injection. |
+| `languages_after` | `list[str]` | Sorted list of newly added language codes. |
+| `error` | `str` | Error message if injection failed, empty string on success. |
+
+Use `result.new_stats.to_json()` to get a plain dictionary of the stats.
+
+---
+
+### `ExtractorData`
+
+Dataclass returned by `SVGTranslationExtractor.extract()`. See the extractor documentation above for field details.
+
+### `InjectorData`
+
+Dataclass returned by `SVGTranslationInjector.inject()`. See the injector documentation above for field details.
+
+---
+
+### High-Level Workflows
+
+#### `svg_extract_and_inject()`
+
+Extract translations from one SVG and inject them into another in a single call.
+
+```python
+from CopySVGTranslation import svg_extract_and_inject
+
+tree = svg_extract_and_inject(
+    extract_file: Path | str,
+    inject_file: Path | str,
+    output_file: Path | None = None,
+    data_output_file: Path | None = None,
+    overwrite: bool | None = None,
+    save_result: bool = False,
+)
+```
+
+#### `svg_extract_and_injects()`
+
+Inject a pre-built translation mapping into an SVG file.
+
+```python
+from CopySVGTranslation import svg_extract_and_injects
+
+tree = svg_extract_and_injects(
+    translations: Mapping,
+    inject_file: Path | str,
+    output_dir: Path | None = None,
+    save_result: bool = False,
+)
+```
+
+---
+
+### Legacy (Deprecated) Functions
+
+> **⚠️ Deprecation Notice:** The function-based `extract()` and `inject()` APIs are deprecated and will be removed in a future release. Migrate to `SVGTranslationExtractor` and `SVGTranslationInjector` respectively.
+
+#### `extract()` *(deprecated)*
+
+```python
+from CopySVGTranslation import extract
+
+# Deprecated — use SVGTranslationExtractor instead
+translations = extract(
+    svg_file_path=Path("arabic.svg"),
+    case_insensitive=True,
+)
+```
+
+**Migration:**
+
+```python
+# Before (deprecated)
+from CopySVGTranslation import extract
+translations = extract(svg_file_path=Path("arabic.svg"), case_insensitive=True)
+
+# After (recommended)
+from CopySVGTranslation import SVGTranslationExtractor
+extractor = SVGTranslationExtractor(svg_file_path=Path("arabic.svg"), case_insensitive=True)
+result = extractor.extract()
+translations = result.to_json() if not result.error else None
+```
+
+#### `inject()` *(deprecated)*
+
+```python
 from CopySVGTranslation import inject
 
-translations = {
-    "new": {
-        "Hello": {"ar": "مرحبًا", "fr": "Bonjour"},
-    }
-}
-
+# Deprecated — use SVGTranslationInjector instead
 tree, stats = inject(
-    inject_file=Path("examples/target_missing_translations.svg"),
+    inject_file=Path("target.svg"),
     all_mappings=translations,
     output_dir=Path("./translated"),
-    overwrite=True,
+    save_result=True,
+    return_stats=True,
+)
+```
+
+**Migration:**
+
+```python
+# Before (deprecated)
+from CopySVGTranslation import inject
+tree, stats = inject(
+    inject_file=Path("target.svg"),
+    all_mappings=translations,
+    output_file=Path("translated/target.svg"),
     save_result=True,
     return_stats=True,
 )
 
-print("Saved to", Path("./translated/target_missing_translations.svg"))
-print(stats)
+# After (recommended)
+from CopySVGTranslation import SVGTranslationInjector
+injector = SVGTranslationInjector(case_insensitive=True, overwrite=False)
+result = injector.inject(
+    inject_file=Path("target.svg"),
+    all_mappings=translations,
+    target_path=Path("translated/target.svg"),
+    save_result=True,
+)
+tree = result.tree
+stats = result.new_stats.to_json()
 ```
 
 ## Data Model
 
-The extractor writes a JSON document rooted under the `"new"` key. Each entry
-maps normalized English text to a dictionary of language codes and translations.
-An example of the modern format:
+The extractor produces a JSON document with these top-level keys:
 
 ```json
 {
     "new": {
-        "but are connected in anti-phase": {
-            "ar": "لكنها موصولة بمرحلتين متعاكستين."
+        "normalized english text": {
+            "ar": "Arabic translation",
+            "fr": "French translation"
+        }
+    },
+    "title": {
+        "text without year": {
+            "ar": "...",
+            "fr": "..."
+        }
+    },
+    "tspans_by_id": {
+        "tspan-id": "Text content"
+    },
+    "title_new": {
+        "text without year": {
+            "ar": "...",
+            "fr": "..."
         }
     }
 }
 ```
 
-Older exports may omit the wrapper and look like
-`{"english": {"ar": "…"}}`. The injector transparently accepts both
-structures, but the recommended format is the nested `"new"` layout shown
-above.
+| Key | Description |
+|---|---|
+| `new` | Primary mapping of normalized source text → language code → translation. |
+| `title` | Title-like entries (text ending with a 4-digit year) with the year stripped. |
+| `title_new` | New-format title translations preserving additional metadata. |
+| `tspans_by_id` | Mapping of `<tspan>` element IDs to their text content. |
+
+Older exports may omit the wrapper and look like `{"english": {"ar": "…"}}`. The injector transparently accepts both structures, but the recommended format is the nested layout shown above.
 
 ## Extract Example
 
@@ -121,14 +370,14 @@ above.
       </text>
   </switch>
   <switch>
-      <text id="t0-ar" systemLanguage="ar">
-          <tspan id="t0-ar">مرحبا</tspan>
+      <text id="t1-ar" systemLanguage="ar">
+          <tspan id="t1-ar">مرحبا</tspan>
       </text>
-      <text id="t0-fr" systemLanguage="fr">
-          <tspan id="t0-fr">Bonjour</tspan>
+      <text id="t1-fr" systemLanguage="fr">
+          <tspan id="t1-fr">Bonjour</tspan>
       </text>
-      <text id="t0">
-          <tspan id="t0">Hello</tspan>
+      <text id="t1">
+          <tspan id="t1">Hello</tspan>
       </text>
   </switch>
 </svg>
@@ -138,12 +387,15 @@ above.
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import extract
+from CopySVGTranslation import SVGTranslationExtractor
 
-translations = extract(
+extractor = SVGTranslationExtractor(
     svg_file_path=Path("arabic.svg"),
     case_insensitive=True,
 )
+
+result = extractor.extract()
+print(result.to_json())
 ```
 
 ### Extracted JSON
@@ -167,14 +419,93 @@ translations = extract(
         }
     },
     "tspans_by_id": {
-        "t0": "Hello"
-    }
+        "t0": "Music in 2020",
+        "t1": "Hello"
+    },
+    "title_new": {},
+    "error": ""
 }
 ```
 
-### Injection Example
+## Injection Example
 
--   TODO
+### Input SVG (target.svg)
+
+```xml
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg">
+  <switch>
+      <text id="t0">
+          <tspan id="t0">Hello</tspan>
+      </text>
+  </switch>
+  <switch>
+      <text id="t1">
+          <tspan id="t1">Music in 2020</tspan>
+      </text>
+  </switch>
+</svg>
+```
+
+### Python code
+
+```python
+from pathlib import Path
+from CopySVGTranslation import SVGTranslationInjector
+
+injector = SVGTranslationInjector(
+    case_insensitive=True,
+    overwrite=False,
+    pretty_print=True,
+)
+
+translations = {
+    "new": {
+        "hello": {"ar": "مرحبا", "fr": "Bonjour"},
+        "music in 2020": {"ar": "الموسيقى في عام 2020", "fr": "La musique en 2020"},
+    }
+}
+
+result = injector.inject(
+    inject_file=Path("target.svg"),
+    all_mappings=translations,
+    target_path=Path("translated/target.svg"),
+    save_result=True,
+)
+
+print(f"Inserted: {result.new_stats.inserted_translations}")
+print(f"Languages: {result.new_stats.all_languages}")
+```
+
+### Output SVG (translated/target.svg)
+
+```xml
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg">
+  <switch>
+    <text id="t0">
+      <tspan id="t0">Hello</tspan>
+    </text>
+    <text id="t0-ar" systemLanguage="ar">
+      <tspan id="t0-ar">مرحبا</tspan>
+    </text>
+    <text id="t0-fr" systemLanguage="fr">
+      <tspan id="t0-fr">Bonjour</tspan>
+    </text>
+  </switch>
+  <switch>
+    <text id="t1">
+      <tspan id="t1">Music in 2020</tspan>
+    </text>
+    <text id="t1-ar" systemLanguage="ar">
+      <tspan id="t1-ar">الموسيقى في عام 2020</tspan>
+    </text>
+    <text id="t1-fr" systemLanguage="fr">
+      <tspan id="t1-fr">La musique en 2020</tspan>
+    </text>
+  </switch>
+</svg>
+```
 
 ## Testing
 
@@ -209,3 +540,5 @@ The tool includes comprehensive error handling for:
 -   Invalid XML structure
 -   Missing required attributes
 -   File permission issues
+-   Nested `<tspan>` structures (raises `SvgNestedTspanExceptionError`)
+-   Invalid SVG structures like `<tref>` elements (raises `SvgStructureExceptionError`)

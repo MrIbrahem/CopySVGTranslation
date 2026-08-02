@@ -32,33 +32,91 @@ pip install pytest
 
 The codebase follows a two-phase pipeline: **Extraction** and **Injection**.
 
+### Public API
+
+The recommended API uses class-based interfaces. Legacy function-based wrappers are available but deprecated.
+
+| Class / Function | Module | Status |
+|---|---|---|
+| `SVGTranslationExtractor` | `CopySVGTranslation.extraction` | **Current** |
+| `SVGTranslationInjector` | `CopySVGTranslation.injection` | **Current** |
+| `ExtractorData` | `CopySVGTranslation.extraction` | **Current** (dataclass) |
+| `InjectorData` | `CopySVGTranslation.injection` | **Current** (dataclass) |
+| `extract()` | `CopySVGTranslation.extraction` | Deprecated (wrapper) |
+| `inject()` | `CopySVGTranslation.injection` | Deprecated (wrapper) |
+| `svg_extract_and_inject()` | `CopySVGTranslation.workflows` | **Current** |
+| `svg_extract_and_injects()` | `CopySVGTranslation.workflows` | **Current** |
+
 ### Core Modules
 
--   **`CopySVGTranslation/extraction/extractor.py`**: Parses SVG files and extracts translation pairs from `<switch>` elements. Collects default (English) text and corresponding translations from sibling `<text>` elements with `systemLanguage` attributes.
+-   **`CopySVGTranslation/extraction/svg_extractor.py`**: Contains `SVGTranslationExtractor` class and `ExtractorData` dataclass. Parses SVG files and extracts translation pairs from `<switch>` elements. Collects default (English) text and corresponding translations from sibling `<text>` elements with `systemLanguage` attributes.
 
--   **`CopySVGTranslation/injection/injector.py`**: The main injection engine. Processes `<switch>` elements, matches default text against mappings, and inserts/updates translation nodes with `systemLanguage` attributes.
+-   **`CopySVGTranslation/extraction/worker.py`**: Contains the deprecated `extract()` function — a thin wrapper around `SVGTranslationExtractor` for backward compatibility.
+
+-   **`CopySVGTranslation/injection/svg_injector.py`**: Contains `SVGTranslationInjector` class, `InjectorData`, and `InjectorStats` dataclasses. The main injection engine that processes `<switch>` elements, matches default text against mappings, and inserts/updates translation nodes with `systemLanguage` attributes.
+
+-   **`CopySVGTranslation/injection/worker.py`**: Contains the deprecated `inject()` function — a thin wrapper around `SVGTranslationInjector` for backward compatibility.
 
 -   **`CopySVGTranslation/injection/preparation.py`**: SVG normalization and preparation before injection. Wraps loose text nodes in `<tspan>` elements, creates `<switch>` wrappers, normalizes language tags, assigns unique IDs (`trsvg*`), and detects unsupported structures (nested tspans, tref elements).
 
 -   **`CopySVGTranslation/workflows.py`**: High-level convenience functions (`svg_extract_and_inject`, `svg_extract_and_injects`) that combine extraction and injection in one call.
 
--   **`CopySVGTranslation/text_utils.py`**: Shared text normalization (trim whitespace, collapse internal whitespace, optional case-insensitivity).
+-   **`CopySVGTranslation/utils/text_utils.py`**: Shared text normalization (trim whitespace, collapse internal whitespace, optional case-insensitivity).
 
--   **`CopySVGTranslation/titles.py`**: Handles title-like text (entries ending with 4-digit years) with special handling.
+-   **`CopySVGTranslation/titles_workers/`**: Handles title-like text (entries ending with 4-digit years) with special handling.
 
 -   **`CopySVGTranslation/nested_analyze/`**: Utilities for detecting and fixing nested `<tspan>` structures that would otherwise cause `SvgNestedTspanExceptionError`.
 
 ### Data Flow
 
-1. **Extraction**: SVG file -> `extract()` -> JSON mapping (`{"new": {"english text": {"ar": "...", "fr": "..."}}}`)
+1. **Extraction**: SVG file → `SVGTranslationExtractor.extract()` → `ExtractorData` (with `.to_json()` for dict)
 
-2. **Injection**: SVG file + JSON mapping -> `inject()` -> Modified SVG with new `<text systemLanguage="XX">` nodes
+2. **Injection**: SVG file + mapping dict → `SVGTranslationInjector.inject()` → `InjectorData` (with `.new_stats` for stats)
 
 3. **Full workflow**: `svg_extract_and_inject()` extracts from source SVG and injects into target SVG in one step.
 
-### Key Data Structure
+### Key Data Structures
 
-The translation JSON format:
+**ExtractorData** (returned by `SVGTranslationExtractor.extract()`):
+
+```python
+@dataclass
+class ExtractorData:
+    new: dict[str, dict[str, str]]     # source text → lang → translation
+    tspans_by_id: dict[str, str]       # tspan id → text content
+    title: dict[str, Any]              # title-like entries (year stripped)
+    title_new: dict[str, Any]          # new-format title translations
+    error: str                         # error message or ""
+```
+
+**InjectorData** (returned by `SVGTranslationInjector.inject()`):
+
+```python
+@dataclass
+class InjectorData:
+    tree: etree._ElementTree | None    # parsed/modified SVG tree
+    new_stats: InjectorStats           # injection statistics
+```
+
+**InjectorStats**:
+
+```python
+@dataclass
+class InjectorStats:
+    all_languages: int
+    new_languages: int
+    processed_switches: int
+    inserted_translations: int
+    skipped_translations: int
+    updated_translations: int
+    languages_before: list[str]
+    languages_after: list[str]
+    error: str
+```
+
+### Translation JSON Format
+
+The extractor produces JSON in this format:
 
 ```json
 {
@@ -66,7 +124,8 @@ The translation JSON format:
     "normalized english text": {"ar": "translation", "fr": "translation"}
   },
   "title": {...},
-  "tspans_by_id": {"id": "text content"}
+  "tspans_by_id": {"id": "text content"},
+  "title_new": {...}
 }
 ```
 
