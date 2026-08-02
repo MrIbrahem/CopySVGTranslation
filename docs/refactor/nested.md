@@ -10,8 +10,9 @@ nested/
 This package is responsible for **detecting and fixing nested `<tspan>` (and `<a>`) elements**, which the rest of the system does not support directly.
 
 It replaces both:
-- `nested_analyze/find_nested.py` (simple flatten)
-- `nested_analyze/find_nested_new.py` (style-preserving attempt)
+
+-   `nested_analyze/find_nested.py` (simple flatten)
+-   `nested_analyze/find_nested_new.py` (style-preserving attempt)
 
 ---
 
@@ -28,14 +29,14 @@ SVG files often contain structures like:
 </text>
 ```
 
-The translation pipeline requires **flat** tspans (no element children).  
+The translation pipeline requires **flat** tspans (no element children).
 This package offers three strategies (controlled by `TranslationConfig.nested_strategy`):
 
-| Strategy | Behaviour |
-|----------|-----------|
+| Strategy         | Behaviour                                                                  |
+| ---------------- | -------------------------------------------------------------------------- |
 | `preserve_style` | Turn nested styled tspans into **sibling** tspans (keeps bold/italic etc.) |
-| `flatten` | Concatenate all text into a single tspan (loses inner styling) |
-| `raise` | Raise `SvgNestedTspanExceptionError` |
+| `flatten`        | Concatenate all text into a single tspan (loses inner styling)             |
+| `raise`          | Raise `SvgNestedTspanExceptionError`                                       |
 
 ---
 
@@ -283,12 +284,12 @@ __all__ = [
 
 ### Integration points
 
-| Caller | How it uses nested/ |
-|--------|---------------------|
-| **NormalizeTspans** (preparation step) | `NestedTspanFlattener(config.nested_strategy).process(root)` |
+| Caller                                   | How it uses nested/                                                    |
+| ---------------------------------------- | ---------------------------------------------------------------------- |
+| **NormalizeTspans** (preparation step)   | `NestedTspanFlattener(config.nested_strategy).process(root)`           |
 | **ValidateStructure** (preparation step) | If strategy is `"raise"`, can call detector or let the flattener raise |
-| **Service / CLI** | Optional pre-check: `NestedTspanDetector().find_in_file(path)` |
-| **Legacy `fix_nested_file`** | Thin wrapper around `NestedTspanFlattener` + `SvgDocument.save` |
+| **Service / CLI**                        | Optional pre-check: `NestedTspanDetector().find_in_file(path)`         |
+| **Legacy `fix_nested_file`**             | Thin wrapper around `NestedTspanFlattener` + `SvgDocument.save`        |
 
 ---
 

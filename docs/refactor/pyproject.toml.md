@@ -171,7 +171,7 @@ disallow_untyped_defs = false
 
 ### Companion files (minimal)
 
-**`CopySVGTranslation/py.typed`** (empty file)  
+**`CopySVGTranslation/py.typed`** (empty file)
 Marks the package as typed for clients.
 
 **`MANIFEST.in`** (optional if using setuptools package-data only)
@@ -210,14 +210,14 @@ mypy CopySVGTranslation
 
 ### Notes
 
-| Setting | Why |
-|---------|-----|
-| `name = "copy-svg-translation"` | Conventional PyPI name (hyphens) |
-| Import package `CopySVGTranslation` | Matches your existing code layout |
-| `requires-python = ">=3.10"` | Fits modern typing (`X \| Y`, `slots=True`, etc.) |
-| `lxml>=4.9` | Only hard runtime dependency |
-| Legacy excluded from coverage | Avoids treating temporary shims as core code |
-| `py.typed` | Enables type checking for downstream users |
-| Version `2.0.0` | Signals the class-based redesign + deprecations |
+| Setting                             | Why                                               |
+| ----------------------------------- | ------------------------------------------------- |
+| `name = "copy-svg-translation"`     | Conventional PyPI name (hyphens)                  |
+| Import package `CopySVGTranslation` | Matches your existing code layout                 |
+| `requires-python = ">=3.10"`        | Fits modern typing (`X \| Y`, `slots=True`, etc.) |
+| `lxml>=4.9`                         | Only hard runtime dependency                      |
+| Legacy excluded from coverage       | Avoids treating temporary shims as core code      |
+| `py.typed`                          | Enables type checking for downstream users        |
+| Version `2.0.0`                     | Signals the class-based redesign + deprecations   |
 
 Adjust `authors`, URLs, and license to match the real project before publishing.

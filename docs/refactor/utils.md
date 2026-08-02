@@ -7,7 +7,7 @@ utils/
 └── xml.py           # thin lxml / SVG helpers
 ```
 
-Shared, dependency-light helpers used by core, extraction, injection, and titles.  
+Shared, dependency-light helpers used by core, extraction, injection, and titles.
 No business logic, no file I/O, no knowledge of mappings or pipelines.
 
 ---
@@ -243,16 +243,16 @@ __all__ = [
 
 ### Who uses what
 
-| Helper | Typical users |
-|--------|----------------|
-| `normalize_text` | Extractor, Injector, TextNode, YearTitleHandler, MatchingStrategy |
-| `normalize_lang` / `split_lang_list` | Preparation (`SplitLanguages`), any language handling |
-| `extract_text_segments` | TextNode, legacy paths |
-| `get_text_content` | Validation steps |
-| `collect_ids` | IdManager, AssignIds step |
-| `sort_switch_children` | ReorderTexts step, final housekeeping in injector |
-| `tree_languages` | Injector stats (before/after) |
-| `findall_svg` / `xpath_svg` / `svg_tag` | Everywhere that touches the tree |
+| Helper                                  | Typical users                                                     |
+| --------------------------------------- | ----------------------------------------------------------------- |
+| `normalize_text`                        | Extractor, Injector, TextNode, YearTitleHandler, MatchingStrategy |
+| `normalize_lang` / `split_lang_list`    | Preparation (`SplitLanguages`), any language handling             |
+| `extract_text_segments`                 | TextNode, legacy paths                                            |
+| `get_text_content`                      | Validation steps                                                  |
+| `collect_ids`                           | IdManager, AssignIds step                                         |
+| `sort_switch_children`                  | ReorderTexts step, final housekeeping in injector                 |
+| `tree_languages`                        | Injector stats (before/after)                                     |
+| `findall_svg` / `xpath_svg` / `svg_tag` | Everywhere that touches the tree                                  |
 
 ---
 
@@ -270,10 +270,10 @@ This finishes the shared foundation that core, extraction, injection, titles, an
 
 ### Remaining after utils
 
-| Part | Status |
-|------|--------|
-| `legacy/` wrappers | Optional next |
+| Part                                    | Status        |
+| --------------------------------------- | ------------- |
+| `legacy/` wrappers                      | Optional next |
 | Package root `__init__.py` (public API) | Optional next |
-| CLI | Low priority |
+| CLI                                     | Low priority  |
 
 Everything required for the modern class-based core is now designed.

@@ -4,7 +4,7 @@
 exceptions.py                 # single module at package root
 ```
 
-All structured errors used by extraction, preparation, injection, and I/O live here.  
+All structured errors used by extraction, preparation, injection, and I/O live here.
 Callers (especially `SVGTranslationService`) catch these and turn them into `OperationResult.fail(...)`.
 
 ---
@@ -188,21 +188,21 @@ class ConfigurationError(CopySVGTranslationError):
 
 ### Mapping from old codes
 
-| Old code / exception | New exception |
-|----------------------|---------------|
-| `SvgStructureExceptionError` | `SvgStructureError` |
-| `SvgNestedTspanExceptionError` | `SvgNestedTspanError` |
-| `structure-error-contains-tref` | `SvgContainsTrefError` |
-| `structure-error-css-too-complex` | `SvgCssTooComplexError` |
-| `structure-error-css-has-ids` | `SvgCssHasIdsError` |
-| `structure-error-text-contains-dollar` | `SvgTextContainsDollarError` |
-| `structure-error-invalid-node-id` | `SvgInvalidIdError` |
-| `structure-error-no-parent-for-text` | `SvgNoParentForTextError` |
+| Old code / exception                    | New exception                |
+| --------------------------------------- | ---------------------------- |
+| `SvgStructureExceptionError`            | `SvgStructureError`          |
+| `SvgNestedTspanExceptionError`          | `SvgNestedTspanError`        |
+| `structure-error-contains-tref`         | `SvgContainsTrefError`       |
+| `structure-error-css-too-complex`       | `SvgCssTooComplexError`      |
+| `structure-error-css-has-ids`           | `SvgCssHasIdsError`          |
+| `structure-error-text-contains-dollar`  | `SvgTextContainsDollarError` |
+| `structure-error-invalid-node-id`       | `SvgInvalidIdError`          |
+| `structure-error-no-parent-for-text`    | `SvgNoParentForTextError`    |
 | `structure-error-non-tspan-inside-text` | `SvgNonTspanInsideTextError` |
-| `structure-error-switch-*` | `SvgSwitchStructureError` |
-| File not found / write failures | `SvgIOError` |
-| lxml `XMLSyntaxError` | wrapped as `SvgParseError` |
-| Empty / missing mappings | `MappingError` |
+| `structure-error-switch-*`              | `SvgSwitchStructureError`    |
+| File not found / write failures         | `SvgIOError`                 |
+| lxml `XMLSyntaxError`                   | wrapped as `SvgParseError`   |
+| Empty / missing mappings                | `MappingError`               |
 
 ---
 

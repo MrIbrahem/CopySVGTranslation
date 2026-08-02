@@ -349,14 +349,14 @@ __all__ = [
 
 ### How the rest of the system uses Core
 
-| Component | Uses |
-|-----------|------|
-| **Extractor** | Builds a `TranslationMapping` |
-| **SwitchProcessor** | Receives a `SwitchNode`, gets `fallback()`, reads `existing_languages()` |
-| **TranslationApplier** | Works with `TextNode` (clone, set_texts, language, id) |
-| **YearTitleHandler** | Reads/writes `TranslationMapping.title` / `title_new` |
-| **Service** | Returns `TranslationMapping` inside `OperationResult` |
-| **MappingStore** | Serializes `TranslationMapping.to_dict()` to JSON |
+| Component              | Uses                                                                     |
+| ---------------------- | ------------------------------------------------------------------------ |
+| **Extractor**          | Builds a `TranslationMapping`                                            |
+| **SwitchProcessor**    | Receives a `SwitchNode`, gets `fallback()`, reads `existing_languages()` |
+| **TranslationApplier** | Works with `TextNode` (clone, set_texts, language, id)                   |
+| **YearTitleHandler**   | Reads/writes `TranslationMapping.title` / `title_new`                    |
+| **Service**            | Returns `TranslationMapping` inside `OperationResult`                    |
+| **MappingStore**       | Serializes `TranslationMapping.to_dict()` to JSON                        |
 
 ---
 

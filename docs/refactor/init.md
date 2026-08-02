@@ -91,6 +91,7 @@ __all__ = [
 ### What users are expected to import
 
 **Recommended (new code):**
+
 ```python
 from CopySVGTranslation import (
     SVGTranslationService,
@@ -101,6 +102,7 @@ from CopySVGTranslation import (
 ```
 
 **Advanced / library integration:**
+
 ```python
 from CopySVGTranslation import (
     SVGTranslationExtractor,
@@ -114,6 +116,7 @@ from CopySVGTranslation import (
 ```
 
 **Legacy (still works, emits deprecation warnings):**
+
 ```python
 from CopySVGTranslation import extract, inject, svg_extract_and_inject
 ```
@@ -122,14 +125,14 @@ from CopySVGTranslation import extract, inject, svg_extract_and_inject
 
 ### Design choices
 
-| Choice | Reason |
-|--------|--------|
-| Service + Config first | Clear modern entry point |
-| `OperationResult` + `TranslationMapping` exported | Needed to use the service effectively |
-| Exceptions exported at top level | Callers can catch specific errors easily |
-| Advanced classes still public | Power users and tests can reach them without deep imports |
-| Legacy kept in `__all__` for now | Backward compatibility during migration |
-| Explicit `__all__` | Controls `from CopySVGTranslation import *` and documents the surface |
+| Choice                                            | Reason                                                                |
+| ------------------------------------------------- | --------------------------------------------------------------------- |
+| Service + Config first                            | Clear modern entry point                                              |
+| `OperationResult` + `TranslationMapping` exported | Needed to use the service effectively                                 |
+| Exceptions exported at top level                  | Callers can catch specific errors easily                              |
+| Advanced classes still public                     | Power users and tests can reach them without deep imports             |
+| Legacy kept in `__all__` for now                  | Backward compatibility during migration                               |
+| Explicit `__all__`                                | Controls `from CopySVGTranslation import *` and documents the surface |
 
 ---
 
