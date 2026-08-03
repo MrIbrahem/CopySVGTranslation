@@ -32,6 +32,7 @@ class SplitLanguages(PreparationStep):
         texts = switch.findall(f"./{{{SVG_NS}}}text")
         for text_el in texts:
             sys_lang = text_el.get("systemLanguage")
+
             if not sys_lang:
                 continue
 
@@ -39,7 +40,8 @@ class SplitLanguages(PreparationStep):
             if len(real_langs) <= 1:
                 # 0 or 1 languages, standard systemLanguage
                 if real_langs:
-                    text_el.set("systemLanguage", real_langs[0])
+                    lang_value = real_langs[0]
+                    text_el.set("systemLanguage", lang_value)
                 continue
 
             # Split into multiple single-language <text> nodes
@@ -47,7 +49,8 @@ class SplitLanguages(PreparationStep):
             index = parent_list.index(text_el)
 
             # Keep the first language in the original node
-            text_el.set("systemLanguage", real_langs[0])
+            original_lang = real_langs[0]
+            text_el.set("systemLanguage", original_lang)
 
             # For subsequent languages, clone the node and allocate new IDs
             for extra_lang in real_langs[1:]:

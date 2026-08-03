@@ -96,7 +96,15 @@ class SplitLanguages(PreparationStep):
                 continue
 
             sys_lang = text_el.get("systemLanguage")
-            real_langs = split_lang_list(sys_lang) if sys_lang else ["fallback"]
+
+            if not sys_lang:
+                # no systemLanguage: this is a single fallback element, no need to split
+                if "fallback" in existing_langs:
+                    raise SvgStructureError("structure-error-multiple-text-same-lang", extra=["fallback"])
+                existing_langs.add("fallback")
+                continue
+
+            real_langs = split_lang_list(sys_lang)
 
             languages_present: set[str] = set()
             for extra_lang in real_langs:
