@@ -6,13 +6,16 @@ from pathlib import Path
 from lxml import etree
 
 from ..config import TranslationConfig
-from .steps.assign_ids import AssignIds
-from .steps.base import PreparationContext, PreparationStep
-from .steps.load import LoadDocument
-from .steps.normalize_tspans import NormalizeTspans
-from .steps.reorder import ReorderTexts
-from .steps.split_languages import SplitLanguages
-from .steps.validate import ValidateStructure
+from .steps import (
+    AssignIds,
+    LoadDocument,
+    NormalizeTspans,
+    PreparationContext,
+    PreparationStep,
+    ReorderTexts,
+    SplitLanguages,
+    ValidateStructure,
+)
 
 
 class SvgPreparationPipeline:
