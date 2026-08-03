@@ -10,18 +10,16 @@ from pathlib import Path
 from lxml import etree
 
 from ..config import TranslationConfig
-from ..exceptions import SvgNestedTspanExceptionError, SvgStructureExceptionError
+from ..exceptions import SvgStructureExceptionError
 from ..utils import normalize_lang
-from .steps import (
-    # AssignIds,
+from .steps import (  # AssignIds,; ReorderTexts,; SplitLanguages,
     LoadDocument,
-    # NormalizeTspans,
+    NormalizeTspans,
     PreparationContext,
     PreparationStep,
-    # ReorderTexts,
-    # SplitLanguages,
     ValidateStructure,
 )
+
 logger = logging.getLogger(__name__)
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -56,7 +54,7 @@ class SvgPreparationPipeline:
         self.steps: list[PreparationStep] = [
             LoadDocument(config),
             ValidateStructure(config),
-            # NormalizeTspans(config),
+            NormalizeTspans(config),
             # AssignIds(config),
             # SplitLanguages(config),
             # ReorderTexts(config),
@@ -91,13 +89,8 @@ class SvgPreparationPipeline:
         self.ids_in_use: list[int] = [0]
         self.translatable_nodes: list[etree._Element] = []
 
-        # self._load_document()
         self.tree, self.root = self.run_new(self.path)
 
-        # self._check_style_elements()
-
-        self._collect_tspans_as_translatable()
-        self._check_no_trefs()
         self._collect_existing_ids()
         self._wrap_loose_text_into_tspans()
         self._clean_ids_and_remove_empty_nodes()
@@ -108,53 +101,6 @@ class SvgPreparationPipeline:
         self._reorder_texts()
 
         return self.tree, self.root
-
-    # ------------------------------------------------------------------
-    # Step 2: validation
-    # ------------------------------------------------------------------
-    def _check_style_elements(self) -> None:
-        """Ensure <style> elements don't use IDs or overly complex CSS."""
-
-        # Check for any <text> elements
-        texts = self.root.findall(".//{%s}text" % SVG_NS)
-        if len(texts) == 0:
-            logger.warning("File %s has nothing to translate", self.path)
-            return self.tree, self.root
-
-        styles = self.root.findall(".//{%s}style" % SVG_NS)
-        css_simple_re = re.compile(r"^([^{]+\{[^}]*\})*[^{]+$")
-
-        for s in styles:
-            css = s.text or ""
-            if "#" in css:
-                if not css_simple_re.match(css):
-                    raise SvgStructureExceptionError("structure-error-css-too-complex", None, [s.get("id", "")])
-                # split selectors roughly and ensure no '#' in selectors portion
-                selectors = re.split(r"\{[^}]*\}", css)
-                for selector in selectors:
-                    if "#" in selector:
-                        raise SvgStructureExceptionError("structure-error-css-has-ids", None, [s.get("id", "")])
-
-    def _collect_tspans_as_translatable(self) -> None:
-        """Collect leaf <tspan> elements as translatable nodes; reject nested ones."""
-        # Process tspans
-        tspans = self.root.findall(".//{%s}tspan" % SVG_NS)
-        for tspan in tspans:
-            # nested content check: tspan should not have element children
-            element_children = [c for c in tspan if isinstance(c.tag, str)]
-            if len(element_children) == 0:
-                self.translatable_nodes.append(tspan)
-            else:
-                # Nested tspans or children not supported
-                # raise SvgStructureExceptionError('structure-error-nested-tspans-not-supported', tspan, element_children)
-                node_text = etree.tostring(tspan, pretty_print=True).decode("utf-8")
-                raise SvgNestedTspanExceptionError(tspan, [tspan.get("id", "")], node_text=node_text)
-
-    def _check_no_trefs(self) -> None:
-        """<tref> elements are not supported."""
-        trefs = self.root.findall(".//{%s}tref" % SVG_NS)
-        if len(trefs) != 0:
-            raise SvgStructureExceptionError("structure-error-contains-tref")
 
     def _collect_existing_ids(self) -> None:
         """Track all IDs in the document and normalize whitespace around them early."""

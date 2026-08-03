@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from lxml import etree
 
-from ...nested import NestedTspanFlattener
+from ...exceptions import SvgNestedTspanExceptionError
 from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -11,40 +11,18 @@ SVG_NS = "http://www.w3.org/2000/svg"
 
 class NormalizeTspans(PreparationStep):
     def execute(self, ctx: PreparationContext) -> None:
+        """Collect leaf <tspan> elements as translatable nodes; reject nested ones."""
         if ctx.root is None:
             return
-
-        # 1. Process nested tspans using Flattener
-        flattener = NestedTspanFlattener(self.config.nested_strategy)
-        flattener.process(ctx.root)
-
-        # 2. Wrap loose text directly under <text> into <tspan>
-        for text_el in ctx.root.findall(f".//{{{SVG_NS}}}text"):
-            self._wrap_loose_text(text_el)
-
-    def _wrap_loose_text(self, text_el: etree._Element) -> None:
-        # If there are no children, we wrap the entire text
-        children = list(text_el)
-        if not children:
-            if text_el.text and text_el.text.strip():
-                tspan = etree.Element(f"{{{SVG_NS}}}tspan")
-                tspan.text = text_el.text
-                text_el.text = None
-                text_el.append(tspan)
-            return
-
-        # If there are already children but also text before first child, wrap it
-        if text_el.text and text_el.text.strip():
-            tspan = etree.Element(f"{{{SVG_NS}}}tspan")
-            tspan.text = text_el.text
-            text_el.text = None
-            text_el.insert(0, tspan)
-
-        # Wrap text tails between elements
-        for child in children:
-            if child.tail and child.tail.strip():
-                tspan = etree.Element(f"{{{SVG_NS}}}tspan")
-                tspan.text = child.tail
-                child.tail = None
-                idx = text_el.index(child)
-                text_el.insert(idx + 1, tspan)
+        # Process tspans
+        tspans = ctx.root.findall(".//{%s}tspan" % SVG_NS)
+        for tspan in tspans:
+            # nested content check: tspan should not have element children
+            element_children = [c for c in tspan if isinstance(c.tag, str)]
+            if len(element_children) == 0:
+                ctx.translatable_nodes.append(tspan)
+            else:
+                # Nested tspans or children not supported
+                # raise SvgStructureExceptionError('structure-error-nested-tspans-not-supported', tspan, element_children)
+                node_text = etree.tostring(tspan, pretty_print=True).decode("utf-8")
+                raise SvgNestedTspanExceptionError(tspan, [tspan.get("id", "")], node_text=node_text)

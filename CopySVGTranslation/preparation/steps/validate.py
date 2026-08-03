@@ -1,5 +1,6 @@
 # injection/steps/validate.py
 from __future__ import annotations
+
 import re
 
 from ...exceptions import SvgStructureExceptionError
@@ -12,6 +13,11 @@ class ValidateStructure(PreparationStep):
     def execute(self, ctx: PreparationContext) -> None:
         if ctx.root is None:
             return
+
+        # <tref> elements are not supported.
+        trefs = ctx.root.findall(".//{%s}tref" % SVG_NS)
+        if len(trefs) != 0:
+            raise SvgStructureExceptionError("structure-error-contains-tref")
 
         # Check for any <text> elements
         texts = ctx.root.findall(".//{%s}text" % SVG_NS)
@@ -26,6 +32,7 @@ class ValidateStructure(PreparationStep):
             if "#" in css:
                 if not css_simple_re.match(css):
                     raise SvgStructureExceptionError("structure-error-css-too-complex", None, [s.get("id", "")])
+
                 # split selectors roughly and ensure no '#' in selectors portion
                 selectors = re.split(r"\{[^}]*\}", css)
                 for selector in selectors:

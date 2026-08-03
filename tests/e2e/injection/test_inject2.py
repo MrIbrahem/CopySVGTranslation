@@ -7,12 +7,12 @@ I:/svgtranslate_php/svgtranslate_php/tests/Model/Svg/SvgFileTest.php
 
 import pytest
 
-from CopySVGTranslation.injection import (
-    inject_file_and_save,
-)
 from CopySVGTranslation.exceptions import (
     SvgNestedTspanExceptionError,
     SvgStructureExceptionError,
+)
+from CopySVGTranslation.injection import (
+    inject_file_and_save,
 )
 from CopySVGTranslation.preparation import make_translation_ready
 

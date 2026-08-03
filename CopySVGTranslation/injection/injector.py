@@ -9,14 +9,14 @@ from pathlib import Path
 from lxml import etree
 
 from ..config import TranslationConfig
+from ..exceptions import (
+    SvgNestedTspanExceptionError,
+    SvgStructureExceptionError,
+)
 from ..preparation import SvgPreparationPipeline
 from ..utils import (
     sort_switch_texts,
     tree_languages,
-)
-from ..exceptions import (
-    SvgNestedTspanExceptionError,
-    SvgStructureExceptionError,
 )
 from .objects import InjectorData, InjectorStats
 from .switch_processor import SwitchProcessor

@@ -17,21 +17,22 @@ class ValidateStructure(PreparationStep):
         if ctx.root is None:
             return
 
-        # 1. No <tref>
-        trefs = ctx.root.findall(f".//{{{SVG_NS}}}tref")
-        if trefs:
+        # <tref> elements are not supported.
+        trefs = ctx.root.findall(".//{%s}tref" % SVG_NS)
+        if len(trefs) != 0:
             raise SvgContainsTrefError("structure-error-contains-tref", element=trefs[0])
 
         # 2. Check CSS styling
-        styles = ctx.root.findall(f".//{{{SVG_NS}}}style")
+        styles = ctx.root.findall(".//{%s}style" % SVG_NS)
         for s in styles:
-            content = s.text or ""
-            if "#" in content:
+            css = s.text or ""
+            if "#" in css:
                 # CSS has IDs, too complex
                 raise SvgCssHasIdsError("structure-error-css-has-ids", element=s)
+
             # Find complex selectors
-            if "{" in content:
-                selectors = [part.split("{")[0].strip() for part in content.split("}") if "{" in part]
+            if "{" in css:
+                selectors = [part.split("{")[0].strip() for part in css.split("}") if "{" in part]
                 for sel in selectors:
                     if "," in sel or " " in sel or ">" in sel or ":" in sel:
                         raise SvgCssTooComplexError("structure-error-css-too-complex", element=s)
