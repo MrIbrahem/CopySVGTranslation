@@ -181,7 +181,7 @@ class TestEdgeCasesAndErrorHandling:
         target_svg = tmp_path / "target.svg"
         target_svg.write_text((FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
 
-        result = inject_file_tree(target_svg, [])
+        result = inject_file_tree(inject_file=target_svg, mapping_files=[])
         # Should return None or handle gracefully
         assert result is None
 

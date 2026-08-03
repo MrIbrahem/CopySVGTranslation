@@ -155,8 +155,8 @@ class TestSVGTranslate(TestSetup):
 
         # Inject with both mapping files
         tree, stats = inject_file_tree(
-            _path,
-            [mapping1_path, mapping2_path],
+            inject_file=_path,
+            mapping_files=[mapping1_path, mapping2_path],
             return_stats=True,
         )
 
@@ -179,8 +179,8 @@ class TestSVGTranslate(TestSetup):
         output_dir.mkdir()
 
         tree = inject_file_and_save(
-            _path,
-            [mapping_path],
+            inject_file=_path,
+            mapping_files=[mapping_path],
             output_dir=output_dir,
         )
 
@@ -199,11 +199,17 @@ class TestSVGTranslate(TestSetup):
         with open(_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
-        tree = inject_file_tree(_path, [mapping_path])
+        tree = inject_file_tree(inject_file=_path, mapping_files=[mapping_path])
 
         assert tree is not None
+        assert not isinstance(tree, tuple)
+
         # Original elements should still be present
-        tree_str = etree.tostring(tree.getroot(), encoding="unicode")
+
+        root = tree.getroot()
+        assert root is not None
+
+        tree_str = etree.tostring(root, encoding="unicode")
         assert 'id="foreground"' in tree_str
         assert "switch" in tree_str
 
@@ -232,8 +238,8 @@ class TestSVGTranslate(TestSetup):
 
         # Inject without overwrite
         tree, stats = inject_file_and_save(
-            svg_path,
-            [mapping_path],
+            inject_file=svg_path,
+            mapping_files=[mapping_path],
             overwrite=False,
             return_stats=True,
             save_path=svg_path,
@@ -305,8 +311,8 @@ class TestSVGTranslate(TestSetup):
 
         # Test with overwrite=True
         tree, stats = inject_file_tree(
-            svg_path,
-            [mapping_path],
+            inject_file=svg_path,
+            mapping_files=[mapping_path],
             overwrite=True,
             return_stats=True,
         )
@@ -341,8 +347,8 @@ class TestSVGTranslate(TestSetup):
 
         # Inject translations
         tree, stats = inject_file_tree(
-            _path,
-            [mapping_path],
+            inject_file=_path,
+            mapping_files=[mapping_path],
             return_stats=True,
         )
 
@@ -363,7 +369,11 @@ class TestSVGTranslate(TestSetup):
         with open(_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
-        tree, stats = inject_file_tree(_path, [mapping_path], return_stats=True)
+        tree, stats = inject_file_tree(
+            inject_file=_path,
+            mapping_files=[mapping_path],
+            return_stats=True,
+        )
 
         # Should complete without error, but with no translations
         assert tree is not None
@@ -379,5 +389,5 @@ class TestSVGTranslate(TestSetup):
         with open(_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
-        result = inject_file_tree(_path, [mapping_path])
+        result = inject_file_tree(inject_file=_path, mapping_files=[mapping_path])
         assert result is None

@@ -47,7 +47,7 @@ class TestIntegrationWorkflows:
     def test_inject_with_dict(self):
         translations = extract(self.source_svg)
         result, stats = inject_file_and_save(
-            self.target_svg,
+            inject_file=self.target_svg,
             output_dir=self.test_dir,
             all_mappings=translations,
             return_stats=True,

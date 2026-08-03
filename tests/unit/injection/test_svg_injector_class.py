@@ -85,7 +85,8 @@ class TestInjectorStats:
         assert set(result.keys()) == expected_keys
 
     def test_to_json_reflects_values(self):
-        stats = InjectorStats(
+        stats = InjectorStats()
+        stats._update(
             all_languages=3,
             new_languages=2,
             inserted_translations=5,
@@ -146,7 +147,11 @@ class TestSVGTranslationInjectorInit:
         assert inj.pretty_print is None
 
     def test_custom_parameters(self):
-        inj = SVGTranslationInjector(case_insensitive=False, overwrite=True, pretty_print=False)
+        inj = SVGTranslationInjector(
+            case_insensitive=False,
+            overwrite=True,
+            pretty_print=False,
+        )
         assert inj.case_insensitive is False
         assert inj.overwrite is True
         assert inj.pretty_print is False
@@ -226,6 +231,8 @@ class TestSVGTranslationInjectorBasic:
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
+        assert result is not None
+        assert result.tree is not None
 
         root = result.tree.getroot()
         default_texts = _get_default_texts(root)
@@ -261,7 +268,9 @@ class TestSVGTranslationInjectorCaseSensitivity:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(case_insensitive=False)
+        inj = SVGTranslationInjector(
+            case_insensitive=False,
+        )
         # Key is lowercase; source text is mixed case — should NOT match
         mappings = {"new": {"hello world": {"ar": "مرحبا بالعالم"}}}
 
@@ -275,7 +284,9 @@ class TestSVGTranslationInjectorCaseSensitivity:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(case_insensitive=False)
+        inj = SVGTranslationInjector(
+            case_insensitive=False,
+        )
         mappings = {"new": {"Hello World": {"ar": "مرحبا بالعالم"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
@@ -334,6 +345,9 @@ class TestSVGTranslationInjectorOverwrite:
         mappings = {"new": {"hello": {"ar": "New Arabic"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
+        assert result is not None
+        assert result.tree is not None
+
         root = result.tree.getroot()
 
         ar_text = _get_ar_text(root)

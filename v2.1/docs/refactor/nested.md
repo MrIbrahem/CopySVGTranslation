@@ -95,7 +95,7 @@ class NestedTspanDetector:
 
         nested = self.find_in_tree(root)
         return [
-            etree.tostring(t, pretty_print=False).decode("utf-8")
+            etree.tostring(t, pretty_print=False,).decode("utf-8")
             for t in nested
         ]
 

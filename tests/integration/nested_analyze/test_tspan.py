@@ -51,4 +51,5 @@ def test_nested_tspans_with_tail_text():
     svg = _make_svg("<text><tspan>start<tspan>mid</tspan>end</tspan></text>")
     fix_nested_tspans(svg)
     tspan = svg.find(f".//{{{SVG_NS}}}tspan")
+    assert tspan is not None
     assert tspan.text == "startmidend"

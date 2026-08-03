@@ -110,7 +110,10 @@ class TestSVGTranslationExtractorInit:
         assert ext.case_insensitive is True
 
     def test_case_insensitive_false(self):
-        ext = SVGTranslationExtractor(source_file=Path("/fake.svg"), case_insensitive=False)
+        ext = SVGTranslationExtractor(
+            source_file=Path("/fake.svg"),
+            case_insensitive=False,
+        )
         assert ext.case_insensitive is False
 
     def test_translations_initialized(self):
@@ -188,7 +191,10 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(svg, case_insensitive=False)
+        ext = SVGTranslationExtractor(
+            svg,
+            case_insensitive=False,
+        )
         result = ext.extract()
 
         assert "Hello World" in result.new

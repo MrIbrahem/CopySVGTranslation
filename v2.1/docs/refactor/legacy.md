@@ -260,7 +260,7 @@ __all__ = [
 | --------------------------------- | --------------------- | --------------------------------------------------------------- |
 | `extract(path)`                   | `dict \| None`        | Same shape as old `to_json()`                                   |
 | `inject(..., return_stats=False)` | `ElementTree \| None` | Same as before                                                  |
-| `inject(..., return_stats=True)`  | `(tree, stats_dict)`  | `stats` includes `error` on failure                             |
+| `inject(..., return_stats=True,)`  | `(tree, stats_dict)`  | `stats` includes `error` on failure                             |
 | `svg_extract_and_inject(...)`     | `ElementTree \| None` | Still may write JSON if `all_mappings_file` or default path used |
 | `svg_extract_and_injects(...)`    | same as `inject`      | Thin redirect                                                   |
 

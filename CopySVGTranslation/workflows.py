@@ -57,7 +57,7 @@ def svg_extract_and_inject(
         _target_path = output_dir / inject_path.name
 
     tree, stats = inject_file_tree(
-        inject_path,
+        inject_file=inject_path,
         all_mappings=all_mappings,
         save_path=_target_path,
         overwrite=bool(overwrite),

@@ -49,7 +49,13 @@ class NestedTspanDetector:
             return []
 
         nested = self.find_in_tree(root)
-        return [etree.tostring(t, pretty_print=False).decode("utf-8") for t in nested]
+        return [
+            etree.tostring(
+                t,
+                pretty_print=False,
+            ).decode("utf-8")
+            for t in nested
+        ]
 
     def has_nested(self, root: etree._Element) -> bool:
         return bool(self.find_in_tree(root))

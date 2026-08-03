@@ -110,7 +110,12 @@ class TestWorkOnSwitches(TestSetup):
         existing_ids = {"text1"}
         mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
 
-        stats = work_on_switches(root, existing_ids, mappings, case_insensitive=False)
+        stats = work_on_switches(
+            root,
+            existing_ids,
+            mappings,
+            case_insensitive=False,
+        )
 
         assert stats["inserted_translations"] == 1
 

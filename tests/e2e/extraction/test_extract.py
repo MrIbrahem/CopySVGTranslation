@@ -45,7 +45,11 @@ class TestWorkflows:
         target_svg = temp_dir / "target.svg"
         target_svg.write_text("<svg></svg>", encoding="utf-8")
 
-        result = svg_extract_and_inject(temp_dir / "none.svg", target_svg, save_result=False)
+        result = svg_extract_and_inject(
+            temp_dir / "none.svg",
+            target_svg,
+            save_result=False,
+        )
         assert result is None
 
     def test_inject_with_return_stats(self, temp_dir):
@@ -77,7 +81,12 @@ class TestWorkflows:
             encoding="utf-8",
         )
         translations = {"new": {"hello": {"ar": "New"}}}
-        tree, stats = inject_file_tree(all_mappings=translations, inject_file=target, overwrite=True, return_stats=True)
+        tree, stats = inject_file_tree(
+            all_mappings=translations,
+            inject_file=target,
+            overwrite=True,
+            return_stats=True,
+        )
         assert tree is not None
         assert stats.get("updated_translations", 0) > 0
 
@@ -111,7 +120,10 @@ class TestExtractor:
             <text id="t"><tspan>Hello World</tspan></text></switch></svg>""",
             encoding="utf-8",
         )
-        result = extract(svg, case_insensitive=False)
+        result = extract(
+            svg,
+            case_insensitive=False,
+        )
         assert result is not None
         assert "new" in result
 

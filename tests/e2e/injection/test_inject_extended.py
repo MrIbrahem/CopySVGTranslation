@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.injection import inject_file_tree
+from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
 
 
 class TestSetup:
@@ -39,7 +39,11 @@ class TestInjectEdgeCases(TestSetup):
 
         mappings = {"new": {"test": {"ar": "اختبار"}}}
 
-        result, stats = inject_file_tree(svg_path, all_mappings=mappings, return_stats=True)
+        result, stats = inject_file_tree(
+            inject_file=svg_path,
+            all_mappings=mappings,
+            return_stats=True,
+        )
 
         assert result is None
         assert "error" in stats
@@ -54,7 +58,11 @@ class TestInjectEdgeCases(TestSetup):
 
         mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
 
-        result = inject_file_tree(svg_path, all_mappings=mappings, case_insensitive=False)
+        result = inject_file_tree(
+            inject_file=svg_path,
+            all_mappings=mappings,
+            case_insensitive=False,
+        )
 
         assert result is not None
 
@@ -69,7 +77,11 @@ class TestInjectEdgeCases(TestSetup):
         _output_file = self.test_dir / "output.svg"
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        inject_file_tree(svg_path, all_mappings=mappings, save_path=_output_file, save_result=True)
+        inject_file_and_save(
+            inject_file=svg_path,
+            all_mappings=mappings,
+            save_path=_output_file,
+        )
 
         assert _output_file.exists() is True
 
@@ -84,6 +96,11 @@ class TestInjectEdgeCases(TestSetup):
         _output_file = self.test_dir / "output.svg"
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        inject_file_tree(svg_path, all_mappings=mappings, save_path=_output_file, save_result=False)
+        inject_file_tree(
+            inject_file=svg_path,
+            all_mappings=mappings,
+            save_path=_output_file,
+            save_result=False,
+        )
 
         assert _output_file.exists() is False

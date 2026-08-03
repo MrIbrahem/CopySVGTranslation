@@ -330,7 +330,10 @@ def test_extract_with_case_insensitive_false(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    result = extract(svg_with_caps, case_insensitive=False)
+    result = extract(
+        svg_with_caps,
+        case_insensitive=False,
+    )
 
     assert result == {
         "new": {"HELLO WORLD": {"ar": "مرحبا"}},

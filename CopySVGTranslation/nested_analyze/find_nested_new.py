@@ -136,7 +136,10 @@ def match_nested_tags(source_file: Path) -> list:
         element_children = [c for c in tspan if isinstance(c.tag, str)]
         if element_children:
             # Add string representation of nested element to results
-            tspan_str = etree.tostring(tspan, pretty_print=False).decode("utf-8")
+            tspan_str = etree.tostring(
+                tspan,
+                pretty_print=False,
+            ).decode("utf-8")
             result.append(tspan_str)
 
     return result

@@ -288,12 +288,11 @@ tree, stats = inject_file_tree(
 
 ```python
 # Before (deprecated)
-from CopySVGTranslation import inject_file_tree
-tree, stats = inject_file_tree(
+from CopySVGTranslation import inject_file_and_save
+tree, stats = inject_file_and_save(
     inject_file=Path("target.svg"),
     all_mappings=translations,
     save_path=Path("translated/target.svg"),
-    save_result=True,
     return_stats=True,
 )
 

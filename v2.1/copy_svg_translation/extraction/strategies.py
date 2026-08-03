@@ -99,7 +99,10 @@ class ByPositionStrategy(MatchingStrategy):
         case_insensitive: bool = True,
     ) -> list[SegmentMatch]:
         default_texts = default_node.texts(normalize=True, case_insensitive=case_insensitive)
-        translated_texts = translated_node.texts(normalize=True, case_insensitive=False)
+        translated_texts = translated_node.texts(
+            normalize=True,
+            case_insensitive=False,
+        )
 
         matches: list[SegmentMatch] = []
         for i, def_text in enumerate(default_texts):

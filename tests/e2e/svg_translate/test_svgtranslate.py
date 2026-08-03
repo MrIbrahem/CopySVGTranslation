@@ -143,8 +143,8 @@ class TestSVGTranslate(TestSetup):
 
         # Inject translations
         tree, stats = inject_file_and_save(
-            no_translations_path,
-            [mapping_path],
+            inject_file=no_translations_path,
+            mapping_files=[mapping_path],
             return_stats=True,
             save_path=no_translations_path,
         )
@@ -189,7 +189,11 @@ class TestSVGTranslate(TestSetup):
             original_content = f.read()
 
         # Inject translations in dry-run mode
-        tree, stats = inject_file_tree(no_translations_path, [mapping_path], return_stats=True)
+        tree, stats = inject_file_tree(
+            inject_file=no_translations_path,
+            mapping_files=[mapping_path],
+            return_stats=True,
+        )
 
         # Verify stats
         assert tree is not None
@@ -240,8 +244,8 @@ class TestSVGTranslate(TestSetup):
 
         # Inject translations with overwrite
         tree, stats = inject_file_and_save(
-            svg_path,
-            [mapping_path],
+            inject_file=svg_path,
+            mapping_files=[mapping_path],
             overwrite=True,
             return_stats=True,
             save_path=svg_path,
@@ -273,7 +277,7 @@ class TestSVGTranslate(TestSetup):
         with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
-        result = inject_file_tree(nonexistent_path, [mapping_path])
+        result = inject_file_tree(inject_file=nonexistent_path, mapping_files=[mapping_path])
         assert result is None
 
     def test_inject_nonexistent_mapping(self):
@@ -284,5 +288,8 @@ class TestSVGTranslate(TestSetup):
         with open(svg_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
-        result = inject_file_tree(svg_path, [nonexistent_mapping])
+        result = inject_file_tree(
+            inject_file=svg_path,
+            mapping_files=[nonexistent_mapping],
+        )
         assert result is None
