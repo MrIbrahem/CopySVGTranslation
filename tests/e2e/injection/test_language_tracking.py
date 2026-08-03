@@ -1,7 +1,7 @@
 import textwrap
 from pathlib import Path
 
-from CopySVGTranslation.injection.worker import inject
+from CopySVGTranslation.injection.worker import inject_file_tree
 from CopySVGTranslation.utils.elements_utils import (
     file_langs,
     tree_langs,
@@ -29,8 +29,8 @@ def test_inject_tracks_new_languages(tmp_path):
     before_languages = file_langs(svg_path)
     mapping = {"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}}
 
-    tree, stats = inject(
-        svg_path,
+    tree, stats = inject_file_tree(
+        inject_file=svg_path,
         all_mappings=mapping,
         save_result=False,
         return_stats=True,
@@ -60,8 +60,8 @@ def test_inject_tracks_only_truly_new_languages(tmp_path):
 
     mapping = {"new": {"hello": {"ar": "مرحبا جديد", "fr": "Bonjour"}}}
 
-    _, stats = inject(
-        svg_path,
+    _, stats = inject_file_tree(
+        inject_file=svg_path,
         all_mappings=mapping,
         save_result=False,
         return_stats=True,
@@ -84,8 +84,8 @@ def test_file_langs_handles_element_tree(tmp_path):
         """,
     )
 
-    tree, _ = inject(
-        svg_path,
+    tree, _ = inject_file_tree(
+        inject_file=svg_path,
         all_mappings={"new": {"hello": {"ar": "مرحبا"}}},
         save_result=False,
         return_stats=True,

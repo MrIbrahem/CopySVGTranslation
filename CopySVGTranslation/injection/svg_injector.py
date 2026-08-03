@@ -35,7 +35,7 @@ class SVGTranslationInjector:
         self,
         case_insensitive: bool = True,
         overwrite: bool = False,
-        pretty_print: bool = True,
+        pretty_print: bool | None = None,
     ) -> None:
         """
         Parameters:
@@ -234,7 +234,7 @@ class SVGTranslationInjector:
         self,
         inject_file: Path | str,
         all_mappings: Mapping | None = None,
-        target_path: Path | None = None,
+        save_path: Path | None = None,
         save_result: bool = False,
     ) -> InjectorData:
         """Inject translations into the provided SVG file."""
@@ -275,27 +275,38 @@ class SVGTranslationInjector:
 
         after_languages = tree_langs(tree)
 
-        if save_result:
-            if target_path is None:
-                logger.error("save_result is True but no target_path was provided")
-                self.new_stats.error = "No target path provided"
-                return self.result
-            try:
-                tree.write(
-                    str(target_path),
-                    encoding="utf-8",
-                    xml_declaration=True,
-                    pretty_print=self.pretty_print,
-                )
-                logger.debug(f"Saved modified SVG to {target_path}")
-            except OSError as e:
-                logger.error(f"Failed writing {inject_path.name}: {e}")
-                self.new_stats.error = f"Failed writing {inject_path.name}: {e}"
-                self.result.tree = None
+        if not save_result:
+            self._update_data(before_languages, after_languages)
+            return self.result
 
+        self.save_svg_to_target(save_path, inject_path.name, tree)
         self._update_data(before_languages, after_languages)
 
         return self.result
+
+    def save_svg_to_target(
+        self,
+        save_path: Path | None,
+        inject_file_name: str,
+        tree: etree._ElementTree,
+    ) -> None:
+        if save_path is None:
+            logger.error("save_result is True but no save_path was provided")
+            self.new_stats.error = "No target path provided"
+            return
+
+        try:
+            tree.write(
+                str(save_path),
+                encoding="utf-8",
+                xml_declaration=True,
+                pretty_print=self.pretty_print,
+            )
+            logger.debug(f"Saved modified SVG to {save_path}")
+        except OSError as e:
+            logger.error(f"Failed writing {inject_file_name}: {e}")
+            self.new_stats.error = f"Failed writing {inject_file_name}: {e}"
+            self.result.tree = None
 
 
 __all__ = [

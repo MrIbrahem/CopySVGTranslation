@@ -172,7 +172,10 @@ def test_fix_deeply_nested_concatenation_is_linear(temp_dir: Path):
 def test_fix_does_not_touch_flat_structure(temp_dir: Path):
     p = _write_svg(temp_dir, "<text><tspan>Flat</tspan></text>")
     before = Path.read_text(p, encoding="utf-8")
-    fix_nested_file(p, pretty_print=False)
+    fix_nested_file(
+        p,
+        pretty_print=False,
+    )
     after = Path.read_text(p, encoding="utf-8")
     # The serializer can change formatting. Compare tree-equivalence instead.
     rb = etree.tostring(etree.fromstring(before.encode("utf-8")), with_tail=False)

@@ -72,7 +72,6 @@ def test_extract_with_string_path_zz() -> None:
 
     assert result is not None
     assert isinstance(result, dict)
-    # assert json.dumps(result["new"], ensure_ascii=False) == "{}"
 
     assert result["tspans_by_id"] == {
         "trsvg1": "Parkinson's disease prevalence, 1990",

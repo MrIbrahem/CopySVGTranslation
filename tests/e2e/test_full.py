@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
 
 from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import inject
-from CopySVGTranslation.workflows import svg_extract_and_inject
+from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -22,188 +20,35 @@ def target_svg(tmp_path: Path) -> Path:
     return target
 
 
-def test_svg_extract_and_inject_creates_translation_files(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_inject should persist both JSON mappings and the translated SVG."""
-    source_svg = FIXTURES_DIR / "source.svg"
-    data_output = tmp_path / "translations.json"
-    output_svg = tmp_path / "translated.svg"
-
-    tree = svg_extract_and_inject(
-        source_svg,
-        target_svg,
-        output_file=output_svg,
-        data_output_file=data_output,
-        overwrite=True,
-        save_result=True,
-    )
-
-    assert tree is not None, "An lxml tree should be returned for the translated SVG"
-    assert output_svg.exists(), "The translated SVG should be written to disk"
-    assert data_output.exists(), "The extracted translations should be written to JSON"
-
-    saved_translations = json.loads(data_output.read_text(encoding="utf-8"))
-    # Keys are normalized to lowercase by the extractor
-    assert saved_translations["new"]["population 2020"]["ar"] == "السكان 2020"
-
-    injected_svg = output_svg.read_text(encoding="utf-8")
-    assert 'systemLanguage="ar"' in injected_svg
-    assert "السكان 2020" in injected_svg
-
-
 def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
     """inject should reuse an already-extracted mapping structure."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
-    output_dir = tmp_path / "outputs"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    tree, stats = inject(
+    _output_dir = tmp_path / "outputs"
+    _output_dir.mkdir(parents=True, exist_ok=True)
+    output_file = _output_dir / target_svg.name
+
+    tree, stats = inject_file_and_save(
         inject_file=target_svg,
         all_mappings=translations,
-        output_dir=output_dir,
-        save_result=True,
+        save_path=output_file,
         return_stats=True,
     )
 
     assert tree is not None
     assert stats["inserted_translations"] >= 1
 
-    output_file = output_dir / target_svg.name
     assert output_file.exists(), "The helper should honour the output directory when saving results"
     content = output_file.read_text(encoding="utf-8")
     assert 'systemLanguage="ar"' in content
     assert "السكان 2020" in content
 
 
-def test_svg_extract_and_inject_without_save_result(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_inject should work without saving results to disk."""
-    source_svg = FIXTURES_DIR / "source.svg"
-    data_output = tmp_path / "translations.json"
-    output_svg = tmp_path / "translated.svg"
-
-    tree = svg_extract_and_inject(
-        source_svg,
-        target_svg,
-        output_file=output_svg,
-        data_output_file=data_output,
-        overwrite=True,
-        save_result=False,  # Don't save the injected SVG
-    )
-
-    assert tree is not None, "An lxml tree should still be returned"
-    assert data_output.exists(), "The extracted translations should still be written to JSON"
-    assert not output_svg.exists(), "The translated SVG should not be written when save_result=False"
-
-
-def test_svg_extract_and_inject_with_default_paths(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_inject should use default paths when none are provided."""
-    import os
-
-    original_cwd = os.getcwd()
-
-    try:
-        # Change to tmp_path so default paths are created there
-        os.chdir(tmp_path)
-
-        source_svg = FIXTURES_DIR / "source.svg"
-
-        tree = svg_extract_and_inject(
-            source_svg,
-            target_svg,
-            save_result=True,
-        )
-
-        assert tree is not None
-        # Check that default directories were created
-        assert (tmp_path / "data").exists(), "Default data directory should be created"
-        assert (tmp_path / "translated").exists(), "Default translated directory should be created"
-
-        # Check that files were created in default locations
-        data_file = tmp_path / "data" / f"{source_svg.name}.json"
-        assert data_file.exists(), "Translation data should be saved in default location"
-
-        translated_file = tmp_path / "translated" / target_svg.name
-        assert translated_file.exists(), "Translated SVG should be saved in default location"
-    finally:
-        os.chdir(original_cwd)
-
-
-def test_svg_extract_and_inject_nonexistent_source(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_inject should return None if source file doesn't exist."""
-    nonexistent_source = tmp_path / "nonexistent_source.svg"
-
-    result = svg_extract_and_inject(
-        nonexistent_source,
-        target_svg,
-        save_result=False,
-    )
-
-    assert result is None, "Should return None when source file doesn't exist"
-
-
-def test_svg_extract_and_inject_nonexistent_target(tmp_path: Path) -> None:
-    """svg_extract_and_inject should return None if target file doesn't exist."""
-    source_svg = FIXTURES_DIR / "source.svg"
-    nonexistent_target = tmp_path / "nonexistent_target.svg"
-
-    result = svg_extract_and_inject(
-        source_svg,
-        nonexistent_target,
-        save_result=False,
-    )
-
-    assert result is None, "Should return None when target file doesn't exist"
-
-
-def test_svg_extract_and_inject_with_pathlib_and_string_paths(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_inject should handle both Path and string arguments."""
-    source_svg = FIXTURES_DIR / "source.svg"
-    output_svg = tmp_path / "output.svg"
-    data_output = tmp_path / "data.json"
-
-    # Test with string paths
-    tree = svg_extract_and_inject(
-        str(source_svg),  # String path
-        str(target_svg),  # String path
-        output_file=str(output_svg),
-        data_output_file=str(data_output),
-        save_result=True,
-    )
-
-    assert tree is not None
-    assert output_svg.exists()
-    assert data_output.exists()
-
-
-def test_svg_extract_and_inject_preserves_translation_data(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_inject should preserve the correct translation structure in JSON."""
-    source_svg = FIXTURES_DIR / "source.svg"
-    data_output = tmp_path / "translations.json"
-    output_svg = tmp_path / "translated.svg"
-
-    svg_extract_and_inject(
-        source_svg,
-        target_svg,
-        output_file=output_svg,
-        data_output_file=data_output,
-        save_result=True,
-    )
-
-    # Verify the JSON structure
-    translations = json.loads(data_output.read_text(encoding="utf-8"))
-
-    assert "new" in translations
-    assert "title" in translations
-    assert isinstance(translations["new"], dict)
-
-    # Verify at least one translation exists
-    assert len(translations["new"]) > 0
-
-
-def test_inject_without_output_dir(tmp_path: Path, target_svg: Path) -> None:
-    """inject should handle missing output_dir when save_result=False."""
+def test_inject_without_save_path(tmp_path: Path, target_svg: Path) -> None:
+    """inject should handle missing save_path when save_result=False."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
-    tree, stats = inject(
+    tree, stats = inject_file_tree(
         inject_file=target_svg,
         all_mappings=translations,
         save_result=False,
@@ -214,38 +59,11 @@ def test_inject_without_output_dir(tmp_path: Path, target_svg: Path) -> None:
     assert isinstance(stats, dict)
 
 
-def test_inject_with_default_output_dir(tmp_path: Path, target_svg: Path) -> None:
-    """inject should create default output_dir when needed."""
-    import os
-
-    original_cwd = os.getcwd()
-
-    try:
-        os.chdir(tmp_path)
-
-        translations = extract(FIXTURES_DIR / "source.svg")
-
-        tree, _stats = inject(
-            inject_file=target_svg,
-            all_mappings=translations,
-            save_result=True,
-            return_stats=True,
-        )
-
-        assert tree is not None
-        # Check that default directory was created
-        translated_dir = Path(str(target_svg)).parent  # / "translated"
-        assert translated_dir.exists()
-        assert (translated_dir / target_svg.name).exists()
-    finally:
-        os.chdir(original_cwd)
-
-
 def test_inject_returns_stats(tmp_path: Path, target_svg: Path) -> None:
     """inject should return detailed statistics when requested."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
-    result = inject(
+    result = inject_file_tree(
         inject_file=target_svg,
         all_mappings=translations,
         return_stats=True,
@@ -266,7 +84,7 @@ def test_inject_without_stats(tmp_path: Path, target_svg: Path) -> None:
     """inject should return only tree when return_stats=False."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
-    result = inject(
+    result = inject_file_tree(
         inject_file=target_svg,
         all_mappings=translations,
         return_stats=False,
@@ -306,8 +124,7 @@ def test_extract_empty_svg(tmp_path: Path) -> None:
 
     result = extract(empty_svg)
 
-    # Should return a dict (possibly with empty structures) or None
-    assert result is None or isinstance(result, dict)
+    assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "error": ""}
 
 
 def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
@@ -338,55 +155,37 @@ def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
 
     assert result is not None
     # Should have translations for ar, fr, and es
-    if "new" in result and "hello" in result["new"]:
-        translations = result["new"]["hello"]
-        assert "ar" in translations or "fr" in translations or "es" in translations
-
-
-def test_svg_extract_and_inject_with_overwrite_true(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_inject should overwrite existing translations when overwrite=True."""
-    source_svg = FIXTURES_DIR / "source.svg"
-    output_svg = tmp_path / "output.svg"
-
-    # First injection
-    tree1 = svg_extract_and_inject(
-        source_svg,
-        target_svg,
-        output_file=output_svg,
-        overwrite=True,
-        save_result=True,
-    )
-
-    assert tree1 is not None
-    assert output_svg.exists()
-
-    # Second injection with overwrite
-    tree2 = svg_extract_and_inject(
-        source_svg,
-        target_svg,
-        output_file=output_svg,
-        overwrite=True,
-        save_result=True,
-    )
-
-    assert tree2 is not None
-    # File should still exist and be valid
-    content2 = output_svg.read_text(encoding="utf-8")
-    assert 'systemLanguage="ar"' in content2
+    assert result == {
+        "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour", "es": "Hola"}},
+        "tspans_by_id": {"label": "Hello"},
+        "title": {},
+        "title_new": {},
+        "error": "",
+    }
 
 
 def test_inject_with_empty_translations(tmp_path: Path, target_svg: Path) -> None:
     """inject should handle empty translation dictionaries gracefully."""
     empty_translations = {"new": {}, "title": {}}
 
-    result = inject(
+    tree, stats = inject_file_tree(
         inject_file=target_svg,
         all_mappings=empty_translations,
         save_result=False,
+        return_stats=True,
     )
 
-    # Should handle gracefully and return a result (even if no translations were applied)
-    assert result is not None or result is None  # Either outcome is acceptable
+    assert stats == {
+        "all_languages": 0,
+        "new_languages": 0,
+        "processed_switches": 0,
+        "inserted_translations": 0,
+        "skipped_translations": 0,
+        "updated_translations": 0,
+        "languages_before": [],
+        "languages_after": [],
+        "error": "",
+    }
 
 
 def test_extract_with_case_insensitive_true() -> None:
@@ -398,12 +197,13 @@ def test_extract_with_case_insensitive_true() -> None:
     result = extract(FIXTURES_DIR / "source.svg", case_insensitive=True)
 
     assert result is not None
-    # Keys should be lowercase
-    if "new" in result:
-        for key in result["new"].keys():
-            if isinstance(key, str):
-                # Text keys should be lowercase
-                assert key == key.lower()
+    assert result == {
+        "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
+        "tspans_by_id": {"label": "Population 2020"},
+        "title": {"population": {"ar": "السكان"}},
+        "title_new": {"population {year}": {"ar": "السكان {year}"}},
+        "error": "",
+    }
 
 
 def test_extract_with_case_insensitive_false(tmp_path: Path) -> None:
@@ -424,32 +224,18 @@ def test_extract_with_case_insensitive_false(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    result = extract(svg_with_caps, case_insensitive=False)
-
-    # When case_insensitive is False, original case might be preserved
-    # (implementation dependent, so we just check it doesn't crash)
-    assert result is None or isinstance(result, dict)
-
-
-def test_svg_extract_and_inject_creates_parent_directories(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_inject should create parent directories for output files."""
-    source_svg = FIXTURES_DIR / "source.svg"
-
-    # Use nested directories that don't exist yet
-    nested_output = tmp_path / "deeply" / "nested" / "path" / "output.svg"
-    nested_data = tmp_path / "another" / "nested" / "data.json"
-
-    tree = svg_extract_and_inject(
-        source_svg,
-        target_svg,
-        output_file=nested_output,
-        data_output_file=nested_data,
-        save_result=True,
+    result = extract(
+        svg_with_caps,
+        case_insensitive=False,
     )
 
-    assert tree is not None
-    assert nested_output.exists(), "Output file should be created with parent directories"
-    assert nested_data.exists(), "Data file should be created with parent directories"
+    assert result == {
+        "new": {"HELLO WORLD": {"ar": "مرحبا"}},
+        "tspans_by_id": {"label": "HELLO WORLD"},
+        "title": {},
+        "title_new": {},
+        "error": "",
+    }
 
 
 def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
@@ -459,22 +245,20 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
     # First injection
     output1 = tmp_path / "output1"
     output1.mkdir()
-    tree1, stats1 = inject(
+    tree1, stats1 = inject_file_and_save(
         inject_file=target_svg,
         all_mappings=translations,
-        output_dir=output1,
-        save_result=True,
+        save_path=output1 / target_svg.name,
         return_stats=True,
     )
 
     # Second injection to different location
     output2 = tmp_path / "output2"
     output2.mkdir()
-    tree2, stats2 = inject(
+    tree2, stats2 = inject_file_and_save(
         inject_file=target_svg,
         all_mappings=translations,
-        output_dir=output2,
-        save_result=True,
+        save_path=output2 / target_svg.name,
         return_stats=True,
     )
 
@@ -484,4 +268,17 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
     assert (output2 / target_svg.name).exists()
 
     # Both should have inserted the same number of translations
+
     assert stats1["inserted_translations"] == stats2["inserted_translations"]
+
+    assert stats1 == {
+        "all_languages": 2,
+        "new_languages": 2,
+        "processed_switches": 1,
+        "inserted_translations": 2,
+        "skipped_translations": 0,
+        "updated_translations": 0,
+        "languages_before": [],
+        "languages_after": ["ar", "fr"],
+        "error": "",
+    }

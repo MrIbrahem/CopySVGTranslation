@@ -12,7 +12,6 @@ import pytest
 
 from CopySVGTranslation.utils import (
     generate_unique_id,
-    get_target_path,
     load_all_mappings,
 )
 
@@ -29,47 +28,6 @@ class TestSetup:
         """Clean up test fixtures."""
         # Clean up temporary files
         shutil.rmtree(self.test_dir)
-
-
-class TestGetTargetPath(TestSetup):
-
-    def test_get_target_path_with_output_file(self):
-        """Test get_target_path when output_file is specified."""
-        output_file = self.test_dir / "output" / "result.svg"
-        result = get_target_path(output_file, None, self.svg_path)
-
-        assert result == output_file
-        assert result.parent.exists() is True
-
-    def test_get_target_path_with_output_dir(self):
-        """Test get_target_path when output_dir is specified."""
-        output_dir = self.test_dir / "translated"
-        result = get_target_path(None, output_dir, self.svg_path)
-
-        assert result == output_dir / "source.svg"
-        assert result.parent.exists() is True
-
-    def test_get_target_path_default_to_source_dir(self):
-        """Test get_target_path defaults to source file's directory."""
-        result = get_target_path(None, None, self.svg_path)
-
-        assert result == self.svg_path.parent / "source.svg"
-
-    def test_get_target_path_creates_nested_directories(self):
-        """Test get_target_path creates nested output directories."""
-        output_file = self.test_dir / "a" / "b" / "c" / "result.svg"
-        result = get_target_path(output_file, None, self.svg_path)
-
-        assert result.parent.exists() is True
-        assert result == output_file
-
-    def test_get_target_path_with_string_paths(self):
-        """Test get_target_path handles string paths."""
-        output_dir = str(self.test_dir / "output")
-        result = get_target_path(None, output_dir, self.svg_path)
-
-        assert isinstance(result, Path) is True
-        assert result.parent.exists() is True
 
 
 class TestLoadAllMappingsEdgeCases(TestSetup):
@@ -114,6 +72,11 @@ class TestLoadAllMappingsEdgeCases(TestSetup):
         assert "new" in result
         assert "title" in result
 
+        assert result == {
+            "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}},
+            "title": {"Population ": {"ar": "السكان ", "fr": "Population "}},
+        }
+
     def test_load_all_mappings_merge_overlapping_keys(self):
         """Test merging mappings with overlapping keys."""
         m1 = self.test_dir / "m1.json"
@@ -130,6 +93,8 @@ class TestLoadAllMappingsEdgeCases(TestSetup):
         assert "lang1" in result["key"]
         assert "lang2" in result["key"]
 
+        assert result == {"key": {"lang1": "value1", "lang2": "value2"}}
+
     def test_load_all_mappings_string_paths(self):
         """Test loading with string paths instead of Path objects."""
         mapping_file = self.test_dir / "test.json"
@@ -139,6 +104,8 @@ class TestLoadAllMappingsEdgeCases(TestSetup):
         result = load_all_mappings([str(mapping_file)])
 
         assert "key" in result
+
+        assert result == {"key": {"value": "test"}}
 
 
 class TestGenerateUniqueIdFunction:

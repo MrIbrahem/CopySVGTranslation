@@ -4,9 +4,8 @@ Unit tests for SVGTranslationExtractor class and ExtractorData dataclass.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
-
-import pytest
 
 from CopySVGTranslation.extraction.svg_extractor import (
     ExtractorData,
@@ -57,6 +56,8 @@ class TestExtractorData:
         assert "title_new" in result
         assert "error" in result
 
+        assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "error": ""}
+
     def test_to_json_reflects_data(self):
         data = ExtractorData(
             new={"hello": {"ar": "مرحبا"}},
@@ -94,26 +95,29 @@ class TestSVGTranslationExtractorInit:
     def test_accepts_path_object(self, tmp_path: Path):
         p = tmp_path / "f.svg"
         p.write_text("<svg/>", encoding="utf-8")
-        ext = SVGTranslationExtractor(svg_file_path=p)
-        assert ext.svg_file_path == p
-        assert isinstance(ext.svg_file_path, Path)
+        ext = SVGTranslationExtractor(source_file=p)
+        assert ext.source_file == p
+        assert isinstance(ext.source_file, Path)
 
     def test_accepts_string_path(self, tmp_path: Path):
         p = tmp_path / "f.svg"
         p.write_text("<svg/>", encoding="utf-8")
-        ext = SVGTranslationExtractor(svg_file_path=str(p))
-        assert isinstance(ext.svg_file_path, Path)
+        ext = SVGTranslationExtractor(source_file=str(p))
+        assert isinstance(ext.source_file, Path)
 
     def test_default_case_insensitive(self):
-        ext = SVGTranslationExtractor(svg_file_path=Path("/fake.svg"))
+        ext = SVGTranslationExtractor(source_file=Path("/fake.svg"))
         assert ext.case_insensitive is True
 
     def test_case_insensitive_false(self):
-        ext = SVGTranslationExtractor(svg_file_path=Path("/fake.svg"), case_insensitive=False)
+        ext = SVGTranslationExtractor(
+            source_file=Path("/fake.svg"),
+            case_insensitive=False,
+        )
         assert ext.case_insensitive is False
 
     def test_translations_initialized(self):
-        ext = SVGTranslationExtractor(svg_file_path=Path("/fake.svg"))
+        ext = SVGTranslationExtractor(source_file=Path("/fake.svg"))
         assert isinstance(ext.translations, ExtractorData)
         assert ext.translations.error == ""
 
@@ -187,7 +191,10 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(svg, case_insensitive=False)
+        ext = SVGTranslationExtractor(
+            svg,
+            case_insensitive=False,
+        )
         result = ext.extract()
 
         assert "Hello World" in result.new
@@ -283,7 +290,7 @@ class TestSVGTranslationExtractorErrors:
     """Tests for error handling in SVGTranslationExtractor."""
 
     def test_nonexistent_file(self, tmp_path: Path):
-        ext = SVGTranslationExtractor(svg_file_path=tmp_path / "missing.svg")
+        ext = SVGTranslationExtractor(source_file=tmp_path / "missing.svg")
         result = ext.extract()
 
         assert result.error == "File not found"
@@ -292,7 +299,7 @@ class TestSVGTranslationExtractorErrors:
     def test_invalid_xml(self, tmp_path: Path):
         svg = tmp_path / "bad.svg"
         svg.write_text("<svg><unclosed>", encoding="utf-8")
-        ext = SVGTranslationExtractor(svg_file_path=svg)
+        ext = SVGTranslationExtractor(source_file=svg)
         result = ext.extract()
 
         assert result.error == "Failed to parse SVG file"
@@ -301,7 +308,7 @@ class TestSVGTranslationExtractorErrors:
     def test_empty_file(self, tmp_path: Path):
         svg = tmp_path / "empty.svg"
         svg.write_text("", encoding="utf-8")
-        ext = SVGTranslationExtractor(svg_file_path=svg)
+        ext = SVGTranslationExtractor(source_file=svg)
         result = ext.extract()
 
         assert result.error != ""
@@ -342,7 +349,6 @@ class TestExtractorDataToJson:
         assert isinstance(data["error"], str)
 
     def test_to_json_is_serializable(self, tmp_path: Path):
-        import json
 
         inner = """
             <switch>

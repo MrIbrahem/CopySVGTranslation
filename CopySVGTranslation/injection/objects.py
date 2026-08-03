@@ -41,6 +41,10 @@ class InjectorStats:
     def to_json(self) -> dict[str, Any]:
         return asdict(self)
 
+    def _update(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
 
 @dataclass
 class InjectorData:

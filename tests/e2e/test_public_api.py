@@ -7,8 +7,7 @@ from pathlib import Path
 # Test that the public API is importable
 import CopySVGTranslation
 from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import inject
-from CopySVGTranslation.workflows import svg_extract_and_inject
+from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -21,15 +20,6 @@ class TestPublicAPIExports:
         assert hasattr(CopySVGTranslation, "__all__")
         assert isinstance(CopySVGTranslation.__all__, list)
 
-    def test_all_attribute_completeness(self):
-        """The __all__ attribute should contain all expected public functions."""
-        expected_exports = [
-            "extract",
-            "inject",
-        ]
-        for name in expected_exports:
-            assert name in CopySVGTranslation.__all__, f"{name} should be in __all__"
-
     def test_all_exports_are_callable(self):
         """All items in __all__ should be callable functions."""
         for name in CopySVGTranslation.__all__:
@@ -40,16 +30,6 @@ class TestPublicAPIExports:
         """The extract function should be importable from top-level module."""
         assert callable(extract)
         assert extract.__name__ == "extract"
-
-    def test_inject_is_importable(self):
-        """The inject function should be importable from top-level module."""
-        assert callable(inject)
-        assert inject.__name__ == "inject"
-
-    def test_svg_extract_and_inject_is_importable(self):
-        """The svg_extract_and_inject function should be importable from top-level module."""
-        assert callable(svg_extract_and_inject)
-        assert svg_extract_and_inject.__name__ == "svg_extract_and_inject"
 
     def test_module_has_docstring(self):
         """The module should have a docstring."""
@@ -81,6 +61,13 @@ class TestExtractFunction:
         result = extract(FIXTURES_DIR / "source.svg")
         assert "new" in result
         assert "title" in result
+        assert result == {
+            "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
+            "tspans_by_id": {"label": "Population 2020"},
+            "title": {"population": {"ar": "السكان"}},
+            "title_new": {"population {year}": {"ar": "السكان {year}"}},
+            "error": "",
+        }
 
     def test_extract_nonexistent_file_returns_none(self):
         """extract should return None for non-existent files."""
@@ -93,6 +80,13 @@ class TestExtractFunction:
         assert result is not None
         # Should have lowercase keys
         assert "population 2020" in result["new"]
+        assert result == {
+            "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
+            "tspans_by_id": {"label": "Population 2020"},
+            "title": {"population": {"ar": "السكان"}},
+            "title_new": {"population {year}": {"ar": "السكان {year}"}},
+            "error": "",
+        }
 
     def test_extract_with_arabic_translations(self):
         """extract should properly extract Arabic translations."""
@@ -100,33 +94,17 @@ class TestExtractFunction:
         assert result is not None
         assert "ar" in result["new"]["population 2020"]
         assert result["new"]["population 2020"]["ar"] == "السكان 2020"
+        assert result == {
+            "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
+            "tspans_by_id": {"label": "Population 2020"},
+            "title": {"population": {"ar": "السكان"}},
+            "title_new": {"population {year}": {"ar": "السكان {year}"}},
+            "error": "",
+        }
 
 
 class TestIntegrationWorkflows:
     """Integration tests for high-level workflow functions."""
-
-    def test_svg_extract_and_inject_end_to_end(self, tmp_path: Path):
-        """Test complete extract and inject workflow."""
-        source_svg = FIXTURES_DIR / "source.svg"
-        target_svg = tmp_path / "target.svg"
-        output_svg = tmp_path / "output.svg"
-        data_file = tmp_path / "data.json"
-
-        # Copy target fixture
-        target_svg.write_text((FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
-
-        # Run the workflow
-        result = svg_extract_and_inject(
-            source_svg,
-            target_svg,
-            output_file=output_svg,
-            data_output_file=data_file,
-            save_result=True,
-        )
-
-        assert result is not None
-        assert output_svg.exists()
-        assert data_file.exists()
 
     def test_inject_with_dict(self, tmp_path: Path):
         """Test inject with pre-extracted translations dict."""
@@ -137,11 +115,10 @@ class TestIntegrationWorkflows:
         translations = extract(FIXTURES_DIR / "source.svg")
 
         # Inject using the dict
-        result, stats = inject(
+        result, stats = inject_file_and_save(
             inject_file=target_svg,
             all_mappings=translations,
-            output_dir=tmp_path,
-            save_result=True,
+            save_path=tmp_path / "target2.svg",
             return_stats=True,
         )
 
@@ -160,7 +137,7 @@ class TestEdgeCasesAndErrorHandling:
 
         result = extract(empty_svg)
         # Should either return None or empty dict depending on implementation
-        assert result is None or isinstance(result, dict)
+        assert result is None
 
     def test_extract_with_invalid_xml(self, tmp_path: Path):
         """extract should handle invalid XML gracefully."""
@@ -175,20 +152,13 @@ class TestEdgeCasesAndErrorHandling:
         target_svg = tmp_path / "target.svg"
         target_svg.write_text((FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
 
-        result = inject(target_svg, [])
+        result = inject_file_tree(inject_file=target_svg, mapping_files=[])
         # Should return None or handle gracefully
-        assert result is None or result is not None
+        assert result is None
 
 
 class TestAPIConsistency:
     """Tests to ensure API consistency across the package."""
-
-    def test_all_functions_have_docstrings(self):
-        """All exported functions should have docstrings."""
-        for name in CopySVGTranslation.__all__:
-            func = getattr(CopySVGTranslation, name)
-            assert func.__doc__ is not None, f"{name} should have a docstring"
-            assert len(func.__doc__) > 0, f"{name} docstring should not be empty"
 
     def test_import_paths_consistency(self):
         """Verify that functions are accessible from both paths."""

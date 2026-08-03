@@ -3,14 +3,13 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
-import json
 import shutil
 import tempfile
 from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.injection import inject
+from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
 
 
 class TestSetup:
@@ -18,8 +17,8 @@ class TestSetup:
     def setUp(self):
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
-        self.output_dir = self.test_dir / "output"
-        self.output_dir.mkdir()
+        self._output_dir = self.test_dir / "output"
+        self._output_dir.mkdir()
 
         yield
         """Clean up test fixtures."""
@@ -28,10 +27,10 @@ class TestSetup:
 
 
 class TestInjectEdgeCases(TestSetup):
-    """Test suite for inject function edge cases."""
+    """Test suite for inject_file_tree function edge cases."""
 
     def test_inject_with_invalid_svg_structure(self):
-        """Test inject with invalid SVG structure."""
+        """Test inject_file_tree with invalid SVG structure."""
         svg_path = self.test_dir / "invalid.svg"
         svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <text id="bad|id">Test</text>
@@ -40,13 +39,17 @@ class TestInjectEdgeCases(TestSetup):
 
         mappings = {"new": {"test": {"ar": "اختبار"}}}
 
-        result, stats = inject(svg_path, all_mappings=mappings, return_stats=True)
+        result, stats = inject_file_tree(
+            inject_file=svg_path,
+            all_mappings=mappings,
+            return_stats=True,
+        )
 
         assert result is None
         assert "error" in stats
 
     def test_inject_case_insensitive_false(self):
-        """Test inject with case-sensitive matching."""
+        """Test inject_file_tree with case-sensitive matching."""
         svg_path = self.test_dir / "test.svg"
         svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <switch><text id="t1"><tspan>Hello</tspan></text></switch>
@@ -55,27 +58,12 @@ class TestInjectEdgeCases(TestSetup):
 
         mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
 
-        result = inject(svg_path, all_mappings=mappings, case_insensitive=False)
+        result = inject_file_tree(
+            inject_file=svg_path,
+            all_mappings=mappings,
+            case_insensitive=False,
+        )
 
-        assert result is not None
-
-    def test_inject_both_mapping_files_and_all_mappings(self):
-        """Test that all_mappings takes precedence over mapping_files."""
-        svg_path = self.test_dir / "test.svg"
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch><text id="t1"><tspan>Hello</tspan></text></switch>
-        </svg>"""
-        svg_path.write_text(svg_content, encoding="utf-8")
-
-        mapping_file = self.test_dir / "mapping.json"
-        with open(mapping_file, "w", encoding="utf-8") as f:
-            json.dump({"new": {"hello": {"fr": "Bonjour"}}}, f)
-
-        all_mappings = {"new": {"hello": {"ar": "مرحبا"}}}
-
-        result = inject(svg_path, mapping_files=[mapping_file], all_mappings=all_mappings)
-
-        # all_mappings should be used
         assert result is not None
 
     def test_inject_save_result_creates_output_file(self):
@@ -86,12 +74,16 @@ class TestInjectEdgeCases(TestSetup):
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        output_file = self.test_dir / "output.svg"
+        _output_file = self.test_dir / "output.svg"
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        inject(svg_path, all_mappings=mappings, output_file=output_file, save_result=True)
+        inject_file_and_save(
+            inject_file=svg_path,
+            all_mappings=mappings,
+            save_path=_output_file,
+        )
 
-        assert output_file.exists() is True
+        assert _output_file.exists() is True
 
     def test_inject_without_save_result_no_file_created(self):
         """Test that save_result=False doesn't create output file."""
@@ -101,9 +93,14 @@ class TestInjectEdgeCases(TestSetup):
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        output_file = self.test_dir / "output.svg"
+        _output_file = self.test_dir / "output.svg"
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        inject(svg_path, all_mappings=mappings, output_file=output_file, save_result=False)
+        inject_file_tree(
+            inject_file=svg_path,
+            all_mappings=mappings,
+            save_path=_output_file,
+            save_result=False,
+        )
 
-        assert output_file.exists() is False
+        assert _output_file.exists() is False

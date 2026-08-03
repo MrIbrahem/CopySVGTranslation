@@ -10,7 +10,6 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 
-import pytest
 from lxml import etree
 
 # ---------------------------------------------------------------------------
@@ -177,7 +176,7 @@ class TestExtractorStateIsolation:
         assert "world" not in r1.new
 
         # Reuse same instance for file B
-        ext.svg_file_path = svg_b
+        ext.source_file = svg_b
         r2 = ext.extract()
         assert "world" in r2.new
         assert "hello" not in r2.new, "Keys from file A leaked into file B extraction"
@@ -229,7 +228,7 @@ class TestExtractorStateIsolation:
         r1 = ext.extract()
         assert "t-unique-a" in r1.tspans_by_id
 
-        ext.svg_file_path = svg_b
+        ext.source_file = svg_b
         r2 = ext.extract()
         assert "t-unique-b" in r2.tspans_by_id
         assert "t-unique-a" not in r2.tspans_by_id, "tspans_by_id from file A leaked into file B"
@@ -256,64 +255,9 @@ class TestExtractorStateIsolation:
             """,
             name="good.svg",
         )
-        ext.svg_file_path = good_svg
+        ext.source_file = good_svg
         r2 = ext.extract()
         assert r2.error == "", f"Error persisted: {r2.error!r}"
-
-
-# ===========================================================================
-# BUG-04: svg_extract_and_inject not in __all__
-# ===========================================================================
-
-
-class TestPublicAPIExports:
-    """Verify that documented public API functions are properly exported."""
-
-    def test_svg_extract_and_inject_importable(self):
-        """svg_extract_and_inject should be importable from the top-level package."""
-        import CopySVGTranslation
-
-        assert hasattr(CopySVGTranslation, "svg_extract_and_inject")
-        assert callable(CopySVGTranslation.svg_extract_and_inject)
-
-    def test_svg_extract_and_injects_importable(self):
-        """svg_extract_and_injects should be importable from the top-level package."""
-        import CopySVGTranslation
-
-        assert hasattr(CopySVGTranslation, "svg_extract_and_injects")
-        assert callable(CopySVGTranslation.svg_extract_and_injects)
-
-    def test_both_in_all(self):
-        """Both workflow functions should be listed in __all__."""
-        import CopySVGTranslation
-
-        assert "svg_extract_and_inject" in CopySVGTranslation.__all__
-        assert "svg_extract_and_injects" in CopySVGTranslation.__all__
-
-    def test_star_import_includes_workflows(self):
-        """A star import should include the workflow functions."""
-        import CopySVGTranslation
-
-        # Simulate what `from CopySVGTranslation import *` would give
-        all_names = CopySVGTranslation.__all__
-        assert "svg_extract_and_inject" in all_names
-        assert "svg_extract_and_injects" in all_names
-
-    def test_documented_classes_still_exported(self):
-        """Ensure existing exports were not removed when adding workflow functions."""
-        import CopySVGTranslation
-
-        expected = {
-            "SVGTranslationInjector",
-            "SVGTranslationExtractor",
-            "ExtractorData",
-            "InjectorData",
-            "svg_extract_and_inject",
-            "svg_extract_and_injects",
-            "match_nested_tags",
-            "fix_nested_file",
-        }
-        assert expected.issubset(set(CopySVGTranslation.__all__))
 
 
 # ===========================================================================
@@ -365,9 +309,9 @@ class TestPreparerIdempotency:
         preparer.prepare()
         count_after_second = len(preparer.translatable_nodes)
 
-        assert count_after_first == count_after_second, (
-            f"translatable_nodes grew from {count_after_first} to {count_after_second}"
-        )
+        assert (
+            count_after_first == count_after_second
+        ), f"translatable_nodes grew from {count_after_first} to {count_after_second}"
 
     def test_existing_ids_do_not_accumulate(self, tmp_path: Path):
         """existing_ids should have the same count after each prepare() call."""
@@ -386,9 +330,7 @@ class TestPreparerIdempotency:
         preparer.prepare()
         ids_after_second = set(preparer.existing_ids)
 
-        assert ids_after_first == ids_after_second, (
-            f"existing_ids changed: {ids_after_first} → {ids_after_second}"
-        )
+        assert ids_after_first == ids_after_second, f"existing_ids changed: {ids_after_first} → {ids_after_second}"
 
     def test_ids_in_use_reset(self, tmp_path: Path):
         """ids_in_use should be reset between prepare() calls."""
@@ -408,9 +350,7 @@ class TestPreparerIdempotency:
         preparer.prepare()
         ids_after_second = list(preparer.ids_in_use)
 
-        assert ids_after_first == ids_after_second, (
-            f"ids_in_use changed: {ids_after_first} → {ids_after_second}"
-        )
+        assert ids_after_first == ids_after_second, f"ids_in_use changed: {ids_after_first} → {ids_after_second}"
 
 
 # ===========================================================================
@@ -436,9 +376,8 @@ class TestFixNestedFileDeprecation:
 
             deprecation_warnings = [x for x in w if issubclass(x.category, DeprecationWarning)]
             assert len(deprecation_warnings) >= 1, "Expected DeprecationWarning when new_path is None"
-            assert "new_path" in str(deprecation_warnings[0].message).lower() or "deprecated" in str(
-                deprecation_warnings[0].message
-            ).lower()
+            assert "new_path" in str(deprecation_warnings[0].message).lower()
+            assert "deprecated" in str(deprecation_warnings[0].message).lower()
 
     def test_no_warning_when_new_path_provided(self, tmp_path: Path):
         """Calling fix_nested_file with new_path should not emit a warning."""

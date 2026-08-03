@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation import extract, inject
-from CopySVGTranslation.workflows import svg_extract_and_inject
+from CopySVGTranslation import extract
+from CopySVGTranslation.injection import inject_file_and_save
 
 FIXTURES_DIR = Path(__file__).parent.parent / "tests_files/example"
 
@@ -31,25 +31,12 @@ class TestIntegrationWorkflows:
         expected_svg = FIXTURES_DIR / "after_translate.svg"
         self.expected_text = expected_svg.read_text(encoding="utf-8")
 
-    def test_svg_extract_and_inject_end_to_end(self):
-        r = svg_extract_and_inject(
-            self.source_svg,
-            self.target_svg,
-            output_file=self.output_svg,
-            data_output_file=self.data_file,
-            save_result=True,
-        )
-        assert r is not None
-        assert self.output_svg.exists()
-        assert self.data_file.exists()
-
     def test_inject_with_dict(self):
         translations = extract(self.source_svg)
-        result, stats = inject(
-            self.target_svg,
-            output_dir=self.test_dir,
+        result, stats = inject_file_and_save(
+            inject_file=self.target_svg,
+            save_path=self.test_dir / "t.svg",
             all_mappings=translations,
-            save_result=True,
             return_stats=True,
         )
         assert result is not None

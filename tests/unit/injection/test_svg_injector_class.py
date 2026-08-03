@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 from lxml import etree
 
 from CopySVGTranslation.injection.objects import InjectorData, InjectorStats
@@ -44,7 +43,7 @@ def _get_ar_text(root: etree._Element) -> str | None:
 
 def _get_default_texts(root: etree._Element) -> list[str]:
     """Return tspan text content of default (no systemLanguage) text nodes."""
-    tspans = root.xpath('//svg:text[not(@systemLanguage)]/svg:tspan/text()', namespaces=SVG_NSMAP)
+    tspans = root.xpath("//svg:text[not(@systemLanguage)]/svg:tspan/text()", namespaces=SVG_NSMAP)
     return tspans
 
 
@@ -86,7 +85,8 @@ class TestInjectorStats:
         assert set(result.keys()) == expected_keys
 
     def test_to_json_reflects_values(self):
-        stats = InjectorStats(
+        stats = InjectorStats()
+        stats._update(
             all_languages=3,
             new_languages=2,
             inserted_translations=5,
@@ -144,10 +144,14 @@ class TestSVGTranslationInjectorInit:
         inj = SVGTranslationInjector()
         assert inj.case_insensitive is True
         assert inj.overwrite is False
-        assert inj.pretty_print is True
+        assert inj.pretty_print is None
 
     def test_custom_parameters(self):
-        inj = SVGTranslationInjector(case_insensitive=False, overwrite=True, pretty_print=False)
+        inj = SVGTranslationInjector(
+            case_insensitive=False,
+            overwrite=True,
+            pretty_print=False,
+        )
         assert inj.case_insensitive is False
         assert inj.overwrite is True
         assert inj.pretty_print is False
@@ -227,6 +231,8 @@ class TestSVGTranslationInjectorBasic:
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
+        assert result is not None
+        assert result.tree is not None
 
         root = result.tree.getroot()
         default_texts = _get_default_texts(root)
@@ -262,7 +268,9 @@ class TestSVGTranslationInjectorCaseSensitivity:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(case_insensitive=False)
+        inj = SVGTranslationInjector(
+            case_insensitive=False,
+        )
         # Key is lowercase; source text is mixed case — should NOT match
         mappings = {"new": {"hello world": {"ar": "مرحبا بالعالم"}}}
 
@@ -276,7 +284,9 @@ class TestSVGTranslationInjectorCaseSensitivity:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(case_insensitive=False)
+        inj = SVGTranslationInjector(
+            case_insensitive=False,
+        )
         mappings = {"new": {"Hello World": {"ar": "مرحبا بالعالم"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
@@ -335,6 +345,9 @@ class TestSVGTranslationInjectorOverwrite:
         mappings = {"new": {"hello": {"ar": "New Arabic"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
+        assert result is not None
+        assert result.tree is not None
+
         root = result.tree.getroot()
 
         ar_text = _get_ar_text(root)
@@ -379,7 +392,7 @@ class TestSVGTranslationInjectorSave:
         result = inj.inject(
             inject_file=svg,
             all_mappings=mappings,
-            target_path=target,
+            save_path=target,
             save_result=True,
         )
 
@@ -400,7 +413,7 @@ class TestSVGTranslationInjectorSave:
         inj.inject(
             inject_file=svg,
             all_mappings=mappings,
-            target_path=target,
+            save_path=target,
             save_result=False,
         )
 
@@ -420,7 +433,7 @@ class TestSVGTranslationInjectorSave:
             inject_file=svg,
             all_mappings=mappings,
             save_result=True,
-            target_path=None,
+            save_path=None,
         )
 
         assert result.new_stats.error != ""
@@ -439,14 +452,14 @@ class TestSVGTranslationInjectorSave:
         inj.inject(
             inject_file=svg,
             all_mappings=mappings,
-            target_path=target,
+            save_path=target,
             save_result=True,
         )
 
         # Should parse without error
         tree = etree.parse(str(target))
         root = tree.getroot()
-        assert root.tag == "svg" or root.tag.endswith("}svg")
+        assert root.tag == "{http://www.w3.org/2000/svg}svg"
 
 
 # ===========================================================================
@@ -561,11 +574,13 @@ class TestWorkOnSwitches:
         return etree.fromstring(_wrap_svg(inner))
 
     def test_inserts_translation_nodes(self):
-        root = self._make_root("""
+        root = self._make_root(
+            """
             <switch>
                 <text id="t0"><tspan id="t0">Hello</tspan></text>
             </switch>
-        """)
+        """
+        )
         inj = SVGTranslationInjector()
         existing_ids = set(root.xpath("//@id"))
 
@@ -575,11 +590,13 @@ class TestWorkOnSwitches:
         assert len(ar_nodes) == 1
 
     def test_generates_unique_ids(self):
-        root = self._make_root("""
+        root = self._make_root(
+            """
             <switch>
                 <text id="t0"><tspan id="t0">Hello</tspan></text>
             </switch>
-        """)
+        """
+        )
         inj = SVGTranslationInjector()
         existing_ids = set(root.xpath("//@id"))
 
@@ -596,11 +613,13 @@ class TestWorkOnSwitches:
         assert fr_id.startswith("t0")
 
     def test_newly_generated_ids_are_unique(self):
-        root = self._make_root("""
+        root = self._make_root(
+            """
             <switch>
                 <text id="t0"><tspan id="t0">Hello</tspan></text>
             </switch>
-        """)
+        """
+        )
         inj = SVGTranslationInjector()
         existing_ids = set(root.xpath("//@id"))
 
@@ -611,8 +630,8 @@ class TestWorkOnSwitches:
         )
 
         # Collect only the newly added <text> nodes (those with systemLanguage)
-        new_text_ids = root.xpath('.//svg:text[@systemLanguage]/@id', namespaces=SVG_NSMAP)
-        new_tspan_ids = root.xpath('.//svg:text[@systemLanguage]/svg:tspan/@id', namespaces=SVG_NSMAP)
+        new_text_ids = root.xpath(".//svg:text[@systemLanguage]/@id", namespaces=SVG_NSMAP)
+        new_tspan_ids = root.xpath(".//svg:text[@systemLanguage]/svg:tspan/@id", namespaces=SVG_NSMAP)
 
         # Newly generated IDs should not collide with the original IDs
         for new_id in list(new_text_ids) + list(new_tspan_ids):
@@ -623,11 +642,13 @@ class TestWorkOnSwitches:
         assert len(all_new) == len(set(all_new))
 
     def test_no_match_skips_switch(self):
-        root = self._make_root("""
+        root = self._make_root(
+            """
             <switch>
                 <text id="t0"><tspan id="t0">Goodbye</tspan></text>
             </switch>
-        """)
+        """
+        )
         inj = SVGTranslationInjector()
 
         inj.work_on_switches(root, mappings={"new": {"hello": {"ar": "مرحبا"}}})
@@ -685,7 +706,7 @@ class TestExtractorInjectorE2E:
         inject_result = injector.inject(
             inject_file=target_svg,
             all_mappings=extract_result.to_json(),
-            target_path=output_svg,
+            save_path=output_svg,
             save_result=True,
         )
 
@@ -726,7 +747,7 @@ class TestExtractorInjectorE2E:
         result = injector.inject(
             inject_file=target_svg,
             all_mappings=data,
-            target_path=output_svg,
+            save_path=output_svg,
             save_result=True,
         )
 

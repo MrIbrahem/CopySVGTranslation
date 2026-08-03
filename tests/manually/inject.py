@@ -5,8 +5,7 @@ python I:/TOOLFORGE_TOOLS/SVG_PY/CopySVGTranslation/tests/manually/inject.py
 import logging
 from pathlib import Path
 
-from CopySVGTranslation import inject
-from CopySVGTranslation.injection import make_translation_ready
+from CopySVGTranslation.injection import inject_file_and_save, make_translation_ready
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -27,6 +26,12 @@ data = {"new": {"lang none": {"la": "lang la (new)"}}}
 tree, root = make_translation_ready(svg_file)
 # write to file
 tree.write(str(svg_file), pretty_print=True, xml_declaration=True, encoding="utf-8")
-result = inject(inject_file=svg_file, all_mappings=data, save_result=True, overwrite=True, pretty_print=False)
+
+result = inject_file_and_save(
+    inject_file=svg_file,
+    all_mappings=data,
+    overwrite=True,
+    pretty_print=False,
+)
 
 # print(result)

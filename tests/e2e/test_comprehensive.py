@@ -12,7 +12,8 @@ from lxml import etree
 
 from CopySVGTranslation.injection import (
     SvgStructureExceptionError,
-    inject,
+    inject_file_and_save,
+    inject_file_tree,
     make_translation_ready,
 )
 from CopySVGTranslation.utils import (
@@ -68,6 +69,8 @@ class TestInjector:
         assert "new" in result
         assert result["new"]["hello"]["ar"] == "مرحبا"
 
+        assert result == {"new": {"hello": {"ar": "مرحبا"}}}
+
     def test_load_all_mappings_multiple_files(self, temp_dir):
         """Test loading multiple mapping files."""
         m1 = temp_dir / "m1.json"
@@ -77,6 +80,8 @@ class TestInjector:
         result = load_all_mappings([m1, m2])
         assert "key1" in result
         assert "key2" in result
+
+        assert result == {"key1": {"value": 1}, "key2": {"value": 2}}
 
     def test_load_all_mappings_nonexistent_file(self, temp_dir):
         """Test loading with nonexistent file."""
@@ -111,24 +116,32 @@ class TestInjector:
         assert result == "text-123-fr"
 
     def test_inject_with_all_mappings_parameter(self, temp_dir):
-        """Test inject using all_mappings parameter instead of mapping_files."""
+        """Test inject using all_mappings parameter."""
         svg_path = temp_dir / "test.svg"
         svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="text1"><tspan>Hello</tspan></text></switch></svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
-        tree, stats = inject(svg_path, all_mappings=mappings, return_stats=True)
+        tree, stats = inject_file_tree(
+            inject_file=svg_path,
+            all_mappings=mappings,
+            return_stats=True,
+        )
         assert tree is not None
         assert stats is not None
 
-    def test_inject_with_output_dir(self, temp_dir):
-        """Test inject with output_dir parameter."""
+    def test_inject_with_save_path(self, temp_dir):
+        """Test inject with save_path parameter."""
         svg_path = temp_dir / "test.svg"
         out_dir = temp_dir / "out"
         out_dir.mkdir()
         svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
-        tree = inject(svg_path, all_mappings=mappings, output_dir=out_dir, save_result=True)
+        tree = inject_file_and_save(
+            inject_file=svg_path,
+            all_mappings=mappings,
+            save_path=out_dir / "test.svg",
+        )
         assert tree is not None
         assert (out_dir / "test.svg").exists()
 
@@ -138,9 +151,26 @@ class TestInjector:
         svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
         mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
-        tree, stats = inject(svg_path, all_mappings=mappings, case_insensitive=False, return_stats=True)
+        tree, stats = inject_file_tree(
+            inject_file=svg_path,
+            all_mappings=mappings,
+            case_insensitive=False,
+            return_stats=True,
+        )
         assert tree is not None
         assert stats["inserted_translations"] == 1
+
+        assert stats == {
+            "all_languages": 1,
+            "new_languages": 1,
+            "processed_switches": 1,
+            "inserted_translations": 1,
+            "skipped_translations": 0,
+            "updated_translations": 0,
+            "languages_before": [],
+            "languages_after": ["ar"],
+            "error": "",
+        }
 
 
 # -------------------------------
@@ -164,7 +194,10 @@ class TestEdgeCases:
         svg.write_text(
             '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><text>Test</text></svg>', encoding="utf-8"
         )
-        result = inject(svg, all_mappings={})
+        result = inject_file_tree(
+            inject_file=svg,
+            all_mappings={},
+        )
         assert result is None
 
     def test_inject_return_stats_false(self, temp_dir):
@@ -175,6 +208,10 @@ class TestEdgeCases:
             encoding="utf-8",
         )
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
-        result = inject(svg, all_mappings=mappings, return_stats=False)
+        result = inject_file_tree(
+            inject_file=svg,
+            all_mappings=mappings,
+            return_stats=False,
+        )
         assert result is not None
         assert isinstance(result, etree._ElementTree)

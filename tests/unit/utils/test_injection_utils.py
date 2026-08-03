@@ -1,4 +1,3 @@
-# ruff: noqa: F401
 """
 Unit tests for CopySVGTranslation/injection/utils.py module.
 
@@ -10,7 +9,6 @@ import json
 
 from CopySVGTranslation.utils.injection_utils import (
     generate_unique_id,
-    get_target_path,
     load_all_mappings,
 )
 
@@ -40,6 +38,8 @@ class TestLoadAllMappings:
         mapping_file.write_text(json.dumps(test_mapping, ensure_ascii=False), encoding="utf-8")
         result = load_all_mappings([mapping_file])
         assert "new" in result
+
+        assert result == {"new": {"hello": {"ar": "مرحبا"}}}
 
     def test_load_all_mappings_multiple_files_merge(self, temp_dir):
         """Test loading and merging multiple mapping files."""
