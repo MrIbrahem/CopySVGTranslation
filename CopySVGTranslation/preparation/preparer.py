@@ -12,14 +12,17 @@ from lxml import etree
 from ..config import TranslationConfig
 from ..exceptions import SvgStructureExceptionError
 from ..utils import normalize_lang
-from .steps import (  # AssignIds,; ReorderTexts,; SplitLanguages,
+from .steps import (
+    AssignIds,
     LoadDocument,
     NormalizeTspans,
     PreparationContext,
     PreparationStep,
+    WrapTspans,
+    # ReorderTexts,
+    # SplitLanguages,
     ValidateStructure,
 )
-
 logger = logging.getLogger(__name__)
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -55,7 +58,8 @@ class SvgPreparationPipeline:
             LoadDocument(config),
             ValidateStructure(config),
             NormalizeTspans(config),
-            # AssignIds(config),
+            AssignIds(config),
+            WrapTspans(config),
             # SplitLanguages(config),
             # ReorderTexts(config),
         ]
@@ -77,6 +81,11 @@ class SvgPreparationPipeline:
         )
         for step in self.steps:
             step.execute(ctx)
+
+        self.existing_ids: set[str] = ctx.existing_ids
+        # self.ids_in_use: list[int] = ctx.ids_in_use
+        self.translatable_nodes: list[etree._Element] = ctx.translatable_nodes
+
         return ctx.tree, ctx.root
 
     def run(self, source_file: Path) -> tuple[etree._ElementTree[etree._Element], etree._Element]:
@@ -85,14 +94,11 @@ class SvgPreparationPipeline:
         self.path = Path(str(source_file))
         self.tree: etree._ElementTree
         self.root: etree._Element
-        self.existing_ids: set[str] = set()
-        self.ids_in_use: list[int] = [0]
-        self.translatable_nodes: list[etree._Element] = []
 
+        self.ids_in_use: list[int] = [0]
         self.tree, self.root = self.run_new(self.path)
 
-        self._collect_existing_ids()
-        self._wrap_loose_text_into_tspans()
+        # self._wrap_loose_text_into_tspans()
         self._clean_ids_and_remove_empty_nodes()
         self._rebuild_translatable_nodes()
         self._assign_missing_ids()
@@ -101,17 +107,6 @@ class SvgPreparationPipeline:
         self._reorder_texts()
 
         return self.tree, self.root
-
-    def _collect_existing_ids(self) -> None:
-        """Track all IDs in the document and normalize whitespace around them early."""
-        for element in self.root.xpath("//*[@id]"):
-            element_id = element.get("id")
-            if not element_id:
-                continue
-            trimmed = element_id.strip()
-            if trimmed != element_id:
-                element.set("id", trimmed)
-            self.existing_ids.add(trimmed)
 
     # ------------------------------------------------------------------
     # Step 3: id allocation helpers
@@ -142,35 +137,6 @@ class SvgPreparationPipeline:
             return candidate
         return self._allocate_trsvg_id()
 
-    # ------------------------------------------------------------------
-    # Step 4: text/tspan normalization
-    # ------------------------------------------------------------------
-    def _wrap_loose_text_into_tspans(self) -> None:
-        """Wrap raw text nodes (before first child, or as tails) into <tspan>."""
-        texts = self.root.findall(".//{%s}text" % SVG_NS)
-        for text in texts:
-            # handle text before first child
-            if (text.text or "").strip():
-                tspan = etree.Element("{%s}tspan" % SVG_NS)
-                tspan.text = text.text
-                text.text = None
-                text.insert(0, tspan)
-                self.translatable_nodes.append(tspan)
-
-            # handle tails after children
-            children = list(text)
-            for child in children:
-                if (child.tail or "").strip():
-                    new_tspan = etree.Element("{%s}tspan" % SVG_NS)
-                    new_tspan.text = child.tail
-                    child.tail = None
-                    # insert after child
-                    insert_index = list(text).index(child) + 1
-                    text.insert(insert_index, new_tspan)
-                    self.translatable_nodes.append(new_tspan)
-
-            # accumulate the text element itself as translatable node
-            self.translatable_nodes.append(text)
 
     def _clean_ids_and_remove_empty_nodes(self) -> None:
         """Normalize/validate ids on translatable nodes and drop empty nodes."""

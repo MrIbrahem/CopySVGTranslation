@@ -26,3 +26,37 @@ class NormalizeTspans(PreparationStep):
                 # raise SvgStructureExceptionError('structure-error-nested-tspans-not-supported', tspan, element_children)
                 node_text = etree.tostring(tspan, pretty_print=True).decode("utf-8")
                 raise SvgNestedTspanExceptionError(tspan, [tspan.get("id", "")], node_text=node_text)
+
+        # self._wrap_loose_text_into_tspans(ctx)
+
+class WrapTspans(PreparationStep):
+    # ------------------------------------------------------------------
+    # Step 4: text/tspan normalization
+    # ------------------------------------------------------------------
+    def execute(self, ctx: PreparationContext) -> None:
+        """Wrap raw text nodes (before first child, or as tails) into <tspan>."""
+        texts = ctx.root.findall(".//{%s}text" % SVG_NS)
+        for text in texts:
+            # handle text before first child
+            if (text.text or "").strip():
+                tspan = etree.Element("{%s}tspan" % SVG_NS)
+                tspan.text = text.text
+                text.text = None
+                text.insert(0, tspan)
+                ctx.translatable_nodes.append(tspan)
+
+            # handle tails after children
+            children = list(text)
+            for child in children:
+                if (child.tail or "").strip():
+                    new_tspan = etree.Element("{%s}tspan" % SVG_NS)
+                    new_tspan.text = child.tail
+                    child.tail = None
+                    # insert after child
+                    insert_index = list(text).index(child) + 1
+                    text.insert(insert_index, new_tspan)
+                    ctx.translatable_nodes.append(new_tspan)
+
+            # accumulate the text element itself as translatable node
+            ctx.translatable_nodes.append(text)
+

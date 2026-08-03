@@ -2,8 +2,8 @@
 from .base import PreparationContext, PreparationStep
 from .load import LoadDocument
 
-# from .assign_ids import AssignIds
-from .normalize_tspans import NormalizeTspans
+from .assign_ids import AssignIds
+from .normalize_tspans import NormalizeTspans, WrapTspans
 from .validate import ValidateStructure
 
 # from .reorder import ReorderTexts
@@ -11,11 +11,12 @@ from .validate import ValidateStructure
 
 __all__ = [
     "LoadDocument",
-    # "AssignIds",
-    # "NormalizeTspans",
+    "AssignIds",
+    "WrapTspans",
+    "NormalizeTspans",
     "PreparationContext",
     "PreparationStep",
-    "ReorderTexts",
+    # "ReorderTexts",
     # "SplitLanguages",
     "ValidateStructure",
 ]
