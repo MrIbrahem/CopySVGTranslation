@@ -23,6 +23,7 @@ from lxml import etree
 from CopySVGTranslation.exceptions import SvgStructureError
 from CopySVGTranslation.preparation.steps.split_languages import SVG_NS, SplitLanguages
 
+
 class FakeIdManager:
     """Minimal stand-in for the real IdManager used across tests."""
 
@@ -142,10 +143,7 @@ class TestSplitLanguagesInSwitch:
         assert exc_info.value.args[0] == "structure-error-multiple-lang-in-text: ['ar']"
 
     def test_duplicate_language_across_texts_raises(self, step, ctx):
-        switch = make_switch(
-            '<text id="t1" systemLanguage="ar">a</text>'
-            '<text id="t2" systemLanguage="ar">b</text>'
-        )
+        switch = make_switch('<text id="t1" systemLanguage="ar">a</text><text id="t2" systemLanguage="ar">b</text>')
 
         with pytest.raises(SvgStructureError) as exc_info:
             step._split_languages_in_switch(switch, ctx)
@@ -181,10 +179,7 @@ class TestSplitLanguagesInSwitch:
         assert len(text_children) == 1
 
     def test_multiple_independent_single_language_texts(self, step, ctx):
-        switch = make_switch(
-            '<text id="t1" systemLanguage="ar">a</text>'
-            '<text id="t2" systemLanguage="fr">b</text>'
-        )
+        switch = make_switch('<text id="t1" systemLanguage="ar">a</text><text id="t2" systemLanguage="fr">b</text>')
 
         step._split_languages_in_switch(switch, ctx)
 
@@ -195,8 +190,7 @@ class TestSplitLanguagesInSwitch:
 
     def test_clones_are_inserted_immediately_after_original_in_order(self, step, ctx):
         switch = make_switch(
-            '<text id="t1" systemLanguage="ar,fr">a</text>'
-            '<text id="t2" systemLanguage="en">b</text>'
+            '<text id="t1" systemLanguage="ar,fr">a</text><text id="t2" systemLanguage="en">b</text>'
         )
 
         step._split_languages_in_switch(switch, ctx)
