@@ -16,7 +16,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 @dataclass
 class ApplyResult:
     action: Literal["inserted", "updated", "skipped"]
-    node: etree._Element | None = None
+    node: etree._Element | None = None  # new or updated node
 
 
 class TranslationApplier:

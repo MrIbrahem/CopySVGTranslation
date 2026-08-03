@@ -1,4 +1,4 @@
-**copy_svg_translation – Modern Class-Based Redesign**
+**copy_svg_translation - Modern Class-Based Redesign**
 
 ### 1. Proposed Detailed File Structure + Class Names
 
@@ -49,8 +49,8 @@ copy_svg_translation/
 │
 ├── io/
 │   ├── __init__.py
-│   ├── svg_document.py         # SvgDocument – load / save / root access
-│   └── mapping_store.py        # MappingStore – load / merge / save JSON mappings
+│   ├── svg_document.py         # SvgDocument - load / save / root access
+│   └── mapping_store.py        # MappingStore - load / merge / save JSON mappings
 │
 ├── utils/
 │   ├── __init__.py
@@ -91,7 +91,7 @@ copy_svg_translation/
 
 ### 2. Phased Migration Plan
 
-#### Phase 1 – Foundation & Compatibility (low risk, 1–2 weeks)
+#### Phase 1 - Foundation & Compatibility (low risk, 1–2 weeks)
 
 **Goal:** Introduce new structure without breaking existing callers.
 
@@ -109,7 +109,7 @@ copy_svg_translation/
 
 ---
 
-#### Phase 2 – Core Rewrite (medium risk, 2–4 weeks)
+#### Phase 2 - Core Rewrite (medium risk, 2–4 weeks)
 
 **Goal:** Move real logic into the new class-based design.
 
@@ -126,7 +126,7 @@ copy_svg_translation/
 
 ---
 
-#### Phase 3 – Cleanup & Modernization (low–medium risk, 1–2 weeks)
+#### Phase 3 - Cleanup & Modernization (low–medium risk, 1–2 weeks)
 
 **Goal:** Remove technical debt and polish the API.
 
@@ -208,7 +208,7 @@ from typing import Literal
 class TranslationConfig:
     """
     Central configuration for all SVG translation operations.
-    Immutable by convention – create a new instance to change settings.
+    Immutable by convention - create a new instance to change settings.
     """
 
     # --- Matching / lookup ---
@@ -269,6 +269,7 @@ class TranslationConfig:
     def with_updates(self, **kwargs) -> TranslationConfig:
         """Return a new config with the given fields replaced."""
         from dataclasses import replace
+
         return replace(self, **kwargs)
 ```
 
@@ -356,7 +357,7 @@ class OperationResult(Generic[T]):
 
 
 # Convenience aliases
-ExtractResult = OperationResult["TranslationMapping"]          # forward ref
+ExtractResult = OperationResult["TranslationMapping"]  # type: ignore # forward ref
 InjectResult = OperationResult[etree._ElementTree]
 ```
 
@@ -376,8 +377,11 @@ from typing import Any
 from lxml import etree
 
 from .config import TranslationConfig
-from .core.models import TranslationMapping
-from .result import InjectResult, InjectorStats, OperationResult
+from .core.mapping import TranslationMapping
+from .extraction.extractor import SVGTranslationExtractor
+from .injection.injector import SVGTranslationInjector
+from .io.mapping_store import MappingStore
+from .result import InjectResult, OperationResult
 
 logger = logging.getLogger(__name__)
 

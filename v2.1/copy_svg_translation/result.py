@@ -76,5 +76,6 @@ class OperationResult(Generic[T]):
         )
 
 
+# Convenience aliases
 ExtractResult = OperationResult["TranslationMapping"]  # type: ignore # forward ref
 InjectResult = OperationResult[etree._ElementTree]

@@ -23,9 +23,9 @@ class YearTitleHandler:
         self.config = config or TranslationConfig()
         self.enabled = self.config.enable_year_titles
 
- # ------------------------------------------------------------------
- # Low-level helpers
- # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
+    # Low-level helpers
+    # ------------------------------------------------------------------
     @staticmethod
     def match_year(text: str) -> str:
         """

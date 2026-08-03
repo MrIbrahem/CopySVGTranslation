@@ -11,5 +11,6 @@ class NestedStrategy(str, Enum):
     RAISE = "raise"
 
 
+# Common type aliases
 LangCode: TypeAlias = str
 SourceText: TypeAlias = str

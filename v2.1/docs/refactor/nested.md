@@ -36,7 +36,7 @@ This package offers three strategies (controlled by `TranslationConfig.nested_st
 | ---------------- | -------------------------------------------------------------------------- |
 | `preserve_style` | Turn nested styled tspans into **sibling** tspans (keeps bold/italic etc.) |
 | `flatten`        | Concatenate all text into a single tspan (loses inner styling)             |
-| `raise`          | Raise `SvgNestedTspanExceptionError`                                       |
+| `raise`          | Raise `SvgNestedTspanError`                                       |
 
 ---
 
@@ -116,7 +116,7 @@ from typing import Literal
 
 from lxml import etree
 
-from ..exceptions import SvgNestedTspanExceptionError
+from ..exceptions import SvgNestedTspanError
 
 logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -182,7 +182,7 @@ class NestedTspanFlattener:
             element_children = [c for c in tspan if isinstance(c.tag, str)]
             if element_children:
                 node_text = etree.tostring(tspan, pretty_print=True).decode("utf-8")
-                raise SvgNestedTspanExceptionError(
+                raise SvgNestedTspanError(
                     element=tspan,
                     extra=[tspan.get("id", "")],
                     node_text=node_text,

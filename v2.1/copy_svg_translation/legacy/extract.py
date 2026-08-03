@@ -15,6 +15,9 @@ def extract(
 ) -> dict[str, Any] | None:
     """
     Deprecated. Use SVGTranslationService.extract() instead.
+
+    Legacy function-style wrapper kept for backward compatibility.
+    Returns a plain dict (or None on failure), matching the old API.
     """
     warnings.warn(
         "copy_svg_translation.extract() is deprecated. Use SVGTranslationService.extract() instead.",

@@ -37,6 +37,17 @@ class SwitchProcessor:
         mapping: TranslationMapping,
         stats: InjectorStats,
     ) -> None:
+        """
+        1. Find fallback (default) <text> node
+        2. Extract default_texts
+        3. Enrich mapping with year-title expansions (if enabled)
+        4. Collect existing languages in this switch
+        5. For every language present in the mapping:
+              - decide skip / update / insert
+              - call TranslationApplier
+              - update stats
+        6. Optionally re-sort children of the switch
+        """
         switch = SwitchNode(switch_element)
         default = switch.fallback()
         if default is None:

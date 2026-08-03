@@ -18,6 +18,12 @@ XMLNS_ATTR = "{http://www.w3.org/2000/xmlns/}xmlns"
 class SvgDocument:
     """
     Thin I/O + document holder around an lxml ElementTree.
+
+    Responsibilities:
+    - Load an SVG from disk
+    - Ensure a sane default namespace
+    - Expose root / tree
+    - Save back to disk
     """
 
     def __init__(
@@ -34,6 +40,9 @@ class SvgDocument:
         if self.root is None:
             raise SvgStructureError("structure-error-no-doc-element")
 
+    # ------------------------------------------------------------------
+    # Factory
+    # ------------------------------------------------------------------
     @classmethod
     def load(
         cls,
@@ -59,6 +68,9 @@ class SvgDocument:
         doc._ensure_namespace()
         return doc
 
+    # ------------------------------------------------------------------
+    # Namespace helper
+    # ------------------------------------------------------------------
     def _ensure_namespace(self) -> None:
         """Guarantee the document has a proper default SVG namespace."""
         import re
@@ -67,6 +79,9 @@ class SvgDocument:
         if default_ns is None or re.match(r"^(&[^;]+;)+$", str(default_ns)):
             self.root.set(XMLNS_ATTR, SVG_NS)
 
+    # ------------------------------------------------------------------
+    # Save
+    # ------------------------------------------------------------------
     def save(
         self,
         path: Path | str | None = None,
@@ -94,6 +109,9 @@ class SvgDocument:
         logger.debug("Saved SVG to %s", target)
         return target
 
+    # ------------------------------------------------------------------
+    # Convenience
+    # ------------------------------------------------------------------
     def xpath(self, expression: str, namespaces: dict | None = None):
         ns = namespaces or {"svg": SVG_NS}
         return self.root.xpath(expression, namespaces=ns)

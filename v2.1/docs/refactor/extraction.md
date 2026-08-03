@@ -68,6 +68,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 @dataclass(slots=True)
 class SegmentMatch:
     """One matched pair: default segment ↔ translated segment."""
+
     default_text: str
     translated_text: str
     default_id: str | None = None

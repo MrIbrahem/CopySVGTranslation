@@ -20,6 +20,9 @@ class MappingStore:
     def __init__(self, config: TranslationConfig | None = None) -> None:
         self.config = config or TranslationConfig()
 
+    # ------------------------------------------------------------------
+    # Load
+    # ------------------------------------------------------------------
     def load(self, path: Path | str) -> TranslationMapping:
         path = Path(path)
         if not path.exists():
@@ -44,6 +47,9 @@ class MappingStore:
                 logger.error("Failed to load mapping %s: %s", p, exc)
         return result
 
+    # ------------------------------------------------------------------
+    # Save
+    # ------------------------------------------------------------------
     def save(
         self,
         mapping: TranslationMapping,
@@ -69,6 +75,9 @@ class MappingStore:
         logger.debug("Saved mapping to %s", path)
         return path
 
+    # ------------------------------------------------------------------
+    # Helpers used by the service
+    # ------------------------------------------------------------------
     def default_mapping_path(self, svg_path: Path) -> Path:
         """Return the conventional path for a mapping extracted from an SVG."""
         base_dir = self.config.mapping_output_dir or svg_path.parent / "data"

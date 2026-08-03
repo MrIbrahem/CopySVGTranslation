@@ -36,6 +36,7 @@ class MatchingStrategy(ABC):
     ) -> list[SegmentMatch]:
         """
         Return matched segments for one language node.
+        The list length should normally equal the number of default segments.
         """
         ...
 
@@ -46,6 +47,11 @@ class ByTspanIdStrategy(MatchingStrategy):
 
     Assumes translated tspan ids are derived from the default ids:
       trsvg12  →  trsvg12-ar  or  trsvg12_ar  or  ar-trsvg12  etc.
+
+    Algorithm
+    ---------
+    1. Build map: base_id → default text  (base_id = id split on '-' / '_' [0])
+    2. For each translated tspan, recover base_id and look up default text.
     """
 
     def match(
@@ -55,6 +61,7 @@ class ByTspanIdStrategy(MatchingStrategy):
         *,
         case_insensitive: bool = True,
     ) -> list[SegmentMatch]:
+        # default id → text
         default_by_id: dict[str, str] = {}
         for tspan in default_node.tspans():
             tid = tspan.get("id")
@@ -89,6 +96,9 @@ class ByTspanIdStrategy(MatchingStrategy):
 class ByPositionStrategy(MatchingStrategy):
     """
     Fallback strategy when ids are missing or unreliable.
+
+    Matches segments by index order:
+      default tspans[i] ↔ translated tspans[i]
     """
 
     def match(
@@ -120,6 +130,7 @@ class ByPositionStrategy(MatchingStrategy):
 class CompositeMatchingStrategy(MatchingStrategy):
     """
     Try strategies in order; use the first one that returns any matches.
+    Default pipeline: ByTspanId → ByPosition.
     """
 
     def __init__(self, strategies: list[MatchingStrategy] | None = None) -> None:

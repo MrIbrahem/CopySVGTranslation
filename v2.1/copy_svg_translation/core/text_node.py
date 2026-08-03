@@ -20,6 +20,9 @@ class TextNode:
 
     element: etree._Element
 
+    # ------------------------------------------------------------------
+    # Identity & language
+    # ------------------------------------------------------------------
     @property
     def id(self) -> str | None:
         return self.element.get("id")
@@ -44,6 +47,9 @@ class TextNode:
     def is_fallback(self) -> bool:
         return self.language is None
 
+    # ------------------------------------------------------------------
+    # Text content
+    # ------------------------------------------------------------------
     def texts(self, *, normalize: bool = True, case_insensitive: bool = False) -> list[str]:
         """
         Return the list of text segments.
@@ -72,6 +78,9 @@ class TextNode:
         for tspan in self.tspans():
             yield TextNode(tspan)
 
+    # ------------------------------------------------------------------
+    # Cloning
+    # ------------------------------------------------------------------
     def clone(self) -> TextNode:
         """Deep clone the underlying element and wrap it."""
         import copy

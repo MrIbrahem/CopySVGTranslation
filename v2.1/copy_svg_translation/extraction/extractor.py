@@ -32,9 +32,14 @@ class SVGTranslationExtractor:
         self.strategy = matching_strategy or CompositeMatchingStrategy()
         self.year_handler = YearTitleHandler(self.config)
 
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
     def extract(self, path: Path | str) -> TranslationMapping:
         """
         Load the SVG and return a TranslationMapping.
+        Raises on fatal I/O or parse errors; returns an empty mapping
+        when no switches/translations are found.
         """
         doc = SvgDocument.load(path, config=self.config)
         return self.extract_from_root(doc.root)
@@ -52,6 +57,9 @@ class SVGTranslationExtractor:
 
         return mapping
 
+    # ------------------------------------------------------------------
+    # Per-switch logic
+    # ------------------------------------------------------------------
     def _process_switch(
         self,
         switch: SwitchNode,
@@ -68,15 +76,18 @@ class SVGTranslationExtractor:
         if not any(default_texts):
             return
 
+        # Record diagnostic id → text (optional)
         for tspan in default.tspans():
             tid = tspan.get("id")
             if tid and tspan.text and tspan.text.strip():
                 mapping.tspans_by_id[tid] = tspan.text.strip()
 
+        # Ensure keys exist in mapping.new
         for text in default_texts:
             key = normalize_text(text, self.config.case_insensitive)
             mapping.new.setdefault(key, {})
 
+        # Match every language node
         for node in switch.text_nodes():
             if node.is_fallback:
                 continue
@@ -95,5 +106,5 @@ class SVGTranslationExtractor:
                     key,
                     lang,
                     m.translated_text,
-                    case_insensitive=False,
+                    case_insensitive=False,  # key already normalized
                 )

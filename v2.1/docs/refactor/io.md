@@ -24,7 +24,7 @@ from pathlib import Path
 from lxml import etree
 
 from ..config import TranslationConfig
-from ..exceptions import SvgStructureExceptionError  # or a dedicated IO error
+from ..exceptions import SvgStructureError
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class SvgDocument:
         self.config = config or TranslationConfig()
         self.root = tree.getroot()
         if self.root is None:
-            raise SvgStructureExceptionError("structure-error-no-doc-element")
+            raise SvgStructureError("structure-error-no-doc-element")
 
     # ------------------------------------------------------------------
     # Factory
@@ -204,11 +204,7 @@ class MappingStore:
         indent: int = 2,
     ) -> Path:
         path = Path(path)
-        create = (
-            self.config.create_parents
-            if create_parents is None
-            else create_parents
-        )
+        create = self.config.create_parents if create_parents is None else create_parents
 
         if create:
             path.parent.mkdir(parents=True, exist_ok=True)

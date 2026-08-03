@@ -77,7 +77,6 @@ def inject_file_tree(
     all_mappings: Mapping | None = None,
     case_insensitive: bool = True,
     save_path: Path | None = None,
-    output_dir: Path | None = None,
     overwrite: bool = False,
     save_result: bool = False,
     return_stats: bool = False,

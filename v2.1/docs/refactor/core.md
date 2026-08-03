@@ -19,13 +19,15 @@ This layer holds the **domain concepts** only. No file I/O, no lxml parsing deta
 # core/mapping.py
 from __future__ import annotations
 
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field
-from typing import Any, Iterator, Mapping
+from typing import Any
 
 
 @dataclass(slots=True, frozen=True)
 class TranslationEntry:
     """One source string and its per-language translations."""
+
     source: str
     translations: Mapping[str, str] = field(default_factory=dict)
 
@@ -138,8 +140,8 @@ class TranslationMapping:
 # core/text_node.py
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Iterator
 
 from lxml import etree
 
@@ -152,8 +154,9 @@ SVG_NS = "http://www.w3.org/2000/svg"
 class TextNode:
     """
     Thin domain wrapper over an SVG <text> or <tspan> element.
-    Does not own the element – it only provides a convenient API.
+    Does not own the element - it only provides a convenient API.
     """
+
     element: etree._Element
 
     # ------------------------------------------------------------------
@@ -223,6 +226,7 @@ class TextNode:
     def clone(self) -> TextNode:
         """Deep clone the underlying element and wrap it."""
         import copy
+
         return TextNode(copy.deepcopy(self.element))
 ```
 
@@ -247,6 +251,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 @dataclass(slots=True)
 class SwitchNode:
     """Domain wrapper over an SVG <switch> element."""
+
     element: etree._Element
 
     def text_nodes(self) -> list[TextNode]:
@@ -286,6 +291,7 @@ class SwitchNode:
             lang = n.language or "fallback"
             # Prefer numeric part of trsvg IDs when present
             import re
+
             m = re.search(r"trsvg(\d+)", n.id or "")
             num = int(m.group(1)) if m else 10**9
             is_fallback = 0 if n.is_fallback else 1

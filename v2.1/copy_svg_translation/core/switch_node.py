@@ -52,6 +52,7 @@ class SwitchNode:
 
         def sort_key(n: TextNode):
             lang = n.language or "fallback"
+            # Prefer numeric part of trsvg IDs when present
             import re
 
             m = re.search(r"trsvg(\d+)", n.id or "")

@@ -34,9 +34,12 @@ def inject_file_tree(
         stacklevel=2,
     )
 
+    # ---- normalize legacy argument aliases ----
+
     if inject_file is None:
         return (None, {"error": "No inject file provided"}) if return_stats else None
 
+    # ---- resolve mapping ----
     if all_mappings is None and mapping_files:
         store = MappingStore()
         all_mappings = store.load_many(mapping_files).to_dict()
@@ -44,8 +47,10 @@ def inject_file_tree(
     if not all_mappings:
         return (None, {"error": "No valid mappings found"}) if return_stats else None
 
+    # ---- resolve output path ----
     inject_path = Path(str(inject_file))
 
+    # ---- call new service ----
     config = TranslationConfig(
         case_insensitive=case_insensitive,
         overwrite=overwrite,

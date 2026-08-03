@@ -24,6 +24,15 @@ class TranslationEntry:
 class TranslationMapping:
     """
     Full mapping produced by extraction and consumed by injection.
+
+    Attributes
+    ----------
+    new:
+        Main map: normalized source text → {lang: translated text}
+    title / title_new:
+        Optional year-title variants (kept for compatibility / advanced use)
+    tspans_by_id:
+        Optional diagnostic map from extraction (id → default text)
     """
 
     new: dict[str, dict[str, str]] = field(default_factory=dict)
@@ -32,6 +41,9 @@ class TranslationMapping:
     tspans_by_id: dict[str, str] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
 
+    # ------------------------------------------------------------------
+    # Factory helpers
+    # ------------------------------------------------------------------
     @classmethod
     def from_any(cls, data: Mapping[str, Any] | TranslationMapping) -> TranslationMapping:
         if isinstance(data, TranslationMapping):
@@ -49,6 +61,9 @@ class TranslationMapping:
         """Create from the dict currently returned by the legacy extractor."""
         return cls.from_any(data)
 
+    # ------------------------------------------------------------------
+    # Query helpers
+    # ------------------------------------------------------------------
     def is_empty(self) -> bool:
         return not self.new and not self.title and not self.title_new
 
@@ -73,6 +88,9 @@ class TranslationMapping:
         for source, trans in self.new.items():
             yield TranslationEntry(source=source, translations=trans)
 
+    # ------------------------------------------------------------------
+    # Mutation helpers (used while building the mapping)
+    # ------------------------------------------------------------------
     def add(self, source: str, lang: str, text: str, *, case_insensitive: bool = True) -> None:
         key = source.lower() if case_insensitive else source
         self.new.setdefault(key, {})[lang] = text

@@ -40,6 +40,9 @@ class NestedTspanFlattener:
         self.strategy = strategy
         self.also_fix_a = also_fix_a
 
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
     def process(self, root: etree._Element) -> etree._Element:
         """
         Process the tree in-place and return the root.
@@ -57,9 +60,13 @@ class NestedTspanFlattener:
         # preserve_style (default)
         self._preserve_style(root, tag="tspan")
         if self.also_fix_a:
+            # <a> inside tspan is also invalid for many tools
             self._preserve_style(root, tag="a")
         return root
 
+    # ------------------------------------------------------------------
+    # Strategy: raise
+    # ------------------------------------------------------------------
     def _raise_if_nested(self, root: etree._Element) -> None:
         for tspan in root.findall(f".//{{{SVG_NS}}}tspan"):
             element_children = [c for c in tspan if isinstance(c.tag, str)]
@@ -71,6 +78,9 @@ class NestedTspanFlattener:
                     node_text=node_text,
                 )
 
+    # ------------------------------------------------------------------
+    # Strategy: flatten
+    # ------------------------------------------------------------------
     def _flatten_all(self, root: etree._Element, tag: str) -> None:
         for tspan in root.findall(f".//{{{SVG_NS}}}tspan"):
             nested = tspan.findall(f".//{{{SVG_NS}}}{tag}")
@@ -82,10 +92,26 @@ class NestedTspanFlattener:
             tspan.text = flattened
             tspan.tail = None
 
+    # ------------------------------------------------------------------
+    # Strategy: preserve_style
+    # ------------------------------------------------------------------
     def _preserve_style(self, root: etree._Element, tag: str) -> None:
         """
         Convert nested tspans into sibling tspans so styling is kept.
+
+        Example
+        -------
+        Before:
+            <tspan x="16" y="581">
+                <tspan style="font-weight:700">Data source:</tspan>
+                United Nations ...
+            </tspan>
+
+        After:
+            <tspan style="font-weight:700">Data source:</tspan>
+            <tspan>United Nations ...</tspan>
         """
+        # Process per parent <text> so we can safely replace children
         for parent in root.findall(f".//{{{SVG_NS}}}text"):
             direct_tspans = [child for child in parent if child.tag == f"{{{SVG_NS}}}tspan"]
 
@@ -98,9 +124,11 @@ class NestedTspanFlattener:
                 index = parent_list.index(tspan)
                 new_siblings: list[etree._Element] = []
 
+                # Text that belongs to the outer tspan (before any children)
                 if tspan.text and tspan.text.strip():
                     outer = etree.Element(f"{{{SVG_NS}}}tspan")
                     outer.text = tspan.text
+                    # optionally copy non-position attributes from outer tspan
                     new_siblings.append(outer)
 
                 for nested in nested_children:
@@ -110,11 +138,13 @@ class NestedTspanFlattener:
                     new_tspan.text = nested.text
                     new_siblings.append(new_tspan)
 
+                    # Tail after the nested element
                     if nested.tail and nested.tail.strip():
                         tail_tspan = etree.Element(f"{{{SVG_NS}}}tspan")
                         tail_tspan.text = nested.tail
                         new_siblings.append(tail_tspan)
 
+                # Replace the original nested tspan with the new siblings
                 parent.remove(tspan)
                 for i, sibling in enumerate(new_siblings):
                     parent.insert(index + i, sibling)

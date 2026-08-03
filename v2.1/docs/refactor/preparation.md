@@ -64,7 +64,7 @@ Each step reads from and writes to this context.
 ```python
 # steps/base.py
 class PreparationStep(ABC):
-    def __init__(self, config: TranslationConfig):
+    def __init__(self, config: TranslationConfig) -> None:
         self.config = config
 
     @abstractmethod
@@ -78,7 +78,7 @@ class PreparationStep(ABC):
 ```python
 # preparer.py
 class SvgPreparationPipeline:
-    def __init__(self, config: TranslationConfig):
+    def __init__(self, config: TranslationConfig) -> None:
         self.config = config
         self.steps: list[PreparationStep] = [
             LoadDocument(config),
@@ -89,8 +89,12 @@ class SvgPreparationPipeline:
             ReorderTexts(config),
         ]
 
-    def run(self, path: Path) -> tuple[etree._ElementTree, etree._Element]:
-        ctx = PreparationContext(path=path, config=self.config)
+    def run(self, path: Path) -> tuple[etree._ElementTree[etree._Element], etree._Element]:
+        ctx = PreparationContext(
+            path=path,
+            config=self.config,
+            id_manager=IdManager(),
+        )
         for step in self.steps:
             step.execute(ctx)
         return ctx.tree, ctx.root

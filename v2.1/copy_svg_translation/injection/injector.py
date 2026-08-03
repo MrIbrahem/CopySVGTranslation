@@ -39,7 +39,7 @@ class SVGTranslationInjector:
         svg_path = Path(svg_path)
         stats = InjectorStats()
 
-        # 1. Prepare SVG
+        # 1. Prepare (pipeline)
         try:
             tree, root = self.preparer.run(svg_path)
         except Exception as exc:
@@ -50,30 +50,35 @@ class SVGTranslationInjector:
             stats.error = "preparation_returned_none_tree"
             return None, stats
 
-        # 2. Track existing languages
+        # 2. Snapshot languages before
         before = tree_languages(tree)
         stats.languages_before = sorted(before)
 
-        # 3. Seed ID Manager
+        # 3. Seed IdManager with existing IDs
         self.id_manager.register_many(root.xpath("//@id"))
 
-        # 4. Inject
+        # 4. Process every switch
         switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})
         for switch in switches:
             self.switch_processor.process(switch, mapping, stats)
 
-        # 5. Save if requested
+        # 5. Final housekeeping
+        # self._finalize_switches(root)
+
+        # 6. Languages after + stats
         after = tree_languages(tree)
         stats.languages_after = sorted(after - before)
         stats.all_languages = len(after)
         stats.new_languages = len(after - before)
 
+        # 7. Save if requested
         if save and save_path:
             self._save(tree, save_path)
 
         return tree, stats
 
     def prepare(self, svg_path: Path | str) -> etree._ElementTree:
+        """Public helper used by service.prepare_only()."""
         svg_path = Path(svg_path)
         tree, _ = self.preparer.run(svg_path)
         return tree

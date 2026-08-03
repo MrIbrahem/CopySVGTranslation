@@ -191,7 +191,7 @@ class ConfigurationError(CopySVGTranslationError):
 | Old code / exception                    | New exception                |
 | --------------------------------------- | ---------------------------- |
 | `SvgStructureExceptionError`            | `SvgStructureError`          |
-| `SvgNestedTspanExceptionError`          | `SvgNestedTspanError`        |
+| `SvgNestedTspanError`                   | `SvgNestedTspanError`        |
 | `structure-error-contains-tref`         | `SvgContainsTrefError`       |
 | `structure-error-css-too-complex`       | `SvgCssTooComplexError`      |
 | `structure-error-css-has-ids`           | `SvgCssHasIdsError`          |
