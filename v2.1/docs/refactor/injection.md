@@ -32,12 +32,12 @@ In the new design this responsibility is split into clear, testable pieces.
 
 ### Responsibilities
 
-| Component                  | Role                                                                                                                                                           |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **IdManager**              | Single source of truth for generating and tracking unique IDs.                                                                                                 |
-| **SwitchProcessor**        | Iterates over all `<switch>` elements and coordinates the work for one switch.                                                                                 |
-| **TranslationApplier**     | Pure logic: given a default node + mapping + language → produce the new/updated `<text>` node.                                                                 |
-| **SVGTranslationInjector** | Thin orchestrator: prepare → process switches → fix/sort → collect stats → optionally save.                                                                    |
+| Component                  | Role                                                                                           |
+| -------------------------- | ---------------------------------------------------------------------------------------------- |
+| **IdManager**              | Single source of truth for generating and tracking unique IDs.                                 |
+| **SwitchProcessor**        | Iterates over all `<switch>` elements and coordinates the work for one switch.                 |
+| **TranslationApplier**     | Pure logic: given a default node + mapping + language → produce the new/updated `<text>` node. |
+| **SVGTranslationInjector** | Thin orchestrator: prepare → process switches → fix/sort → collect stats → optionally save.    |
 
 ---
 
@@ -180,38 +180,20 @@ class SVGTranslationInjector:
 
 ---
 
-### Preparation pipeline (`steps/`) – runs **before** any injection
+### How Injection Uses Preparation
+
+The injector delegates all pre-processing to `SvgPreparationPipeline` (see [`preparation.md`](preparation.md) for full details). Injection **assumes** the SVG is already clean and does not repeat preparation work:
 
 ```python
-# injection/preparer.py
-class SvgPreparationPipeline:
-    def __init__(self, config: TranslationConfig):
-        self.steps = [
-            LoadDocument(config),
-            ValidateStructure(config),
-            NormalizeTspans(config),      # uses NestedTspanFlattener according to config.nested_strategy
-            AssignIds(config),
-            SplitLanguages(config),
-            ReorderTexts(config),
-        ]
-
-    def run(self, path: Path) -> tuple[etree._ElementTree, etree._Element]:
-        ctx = PreparationContext(path=path, config=self.config)
-        for step in self.steps:
-            step.execute(ctx)
-        return ctx.tree, ctx.root
+# Inside SVGTranslationInjector.inject()
+tree, root = self.preparer.run(svg_path)   # ← full preparation pipeline
+# Only then does injection begin
+self.id_manager.register_many(...)         # uses IDs assigned by AssignIds step
+for switch in root.xpath("//svg:switch", ...):
+    self.switch_processor.process(switch, mapping, stats)
 ```
 
-Each step is small and focused:
-
-| Step                | Old location                                             | New job                                  |
-| ------------------- | -------------------------------------------------------- | ---------------------------------------- |
-| `LoadDocument`      | `_load_document`                                         | Parse + ensure namespace                 |
-| `ValidateStructure` | `_check_style_elements`, `_check_no_trefs`, nested check | Raise structured errors                  |
-| `NormalizeTspans`   | `_wrap_loose_text...` + nested handling                  | Guarantee every text piece is in a tspan |
-| `AssignIds`         | `_assign_missing_ids` + IdManager                        | All translatable nodes have stable IDs   |
-| `SplitLanguages`    | `_split_switch_languages`                                | One language per `<text>`                |
-| `ReorderTexts`      | `_reorder_texts`                                         | Deterministic order (fallback last)      |
+Preparation knows **nothing** about translations; injection knows **nothing** about SVG normalization.
 
 ---
 
