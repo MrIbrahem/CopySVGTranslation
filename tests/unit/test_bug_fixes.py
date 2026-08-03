@@ -304,10 +304,10 @@ class TestPreparerIdempotency:
         preparer = SvgPreparationPipeline()
 
         preparer.run(svg)
-        count_after_first = len(preparer.translatable_nodes)
+        count_after_first = len(preparer.ctx.translatable_nodes)
 
         preparer.run(svg)
-        count_after_second = len(preparer.translatable_nodes)
+        count_after_second = len(preparer.ctx.translatable_nodes)
 
         assert (
             count_after_first == count_after_second
@@ -325,10 +325,10 @@ class TestPreparerIdempotency:
         preparer = SvgPreparationPipeline()
 
         preparer.run(svg)
-        ids_after_first = set(preparer.existing_ids)
+        ids_after_first = set(preparer.ctx.existing_ids)
 
         preparer.run(svg)
-        ids_after_second = set(preparer.existing_ids)
+        ids_after_second = set(preparer.ctx.existing_ids)
 
         assert ids_after_first == ids_after_second, f"existing_ids changed: {ids_after_first} → {ids_after_second}"
 
@@ -345,10 +345,10 @@ class TestPreparerIdempotency:
         preparer = SvgPreparationPipeline()
 
         preparer.run(svg)
-        ids_after_first = list(preparer.ids_in_use)
+        ids_after_first = list(preparer.ctx.ids_in_use)
 
         preparer.run(svg)
-        ids_after_second = list(preparer.ids_in_use)
+        ids_after_second = list(preparer.ctx.ids_in_use)
 
         assert ids_after_first == ids_after_second, f"ids_in_use changed: {ids_after_first} → {ids_after_second}"
 

@@ -7,9 +7,7 @@ import re
 from lxml import etree
 
 from ...exceptions import SvgStructureExceptionError
-
 from ...utils import normalize_lang
-
 from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -18,7 +16,6 @@ SVG_NS = "http://www.w3.org/2000/svg"
 def get_text_content(el: etree._Element) -> str:
     """Return concatenated text content of element (like DOM textContent)."""
     return "".join(el.itertext())
-
 
 
 def _clone_element(el: etree._Element) -> etree._Element:
@@ -150,7 +147,6 @@ class SplitLanguages(PreparationStep):
                     cloned.set("id", new_id)
                     existing_langs.add(real)
                     sw.append(cloned)
-
 
     def _allocate_clone_id(self, ctx, base_id: str | None, lang: str) -> str:
         """Allocate a unique identifier for a cloned ``<text>`` node."""

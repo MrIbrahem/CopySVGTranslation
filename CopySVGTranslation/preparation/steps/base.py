@@ -24,6 +24,7 @@ class PreparationContext:
     ids_in_use: list[int] = field(default_factory=list)
     existing_ids: set[str] = field(default_factory=set)
 
+
 class PreparationStep(ABC):
     def __init__(self, config: TranslationConfig) -> None:
         self.config = config

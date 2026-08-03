@@ -19,8 +19,8 @@ from .steps import (
     SplitLanguages,
     ValidateStructure,
 )
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 
 class SvgPreparationPipeline:

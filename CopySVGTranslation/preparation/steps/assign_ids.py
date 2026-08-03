@@ -11,7 +11,6 @@ class AssignIds(PreparationStep):
         if ctx.root is None:
             return
 
-
         counter = max(ctx.ids_in_use) if ctx.ids_in_use else 0
 
         # Check all existing IDs for validity

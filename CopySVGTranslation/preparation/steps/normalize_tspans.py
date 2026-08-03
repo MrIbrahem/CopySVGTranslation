@@ -1,12 +1,12 @@
 # injection/steps/normalize_tspans.py
 from __future__ import annotations
+
 import re
 
 from lxml import etree
 
-from ...injection import SvgStructureExceptionError
-
 from ...exceptions import SvgNestedTspanExceptionError
+from ...injection import SvgStructureExceptionError
 from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -31,6 +31,7 @@ class NormalizeTspans(PreparationStep):
                 raise SvgNestedTspanExceptionError(tspan, [tspan.get("id", "")], node_text=node_text)
 
         # self._wrap_loose_text_into_tspans(ctx)
+
 
 class WrapTspans(PreparationStep):
     # ------------------------------------------------------------------
@@ -65,7 +66,6 @@ class WrapTspans(PreparationStep):
 
         self._clean_ids_and_remove_empty_nodes(ctx)
         self._rebuild_translatable_nodes(ctx)
-
 
     def _clean_ids_and_remove_empty_nodes(self, ctx: PreparationContext) -> None:
         """Normalize/validate ids on translatable nodes and drop empty nodes."""
@@ -111,4 +111,3 @@ class WrapTspans(PreparationStep):
         ctx.translatable_nodes = []
         ctx.translatable_nodes.extend(ctx.root.findall(".//{%s}tspan" % SVG_NS))
         ctx.translatable_nodes.extend(ctx.root.findall(".//{%s}text" % SVG_NS))
-

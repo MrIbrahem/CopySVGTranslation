@@ -14,13 +14,13 @@ from .steps import (
     NormalizeTspans,
     PreparationContext,
     PreparationStep,
-    WrapTspans,
     ReorderTexts,
     SplitLanguages,
     ValidateStructure,
+    WrapTspans,
 )
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 
 class SvgPreparationPipeline:
@@ -56,15 +56,16 @@ class SvgPreparationPipeline:
         # Reset per-run state to ensure idempotent behavior
         path = Path(str(source_file))
 
-        ctx = PreparationContext(
+        self.ctx = PreparationContext(
             path=path,
             config=self.config,
             # id_manager=IdManager(),
         )
         for step in self.steps:
-            step.execute(ctx)
+            step.execute(self.ctx)
 
-        return ctx.tree, ctx.root
+        return self.ctx.tree, self.ctx.root
+
 
 def make_translation_ready(source_file: Path | str) -> tuple[etree._ElementTree, etree._Element]:
     """

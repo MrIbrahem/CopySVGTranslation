@@ -1,5 +1,6 @@
 # injection/steps/reorder.py
 from __future__ import annotations
+
 import re
 
 from .base import PreparationContext, PreparationStep
@@ -41,4 +42,3 @@ class ReorderTexts(PreparationStep):
                 sw.remove(t)
             for t in texts_sorted:
                 sw.append(t)
-
