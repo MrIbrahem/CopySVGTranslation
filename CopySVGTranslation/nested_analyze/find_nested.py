@@ -108,7 +108,7 @@ def fix_nested_file(source_file: Path, new_path: Path | None = None, pretty_prin
     # Only tspan elements should be used within text.
     root = fix_nested_tspans(root, "a")
     # ---
-    if root:
+    if root is not None:
         try:
             _str = etree.tostring(root, encoding="unicode", pretty_print=pretty_print)
             new_path.write_text(_str, encoding="utf-8")
