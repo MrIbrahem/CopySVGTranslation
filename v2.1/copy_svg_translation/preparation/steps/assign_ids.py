@@ -16,7 +16,7 @@ class AssignIds(PreparationStep):
         # Initialize ID manager if not done
         existing_ids = collect_ids(ctx.root)
         if ctx.id_manager is None:
-            from ..id_manager import IdManager
+            from ...injection.id_manager import IdManager
 
             ctx.id_manager = IdManager(existing_ids)
         else:

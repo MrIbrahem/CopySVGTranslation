@@ -18,21 +18,14 @@ In the new design this responsibility is split into clear, testable pieces.
 ### Target structure (injection/)
 
 ```
-injection/
-    ├── __init__.py
-    ├── preparer.py              # SvgPreparationPipeline
-    ├── injector.py              # SVGTranslationInjector (orchestrator only)
-    ├── id_manager.py            # IdManager
-    ├── switch_processor.py      # SwitchProcessor  ← replaces most of work_on_switches
-    ├── translation_applier.py   # TranslationApplier
-    └── steps/                   # Preparation only (runs before injection)
-        ├── base.py
-        ├── load.py
-        ├── validate.py
-        ├── normalize_tspans.py
-        ├── assign_ids.py
-        ├── split_languages.py
-        └── reorder.py
+├── copy_svg_translation/
+│   ├── injection/
+│   │   ├── __init__.py
+│   │   ├── id_manager.py            # IdManager
+│   │   ├── injector.py              # SVGTranslationInjector (orchestrator only)
+│   │   ├── README.md
+│   │   ├── switch_processor.py      # SwitchProcessor  ← replaces most of work_on_switches
+│   │   └── translation_applier.py   # TranslationApplier
 ```
 
 ---
@@ -41,7 +34,6 @@ injection/
 
 | Component                  | Role                                                                                                                                                           |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **SvgPreparationPipeline** | Runs the `steps/` pipeline once. Guarantees a clean, well-structured SVG (every text inside a switch, tspans present, IDs assigned, languages split, ordered). |
 | **IdManager**              | Single source of truth for generating and tracking unique IDs.                                                                                                 |
 | **SwitchProcessor**        | Iterates over all `<switch>` elements and coordinates the work for one switch.                                                                                 |
 | **TranslationApplier**     | Pure logic: given a default node + mapping + language → produce the new/updated `<text>` node.                                                                 |
@@ -272,10 +264,9 @@ Stats + optional save
 ```python
 # injection/__init__.py
 from .injector import SVGTranslationInjector
-from .preparer import SvgPreparationPipeline
 from .id_manager import IdManager
 
-__all__ = ["SVGTranslationInjector", "SvgPreparationPipeline", "IdManager"]
+__all__ = ["SVGTranslationInjector", "IdManager"]
 ```
 
 Everything else (`SwitchProcessor`, `TranslationApplier`, steps) stays internal.

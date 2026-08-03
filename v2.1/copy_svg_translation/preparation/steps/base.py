@@ -8,7 +8,7 @@ from pathlib import Path
 from lxml import etree
 
 from ...config import TranslationConfig
-from ..id_manager import IdManager
+from ...injection.id_manager import IdManager
 
 
 @dataclass

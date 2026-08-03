@@ -18,18 +18,26 @@ After the pipeline finishes we have:
 ### Structure
 
 ```
-injection/
-├── preparer.py                 # SvgPreparationPipeline + PreparationContext
-└── steps/
-    ├── __init__.py
-    ├── base.py                 # PreparationStep (ABC)
-    ├── load.py
-    ├── validate.py
-    ├── normalize_tspans.py
-    ├── assign_ids.py
-    ├── split_languages.py
-    └── reorder.py
+├── copy_svg_translation/
+│   ├── preparation/
+│   │   ├── steps/                   # Preparation only (runs before injection)
+│   │   │   ├── __init__.py
+│   │   │   ├── assign_ids.py
+│   │   │   ├── base.py
+│   │   │   ├── load.py
+│   │   │   ├── normalize_tspans.py
+│   │   │   ├── reorder.py
+│   │   │   ├── split_languages.py
+│   │   │   └── validate.py
+│   │   ├── __init__.py
+│   │   └── preparer.py                # SvgPreparationPipeline
 ```
+
+### Responsibilities
+
+| Component                  | Role                                                                                                                                                           |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SvgPreparationPipeline** | Runs the `steps/` pipeline once. Guarantees a clean, well-structured SVG (every text inside a switch, tspans present, IDs assigned, languages split, ordered). |
 
 ---
 
