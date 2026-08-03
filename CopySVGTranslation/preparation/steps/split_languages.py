@@ -85,23 +85,14 @@ class SplitLanguages(PreparationStep):
         for switch in switches:
             self._split_languages_in_switch(switch, ctx)
 
-    def validate_text_el_children(self, text_el) -> None:
-        if not isinstance(text_el.tag, str):
-            # ignore comments etc, but if there's text content outside elements, check whitespace
-            if text_el.text and text_el.text.strip():
-                raise SvgStructureError("structure-error-switch-text-content-outside-text")
-            return False
-        if text_el.tag not in ({f"{{{SVG_NS}}}text", "text"}):
-            raise SvgStructureError("structure-error-switch-child-not-text")
-        return True
-
     def _split_languages_in_switch(self, switch: etree._Element, ctx: PreparationContext) -> None:
         # gather existing languages for duplicate detection
         existing_langs: set[str] = set()
         # collect children first to avoid modifying while iterating
+
         children = list(switch)
         for text_el in children:
-            if not self.validate_text_el_children(text_el):
+            if not self._validate_text_el_children(text_el):
                 continue
 
             sys_lang = text_el.get("systemLanguage")
@@ -169,3 +160,13 @@ class SplitLanguages(PreparationStep):
             new_id = ctx.id_manager.allocate_trsvg()
 
         element.set("id", new_id)
+
+    def _validate_text_el_children(self, text_el) -> None:
+        if not isinstance(text_el.tag, str):
+            # ignore comments etc, but if there's text content outside elements, check whitespace
+            if text_el.text and text_el.text.strip():
+                raise SvgStructureError("structure-error-switch-text-content-outside-text")
+            return False
+        if text_el.tag not in ({f"{{{SVG_NS}}}text", "text"}):
+            raise SvgStructureError("structure-error-switch-child-not-text")
+        return True
