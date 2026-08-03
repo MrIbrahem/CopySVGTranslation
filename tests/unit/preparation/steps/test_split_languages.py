@@ -11,5 +11,4 @@ TODO: write tests
 
 from CopySVGTranslation.preparation.steps.split_languages import (
     SplitLanguages,
-    get_text_content,
 )
