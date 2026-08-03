@@ -48,7 +48,7 @@ def file_langs(file: Path | str | None) -> set[str]:
     return languages
 
 
-def tree_langs(tree: etree._ElementTree | None) -> set[str]:
+def tree_languages(tree: etree._ElementTree | None) -> set[str]:
     """Return the list of languages declared in ``systemLanguage`` attributes."""
 
     if tree is None:
@@ -106,7 +106,7 @@ def extract_text_from_node(node) -> list[str]:
 
 __all__ = [
     "extract_root_languages",
-    "tree_langs",
+    "tree_languages",
     "file_langs",
     "sort_switch_texts",
     "extract_text_from_node",

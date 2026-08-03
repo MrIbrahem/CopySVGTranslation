@@ -9,12 +9,12 @@ import pytest
 
 from CopySVGTranslation.injection import (
     inject_file_and_save,
-    make_translation_ready,
 )
 from CopySVGTranslation.injection.exceptions import (
     SvgNestedTspanExceptionError,
     SvgStructureExceptionError,
 )
+from CopySVGTranslation.preparation import make_translation_ready
 
 
 class Testinject:

@@ -12,7 +12,7 @@ import pytest
 from CopySVGTranslation.injection.exceptions import (
     SvgStructureExceptionError,
 )
-from CopySVGTranslation.injection.preparation import (
+from CopySVGTranslation.preparation import (
     make_translation_ready,
 )
 

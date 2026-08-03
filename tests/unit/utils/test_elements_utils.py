@@ -18,7 +18,7 @@ from CopySVGTranslation.utils.elements_utils import (
     extract_text_from_node,
     file_langs,
     sort_switch_texts,
-    tree_langs,
+    tree_languages,
 )
 
 
@@ -56,7 +56,7 @@ class TestElementsUtils:
         root = etree.fromstring(svg)
         tree = etree.ElementTree(root)
 
-        assert sorted(tree_langs(tree)) == ["en", "fr"]
+        assert sorted(tree_languages(tree)) == ["en", "fr"]
         assert sorted(extract_root_languages(root)) == ["en", "fr"]
 
 
@@ -89,7 +89,7 @@ class TestFileLangs:
 
 
 class TestTreeLangs:
-    """Tests for tree_langs function."""
+    """Tests for tree_languages function."""
 
     def test_tree_langs(self): ...
 

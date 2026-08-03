@@ -9,8 +9,8 @@ from pathlib import Path
 
 from lxml import etree
 
+from ..injection.exceptions import SvgNestedTspanExceptionError, SvgStructureExceptionError
 from ..utils import normalize_lang
-from .exceptions import SvgNestedTspanExceptionError, SvgStructureExceptionError
 
 logger = logging.getLogger(__name__)
 

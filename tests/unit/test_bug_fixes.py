@@ -270,7 +270,7 @@ class TestPreparerIdempotency:
 
     def test_prepare_called_twice_produces_same_result(self, tmp_path: Path):
         """Calling prepare() twice should produce structurally equivalent results."""
-        from CopySVGTranslation.injection.preparation import SvgTranslationPreparer
+        from CopySVGTranslation.preparation import SvgTranslationPreparer
 
         svg = _write_svg(
             tmp_path,
@@ -289,7 +289,7 @@ class TestPreparerIdempotency:
 
     def test_translatable_nodes_do_not_accumulate(self, tmp_path: Path):
         """translatable_nodes should have the same count after each prepare() call."""
-        from CopySVGTranslation.injection.preparation import SvgTranslationPreparer
+        from CopySVGTranslation.preparation import SvgTranslationPreparer
 
         svg = _write_svg(
             tmp_path,
@@ -315,7 +315,7 @@ class TestPreparerIdempotency:
 
     def test_existing_ids_do_not_accumulate(self, tmp_path: Path):
         """existing_ids should have the same count after each prepare() call."""
-        from CopySVGTranslation.injection.preparation import SvgTranslationPreparer
+        from CopySVGTranslation.preparation import SvgTranslationPreparer
 
         svg = _write_svg(
             tmp_path,
@@ -334,7 +334,7 @@ class TestPreparerIdempotency:
 
     def test_ids_in_use_reset(self, tmp_path: Path):
         """ids_in_use should be reset between prepare() calls."""
-        from CopySVGTranslation.injection.preparation import SvgTranslationPreparer
+        from CopySVGTranslation.preparation import SvgTranslationPreparer
 
         # SVG with no IDs → preparer will allocate trsvg IDs
         svg = _write_svg(

@@ -14,8 +14,8 @@ from CopySVGTranslation.injection import (
     SvgStructureExceptionError,
     inject_file_and_save,
     inject_file_tree,
-    make_translation_ready,
 )
+from CopySVGTranslation.preparation import make_translation_ready
 from CopySVGTranslation.utils import (
     generate_unique_id,
     load_all_mappings,
