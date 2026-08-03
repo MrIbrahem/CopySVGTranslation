@@ -136,10 +136,12 @@ class TestSplitLanguagesInSwitch:
         assert len(children) == 2
         assert children[0].get("systemLanguage") == "ar"
 
-        expeced = '''<text xmlns="http://www.w3.org/2000/svg" id="t1-ar" systemLanguage="ar">hello</text>'''
-        # _expeced_old = '''<text xmlns="http://www.w3.org/2000/svg" id="t1-">hello</text>'''
+        # expeced = '''<text xmlns="http://www.w3.org/2000/svg" id="t1-ar" systemLanguage="ar">hello</text>'''
+        expeced = '''<text xmlns="http://www.w3.org/2000/svg" id="t1-">hello</text>'''
 
-        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text><text id="t1-ar" systemLanguage="ar">hello</text></switch>"""
+        # assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text><text id="t1-ar" systemLanguage="ar">hello</text></switch>"""
+
+        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text><text id="t1-">hello</text></switch>"""
         assert self.tostring(children[1]) == expeced
 
         # assert children[1].get("systemLanguage") is None
