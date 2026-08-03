@@ -189,9 +189,7 @@ class TestSplitLanguagesInSwitch:
         assert children[1].get("systemLanguage") == "fr"
 
     def test_clones_are_inserted_immediately_after_original_in_order(self, step, ctx):
-        switch = make_switch(
-            '<text id="t1" systemLanguage="ar,fr">a</text><text id="t2" systemLanguage="en">b</text>'
-        )
+        switch = make_switch('<text id="t1" systemLanguage="ar,fr">a</text><text id="t2" systemLanguage="en">b</text>')
 
         step._split_languages_in_switch(switch, ctx)
 
