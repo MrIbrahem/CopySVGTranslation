@@ -14,12 +14,12 @@ from ..service import SVGTranslationService
 
 
 def inject_file_tree(
+    *,
     inject_file: Path | str | None = None,
     mapping_files: Iterable[Path | str] | None = None,
     all_mappings: Mapping | None = None,
     case_insensitive: bool = True,
     save_path: Path | None = None,
-    output_dir: Path | None = None,
     overwrite: bool = False,
     save_result: bool = False,
     return_stats: bool = False,
@@ -65,7 +65,7 @@ def inject_file_tree(
     result = service.inject(
         inject_path,
         TranslationMapping.from_any(all_mappings),
-        output=target,
+        output=save_path,
         save=save_result,
     )
 

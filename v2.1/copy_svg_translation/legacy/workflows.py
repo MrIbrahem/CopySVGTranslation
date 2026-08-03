@@ -11,12 +11,14 @@ from ..service import SVGTranslationService
 
 
 def svg_extract_and_inject(
+    *,
     extract_file: Path | str,
     inject_file: Path | str,
-    target_path: Path | None = None,
     all_mappings_file: Path | None = None,
     overwrite: bool | None = None,
+    pretty_print: bool | None = None,
     save_result: bool = False,
+    target_path: Path | None = None,
 ) -> Any:
     """
     Deprecated. Use SVGTranslationService.extract_and_inject() instead.
@@ -30,8 +32,10 @@ def svg_extract_and_inject(
 
     config = TranslationConfig(
         overwrite=bool(overwrite),
+        pretty_print=pretty_print,
         auto_save=False,
     )
+
     service = SVGTranslationService(config)
 
     save_mapping: bool | Path | None = False
@@ -49,12 +53,14 @@ def svg_extract_and_inject(
 
 
 def svg_extract_and_injects(
+    *,
     translations: Mapping,
     inject_file: Path | str,
     output_dir: Path | None = None,
-    save_result: bool = False,
-    overwrite: bool = False,
+    overwrite: bool | None = None,
     pretty_print: bool | None = None,
+    save_result: bool = False,
+    target_path: Path | None = None,
 ) -> Any:
     """
     Deprecated. Use SVGTranslationService.inject() instead.
@@ -64,14 +70,22 @@ def svg_extract_and_injects(
         DeprecationWarning,
         stacklevel=2,
     )
+    inject_path = Path(str(inject_file))
+    _target_path: Path | None = target_path
+
+    if save_result and not _target_path:
+        if output_dir:
+            _target_path = Path(str(output_dir)) / inject_path.name
+        else:
+            _target_path = inject_path.parent / "translated" / inject_path.name
 
     from .inject import inject_file_tree
 
     return inject_file_tree(
-        inject_file=inject_file,
+        inject_file=inject_path,
         all_mappings=translations,
-        output_dir=output_dir,
         save_result=save_result,
+        save_path=_target_path,
         overwrite=overwrite,
         pretty_print=pretty_print,
     )

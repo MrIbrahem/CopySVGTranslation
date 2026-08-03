@@ -48,7 +48,7 @@ class TestIntegrationWorkflows:
         translations = extract(self.source_svg)
         result, stats = inject_file_and_save(
             inject_file=self.target_svg,
-            output_dir=self.test_dir,
+            save_path=self.test_dir / "t.svg",
             all_mappings=translations,
             return_stats=True,
         )

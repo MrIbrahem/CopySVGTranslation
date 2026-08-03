@@ -181,7 +181,7 @@ class TestSVGTranslate(TestSetup):
         tree = inject_file_and_save(
             inject_file=_path,
             mapping_files=[mapping_path],
-            output_dir=output_dir,
+            save_path=output_dir / _path.name,
         )
 
         assert tree is not None

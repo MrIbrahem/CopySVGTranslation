@@ -58,21 +58,11 @@ def inject_file_and_save(
     mapping_files: Iterable[Path | str] | None = None,
     all_mappings: Mapping | None = None,
     case_insensitive: bool = True,
-    save_path: Path | None = None,
-    output_dir: Path | None = None,
+    save_path: Path,
     overwrite: bool = False,
     return_stats: bool = False,
     pretty_print: bool | None = None,
 ) -> tuple[Any, Any] | Any:
-    inject_path = Path(str(inject_file))
-    _save_path: Path | None = None
-
-    if save_path:
-        _save_path = Path(str(save_path))
-    elif output_dir:
-        _save_path = Path(str(output_dir)) / inject_path.name
-    else:
-        _save_path = inject_path.parent / "translated" / inject_path.name
 
     return inject_file_tree(
         inject_file=inject_file,
@@ -81,7 +71,7 @@ def inject_file_and_save(
         case_insensitive=case_insensitive,
         overwrite=overwrite,
         pretty_print=pretty_print,
-        save_path=_save_path,
+        save_path=save_path,
         save_result=True,
         return_stats=return_stats,
     )

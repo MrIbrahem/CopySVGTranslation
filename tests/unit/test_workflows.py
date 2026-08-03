@@ -1,4 +1,3 @@
-# ruff: noqa: F401
 """
 Unit tests for CopySVGTranslation/workflows.py module.
 
@@ -8,9 +7,6 @@ Functions to test: svg_extract_and_inject, svg_extract_and_injects
 from __future__ import annotations
 
 from pathlib import Path
-
-import pytest
-from lxml import etree
 
 from CopySVGTranslation.workflows import (
     svg_extract_and_inject,
@@ -122,7 +118,7 @@ class TestSvgExtractAndInjects:
             translations=translations,
             inject_file=target,
             save_result=True,
-            output_dir=tmp_path,
+            target_path=output,
         )
 
         assert tree is not None

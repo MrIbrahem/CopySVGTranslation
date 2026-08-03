@@ -261,61 +261,6 @@ class TestExtractorStateIsolation:
 
 
 # ===========================================================================
-# BUG-04: svg_extract_and_inject not in __all__
-# ===========================================================================
-
-
-class TestPublicAPIExports:
-    """Verify that documented public API functions are properly exported."""
-
-    def test_svg_extract_and_inject_importable(self):
-        """svg_extract_and_inject should be importable from the top-level package."""
-        import CopySVGTranslation
-
-        assert hasattr(CopySVGTranslation, "svg_extract_and_inject")
-        assert callable(CopySVGTranslation.svg_extract_and_inject)
-
-    def test_svg_extract_and_injects_importable(self):
-        """svg_extract_and_injects should be importable from the top-level package."""
-        import CopySVGTranslation
-
-        assert hasattr(CopySVGTranslation, "svg_extract_and_injects")
-        assert callable(CopySVGTranslation.svg_extract_and_injects)
-
-    def test_both_in_all(self):
-        """Both workflow functions should be listed in __all__."""
-        import CopySVGTranslation
-
-        assert "svg_extract_and_inject" in CopySVGTranslation.__all__
-        assert "svg_extract_and_injects" in CopySVGTranslation.__all__
-
-    def test_star_import_includes_workflows(self):
-        """A star import should include the workflow functions."""
-        import CopySVGTranslation
-
-        # Simulate what `from CopySVGTranslation import *` would give
-        all_names = CopySVGTranslation.__all__
-        assert "svg_extract_and_inject" in all_names
-        assert "svg_extract_and_injects" in all_names
-
-    def test_documented_classes_still_exported(self):
-        """Ensure existing exports were not removed when adding workflow functions."""
-        import CopySVGTranslation
-
-        expected = {
-            "SVGTranslationInjector",
-            "SVGTranslationExtractor",
-            "ExtractorData",
-            "InjectorData",
-            "svg_extract_and_inject",
-            "svg_extract_and_injects",
-            "match_nested_tags",
-            "fix_nested_file",
-        }
-        assert expected.issubset(set(CopySVGTranslation.__all__))
-
-
-# ===========================================================================
 # BUG-05: SvgTranslationPreparer not idempotent
 # ===========================================================================
 

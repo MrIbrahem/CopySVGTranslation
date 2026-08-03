@@ -56,19 +56,20 @@ def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
 
     output_dir = tmp_path / "outputs"
     output_dir.mkdir(parents=True, exist_ok=True)
+    output_file = output_dir / target_svg.name
+
     tree, stats = inject_file_and_save(
         inject_file=target_svg,
         all_mappings=translations,
-        output_dir=output_dir,
+        save_path=output_file,
         return_stats=True,
     )
 
     assert tree is not None
     assert stats["inserted_translations"] >= 1
 
-    _output_file = output_dir / target_svg.name
-    assert _output_file.exists(), "The helper should honour the output directory when saving results"
-    content = _output_file.read_text(encoding="utf-8")
+    assert output_file.exists(), "The helper should honour the output directory when saving results"
+    content = output_file.read_text(encoding="utf-8")
     assert 'systemLanguage="ar"' in content
     assert "السكان 2020" in content
 
@@ -354,7 +355,7 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
     tree1, stats1 = inject_file_and_save(
         inject_file=target_svg,
         all_mappings=translations,
-        output_dir=output1,
+        save_path=output1 / target_svg.name,
         return_stats=True,
     )
 
@@ -364,7 +365,7 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
     tree2, stats2 = inject_file_and_save(
         inject_file=target_svg,
         all_mappings=translations,
-        output_dir=output2,
+        save_path=output2 / target_svg.name,
         return_stats=True,
     )
 

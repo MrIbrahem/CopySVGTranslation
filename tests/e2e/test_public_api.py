@@ -147,7 +147,7 @@ class TestIntegrationWorkflows:
         result, stats = inject_file_and_save(
             inject_file=target_svg,
             all_mappings=translations,
-            output_dir=tmp_path,
+            save_path=tmp_path / "target2.svg",
             return_stats=True,
         )
 

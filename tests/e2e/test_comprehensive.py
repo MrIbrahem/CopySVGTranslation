@@ -140,7 +140,7 @@ class TestInjector:
         tree = inject_file_and_save(
             inject_file=svg_path,
             all_mappings=mappings,
-            output_dir=out_dir,
+            save_path=out_dir / "test.svg",
         )
         assert tree is not None
         assert (out_dir / "test.svg").exists()
