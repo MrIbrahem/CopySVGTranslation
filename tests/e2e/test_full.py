@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import inject_file_tree
+from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
 from CopySVGTranslation.workflows import svg_extract_and_inject
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -56,11 +56,10 @@ def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
 
     output_dir = tmp_path / "outputs"
     output_dir.mkdir(parents=True, exist_ok=True)
-    tree, stats = inject_file_tree(
+    tree, stats = inject_file_and_save(
         inject_file=target_svg,
         all_mappings=translations,
         output_dir=output_dir,
-        save_result=True,
         return_stats=True,
     )
 
@@ -349,22 +348,20 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
     # First injection
     output1 = tmp_path / "output1"
     output1.mkdir()
-    tree1, stats1 = inject_file_tree(
+    tree1, stats1 = inject_file_and_save(
         inject_file=target_svg,
         all_mappings=translations,
         output_dir=output1,
-        save_result=True,
         return_stats=True,
     )
 
     # Second injection to different location
     output2 = tmp_path / "output2"
     output2.mkdir()
-    tree2, stats2 = inject_file_tree(
+    tree2, stats2 = inject_file_and_save(
         inject_file=target_svg,
         all_mappings=translations,
         output_dir=output2,
-        save_result=True,
         return_stats=True,
     )
 

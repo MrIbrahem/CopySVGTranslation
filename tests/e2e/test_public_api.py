@@ -7,7 +7,7 @@ from pathlib import Path
 # Test that the public API is importable
 import CopySVGTranslation
 from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import inject_file_tree
+from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
 from CopySVGTranslation.workflows import svg_extract_and_inject
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -144,11 +144,10 @@ class TestIntegrationWorkflows:
         translations = extract(FIXTURES_DIR / "source.svg")
 
         # Inject using the dict
-        result, stats = inject_file_tree(
+        result, stats = inject_file_and_save(
             inject_file=target_svg,
             all_mappings=translations,
             output_dir=tmp_path,
-            save_result=True,
             return_stats=True,
         )
 
