@@ -62,8 +62,8 @@ def ctx() -> SimpleNamespace:
 
 
 class TestSplitLanguagesInSwitch:
-    def tostring(self, el: etree._Element) -> str:
-        return etree.tostring(el, pretty_print=True).decode("utf-8").strip()
+    def tostring(self, el: etree._Element, pretty_print=True) -> str:
+        return etree.tostring(el, pretty_print=pretty_print).decode("utf-8").strip()
 
     def test_single_text_without_systemlanguage_is_left_as_fallback(self, step, ctx):
         switch = make_switch('<text id="t1">hello</text>')
@@ -137,11 +137,12 @@ class TestSplitLanguagesInSwitch:
         assert children[0].get("systemLanguage") == "ar"
 
         expeced = '''<text xmlns="http://www.w3.org/2000/svg" id="t1-ar" systemLanguage="ar">hello</text>'''
-        _expeced_old = '''<text xmlns="http://www.w3.org/2000/svg" id="t1-">hello</text>'''
+        # _expeced_old = '''<text xmlns="http://www.w3.org/2000/svg" id="t1-">hello</text>'''
 
+        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text><text id="t1-ar" systemLanguage="ar">hello</text></switch>"""
         assert self.tostring(children[1]) == expeced
 
-        assert children[1].get("systemLanguage") is None
+        # assert children[1].get("systemLanguage") is None
 
     def test_duplicate_language_within_same_text_raises(self, step, ctx):
         switch = make_switch('<text id="t1" systemLanguage="ar,ar">hello</text>')
