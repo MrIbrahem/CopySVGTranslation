@@ -12,7 +12,7 @@ from lxml import etree
 
 from CopySVGTranslation.injection import (
     SvgStructureExceptionError,
-    inject,
+    inject_file_tree,
     make_translation_ready,
 )
 from CopySVGTranslation.utils import (
@@ -120,7 +120,7 @@ class TestInjector:
         svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="text1"><tspan>Hello</tspan></text></switch></svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
-        tree, stats = inject(svg_path, all_mappings=mappings, return_stats=True)
+        tree, stats = inject_file_tree(svg_path, all_mappings=mappings, return_stats=True)
         assert tree is not None
         assert stats is not None
 
@@ -132,7 +132,7 @@ class TestInjector:
         svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
-        tree = inject(svg_path, all_mappings=mappings, output_dir=out_dir, save_result=True)
+        tree = inject_file_tree(svg_path, all_mappings=mappings, output_dir=out_dir, save_result=True)
         assert tree is not None
         assert (out_dir / "test.svg").exists()
 
@@ -142,7 +142,7 @@ class TestInjector:
         svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
         mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
-        tree, stats = inject(svg_path, all_mappings=mappings, case_insensitive=False, return_stats=True)
+        tree, stats = inject_file_tree(svg_path, all_mappings=mappings, case_insensitive=False, return_stats=True)
         assert tree is not None
         assert stats["inserted_translations"] == 1
 
@@ -180,7 +180,7 @@ class TestEdgeCases:
         svg.write_text(
             '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><text>Test</text></svg>', encoding="utf-8"
         )
-        result = inject(svg, all_mappings={})
+        result = inject_file_tree(svg, all_mappings={})
         assert result is None
 
     def test_inject_return_stats_false(self, temp_dir):
@@ -191,6 +191,6 @@ class TestEdgeCases:
             encoding="utf-8",
         )
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
-        result = inject(svg, all_mappings=mappings, return_stats=False)
+        result = inject_file_tree(svg, all_mappings=mappings, return_stats=False)
         assert result is not None
         assert isinstance(result, etree._ElementTree)

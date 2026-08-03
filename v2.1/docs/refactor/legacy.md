@@ -73,7 +73,7 @@ from ..service import SVGTranslationService
 from ..utils.xml import tree_languages  # only if needed for stats shape
 
 
-def inject(
+def inject_file_tree(
     inject_file: Path | str | None = None,
     all_mappings: Mapping | None = None,
     case_insensitive: bool = True,
@@ -222,7 +222,7 @@ def svg_extract_and_injects(
         stacklevel=2,
     )
 
-    from .inject import inject
+    from .inject import inject_file_tree
 
     return inject(
         inject_file=inject_file,
@@ -241,12 +241,12 @@ def svg_extract_and_injects(
 ```python
 # legacy/__init__.py
 from .extract import extract
-from .inject import inject
+from .inject import inject_file_tree
 from .workflows import svg_extract_and_inject, svg_extract_and_injects
 
 __all__ = [
     "extract",
-    "inject",
+    "inject_file_tree",
     "svg_extract_and_inject",
     "svg_extract_and_injects",
 ]

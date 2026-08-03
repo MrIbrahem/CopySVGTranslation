@@ -11,7 +11,7 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import inject
+from CopySVGTranslation.injection import inject_file_tree
 from CopySVGTranslation.utils import generate_unique_id
 
 
@@ -149,13 +149,13 @@ class TestSVGTranslate(TestSetup):
     </switch>
 </svg>"""
 
-        save_path = self.test_dir / "target.svg"
-        with open(save_path, "w", encoding="utf-8") as f:
+        _path = self.test_dir / "target.svg"
+        with open(_path, "w", encoding="utf-8") as f:
             f.write(target_svg)
 
         # Inject with both mapping files
-        tree, stats = inject(
-            save_path,
+        tree, stats = inject_file_tree(
+            _path,
             [mapping1_path, mapping2_path],
             return_stats=True,
         )
@@ -171,15 +171,15 @@ class TestSVGTranslate(TestSetup):
         with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
-        save_path = self.test_dir / "target.svg"
-        with open(save_path, "w", encoding="utf-8") as f:
+        _path = self.test_dir / "target.svg"
+        with open(_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
         output_dir = self.test_dir / "output"
         output_dir.mkdir()
 
-        tree = inject(
-            save_path,
+        tree = inject_file_tree(
+            _path,
             [mapping_path],
             output_dir=output_dir,
             save_result=True,
@@ -187,7 +187,7 @@ class TestSVGTranslate(TestSetup):
 
         assert tree is not None
         # Check that file was saved in output directory
-        expected_output = output_dir / save_path.name
+        expected_output = output_dir / _path.name
         assert expected_output.exists() is True
 
     def test_inject_preserves_original_structure(self):
@@ -196,11 +196,11 @@ class TestSVGTranslate(TestSetup):
         with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
-        save_path = self.test_dir / "target.svg"
-        with open(save_path, "w", encoding="utf-8") as f:
+        _path = self.test_dir / "target.svg"
+        with open(_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
-        tree = inject(save_path, [mapping_path])
+        tree = inject_file_tree(_path, [mapping_path])
 
         assert tree is not None
         # Original elements should still be present
@@ -232,7 +232,7 @@ class TestSVGTranslate(TestSetup):
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         # Inject without overwrite
-        tree, stats = inject(
+        tree, stats = inject_file_tree(
             svg_path,
             [mapping_path],
             overwrite=False,
@@ -306,7 +306,7 @@ class TestSVGTranslate(TestSetup):
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         # Test with overwrite=True
-        tree, stats = inject(
+        tree, stats = inject_file_tree(
             svg_path,
             [mapping_path],
             overwrite=True,
@@ -337,13 +337,13 @@ class TestSVGTranslate(TestSetup):
             json.dump(translations, f, ensure_ascii=False)
 
         # Create target without translations
-        save_path = self.test_dir / "target.svg"
-        with open(save_path, "w", encoding="utf-8") as f:
+        _path = self.test_dir / "target.svg"
+        with open(_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
         # Inject translations
-        tree, stats = inject(
-            save_path,
+        tree, stats = inject_file_tree(
+            _path,
             [mapping_path],
             return_stats=True,
         )
@@ -361,11 +361,11 @@ class TestSVGTranslate(TestSetup):
         with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(empty_mapping, f)
 
-        save_path = self.test_dir / "target.svg"
-        with open(save_path, "w", encoding="utf-8") as f:
+        _path = self.test_dir / "target.svg"
+        with open(_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
-        tree, stats = inject(save_path, [mapping_path], return_stats=True)
+        tree, stats = inject_file_tree(_path, [mapping_path], return_stats=True)
 
         # Should complete without error, but with no translations
         assert tree is not None
@@ -377,9 +377,9 @@ class TestSVGTranslate(TestSetup):
         with open(mapping_path, "w", encoding="utf-8") as f:
             f.write("{invalid json content")
 
-        save_path = self.test_dir / "target.svg"
-        with open(save_path, "w", encoding="utf-8") as f:
+        _path = self.test_dir / "target.svg"
+        with open(_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
-        result = inject(save_path, [mapping_path])
+        result = inject_file_tree(_path, [mapping_path])
         assert result is None

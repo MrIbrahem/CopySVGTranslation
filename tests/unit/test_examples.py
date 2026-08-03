@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation import extract, inject
+from CopySVGTranslation import extract, inject_file_tree
 from CopySVGTranslation.workflows import svg_extract_and_inject
 
 FIXTURES_DIR = Path(__file__).parent.parent / "tests_files/example"
@@ -45,7 +45,7 @@ class TestIntegrationWorkflows:
 
     def test_inject_with_dict(self):
         translations = extract(self.source_svg)
-        result, stats = inject(
+        result, stats = inject_file_tree(
             self.target_svg,
             output_dir=self.test_dir,
             all_mappings=translations,

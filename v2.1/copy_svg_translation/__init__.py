@@ -23,7 +23,7 @@ from .exceptions import (
 from .extraction import SVGTranslationExtractor
 from .injection import SvgPreparationPipeline, SVGTranslationInjector
 from .io import MappingStore, SvgDocument
-from .legacy import extract, inject, svg_extract_and_inject
+from .legacy import extract, inject_file_tree, svg_extract_and_inject
 from .nested import NestedTspanDetector, NestedTspanFlattener
 from .result import InjectorStats, OperationResult
 from .service import SVGTranslationService
@@ -53,6 +53,6 @@ __all__ = [
     "YearTitleHandler",
     "__version__",
     "extract",
-    "inject",
+    "inject_file_tree",
     "svg_extract_and_inject",
 ]

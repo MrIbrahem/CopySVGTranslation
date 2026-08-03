@@ -13,7 +13,7 @@ from ..io.mapping_store import MappingStore
 from ..service import SVGTranslationService
 
 
-def inject(
+def inject_file_tree(
     inject_file: Path | str | None = None,
     mapping_files: Iterable[Path | str] | None = None,
     all_mappings: Mapping | None = None,

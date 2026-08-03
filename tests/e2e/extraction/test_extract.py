@@ -2,7 +2,7 @@
 Comprehensive pytest tests for CopySVGTranslation covering edge cases and additional functionality.
 """
 
-from CopySVGTranslation import extract, inject
+from CopySVGTranslation import extract, inject_file_tree
 from CopySVGTranslation.workflows import svg_extract_and_inject
 
 # -------------------------------
@@ -57,7 +57,12 @@ class TestWorkflows:
             encoding="utf-8",
         )
         translations = {"new": {"hello": {"ar": "مرحبا"}}}
-        tree, stats = inject(all_mappings=translations, inject_file=target, save_result=False, return_stats=True)
+        tree, stats = inject_file_tree(
+            all_mappings=translations,
+            inject_file=target,
+            save_result=False,
+            return_stats=True,
+        )
         assert tree is not None
         assert stats is not None
         assert "processed_switches" in stats
@@ -72,7 +77,7 @@ class TestWorkflows:
             encoding="utf-8",
         )
         translations = {"new": {"hello": {"ar": "New"}}}
-        tree, stats = inject(all_mappings=translations, inject_file=target, overwrite=True, return_stats=True)
+        tree, stats = inject_file_tree(all_mappings=translations, inject_file=target, overwrite=True, return_stats=True)
         assert tree is not None
         assert stats.get("updated_translations", 0) > 0
 

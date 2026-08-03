@@ -269,13 +269,13 @@ result = extractor.extract()
 translations = result.to_json() if not result.error else None
 ```
 
-#### `inject()` _(deprecated)_
+#### `inject_file_tree()` _(deprecated)_
 
 ```python
-from CopySVGTranslation import inject
+from CopySVGTranslation import inject_file_tree
 
 # Deprecated — use SVGTranslationInjector instead
-tree, stats = inject(
+tree, stats = inject_file_tree(
     inject_file=Path("target.svg"),
     all_mappings=translations,
     output_dir=Path("./translated"),
@@ -288,8 +288,8 @@ tree, stats = inject(
 
 ```python
 # Before (deprecated)
-from CopySVGTranslation import inject
-tree, stats = inject(
+from CopySVGTranslation import inject_file_tree
+tree, stats = inject_file_tree(
     inject_file=Path("target.svg"),
     all_mappings=translations,
     save_path=Path("translated/target.svg"),

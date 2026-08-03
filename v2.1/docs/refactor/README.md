@@ -103,7 +103,7 @@ copy_svg_translation/
 5. Unify error handling: convert internal `None` + `error` strings into `OperationResult`.
 6. Keep public API backward-compatible:
     ```python
-    from copy_svg_translation import extract, inject, SVGTranslationService
+    from copy_svg_translation import extract, inject_file_tree, SVGTranslationService
     ```
 
 **Exit criteria:** All existing tests pass; new service works as thin wrapper.

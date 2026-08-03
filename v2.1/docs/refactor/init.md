@@ -11,7 +11,7 @@ Modern entry point:
     from copy_svg_translation import SVGTranslationService, TranslationConfig
 
 Legacy functions (deprecated):
-    from copy_svg_translation import extract, inject
+    from copy_svg_translation import extract, inject_file_tree
 """
 
 from __future__ import annotations
@@ -49,7 +49,7 @@ from .io import SvgDocument, MappingStore
 # ---------------------------------------------------------------------------
 # Legacy compatibility layer (deprecated)
 # ---------------------------------------------------------------------------
-from .legacy import extract, inject, svg_extract_and_inject
+from .legacy import extract, inject_file_tree, svg_extract_and_inject
 
 __all__ = [
     # version
@@ -81,7 +81,7 @@ __all__ = [
     "MappingStore",
     # legacy (deprecated)
     "extract",
-    "inject",
+    "inject_file_tree",
     "svg_extract_and_inject",
 ]
 ```
@@ -118,7 +118,7 @@ from copy_svg_translation import (
 **Legacy (still works, emits deprecation warnings):**
 
 ```python
-from copy_svg_translation import extract, inject, svg_extract_and_inject
+from copy_svg_translation import extract, inject_file_tree, svg_extract_and_inject
 ```
 
 ---

@@ -11,7 +11,7 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import inject
+from CopySVGTranslation.injection import inject_file_tree
 from CopySVGTranslation.utils import generate_unique_id
 
 
@@ -142,7 +142,7 @@ class TestSVGTranslate(TestSetup):
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         # Inject translations
-        tree, stats = inject(
+        tree, stats = inject_file_tree(
             no_translations_path,
             [mapping_path],
             return_stats=True,
@@ -190,7 +190,7 @@ class TestSVGTranslate(TestSetup):
             original_content = f.read()
 
         # Inject translations in dry-run mode
-        tree, stats = inject(no_translations_path, [mapping_path], return_stats=True)
+        tree, stats = inject_file_tree(no_translations_path, [mapping_path], return_stats=True)
 
         # Verify stats
         assert tree is not None
@@ -240,7 +240,7 @@ class TestSVGTranslate(TestSetup):
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         # Inject translations with overwrite
-        tree, stats = inject(
+        tree, stats = inject_file_tree(
             svg_path,
             [mapping_path],
             overwrite=True,
@@ -275,7 +275,7 @@ class TestSVGTranslate(TestSetup):
         with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
-        result = inject(nonexistent_path, [mapping_path])
+        result = inject_file_tree(nonexistent_path, [mapping_path])
         assert result is None
 
     def test_inject_nonexistent_mapping(self):
@@ -286,5 +286,5 @@ class TestSVGTranslate(TestSetup):
         with open(svg_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
-        result = inject(svg_path, [nonexistent_mapping])
+        result = inject_file_tree(svg_path, [nonexistent_mapping])
         assert result is None

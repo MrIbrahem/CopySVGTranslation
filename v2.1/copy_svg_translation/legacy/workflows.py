@@ -65,9 +65,9 @@ def svg_extract_and_injects(
         stacklevel=2,
     )
 
-    from .inject import inject
+    from .inject import inject_file_tree
 
-    return inject(
+    return inject_file_tree(
         inject_file=inject_file,
         all_mappings=translations,
         output_dir=output_dir,

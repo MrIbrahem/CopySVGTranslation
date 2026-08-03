@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .extraction import extract
-from .injection import InjectorData, SVGTranslationInjector, inject
+from .injection import InjectorData, SVGTranslationInjector, inject_file_tree
 from .utils import load_all_mappings
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ def svg_extract_and_inject(
         output_dir.mkdir(parents=True, exist_ok=True)
         _target_path = output_dir / inject_path.name
 
-    tree, stats = inject(
+    tree, stats = inject_file_tree(
         inject_path,
         all_mappings=all_mappings,
         save_path=_target_path,

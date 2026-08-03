@@ -46,6 +46,6 @@ except SvgNestedTspanExceptionError as e:
     print("SvgNestedTspanExceptionError")
     print(e.node())
 
-# result = inject(inject_file=svg_file, all_mappings=data, save_result=True, overwrite=True, pretty_print=False)
+# result = inject_file_tree(inject_file=svg_file, all_mappings=data, save_result=True, overwrite=True, pretty_print=False)
 
 # print(result)

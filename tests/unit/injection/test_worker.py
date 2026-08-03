@@ -7,4 +7,5 @@ import json
 
 from CopySVGTranslation.injection.worker import (
     inject,
+    inject_file_tree,
 )

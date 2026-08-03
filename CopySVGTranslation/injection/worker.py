@@ -13,7 +13,7 @@ from .svg_injector import InjectorData, SVGTranslationInjector
 logger = logging.getLogger(__name__)
 
 
-def inject(
+def inject_file_tree(
     inject_file: Path | str | None = None,
     mapping_files: Iterable[Path | str] | None = None,
     all_mappings: Mapping | None = None,
@@ -34,15 +34,15 @@ def inject(
         all_mappings = load_all_mappings(mapping_files)
 
     inject_path = Path(str(inject_file))
-    save_path: Path | None = None
+    _save_path: Path | None = None
 
     if save_result:
         if save_path:
-            save_path = Path(str(save_path))
+            _save_path = Path(str(save_path))
         elif output_dir:
-            save_path = Path(str(output_dir)) / inject_path.name
+            _save_path = Path(str(output_dir)) / inject_path.name
         else:
-            save_path = inject_path.parent / "translated" / inject_path.name
+            _save_path = inject_path.parent / "translated" / inject_path.name
 
     injector = SVGTranslationInjector(
         case_insensitive=case_insensitive,
@@ -54,7 +54,7 @@ def inject(
         inject_file=inject_file,
         all_mappings=all_mappings,
         save_result=save_result,
-        save_path=save_path,
+        save_path=_save_path,
     )
 
     if return_stats:
@@ -63,6 +63,33 @@ def inject(
     return result.tree
 
 
+def inject(
+    inject_file: Path | str | None = None,
+    mapping_files: Iterable[Path | str] | None = None,
+    all_mappings: Mapping | None = None,
+    case_insensitive: bool = True,
+    save_path: Path | None = None,
+    output_dir: Path | None = None,
+    overwrite: bool = False,
+    save_result: bool = False,
+    return_stats: bool = False,
+    pretty_print: bool | None = None,
+) -> tuple[Any, Any] | Any:
+    return inject_file_tree(
+        inject_file=inject_file,
+        mapping_files=mapping_files,
+        all_mappings=all_mappings,
+        case_insensitive=case_insensitive,
+        save_path=save_path,
+        output_dir=output_dir,
+        overwrite=overwrite,
+        save_result=save_result,
+        return_stats=return_stats,
+        pretty_print=pretty_print,
+    )
+
+
 __all__ = [
     "inject",
+    "inject_file_tree",
 ]

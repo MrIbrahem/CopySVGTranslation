@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import inject
+from CopySVGTranslation.injection import inject_file_tree
 from CopySVGTranslation.workflows import svg_extract_and_inject
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -56,7 +56,7 @@ def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
 
     output_dir = tmp_path / "outputs"
     output_dir.mkdir(parents=True, exist_ok=True)
-    tree, stats = inject(
+    tree, stats = inject_file_tree(
         inject_file=target_svg,
         all_mappings=translations,
         output_dir=output_dir,
@@ -123,7 +123,7 @@ def test_inject_without_output_dir(tmp_path: Path, target_svg: Path) -> None:
     """inject should handle missing output_dir when save_result=False."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
-    tree, stats = inject(
+    tree, stats = inject_file_tree(
         inject_file=target_svg,
         all_mappings=translations,
         save_result=False,
@@ -138,7 +138,7 @@ def test_inject_returns_stats(tmp_path: Path, target_svg: Path) -> None:
     """inject should return detailed statistics when requested."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
-    result = inject(
+    result = inject_file_tree(
         inject_file=target_svg,
         all_mappings=translations,
         return_stats=True,
@@ -159,7 +159,7 @@ def test_inject_without_stats(tmp_path: Path, target_svg: Path) -> None:
     """inject should return only tree when return_stats=False."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
-    result = inject(
+    result = inject_file_tree(
         inject_file=target_svg,
         all_mappings=translations,
         return_stats=False,
@@ -275,7 +275,7 @@ def test_inject_with_empty_translations(tmp_path: Path, target_svg: Path) -> Non
     """inject should handle empty translation dictionaries gracefully."""
     empty_translations = {"new": {}, "title": {}}
 
-    tree, stats = inject(
+    tree, stats = inject_file_tree(
         inject_file=target_svg,
         all_mappings=empty_translations,
         save_result=False,
@@ -349,7 +349,7 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
     # First injection
     output1 = tmp_path / "output1"
     output1.mkdir()
-    tree1, stats1 = inject(
+    tree1, stats1 = inject_file_tree(
         inject_file=target_svg,
         all_mappings=translations,
         output_dir=output1,
@@ -360,7 +360,7 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
     # Second injection to different location
     output2 = tmp_path / "output2"
     output2.mkdir()
-    tree2, stats2 = inject(
+    tree2, stats2 = inject_file_tree(
         inject_file=target_svg,
         all_mappings=translations,
         output_dir=output2,

@@ -8,7 +8,7 @@ I:/svgtranslate_php/svgtranslate_php/tests/Model/Svg/SvgFileTest.php
 import pytest
 
 from CopySVGTranslation.injection import (
-    inject,
+    inject_file_tree,
     make_translation_ready,
 )
 from CopySVGTranslation.injection.exceptions import (
@@ -48,7 +48,7 @@ class Testinject:
         # write to file
         tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
-        _result = inject(
+        _result = inject_file_tree(
             inject_file=file,
             save_path=file,
             all_mappings=data,
@@ -105,7 +105,7 @@ class Testinject:
         # write to file
         tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
-        _result = inject(
+        _result = inject_file_tree(
             inject_file=file,
             save_path=file,
             all_mappings=data,
