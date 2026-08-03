@@ -1,4 +1,4 @@
-# injection/steps/split_languages.py
+# split_languages_test.py
 from __future__ import annotations
 
 import copy
@@ -90,6 +90,16 @@ class SplitLanguages(PreparationStep):
             self._split_languages_in_switch(switch, ctx)
 
     def _split_languages_in_switch(self, switch: etree._Element, ctx: PreparationContext) -> None:
+        # collect children first to avoid modifying while iterating
+        children = list(switch)
+
+        # Phase 1: validate everything up front (structure + duplicate
+        # languages). If anything is wrong this raises and switch is left
+        # completely untouched.
+        entries = self._validate_switch_languages(children)
+
+        # Phase 2: perform the actual split/clone. No validation or raising
+        # happens from this point on — entries is already known to be valid.
         # gather existing languages for duplicate detection
         existing_langs: set[str] = set()
         # collect children first to avoid modifying while iterating
@@ -157,6 +167,43 @@ class SplitLanguages(PreparationStep):
                 switch.insert(index + 1, cloned)
                 index += 1
 
+    def _validate_switch_languages(
+        self, children: list[etree._Element]
+    ) -> list[tuple[etree._Element, list[str]]]:
+        """
+        Validate every child of a <switch> element and, for each valid
+        <text> element, compute the normalized list of languages it
+        declares.
+
+        This is a pure read-only pass: it never mutates any element. It
+        raises SvgStructureError on:
+          - non-whitespace text content directly inside <switch>
+            (i.e. on a non-element child such as a comment)
+          - a child that is not a <text> element
+          - the same language declared twice within one <text> element
+          - the same language declared by two different <text> elements
+            (including "fallback" for elements without systemLanguage)
+
+        Comment nodes (and other non-element nodes with only whitespace
+        content) are silently skipped.
+
+        Returns a list of (text_el, real_langs) tuples, in document order,
+        for every valid <text> child. real_langs is ["fallback"] for
+        elements without a systemLanguage attribute.
+        """
+        existing_langs: set[str] = set()
+        entries: list[tuple[etree._Element, list[str]]] = []
+
+        for text_el in children:
+            # --- structural validation (merged from _validate_text_el_children) ---
+            if not isinstance(text_el.tag, str):
+                # ignore comments etc, but if there's text content outside elements, check whitespace
+                if text_el.text and text_el.text.strip():
+                    raise SvgStructureError(code="structure-error-switch-text-content-outside-text")
+                continue
+            if text_el.tag not in ({f"{{{SVG_NS}}}text", "text"}):
+                raise SvgStructureError(code="structure-error-switch-child-not-text")
+
     def _reassign_ids(self, element: etree._Element, ctx: PreparationContext) -> None:
         if ctx.id_manager is None:
             return
@@ -172,13 +219,3 @@ class SplitLanguages(PreparationStep):
             new_id = ctx.id_manager.allocate_trsvg()
 
         element.set("id", new_id)
-
-    def _validate_text_el_children(self, text_el) -> None:
-        if not isinstance(text_el.tag, str):
-            # ignore comments etc, but if there's text content outside elements, check whitespace
-            if text_el.text and text_el.text.strip():
-                raise SvgStructureError(code="structure-error-switch-text-content-outside-text")
-            return False
-        if text_el.tag not in ({f"{{{SVG_NS}}}text", "text"}):
-            raise SvgStructureError(code="structure-error-switch-child-not-text")
-        return True
