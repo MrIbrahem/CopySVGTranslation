@@ -256,7 +256,7 @@ __all__ = [
 | **SvgPreparationPipeline** (`LoadDocument` step) | `SvgDocument.load(path)` → puts `tree` / `root` into `PreparationContext`                                   |
 | **SVGTranslationInjector**                       | Receives an already-loaded tree (or loads via `SvgDocument` if needed); calls `doc.save()` when `save=True` |
 | **SVGTranslationService**                        | Uses `MappingStore` for `load_mapping` / `save_mapping` and for optional auto-save of extracted mappings    |
-| **Legacy workflows**                             | Can be re-implemented as thin wrappers around `MappingStore` + `SvgDocument`                                |
+| **Legacy**                                       | Can be re-implemented as thin wrappers around `MappingStore` + `SvgDocument`                                |
 
 ---
 

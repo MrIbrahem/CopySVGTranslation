@@ -36,16 +36,14 @@ The codebase follows a two-phase pipeline: **Extraction** and **Injection**.
 
 The recommended API uses class-based interfaces. Legacy function-based wrappers are available but deprecated.
 
-| Class / Function | Module | Status |
-|---|---|---|
-| `SVGTranslationExtractor` | `CopySVGTranslation.extraction` | **Current** |
-| `SVGTranslationInjector` | `CopySVGTranslation.injection` | **Current** |
-| `ExtractorData` | `CopySVGTranslation.extraction` | **Current** (dataclass) |
-| `InjectorData` | `CopySVGTranslation.injection` | **Current** (dataclass) |
-| `extract()` | `CopySVGTranslation.extraction` | Deprecated (wrapper) |
-| `inject()` | `CopySVGTranslation.injection` | Deprecated (wrapper) |
-| `svg_translate_between_files()` | `CopySVGTranslation.workflows` | **Current** |
-| `svg_inject_translations()` | `CopySVGTranslation.workflows` | **Current** |
+| Class / Function          | Module                          | Status                  |
+| ------------------------- | ------------------------------- | ----------------------- |
+| `SVGTranslationExtractor` | `CopySVGTranslation.extraction` | **Current**             |
+| `SVGTranslationInjector`  | `CopySVGTranslation.injection`  | **Current**             |
+| `ExtractorData`           | `CopySVGTranslation.extraction` | **Current** (dataclass) |
+| `InjectorData`            | `CopySVGTranslation.injection`  | **Current** (dataclass) |
+| `extract()`               | `CopySVGTranslation.extraction` | Deprecated (wrapper)    |
+| `inject()`                | `CopySVGTranslation.injection`  | Deprecated (wrapper)    |
 
 ### Core Modules
 
@@ -59,8 +57,6 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 
 -   **`CopySVGTranslation/injection/preparation.py`**: SVG normalization and preparation before injection. Wraps loose text nodes in `<tspan>` elements, creates `<switch>` wrappers, normalizes language tags, assigns unique IDs (`trsvg*`), and detects unsupported structures (nested tspans, tref elements).
 
--   **`CopySVGTranslation/workflows.py`**: High-level convenience functions (`svg_translate_between_files`, `svg_inject_translations`) that combine extraction and injection in one call.
-
 -   **`CopySVGTranslation/utils/text_utils.py`**: Shared text normalization (trim whitespace, collapse internal whitespace, optional case-insensitivity).
 
 -   **`CopySVGTranslation/titles_workers/`**: Handles title-like text (entries ending with 4-digit years) with special handling.
@@ -72,8 +68,6 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 1. **Extraction**: SVG file → `SVGTranslationExtractor.extract()` → `ExtractorData` (with `.to_json()` for dict)
 
 2. **Injection**: SVG file + mapping dict → `SVGTranslationInjector.inject()` → `InjectorData` (with `.new_stats` for stats)
-
-3. **Full workflow**: `svg_translate_between_files()` extracts from source SVG and injects into target SVG in one step.
 
 ### Key Data Structures
 

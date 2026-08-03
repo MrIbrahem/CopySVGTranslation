@@ -5,7 +5,6 @@ legacy/
 ├── __init__.py
 ├── extract.py
 ├── inject.py
-└── workflows.py
 ```
 
 Purpose: keep old call sites working during migration, while clearly marking everything as deprecated and routing to the new class-based implementation.
@@ -147,108 +146,16 @@ def inject_file_tree(
 
 ---
 
-### 3. `legacy/workflows.py`
-
-```python
-# legacy/workflows.py
-from __future__ import annotations
-
-import warnings
-from collections.abc import Mapping
-from pathlib import Path
-from typing import Any
-
-from ..config import TranslationConfig
-from ..service import SVGTranslationService
-
-
-def svg_translate_between_files(
-    extract_file: Path | str,
-    inject_file: Path | str,
-    target_path: Path | None = None,
-    all_mappings_file: Path | None = None,
-    overwrite: bool | None = None,
-    save_result: bool = False,
-) -> Any:
-    """
-    Deprecated. Use SVGTranslationService.extract_and_inject() instead.
-    """
-    warnings.warn(
-        "copy_svg_translation.svg_translate_between_files() is deprecated. "
-        "Use SVGTranslationService.extract_and_inject() instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-
-    config = TranslationConfig(
-        overwrite=bool(overwrite),
-        auto_save=False,
-    )
-    service = SVGTranslationService(config)
-
-    save_mapping: bool | Path | None = False
-    if all_mappings_file is not None:
-        save_mapping = Path(all_mappings_file)
-    else:
-        # old behaviour: always wrote a JSON under cwd/data/
-        save_mapping = True
-
-    result = service.extract_and_inject(
-        source=extract_file,
-        target=inject_file,
-        output=target_path,
-        save_mapping=save_mapping,
-        save=save_result,
-    )
-
-    return result.data  # ElementTree or None
-
-
-def svg_inject_translations(
-    translations: Mapping,
-    inject_file: Path | str,
-    output_dir: Path | None = None,
-    save_result: bool = False,
-    overwrite: bool = False,
-    pretty_print: bool | None = None,
-) -> Any:
-    """
-    Deprecated. Use SVGTranslationService.inject() instead.
-    """
-    warnings.warn(
-        "copy_svg_translation.svg_inject_translations() is deprecated. "
-        "Use SVGTranslationService.inject() instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-
-    from .inject import inject_file_tree
-
-    return inject(
-        inject_file=inject_file,
-        all_mappings=translations,
-        output_dir=output_dir,
-        save_result=save_result,
-        overwrite=overwrite,
-        pretty_print=pretty_print,
-    )
-```
-
----
-
 ### 4. `legacy/__init__.py`
 
 ```python
 # legacy/__init__.py
 from .extract import extract
 from .inject import inject_file_tree
-from .workflows import svg_translate_between_files, svg_inject_translations
 
 __all__ = [
     "extract",
     "inject_file_tree",
-    "svg_translate_between_files",
-    "svg_inject_translations",
 ]
 ```
 
@@ -256,13 +163,11 @@ __all__ = [
 
 ### Behaviour contract (what old callers still get)
 
-| Old API                           | Still returns         | Notes                                                           |
-| --------------------------------- | --------------------- | --------------------------------------------------------------- |
-| `extract(path)`                   | `dict \| None`        | Same shape as old `to_json()`                                   |
-| `inject(..., return_stats=False)` | `ElementTree \| None` | Same as before                                                  |
-| `inject(..., return_stats=True,)`  | `(tree, stats_dict)`  | `stats` includes `error` on failure                             |
-| `svg_translate_between_files(...)`     | `ElementTree \| None` | Still may write JSON if `all_mappings_file` or default path used |
-| `svg_inject_translations(...)`    | same as `inject`      | Thin redirect                                                   |
+| Old API                           | Still returns         | Notes                               |
+| --------------------------------- | --------------------- | ----------------------------------- |
+| `extract(path)`                   | `dict \| None`        | Same shape as old `to_json()`       |
+| `inject(..., return_stats=False)` | `ElementTree \| None` | Same as before                      |
+| `inject(..., return_stats=True,)` | `(tree, stats_dict)`  | `stats` includes `error` on failure |
 
 All of them emit `DeprecationWarning`.
 

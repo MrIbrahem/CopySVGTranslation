@@ -36,7 +36,6 @@ v2.1/
 │   │   ├── __init__.py
 │   │   ├── extract.py
 │   │   ├── inject.py
-│   │   └── workflows.py
 │   ├── nested/
 │   │   ├── __init__.py
 │   │   ├── detector.py

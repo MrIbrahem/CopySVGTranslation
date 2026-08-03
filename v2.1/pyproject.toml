@@ -116,6 +116,7 @@ select = [
     "RUF", # ruff-specific
 ]
 ignore = [
+    "RUF022",
     "E501", # line length handled by formatter
 ]
 

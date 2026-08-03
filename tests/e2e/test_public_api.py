@@ -8,7 +8,6 @@ from pathlib import Path
 import CopySVGTranslation
 from CopySVGTranslation.extraction import extract
 from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
-from CopySVGTranslation.workflows import svg_translate_between_files
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -31,11 +30,6 @@ class TestPublicAPIExports:
         """The extract function should be importable from top-level module."""
         assert callable(extract)
         assert extract.__name__ == "extract"
-
-    def test_svg_translate_between_files_is_importable(self):
-        """The svg_translate_between_files function should be importable from top-level module."""
-        assert callable(svg_translate_between_files)
-        assert svg_translate_between_files.__name__ == "svg_translate_between_files"
 
     def test_module_has_docstring(self):
         """The module should have a docstring."""
@@ -111,29 +105,6 @@ class TestExtractFunction:
 
 class TestIntegrationWorkflows:
     """Integration tests for high-level workflow functions."""
-
-    def test_svg_translate_between_files_end_to_end(self, tmp_path: Path):
-        """Test complete extract and inject workflow."""
-        source_svg = FIXTURES_DIR / "source.svg"
-        target_svg = tmp_path / "target.svg"
-        output_svg = tmp_path / "output.svg"
-        data_file = tmp_path / "data.json"
-
-        # Copy target fixture
-        target_svg.write_text((FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
-
-        # Run the workflow
-        result = svg_translate_between_files(
-            extract_file=source_svg,
-            inject_file=target_svg,
-            target_path=output_svg,
-            all_mappings_file=data_file,
-            save_result=True,
-        )
-
-        assert result is not None
-        # assert output_svg.exists()
-        # assert data_file.exists()
 
     def test_inject_with_dict(self, tmp_path: Path):
         """Test inject with pre-extracted translations dict."""

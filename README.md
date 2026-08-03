@@ -71,27 +71,6 @@ if not result.new_stats.error:
     print(f"Languages: {result.new_stats.all_languages}")
 ```
 
-### Extracting and injecting in a single step
-
-For convenience, the high-level workflow functions combine both phases:
-
-```python
-from pathlib import Path
-from CopySVGTranslation import svg_translate_between_files
-
-tree = svg_translate_between_files(
-    extract_file=Path("examples/source_multilingual.svg"),
-    inject_file=Path("examples/target_missing_translations.svg"),
-    all_mappings_file=Path("examples/data.json"),
-    save_result=True,
-)
-
-if tree is not None:
-    print("Injection completed!")
-```
-
-`save_result=True`, writes the translated SVG to `inject_file`.
-
 ## API Reference
 
 ### `SVGTranslationExtractor`
@@ -200,42 +179,6 @@ Dataclass returned by `SVGTranslationExtractor.extract()`. See the extractor doc
 ### `InjectorData`
 
 Dataclass returned by `SVGTranslationInjector.inject()`. See the injector documentation above for field details.
-
----
-
-### High-Level Workflows
-
-#### `svg_translate_between_files()`
-
-Extract translations from one SVG and inject them into another in a single call.
-
-```python
-from CopySVGTranslation import svg_translate_between_files
-
-tree = svg_translate_between_files(
-    extract_file: Path | str,
-    inject_file: Path | str,
-    target_path: Path | None = None,
-    all_mappings_file: Path | None = None,
-    overwrite: bool | None = None,
-    save_result: bool = False,
-)
-```
-
-#### `svg_inject_translations()`
-
-Inject a pre-built translation mapping into an SVG file.
-
-```python
-from CopySVGTranslation import svg_inject_translations
-
-tree = svg_inject_translations(
-    translations: Mapping,
-    inject_file: Path | str,
-    target_path: Path | str,
-    save_result: bool = False,
-)
-```
 
 ---
 

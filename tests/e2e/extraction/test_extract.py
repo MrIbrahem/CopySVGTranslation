@@ -3,7 +3,6 @@ Comprehensive pytest tests for CopySVGTranslation covering edge cases and additi
 """
 
 from CopySVGTranslation import extract, inject_file_tree
-from CopySVGTranslation.workflows import svg_translate_between_files
 
 # -------------------------------
 # Workflows tests
@@ -12,45 +11,6 @@ from CopySVGTranslation.workflows import svg_translate_between_files
 
 class TestWorkflows:
     """Test cases for workflow functions."""
-
-    def test_svg_translate_between_files_with_custom_output(self, temp_dir):
-        """Test svg_translate_between_files with custom output paths."""
-        source_svg = temp_dir / "source.svg"
-        target_svg = temp_dir / "target.svg"
-        output_svg = temp_dir / "output.svg"
-        data_output = temp_dir / "data.json"
-
-        source_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
-        <switch><text id="text1-ar" systemLanguage="ar"><tspan>مرحبا</tspan></text>
-        <text id="text1"><tspan>Hello</tspan></text></switch></svg>"""
-        target_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
-        <switch><text id="text2"><tspan>Hello</tspan></text></switch></svg>"""
-
-        source_svg.write_text(source_content, encoding="utf-8")
-        target_svg.write_text(target_content, encoding="utf-8")
-
-        result = svg_translate_between_files(
-            extract_file=source_svg,
-            inject_file=target_svg,
-            target_path=output_svg,
-            all_mappings_file=data_output,
-            save_result=True,
-            pretty_print=False,
-        )
-        assert result is not None
-        # assert data_output.exists()
-
-    def test_svg_translate_between_files_with_nonexistent_extract_file(self, temp_dir):
-        """Test svg_translate_between_files with nonexistent extract file."""
-        target_svg = temp_dir / "target.svg"
-        target_svg.write_text("<svg></svg>", encoding="utf-8")
-
-        result = svg_translate_between_files(
-            extract_file=temp_dir / "none.svg",
-            inject_file=target_svg,
-            save_result=False,
-        )
-        assert result is None
 
     def test_inject_with_return_stats(self, temp_dir):
         """Test inject with return_stats=True."""

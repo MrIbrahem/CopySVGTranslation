@@ -23,7 +23,7 @@ from .exceptions import (
 from .extraction import SVGTranslationExtractor
 from .injection import SvgPreparationPipeline, SVGTranslationInjector
 from .io import MappingStore, SvgDocument
-from .legacy import extract, inject_file_tree, svg_translate_between_files
+from .legacy import extract, inject_file_tree
 from .nested import NestedTspanDetector, NestedTspanFlattener
 from .result import InjectorStats, OperationResult
 from .service import SVGTranslationService
@@ -54,5 +54,4 @@ __all__ = [
     "__version__",
     "extract",
     "inject_file_tree",
-    "svg_translate_between_files",
 ]

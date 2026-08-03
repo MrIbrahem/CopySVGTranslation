@@ -5,7 +5,6 @@ import pytest
 
 from CopySVGTranslation import extract
 from CopySVGTranslation.injection import inject_file_and_save
-from CopySVGTranslation.workflows import svg_translate_between_files
 
 FIXTURES_DIR = Path(__file__).parent.parent / "tests_files/example"
 
@@ -31,18 +30,6 @@ class TestIntegrationWorkflows:
 
         expected_svg = FIXTURES_DIR / "after_translate.svg"
         self.expected_text = expected_svg.read_text(encoding="utf-8")
-
-    def test_svg_translate_between_files_end_to_end(self):
-        r = svg_translate_between_files(
-            extract_file=self.source_svg,
-            inject_file=self.target_svg,
-            target_path=self.output_svg,
-            all_mappings_file=self.data_file,
-            save_result=True,
-        )
-        assert r is not None
-        assert self.output_svg.exists()
-        # assert self.data_file.exists()
 
     def test_inject_with_dict(self):
         translations = extract(self.source_svg)

@@ -61,7 +61,6 @@ copy_svg_translation/
     ├── __init__.py
     ├── extract.py
     ├── inject.py
-    └── workflows.py
 ```
 
 #### Key Classes (proposed)

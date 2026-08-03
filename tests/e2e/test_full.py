@@ -8,7 +8,6 @@ import pytest
 
 from CopySVGTranslation.extraction import extract
 from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
-from CopySVGTranslation.workflows import svg_translate_between_files
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -19,35 +18,6 @@ def target_svg(tmp_path: Path) -> Path:
     target = tmp_path / "target.svg"
     target.write_text((FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
     return target
-
-
-def test_svg_translate_between_files_creates_translation_files(tmp_path: Path, target_svg: Path) -> None:
-    """svg_translate_between_files should persist both JSON mappings and the translated SVG."""
-    source_svg = FIXTURES_DIR / "source.svg"
-    data_output = tmp_path / "translations.json"
-    output_svg = tmp_path / "translated.svg"
-
-    tree = svg_translate_between_files(
-        extract_file=source_svg,
-        inject_file=target_svg,
-        target_path=output_svg,
-        all_mappings_file=data_output,
-        overwrite=True,
-        save_result=True,
-        pretty_print=False,
-    )
-
-    assert tree is not None, "An lxml tree should be returned for the translated SVG"
-    assert output_svg.exists(), "The translated SVG should be written to disk"
-    # assert data_output.exists(), "The extracted translations should be written to JSON"
-
-    # saved_translations = json.loads(data_output.read_text(encoding="utf-8"))
-    # Keys are normalized to lowercase by the extractor
-    # assert saved_translations["new"]["population 2020"]["ar"] == "السكان 2020"
-
-    injected_svg = output_svg.read_text(encoding="utf-8")
-    assert 'systemLanguage="ar"' in injected_svg
-    assert "السكان 2020" in injected_svg
 
 
 def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
@@ -72,51 +42,6 @@ def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
     content = output_file.read_text(encoding="utf-8")
     assert 'systemLanguage="ar"' in content
     assert "السكان 2020" in content
-
-
-def test_svg_translate_between_files_nonexistent_source(tmp_path: Path, target_svg: Path) -> None:
-    """svg_translate_between_files should return None if source file doesn't exist."""
-    nonexistent_source = tmp_path / "nonexistent_source.svg"
-
-    result = svg_translate_between_files(
-        extract_file=nonexistent_source,
-        inject_file=target_svg,
-        save_result=False,
-    )
-
-    assert result is None, "Should return None when source file doesn't exist"
-
-
-def test_svg_translate_between_files_nonexistent_target(tmp_path: Path) -> None:
-    """svg_translate_between_files should return None if target file doesn't exist."""
-    source_svg = FIXTURES_DIR / "source.svg"
-    nonexistent_target = tmp_path / "nonexistent_target.svg"
-
-    result = svg_translate_between_files(
-        extract_file=source_svg,
-        inject_file=nonexistent_target,
-        save_result=False,
-    )
-
-    assert result is None, "Should return None when target file doesn't exist"
-
-
-def test_svg_translate_between_files_with_pathlib_and_string_paths(tmp_path: Path, target_svg: Path) -> None:
-    """svg_translate_between_files should handle both Path and string arguments."""
-    source_svg = FIXTURES_DIR / "source.svg"
-    output_svg = tmp_path / "output.svg"
-    data_output = tmp_path / "data.json"
-
-    # Test with string paths
-    tree = svg_translate_between_files(
-        extract_file=str(source_svg),  # String path
-        inject_file=str(target_svg),  # String path
-        target_path=str(output_svg),
-        all_mappings_file=str(data_output),
-        save_result=True,
-    )
-
-    assert tree is not None
 
 
 def test_inject_without_save_path(tmp_path: Path, target_svg: Path) -> None:
@@ -237,38 +162,6 @@ def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
         "title_new": {},
         "error": "",
     }
-
-
-def test_svg_translate_between_files_with_overwrite_true(tmp_path: Path, target_svg: Path) -> None:
-    """svg_translate_between_files should overwrite existing translations when overwrite=True."""
-    source_svg = FIXTURES_DIR / "source.svg"
-    output_svg = tmp_path / "output.svg"
-
-    # First injection
-    tree1 = svg_translate_between_files(
-        extract_file=source_svg,
-        inject_file=target_svg,
-        target_path=output_svg,
-        overwrite=True,
-        save_result=True,
-    )
-
-    assert tree1 is not None
-    assert output_svg.exists()
-
-    # Second injection with overwrite
-    tree2 = svg_translate_between_files(
-        extract_file=source_svg,
-        inject_file=target_svg,
-        target_path=output_svg,
-        overwrite=True,
-        save_result=True,
-    )
-
-    assert tree2 is not None
-    # File should still exist and be valid
-    content2 = output_svg.read_text(encoding="utf-8")
-    assert 'systemLanguage="ar"' in content2
 
 
 def test_inject_with_empty_translations(tmp_path: Path, target_svg: Path) -> None:

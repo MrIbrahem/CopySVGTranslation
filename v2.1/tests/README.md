@@ -252,11 +252,10 @@ Use real fixture files and temp dirs (`tmp_path`).
 
 ### 5. Legacy tests
 
-| File                | Purpose                                       |
-| ------------------- | --------------------------------------------- |
-| `test_extract.py`   | old `extract()` still returns dict / None     |
-| `test_inject.py`    | old `inject()` return shapes + `return_stats` |
-| `test_workflows.py` | `svg_translate_between_files` behaviour            |
+| File              | Purpose                                       |
+| ----------------- | --------------------------------------------- |
+| `test_extract.py` | old `extract()` still returns dict / None     |
+| `test_inject.py`  | old `inject()` return shapes + `return_stats` |
 
 All should assert `pytest.warns(DeprecationWarning)`.
 

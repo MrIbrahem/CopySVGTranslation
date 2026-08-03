@@ -49,7 +49,7 @@ from .io import SvgDocument, MappingStore
 # ---------------------------------------------------------------------------
 # Legacy compatibility layer (deprecated)
 # ---------------------------------------------------------------------------
-from .legacy import extract, inject_file_tree, svg_translate_between_files
+from .legacy import extract, inject_file_tree
 
 __all__ = [
     # version
@@ -82,7 +82,6 @@ __all__ = [
     # legacy (deprecated)
     "extract",
     "inject_file_tree",
-    "svg_translate_between_files",
 ]
 ```
 
@@ -118,7 +117,7 @@ from copy_svg_translation import (
 **Legacy (still works, emits deprecation warnings):**
 
 ```python
-from copy_svg_translation import extract, inject_file_tree, svg_translate_between_files
+from copy_svg_translation import extract, inject_file_tree
 ```
 
 ---
