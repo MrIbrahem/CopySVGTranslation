@@ -8,6 +8,7 @@ from pathlib import Path
 from lxml import etree
 
 from ..config import TranslationConfig
+from ..injection.id_manager import IdManager
 from .steps import (
     AssignIds,
     LoadDocument,
@@ -59,7 +60,7 @@ class SvgPreparationPipeline:
         self.ctx = PreparationContext(
             path=path,
             config=self.config,
-            # id_manager=IdManager(),
+            id_manager=IdManager(),
         )
         for step in self.steps:
             step.execute(self.ctx)

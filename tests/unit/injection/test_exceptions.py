@@ -2,13 +2,13 @@
 """
 Unit tests for CopySVGTranslation/CopySVGTranslation/injection/exceptions.py module.
 
-Classes to test: SvgStructureExceptionError, SvgNestedTspanExceptionError
+Classes to test: SvgStructureError, SvgNestedTspanError
 
 TODO: write tests
 """
 
 
 from CopySVGTranslation.exceptions import (
-    SvgNestedTspanExceptionError,
-    SvgStructureExceptionError,
+    SvgNestedTspanError,
+    SvgStructureError,
 )

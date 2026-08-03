@@ -6,7 +6,7 @@ import re
 
 from lxml import etree
 
-from ...exceptions import SvgStructureExceptionError
+from ...exceptions import SvgStructureError
 from ...utils import normalize_lang
 from .base import PreparationContext, PreparationStep
 
@@ -43,31 +43,23 @@ class SplitLanguages(PreparationStep):
         if ctx.root is None:
             return
 
-        texts = ctx.root.findall(".//{%s}text" % SVG_NS)
+        texts = ctx.root.findall(f".//{{{SVG_NS}}}text")
         for text in texts:
             content = get_text_content(text)
             if re.search(r"\$[0-9]+", content):
-                raise SvgStructureExceptionError("structure-error-text-contains-dollar", text, [content])
+                raise SvgStructureError("structure-error-text-contains-dollar")
 
             # normalize systemLanguage if present
-            # if text.get("systemLanguage"):
-            #     text.set("systemLanguage", normalize_lang(text.get("systemLanguage")))
-
-            # normalize systemLanguage if present
-            language_attr = text.get("systemLanguage")
-            if language_attr:
-                normalized = ",".join(
-                    normalize_lang(part) for part in re.split(r"\s*,\s*", language_attr.strip()) if part
-                )
-                text.set("systemLanguage", normalized)
+            if text.get("systemLanguage"):
+                text.set("systemLanguage", normalize_lang(text.get("systemLanguage")))
 
             parent = text.getparent()
             if parent is None or (parent.tag not in ({f"{{{SVG_NS}}}switch", "switch"})):
                 # Create a switch element in the SVG namespace and move the text into it
-                switch = etree.Element("{%s}switch" % SVG_NS)
+                switch = etree.Element(f"{{{SVG_NS}}}switch")
                 parent_of_text = parent
                 if parent_of_text is None:
-                    raise SvgStructureExceptionError("structure-error-no-parent-for-text", text, text)
+                    raise SvgStructureError("structure-error-no-parent-for-text")
                 # insert switch before text
                 idx = list(parent_of_text).index(text)
                 parent_of_text.insert(idx, switch)
@@ -82,14 +74,14 @@ class SplitLanguages(PreparationStep):
             # verify that children of text are only tspans or text nodes
             for child in text:
                 if child.tag not in ({f"{{{SVG_NS}}}tspan", "tspan"}):
-                    raise SvgStructureExceptionError("structure-error-non-tspan-inside-text", child, child)
+                    raise SvgStructureError("structure-error-non-tspan-inside-text")
 
     # ------------------------------------------------------------------
     # Step 6: <switch> language splitting
     # ------------------------------------------------------------------
     def _split_switch_languages(self, ctx: PreparationContext) -> None:
         """Split comma-separated systemLanguage values into cloned <text> nodes."""
-        switches = ctx.root.findall(".//{%s}switch" % SVG_NS)
+        switches = ctx.root.findall(f".//{{{SVG_NS}}}switch")
         for sw in switches:
             # gather existing languages for duplicate detection
             existing_langs: set[str] = set()
@@ -98,13 +90,11 @@ class SplitLanguages(PreparationStep):
             for child in children:
                 if not isinstance(child.tag, str):
                     # ignore comments etc, but if there's text content outside elements, check whitespace
-                    if (child.text or "").strip():
-                        raise SvgStructureExceptionError(
-                            "structure-error-switch-text-content-outside-text", child, child
-                        )
+                    if child.text and child.text.strip():
+                        raise SvgStructureError("structure-error-switch-text-content-outside-text")
                     continue
                 if child.tag not in ({f"{{{SVG_NS}}}text", "text"}):
-                    raise SvgStructureExceptionError("structure-error-switch-child-not-text", child, child)
+                    raise SvgStructureError("structure-error-switch-child-not-text")
 
                 language_attr = child.get("systemLanguage")
                 real_langs = re.split(r",\s*", language_attr) if language_attr else ["fallback"]
@@ -112,10 +102,10 @@ class SplitLanguages(PreparationStep):
                 languages_present: set[str] = set()
                 for real in real_langs:
                     if real in languages_present:
-                        raise SvgStructureExceptionError("structure-error-multiple-lang-in-text", child, [real])
+                        raise SvgStructureError("structure-error-multiple-lang-in-text", extra=[real])
                     languages_present.add(real)
                     if real in existing_langs:
-                        raise SvgStructureExceptionError("structure-error-multiple-text-same-lang", sw, [real])
+                        raise SvgStructureError("structure-error-multiple-text-same-lang", extra=[real])
 
                 if len(real_langs) == 1:
                     lang_value = real_langs[0]
@@ -137,7 +127,7 @@ class SplitLanguages(PreparationStep):
                 base_id = child.get("id")
                 for real in real_langs[1:]:
                     if real in existing_langs:
-                        raise SvgStructureExceptionError("structure-error-multiple-text-same-lang", sw, [real])
+                        raise SvgStructureError("structure-error-multiple-text-same-lang", extra=[real])
                     cloned = _clone_element(child)
                     if real == "fallback":
                         cloned.attrib.pop("systemLanguage", None)
@@ -157,10 +147,10 @@ class SplitLanguages(PreparationStep):
             base_candidate = f"{base_id}-{lang}"
             candidate = base_candidate
             suffix = 1
-            while candidate in ctx.existing_ids:
+            while candidate in ctx.id_manager.existing_ids:
                 suffix += 1
                 candidate = f"{base_candidate}-{suffix}"
-            ctx.existing_ids.add(candidate)
+            ctx.id_manager.register(candidate)
             return candidate
         return self._allocate_trsvg_id(ctx)
 
@@ -169,12 +159,12 @@ class SplitLanguages(PreparationStep):
     # ------------------------------------------------------------------
     def _allocate_trsvg_id(self, ctx) -> str:
         """Allocate a new unique ``trsvg`` identifier."""
-        counter = max(ctx.ids_in_use) if ctx.ids_in_use else 0
+        counter = 1
 
-        while f"trsvg{counter}" in ctx.existing_ids:
+        while f"trsvg{counter}" in ctx.id_manager.existing_ids:
             counter += 1
 
         new_id = f"trsvg{counter}"
-        ctx.ids_in_use.append(counter)
-        ctx.existing_ids.add(new_id)
+        # ctx.ids_in_use.append(counter)
+        ctx.id_manager.register(new_id)
         return new_id

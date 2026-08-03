@@ -8,7 +8,16 @@ SVG_NS = "http://www.w3.org/2000/svg"
 
 
 class ReorderTexts(PreparationStep):
+
+    # ------------------------------------------------------------------
+    # Step 7: final ordering
+    # ------------------------------------------------------------------
     def execute(self, ctx: PreparationContext) -> None:
+        """
+        Simple deterministic reordering: for every <switch>, sort child <text>
+        elements by the numeric part of their id if present, otherwise keep
+        original order. 'fallback' (no systemLanguage) is placed last.
+        """
         if ctx.root is None:
             return
 

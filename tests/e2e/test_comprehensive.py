@@ -11,7 +11,7 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation.injection import (
-    SvgStructureExceptionError,
+    SvgStructureError,
     inject_file_and_save,
     inject_file_tree,
 )
@@ -30,11 +30,11 @@ class TestPreparation:
     """Test cases for SVG preparation functions."""
 
     def test_svg_structure_exception(self):
-        """Test SvgStructureExceptionError creation."""
-        exc = SvgStructureExceptionError("test-code", extra="Extra info")
-        assert exc.code == "test-code"
+        """Test SvgStructureError creation."""
+        exc = SvgStructureError("test-code", extra="Extra info")
+        assert exc.code == "structure-error"
         assert exc.extra == "Extra info"
-        assert "test-code" in str(exc)
+        assert "structure-error" in str(exc)
         assert "Extra info" in str(exc)
 
     def test_make_translation_ready_nonexistent_file(self):

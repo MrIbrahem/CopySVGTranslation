@@ -480,5 +480,5 @@ The tool includes comprehensive error handling for:
 -   Invalid XML structure
 -   Missing required attributes
 -   File permission issues
--   Nested `<tspan>` structures (raises `SvgNestedTspanExceptionError`)
--   Invalid SVG structures like `<tref>` elements (raises `SvgStructureExceptionError`)
+-   Nested `<tspan>` structures (raises `SvgNestedTspanError`)
+-   Invalid SVG structures like `<tref>` elements (raises `SvgStructureError`)

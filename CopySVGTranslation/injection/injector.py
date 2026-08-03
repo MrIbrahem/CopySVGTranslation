@@ -10,8 +10,8 @@ from lxml import etree
 
 from ..config import TranslationConfig
 from ..exceptions import (
-    SvgNestedTspanExceptionError,
-    SvgStructureExceptionError,
+    SvgNestedTspanError,
+    SvgStructureError,
 )
 from ..preparation import SvgPreparationPipeline
 from ..utils import (
@@ -78,10 +78,10 @@ class SVGTranslationInjector:
             tree, root = self.preparer.run(inject_path)
             return tree, root
 
-        except SvgNestedTspanExceptionError as exc:
+        except SvgNestedTspanError as exc:
             self.new_stats.error = "nested_tspan_error"
 
-        except SvgStructureExceptionError as exc:
+        except SvgStructureError as exc:
             self.new_stats.error = str(exc)
 
         except etree.XMLSyntaxError as exc:

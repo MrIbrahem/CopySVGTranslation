@@ -11,6 +11,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 
 class NormalizeTspans(PreparationStep):
     def execute(self, ctx: PreparationContext) -> None:
+        """Collect leaf <tspan> elements as translatable nodes; reject nested ones."""
         if ctx.root is None:
             return
 
@@ -40,11 +41,13 @@ class NormalizeTspans(PreparationStep):
             text_el.text = None
             text_el.insert(0, tspan)
 
+        # handle tails after children
         # Wrap text tails between elements
         for child in children:
             if child.tail and child.tail.strip():
-                tspan = etree.Element(f"{{{SVG_NS}}}tspan")
-                tspan.text = child.tail
+                new_tspan = etree.Element(f"{{{SVG_NS}}}tspan")
+                new_tspan.text = child.tail
                 child.tail = None
+                # insert after child
                 idx = text_el.index(child)
-                text_el.insert(idx + 1, tspan)
+                text_el.insert(idx + 1, new_tspan)

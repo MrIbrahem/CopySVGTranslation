@@ -8,8 +8,7 @@ from pathlib import Path
 from lxml import etree
 
 from ...config import TranslationConfig
-
-# from ...injection import IdManager
+from ...injection.id_manager import IdManager
 
 
 @dataclass
@@ -18,16 +17,14 @@ class PreparationContext:
     config: TranslationConfig
     tree: etree._ElementTree | None = None
     root: etree._Element | None = None
-    # id_manager: IdManager | None = None
+    id_manager: IdManager | None = None
     translatable_nodes: list[etree._Element] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
-    ids_in_use: list[int] = field(default_factory=list)
-    existing_ids: set[str] = field(default_factory=set)
 
 
 class PreparationStep(ABC):
     def __init__(self, config: TranslationConfig) -> None:
-        self.config = config
+        self.config = config or TranslationConfig()
 
     @abstractmethod
     def execute(self, ctx: PreparationContext) -> None:

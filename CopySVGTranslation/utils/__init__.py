@@ -1,7 +1,9 @@
 from .elements_utils import (
+    collect_ids,
     extract_root_languages,
     extract_text_from_node,
     file_langs,
+    sort_switch_children,
     sort_switch_texts,
     tree_languages,
 )
@@ -12,6 +14,8 @@ from .injection_utils import (
 from .text_utils import normalize_lang, normalize_text
 
 __all__ = [
+    "sort_switch_children",
+    "collect_ids",
     "normalize_lang",
     "extract_root_languages",
     "tree_languages",

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import re
 
-from ...exceptions import SvgStructureExceptionError
+from ...exceptions import SvgStructureError
 from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -15,26 +15,26 @@ class ValidateStructure(PreparationStep):
             return
 
         # <tref> elements are not supported.
-        trefs = ctx.root.findall(".//{%s}tref" % SVG_NS)
+        trefs = ctx.root.findall(f".//{{{SVG_NS}}}tref")
         if len(trefs) != 0:
-            raise SvgStructureExceptionError("structure-error-contains-tref")
+            raise SvgStructureError("structure-error-contains-tref")
 
         # Check for any <text> elements
-        texts = ctx.root.findall(".//{%s}text" % SVG_NS)
+        texts = ctx.root.findall(f".//{{{SVG_NS}}}text")
         if len(texts) == 0:
             return
 
-        styles = ctx.root.findall(".//{%s}style" % SVG_NS)
+        styles = ctx.root.findall(f".//{{{SVG_NS}}}style")
         css_simple_re = re.compile(r"^([^{]+\{[^}]*\})*[^{]+$")
 
         for s in styles:
             css = s.text or ""
             if "#" in css:
                 if not css_simple_re.match(css):
-                    raise SvgStructureExceptionError("structure-error-css-too-complex", None, [s.get("id", "")])
+                    raise SvgStructureError("structure-error-css-too-complex", None, [s.get("id", "")])
 
                 # split selectors roughly and ensure no '#' in selectors portion
                 selectors = re.split(r"\{[^}]*\}", css)
                 for selector in selectors:
                     if "#" in selector:
-                        raise SvgStructureExceptionError("structure-error-css-has-ids", None, [s.get("id", "")])
+                        raise SvgStructureError("structure-error-css-has-ids", None, [s.get("id", "")])

@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 from CopySVGTranslation.exceptions import (
-    SvgStructureExceptionError,
+    SvgStructureError,
 )
 from CopySVGTranslation.preparation import (
     make_translation_ready,
@@ -38,7 +38,7 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with pytest.raises(SvgStructureExceptionError) as exc_info:
+        with pytest.raises(SvgStructureError) as exc_info:
             make_translation_ready(svg_path)
 
         assert "tref" in str(exc_info.value)
@@ -52,7 +52,7 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with pytest.raises(SvgStructureExceptionError) as exc_info:
+        with pytest.raises(SvgStructureError) as exc_info:
             make_translation_ready(svg_path)
 
         assert "css" in str(exc_info.value).lower()
@@ -65,7 +65,7 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with pytest.raises(SvgStructureExceptionError) as exc_info:
+        with pytest.raises(SvgStructureError) as exc_info:
             make_translation_ready(svg_path)
 
         assert "dollar" in str(exc_info.value).lower()
@@ -78,7 +78,7 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with pytest.raises(SvgStructureExceptionError) as exc_info:
+        with pytest.raises(SvgStructureError) as exc_info:
             make_translation_ready(svg_path)
 
         assert "nested" in str(exc_info.value).lower()
@@ -136,7 +136,7 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with pytest.raises(SvgStructureExceptionError) as exc_info:
+        with pytest.raises(SvgStructureError) as exc_info:
             make_translation_ready(svg_path)
 
         assert "lang" in str(exc_info.value).lower()
@@ -170,7 +170,7 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with pytest.raises(SvgStructureExceptionError) as exc_info:
+        with pytest.raises(SvgStructureError) as exc_info:
             make_translation_ready(svg_path)
 
         assert "id" in str(exc_info.value).lower()

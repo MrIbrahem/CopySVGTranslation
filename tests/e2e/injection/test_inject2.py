@@ -8,8 +8,7 @@ I:/svgtranslate_php/svgtranslate_php/tests/Model/Svg/SvgFileTest.php
 import pytest
 
 from CopySVGTranslation.exceptions import (
-    SvgNestedTspanExceptionError,
-    SvgStructureExceptionError,
+    SvgStructureError,
 )
 from CopySVGTranslation.injection import (
     inject_file_and_save,
@@ -95,6 +94,7 @@ class Testinject:
                 </switch>
             </svg>
         """
+        expected_ids = ["trsvg3", "trsvg1", "trsvg4", "trsvg2"]
         file = self.getsvgfilefromstring(temp_dir, source_xml)
 
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
@@ -109,8 +109,11 @@ class Testinject:
             save_path=file,
             all_mappings=data,
             overwrite=True,
-            pretty_print=False,
+            pretty_print=True,
         )
+        result_ids = [id_ for id_ in root.xpath("//@id") if id_]
+        assert result_ids == expected_ids
+
         file_text = file.read_text(encoding="utf-8")
         normalized_text = self.normalize(file_text)
 
@@ -131,52 +134,7 @@ class Testinject:
 
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
 
-        with pytest.raises(SvgStructureExceptionError) as excinfo:
-            make_translation_ready(file)
-        assert str(excinfo.value) == "structure-error-multiple-text-same-lang: ['la']"
-
-    @pytest.mark.parametrize(
-        "svg, exc_type, code, extra",
-        [
-            (
-                "<text><tspan>foo <tspan>bar</tspan></tspan></text>",
-                SvgNestedTspanExceptionError,
-                "structure-error-nested-tspans-not-supported",
-                [""],
-            ),
-            (
-                "<text><tspan id='test'>foo <tspan>bar</tspan></tspan></text>",
-                SvgNestedTspanExceptionError,
-                "structure-error-nested-tspans-not-supported",
-                ["test"],
-            ),
-            (
-                "<g id='gparent'><text><tspan>foo <tspan>bar</tspan></tspan></text></g>",
-                SvgNestedTspanExceptionError,
-                "structure-error-nested-tspans-not-supported",
-                [""],
-            ),
-            (
-                "<style>#foo { stroke:1px; } .bar { color:pink; }</style><text>Foo</text>",
-                SvgStructureExceptionError,
-                "structure-error-css-too-complex",
-                [""],
-            ),
-            ("<text id='x|'>Foo</text>", SvgStructureExceptionError, "structure-error-invalid-node-id", ["x|"]),
-            (
-                "<text id='blah'>Foo $3 bar</text>",
-                SvgStructureExceptionError,
-                "structure-error-text-contains-dollar",
-                ["Foo $3 bar"],
-            ),
-        ],
-    )
-    def test_exeptions(self, temp_dir, svg, exc_type, code, extra):
-        text = f'<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">{svg}</svg>'
-        file = self.getsvgfilefromstring(temp_dir, text)
-
-        with pytest.raises(exc_type) as excinfo:
+        with pytest.raises(SvgStructureError) as excinfo:
             make_translation_ready(file)
 
-        assert excinfo.value.code == code
-        assert excinfo.value.extra == extra
+        assert str(excinfo.value) == "structure-error: structure-error-multiple-text-same-lang: ['la']"

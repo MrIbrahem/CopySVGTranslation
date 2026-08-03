@@ -8,8 +8,8 @@ from .split_languages import SplitLanguages
 from .validate import ValidateStructure
 
 __all__ = [
-    "LoadDocument",
     "AssignIds",
+    "LoadDocument",
     "WrapTspans",
     "NormalizeTspans",
     "PreparationContext",
