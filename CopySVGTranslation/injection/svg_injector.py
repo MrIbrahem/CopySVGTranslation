@@ -8,6 +8,7 @@ from pathlib import Path
 
 from lxml import etree
 
+from ..preparation import SvgTranslationPreparer
 from ..titles_workers import get_new_titles_translations
 from ..utils import (
     extract_text_from_node,
@@ -23,7 +24,6 @@ from .exceptions import (
     SvgStructureExceptionError,
 )
 from .objects import InjectorData, InjectorStats
-from .preparation import SvgTranslationPreparer
 
 logger = logging.getLogger(__name__)
 
