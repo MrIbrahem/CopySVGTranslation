@@ -144,7 +144,7 @@ class TestSplitLanguagesInSwitch:
         assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text><text id="t1-">hello</text></switch>"""
         assert self.tostring(children[1]) == expeced
 
-        # assert children[1].get("systemLanguage") is None
+        assert children[1].get("systemLanguage") is None
 
     def test_duplicate_language_within_same_text_raises(self, step, ctx):
         switch = make_switch('<text id="t1" systemLanguage="ar,ar">hello</text>')
