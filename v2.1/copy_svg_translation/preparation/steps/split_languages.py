@@ -65,9 +65,13 @@ class SplitLanguages(PreparationStep):
             return
 
         el_id = element.get("id")
+
         if el_id:
             new_id = ctx.id_manager.allocate_clone(el_id, element.get("systemLanguage", ""))
-            element.set("id", new_id)
+        else:
+            new_id = ctx.id_manager.allocate_trsvg()
+
+        element.set("id", new_id)
 
         # Children
         for child in element:

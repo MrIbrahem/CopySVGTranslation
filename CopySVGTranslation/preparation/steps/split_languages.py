@@ -85,19 +85,24 @@ class SplitLanguages(PreparationStep):
         for switch in switches:
             self._split_languages_in_switch(switch, ctx)
 
+    def validate_text_el_children(self, text_el) -> None:
+        if not isinstance(text_el.tag, str):
+            # ignore comments etc, but if there's text content outside elements, check whitespace
+            if text_el.text and text_el.text.strip():
+                raise SvgStructureError("structure-error-switch-text-content-outside-text")
+            return False
+        if text_el.tag not in ({f"{{{SVG_NS}}}text", "text"}):
+            raise SvgStructureError("structure-error-switch-child-not-text")
+        return True
+
     def _split_languages_in_switch(self, switch: etree._Element, ctx: PreparationContext) -> None:
         # gather existing languages for duplicate detection
         existing_langs: set[str] = set()
         # collect children first to avoid modifying while iterating
         children = list(switch)
         for text_el in children:
-            if not isinstance(text_el.tag, str):
-                # ignore comments etc, but if there's text content outside elements, check whitespace
-                if text_el.text and text_el.text.strip():
-                    raise SvgStructureError("structure-error-switch-text-content-outside-text")
+            if not self.validate_text_el_children(text_el):
                 continue
-            if text_el.tag not in ({f"{{{SVG_NS}}}text", "text"}):
-                raise SvgStructureError("structure-error-switch-child-not-text")
 
             sys_lang = text_el.get("systemLanguage")
             real_langs = split_lang_list(sys_lang) if sys_lang else ["fallback"]
@@ -143,50 +148,24 @@ class SplitLanguages(PreparationStep):
                     cloned.set("systemLanguage", extra_lang)
 
                 # Assign new unique IDs
-                self._reassign_ids(cloned, ctx, extra_lang)
+                self._reassign_ids(cloned, ctx)
 
                 existing_langs.add(extra_lang)
                 switch.insert(index + 1, cloned)
                 index += 1
 
-    def _allocate_clone_id(self, ctx, base_id: str, lang: str) -> str:
-        """Allocate a unique identifier for a cloned ``<text>`` node."""
-
-        base_candidate = f"{base_id}-{lang}"
-        candidate = base_candidate
-        suffix = 1
-
-        while candidate in ctx.id_manager.existing_ids:
-            suffix += 1
-            candidate = f"{base_candidate}-{suffix}"
-        ctx.id_manager.register(candidate)
-
-        return candidate
-
-    # ------------------------------------------------------------------
-    # Step 3: id allocation helpers
-    # ------------------------------------------------------------------
-    def _allocate_trsvg_id(self, ctx) -> str:
-        """Allocate a new unique ``trsvg`` identifier."""
-        counter = 1
-
-        while f"trsvg{counter}" in ctx.id_manager.existing_ids:
-            counter += 1
-
-        new_id = f"trsvg{counter}"
-        # ctx.ids_in_use.append(counter)
-        ctx.id_manager.register(new_id)
-        return new_id
-
-    def _reassign_ids(self, element: etree._Element, ctx: PreparationContext, extra_lang: str) -> None:
+    def _reassign_ids(self, element: etree._Element, ctx: PreparationContext) -> None:
         if ctx.id_manager is None:
             return
 
         el_id = element.get("id")
 
-        if el_id and not re.match(r"^trsvg[0-9]+$", el_id):
-            new_id = self._allocate_clone_id(ctx, el_id, extra_lang)
+        if el_id and re.match(r"^trsvg[0-9]+$", el_id):
+            el_id = None
+
+        if el_id:
+            new_id = ctx.id_manager.allocate_clone(el_id, element.get("systemLanguage", ""))
         else:
-            new_id = self._allocate_trsvg_id(ctx)
+            new_id = ctx.id_manager.allocate_trsvg()
 
         element.set("id", new_id)
