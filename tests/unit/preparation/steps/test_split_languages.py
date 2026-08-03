@@ -1,14 +1,260 @@
-# ruff: noqa: F401
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/preparation/steps/split_languages.py module.
+Tests for SplitLanguages._split_switch_languages and its core helper
+_split_languages_in_switch.
 
-Classes to test: SplitLanguages
-Functions to test: get_text_content
+Notes on setup:
+- We use `types.SimpleNamespace` instead of the real `PreparationContext`
+  dataclass, since only `.root` and `.id_manager` are actually read by the
+  methods under test. This avoids pulling in unrelated dependencies
+  (TranslationConfig, IdManager, Path, etc.) that aren't needed here.
+- `FakeIdManager` is a minimal stand-in that mimics the two methods the
+  production IdManager exposes: `allocate_trsvg()` and `allocate_clone()`.
+- Adjust the import path below (`injection.steps.split_languages`) to match
+  your actual package layout if it differs.
 
-TODO: write tests
+Unit tests for CopySVGTranslation/preparation/steps/split_languages.py module.
 """
 
+from types import SimpleNamespace
 
-from CopySVGTranslation.preparation.steps.split_languages import (
-    SplitLanguages,
-)
+import pytest
+from lxml import etree
+
+from CopySVGTranslation.exceptions import SvgStructureError
+from CopySVGTranslation.preparation.steps.split_languages import SVG_NS, SplitLanguages
+
+class FakeIdManager:
+    """Minimal stand-in for the real IdManager used across tests."""
+
+    def __init__(self) -> None:
+        self._counter = 0
+
+    def allocate_trsvg(self) -> str:
+        self._counter += 1
+        return f"trsvg{self._counter}"
+
+    def allocate_clone(self, base_id: str, lang: str) -> str:
+        return f"{base_id}-{lang}"
+
+
+def make_switch(children_xml: str) -> etree._Element:
+    """Build a standalone <switch> element (SVG namespace) with given children."""
+    xml = f'<switch xmlns="{SVG_NS}">{children_xml}</switch>'
+    return etree.fromstring(xml)
+
+
+@pytest.fixture
+def step() -> SplitLanguages:
+    """Instance of the step under test; config is unused by these methods."""
+    return SplitLanguages(config=None)
+
+
+@pytest.fixture
+def ctx() -> SimpleNamespace:
+    """Lightweight context stub with a fresh FakeIdManager per test."""
+    return SimpleNamespace(root=None, id_manager=FakeIdManager())
+
+
+# ---------------------------------------------------------------------------
+# _split_languages_in_switch
+# ---------------------------------------------------------------------------
+
+
+class TestSplitLanguagesInSwitch:
+    def test_single_text_without_systemlanguage_is_left_as_fallback(self, step, ctx):
+        switch = make_switch('<text id="t1">hello</text>')
+
+        step._split_languages_in_switch(switch, ctx)
+
+        children = list(switch)
+        assert len(children) == 1
+        assert children[0].get("systemLanguage") is None
+
+    def test_single_text_with_one_language_keeps_systemlanguage(self, step, ctx):
+        switch = make_switch('<text id="t1" systemLanguage="ar">hello</text>')
+
+        step._split_languages_in_switch(switch, ctx)
+
+        children = list(switch)
+        assert len(children) == 1
+        assert children[0].get("systemLanguage") == "ar"
+
+    def test_explicit_fallback_value_is_normalized_to_no_attribute(self, step, ctx):
+        # systemLanguage="fallback" written explicitly should behave the
+        # same as a missing systemLanguage attribute.
+        switch = make_switch('<text id="t1" systemLanguage="fallback">hello</text>')
+
+        step._split_languages_in_switch(switch, ctx)
+
+        children = list(switch)
+        assert len(children) == 1
+        assert children[0].get("systemLanguage") is None
+
+    def test_comma_separated_languages_are_split_into_clones(self, step, ctx):
+        switch = make_switch('<text id="t1" systemLanguage="ar,fr,pt-br">hello</text>')
+
+        step._split_languages_in_switch(switch, ctx)
+
+        children = list(switch)
+        assert len(children) == 3
+        assert [c.get("systemLanguage") for c in children] == ["ar", "fr", "pt-BR"]
+        # original node keeps its id; clones get ids from id_manager.allocate_clone
+        assert children[0].get("id") == "t1"
+        assert children[1].get("id") == "t1-fr"
+        assert children[2].get("id") == "t1-pt-BR"
+
+    def test_clone_without_original_id_uses_allocate_trsvg(self, step, ctx):
+        switch = make_switch('<text systemLanguage="ar,fr">hello</text>')
+
+        step._split_languages_in_switch(switch, ctx)
+
+        children = list(switch)
+        assert len(children) == 2
+        # no original id present, so the clone must get a fresh trsvg id
+        assert children[1].get("id") == "trsvg1"
+
+    def test_clone_with_trsvg_like_id_is_reallocated(self, step, ctx):
+        # An id already matching the internal trsvgN pattern must be treated
+        # as if it were absent, to avoid id collisions.
+        switch = make_switch('<text id="trsvg5" systemLanguage="ar,fr">hello</text>')
+
+        step._split_languages_in_switch(switch, ctx)
+
+        children = list(switch)
+        assert children[1].get("id") == "trsvg1"
+
+    def test_fallback_inside_comma_list_removes_attribute_on_that_node(self, step, ctx):
+        switch = make_switch('<text id="t1" systemLanguage="ar,fallback">hello</text>')
+
+        step._split_languages_in_switch(switch, ctx)
+
+        children = list(switch)
+        assert len(children) == 2
+        assert children[0].get("systemLanguage") == "ar"
+        assert children[1].get("systemLanguage") is None
+
+    def test_duplicate_language_within_same_text_raises(self, step, ctx):
+        switch = make_switch('<text id="t1" systemLanguage="ar,ar">hello</text>')
+
+        with pytest.raises(SvgStructureError) as exc_info:
+            step._split_languages_in_switch(switch, ctx)
+
+        assert exc_info.value.args[0] == "structure-error-multiple-lang-in-text: ['ar']"
+
+    def test_duplicate_language_across_texts_raises(self, step, ctx):
+        switch = make_switch(
+            '<text id="t1" systemLanguage="ar">a</text>'
+            '<text id="t2" systemLanguage="ar">b</text>'
+        )
+
+        with pytest.raises(SvgStructureError) as exc_info:
+            step._split_languages_in_switch(switch, ctx)
+
+        assert exc_info.value.args[0] == "structure-error-multiple-text-same-lang: ['ar']"
+
+    def test_duplicate_fallback_across_texts_raises(self, step, ctx):
+        switch = make_switch('<text id="t1">a</text><text id="t2">b</text>')
+
+        with pytest.raises(SvgStructureError) as exc_info:
+            step._split_languages_in_switch(switch, ctx)
+
+        assert exc_info.value.args[0] == "structure-error-multiple-text-same-lang: ['fallback']"
+
+    def test_non_text_child_raises(self, step, ctx):
+        switch = make_switch('<g id="g1"><text>hi</text></g>')
+
+        with pytest.raises(SvgStructureError) as exc_info:
+            step._split_languages_in_switch(switch, ctx)
+
+        assert exc_info.value.args[0] == "structure-error-switch-child-not-text"
+
+    def test_comment_child_is_ignored(self, step, ctx):
+        # raise SvgStructureError(code="structure-error-switch-text-content-outside-text")
+        with pytest.raises(SvgStructureError) as exc_info:
+            switch = make_switch('<!-- a comment --><text id="t1">hello</text>')
+
+            # assert exc_info.value.args[0] == "structure-error-switch-text-content-outside-text"
+            # should not raise; comment nodes are skipped
+            step._split_languages_in_switch(switch, ctx)
+
+        text_children = [c for c in switch if isinstance(c.tag, str)]
+        assert len(text_children) == 1
+
+    def test_multiple_independent_single_language_texts(self, step, ctx):
+        switch = make_switch(
+            '<text id="t1" systemLanguage="ar">a</text>'
+            '<text id="t2" systemLanguage="fr">b</text>'
+        )
+
+        step._split_languages_in_switch(switch, ctx)
+
+        children = list(switch)
+        assert len(children) == 2
+        assert children[0].get("systemLanguage") == "ar"
+        assert children[1].get("systemLanguage") == "fr"
+
+    def test_clones_are_inserted_immediately_after_original_in_order(self, step, ctx):
+        switch = make_switch(
+            '<text id="t1" systemLanguage="ar,fr">a</text>'
+            '<text id="t2" systemLanguage="en">b</text>'
+        )
+
+        step._split_languages_in_switch(switch, ctx)
+
+        children = list(switch)
+        # expected order: t1(ar), clone(fr), t2(en)
+        assert len(children) == 3
+        assert [c.get("systemLanguage") for c in children] == ["ar", "fr", "en"]
+
+
+# ---------------------------------------------------------------------------
+# _split_switch_languages (drives every <switch> found under ctx.root)
+# ---------------------------------------------------------------------------
+
+
+class TestSplitSwitchLanguages:
+    def test_processes_every_switch_under_root(self, step, ctx):
+        svg = f"""
+        <svg xmlns="{SVG_NS}">
+            <switch>
+                <text id="a1" systemLanguage="ar,fr">a</text>
+            </switch>
+            <g>
+                <switch>
+                    <text id="b1" systemLanguage="en">b</text>
+                </switch>
+            </g>
+        </svg>
+        """
+        ctx.root = etree.fromstring(svg)
+
+        step._split_switch_languages(ctx)
+
+        switches = ctx.root.findall(f".//{{{SVG_NS}}}switch")
+        assert len(switches) == 2
+
+        first_switch_texts = list(switches[0])
+        assert [t.get("systemLanguage") for t in first_switch_texts] == ["ar", "fr"]
+
+        second_switch_texts = list(switches[1])
+        assert [t.get("systemLanguage") for t in second_switch_texts] == ["en"]
+
+    def test_no_switches_is_a_no_op(self, step, ctx):
+        svg = f'<svg xmlns="{SVG_NS}"><text id="a1">a</text></svg>'
+        ctx.root = etree.fromstring(svg)
+
+        # should not raise even though there is no <switch> element at all
+        step._split_switch_languages(ctx)
+
+    def test_error_in_one_switch_propagates(self, step, ctx):
+        svg = f"""
+        <svg xmlns="{SVG_NS}">
+            <switch>
+                <text id="a1" systemLanguage="ar,ar">a</text>
+            </switch>
+        </svg>
+        """
+        ctx.root = etree.fromstring(svg)
+
+        with pytest.raises(SvgStructureError):
+            step._split_switch_languages(ctx)

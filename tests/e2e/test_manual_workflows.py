@@ -174,8 +174,7 @@ class TestInjectManual:
         with pytest.raises(SvgStructureError) as excinfo:
             make_translation_ready(svg_file)
 
-        # assert excinfo.value.code == "structure-error-multiple-text-same-lang"
-        assert excinfo.value.code == "structure-error"
+        assert excinfo.value.code == "structure-error-multiple-text-same-lang"
 
     def test_inject_after_normalization(self, temp_dir):
         """After make_translation_ready, injection should work on a clean SVG."""

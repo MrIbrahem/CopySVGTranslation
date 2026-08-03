@@ -91,7 +91,7 @@ class WrapTspans(PreparationStep):
                 else:
                     node.set("id", node_id)
                     if "|" in node_id or "/" in node_id:
-                        raise SvgStructureError("structure-error-invalid-node-id")
+                        raise SvgStructureError(code="structure-error-invalid-node-id")
                     m = re.match(r"^trsvg([0-9]+)$", node_id)
                     # if m:
                     # ctx.ids_in_use.append(int(m.group(1)))

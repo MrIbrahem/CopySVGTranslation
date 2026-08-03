@@ -55,7 +55,7 @@ class SvgDocument:
         self.config = config or TranslationConfig()
         self.root = tree.getroot()
         if self.root is None:
-            raise SvgStructureError("structure-error-no-doc-element")
+            raise SvgStructureError(code="structure-error-no-doc-element")
 
     # ------------------------------------------------------------------
     # Factory
@@ -108,7 +108,7 @@ class SvgDocument:
     ) -> Path:
         target = Path(path) if path is not None else self.path
         if target is None:
-            raise ValueError("No target path provided for save")
+            raise ValueError(code="No target path provided for save")
 
         cfg = self.config
         pretty = cfg.pretty_print if pretty_print is None else pretty_print

@@ -10,7 +10,7 @@ class CopySVGTranslationError(Exception):
     def __init__(
         self,
         message: str = "",
-        # *,
+        *,
         code: str | None = None,
         element: Any = None,
         extra: Any = None,

@@ -38,7 +38,7 @@ class SvgDocument:
         self.config = config or TranslationConfig()
         self.root = tree.getroot()
         if self.root is None:
-            raise SvgStructureError("structure-error-no-doc-element")
+            raise SvgStructureError(code="structure-error-no-doc-element")
 
     # ------------------------------------------------------------------
     # Factory

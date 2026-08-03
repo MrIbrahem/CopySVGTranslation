@@ -27,7 +27,7 @@ class AssignIds(PreparationStep):
         for element in ctx.root.xpath("//*[@id]"):
             el_id = element.get("id")
             if not el_id or not el_id.strip():
-                raise SvgInvalidIdError("structure-error-invalid-node-id", element=element)
+                raise SvgInvalidIdError(code="structure-error-invalid-node-id", element=element)
 
         # Automatically assign missing trsvgN IDs to <text> and <tspan> elements
         if self.config.assign_missing_ids:

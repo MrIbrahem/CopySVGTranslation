@@ -163,4 +163,4 @@ class Testinject:
         with pytest.raises(SvgStructureError) as excinfo:
             make_translation_ready(file)
 
-        assert str(excinfo.value) == "structure-error: structure-error-multiple-text-same-lang: ['la']"
+        assert str(excinfo.value) == "structure-error-multiple-text-same-lang: ['la']"

@@ -17,7 +17,7 @@ class ValidateStructure(PreparationStep):
         # <tref> elements are not supported.
         trefs = ctx.root.findall(f".//{{{SVG_NS}}}tref")
         if len(trefs) != 0:
-            raise SvgStructureError("structure-error-contains-tref")
+            raise SvgStructureError(code="structure-error-contains-tref")
 
         # Check for any <text> elements
         texts = ctx.root.findall(f".//{{{SVG_NS}}}text")
@@ -31,10 +31,10 @@ class ValidateStructure(PreparationStep):
             css = s.text or ""
             if "#" in css:
                 if not css_simple_re.match(css):
-                    raise SvgStructureError("structure-error-css-too-complex", None, [s.get("id", "")])
+                    raise SvgStructureError(code="structure-error-css-too-complex", extra=[s.get("id", "")])
 
                 # split selectors roughly and ensure no '#' in selectors portion
                 selectors = re.split(r"\{[^}]*\}", css)
                 for selector in selectors:
                     if "#" in selector:
-                        raise SvgStructureError("structure-error-css-has-ids", None, [s.get("id", "")])
+                        raise SvgStructureError(code="structure-error-css-has-ids", extra=[s.get("id", "")])

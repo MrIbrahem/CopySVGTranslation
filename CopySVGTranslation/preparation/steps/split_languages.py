@@ -47,11 +47,15 @@ class SplitLanguages(PreparationStep):
         for text in texts:
             content = get_text_content(text)
             if re.search(r"\$[0-9]+", content):
-                raise SvgStructureError("structure-error-text-contains-dollar")
+                raise SvgStructureError(code="structure-error-text-contains-dollar")
 
-            # normalize systemLanguage if present
-            if text.get("systemLanguage"):
-                text.set("systemLanguage", normalize_lang(text.get("systemLanguage")))
+            if self.config.normalize_languages:
+                # normalize systemLanguage if present
+                system_language = text.get("systemLanguage")
+                if system_language:
+                    normalized = normalize_lang(system_language)
+                    if normalized != system_language:
+                        text.set("systemLanguage", normalized)
 
             parent = text.getparent()
             if parent is None or (parent.tag not in ({f"{{{SVG_NS}}}switch", "switch"})):
@@ -59,7 +63,7 @@ class SplitLanguages(PreparationStep):
                 switch = etree.Element(f"{{{SVG_NS}}}switch")
                 parent_of_text = parent
                 if parent_of_text is None:
-                    raise SvgStructureError("structure-error-no-parent-for-text")
+                    raise SvgStructureError(code="structure-error-no-parent-for-text")
                 # insert switch before text
                 idx = list(parent_of_text).index(text)
                 parent_of_text.insert(idx, switch)
@@ -74,7 +78,7 @@ class SplitLanguages(PreparationStep):
             # verify that children of text are only tspans or text nodes
             for child in text:
                 if child.tag not in ({f"{{{SVG_NS}}}tspan", "tspan"}):
-                    raise SvgStructureError("structure-error-non-tspan-inside-text")
+                    raise SvgStructureError(code="structure-error-non-tspan-inside-text")
 
     # ------------------------------------------------------------------
     # Step 6: <switch> language splitting
@@ -100,7 +104,7 @@ class SplitLanguages(PreparationStep):
             if not sys_lang:
                 # no systemLanguage: this is a single fallback element, no need to split
                 if "fallback" in existing_langs:
-                    raise SvgStructureError("structure-error-multiple-text-same-lang", extra=["fallback"])
+                    raise SvgStructureError(code="structure-error-multiple-text-same-lang", extra=["fallback"])
                 existing_langs.add("fallback")
                 continue
 
@@ -109,11 +113,11 @@ class SplitLanguages(PreparationStep):
             languages_present: set[str] = set()
             for extra_lang in real_langs:
                 if extra_lang in languages_present:
-                    raise SvgStructureError("structure-error-multiple-lang-in-text", extra=[extra_lang])
+                    raise SvgStructureError(code="structure-error-multiple-lang-in-text", extra=[extra_lang])
 
                 languages_present.add(extra_lang)
                 if extra_lang in existing_langs:
-                    raise SvgStructureError("structure-error-multiple-text-same-lang", extra=[extra_lang])
+                    raise SvgStructureError(code="structure-error-multiple-text-same-lang", extra=[extra_lang])
 
             if len(real_langs) == 1:
                 lang_value = real_langs[0]
@@ -139,7 +143,7 @@ class SplitLanguages(PreparationStep):
             # For subsequent languages, clone the node and allocate new IDs
             for extra_lang in real_langs[1:]:
                 if extra_lang in existing_langs:
-                    raise SvgStructureError("structure-error-multiple-text-same-lang", extra=[extra_lang])
+                    raise SvgStructureError(code="structure-error-multiple-text-same-lang", extra=[extra_lang])
                 cloned = _clone_element(text_el)
                 if extra_lang == "fallback":
                     cloned.attrib.pop("systemLanguage", None)
@@ -173,8 +177,8 @@ class SplitLanguages(PreparationStep):
         if not isinstance(text_el.tag, str):
             # ignore comments etc, but if there's text content outside elements, check whitespace
             if text_el.text and text_el.text.strip():
-                raise SvgStructureError("structure-error-switch-text-content-outside-text")
+                raise SvgStructureError(code="structure-error-switch-text-content-outside-text")
             return False
         if text_el.tag not in ({f"{{{SVG_NS}}}text", "text"}):
-            raise SvgStructureError("structure-error-switch-child-not-text")
+            raise SvgStructureError(code="structure-error-switch-child-not-text")
         return True
