@@ -26,7 +26,7 @@
 
 Two-phase pipeline: **Extraction** (parse SVG → collect translation pairs from `<switch>` elements) and **Injection** (prepare target SVG → insert `<text systemLanguage="XX">` nodes). A `workflows` module composes both phases. A `nested_analyze` module detects and fixes nested `<tspan>` structures. A `titles_workers` module handles year-suffixed title strings.
 
-Public API: two primary classes (`SVGTranslationExtractor`, `SVGTranslationInjector`), two dataclasses (`ExtractorData`, `InjectorData`), two workflow functions (`svg_extract_and_inject`, `svg_extract_and_injects`), and two legacy wrappers (`extract`, `inject`).
+Public API: two primary classes (`SVGTranslationExtractor`, `SVGTranslationInjector`), two dataclasses (`ExtractorData`, `InjectorData`), two workflow functions (`svg_translate_between_files`, `svg_inject_translations`), and two legacy wrappers (`extract`, `inject`).
 
 ---
 
@@ -39,9 +39,9 @@ Ordered by leverage (impact ÷ effort, discounted by confidence and fix-risk).
 | 1   | **Injector accumulates state across calls**                             | Bug       | HIGH   | S      | LOW  | HIGH       | `svg_injector.py:38-39`         |
 | 2   | **Extractor accumulates state across calls**                            | Bug       | HIGH   | S      | LOW  | HIGH       | `svg_extractor.py:43`           |
 | 3   | **`_parse_svg` catches `(OSError, Exception)` too broadly**             | Bug       | MED    | S      | LOW  | HIGH       | `svg_injector.py:209`           |
-| 4   | **`svg_extract_and_inject` not in `__all__` or top-level exports**      | Bug       | MED    | S      | LOW  | HIGH       | `__init__.py:1-15`              |
+| 4   | **`svg_translate_between_files` not in `__all__` or top-level exports**      | Bug       | MED    | S      | LOW  | HIGH       | `__init__.py:1-15`              |
 | 5   | **`SvgTranslationPreparer.prepare()` not idempotent**                   | Bug       | MED    | S      | MED  | HIGH       | `preparation.py:56,88,127`      |
-| 6   | **`svg_extract_and_inject` has mandatory disk side effects**            | Tech debt | MED    | M      | LOW  | HIGH       | `workflows.py:40-41`            |
+| 6   | **`svg_translate_between_files` has mandatory disk side effects**            | Tech debt | MED    | M      | LOW  | HIGH       | `workflows.py:40-41`            |
 | 7   | **`find_nested.py` vs `find_nested_new.py` — parallel implementations** | Tech debt | MED    | M      | MED  | HIGH       | `nested_analyze/`               |
 | 8   | **CI runs only on Python 3.10, no lint/typecheck**                      | DX        | MED    | S      | LOW  | HIGH       | `.github/workflows/pytest.yaml` |
 | 9   | **Missing type annotations on key methods**                             | Tech debt | LOW    | M      | LOW  | HIGH       | `svg_extractor.py:50,73,124`    |
@@ -109,16 +109,16 @@ Ordered by leverage (impact ÷ effort, discounted by confidence and fix-risk).
 
 ---
 
-### [BUG-04] `svg_extract_and_inject` and `svg_extract_and_injects` not exported (MED impact)
+### [BUG-04] `svg_translate_between_files` and `svg_inject_translations` not exported (MED impact)
 
--   **Evidence**: `CopySVGTranslation/__init__.py:1-15` — the `__all__` list includes `extract`, `inject`, `ExtractorData`, `InjectorData`, `match_nested_tags`, `fix_nested_file`, but NOT `svg_extract_and_inject` or `svg_extract_and_injects`. These are documented in the README as part of the public API.
--   **Impact**: Users who do `from CopySVGTranslation import svg_extract_and_inject` get an `ImportError`. Users following the README's "Extracting and injecting in a single step" example cannot use the documented import path. The functions ARE accessible via `CopySVGTranslation.workflows.svg_extract_and_inject`, but that's an internal module path.
+-   **Evidence**: `CopySVGTranslation/__init__.py:1-15` — the `__all__` list includes `extract`, `inject`, `ExtractorData`, `InjectorData`, `match_nested_tags`, `fix_nested_file`, but NOT `svg_translate_between_files` or `svg_inject_translations`. These are documented in the README as part of the public API.
+-   **Impact**: Users who do `from CopySVGTranslation import svg_translate_between_files` get an `ImportError`. Users following the README's "Extracting and injecting in a single step" example cannot use the documented import path. The functions ARE accessible via `CopySVGTranslation.workflows.svg_translate_between_files`, but that's an internal module path.
 -   **Effort**: S — add the imports and `__all__` entries.
 -   **Risk**: LOW — purely additive.
--   **Confidence**: HIGH — verified with runtime import test: `hasattr(CopySVGTranslation, 'svg_extract_and_inject')` returns `False`.
+-   **Confidence**: HIGH — verified with runtime import test: `hasattr(CopySVGTranslation, 'svg_translate_between_files')` returns `False`.
 -   **Fix sketch**: Add to `__init__.py`:
     ```python
-    from .workflows import svg_extract_and_inject, svg_extract_and_injects
+    from .workflows import svg_translate_between_files, svg_inject_translations
     ```
     and add both to `__all__`.
 
@@ -135,7 +135,7 @@ Ordered by leverage (impact ÷ effort, discounted by confidence and fix-risk).
 
 ---
 
-### [TECH-01] `svg_extract_and_inject` has mandatory disk side effects (MED impact)
+### [TECH-01] `svg_translate_between_files` has mandatory disk side effects (MED impact)
 
 -   **Evidence**: `CopySVGTranslation/workflows.py:30-41` — the function always writes a JSON file and creates directories, even when `save_result=False`. Lines 30-34 create `data/` directory, lines 40-41 unconditionally `json.dump()` to it. Line 46-47 creates `translated/` directory.
 -   **Impact**: Users cannot use this function as a pure in-memory pipeline. Every call writes to the filesystem, which is surprising for a function that accepts `save_result=False`. In serverless/ephemeral environments or when processing many files, this creates unwanted I/O and directory clutter. The function also uses `Path.cwd()` which makes behavior depend on the working directory.
@@ -219,7 +219,7 @@ The "new" nested tspan fixer preserves styling by creating sibling tspans instea
 
 ### 3. Pure in-memory workflow
 
-The `svg_extract_and_inject` function always touches the filesystem. An in-memory variant that accepts `str | bytes` SVG content and returns `str | bytes` would enable use in web services, notebooks, and pipelines where disk I/O is undesirable. **Evidence**: TECH-01 and the function's mandatory `mkdir`/`json.dump` calls. **Effort**: S-M.
+The `svg_translate_between_files` function always touches the filesystem. An in-memory variant that accepts `str | bytes` SVG content and returns `str | bytes` would enable use in web services, notebooks, and pipelines where disk I/O is undesirable. **Evidence**: TECH-01 and the function's mandatory `mkdir`/`json.dump` calls. **Effort**: S-M.
 
 ### 4. Structured logging / progress reporting
 

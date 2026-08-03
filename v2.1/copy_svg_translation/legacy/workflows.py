@@ -10,7 +10,7 @@ from ..config import TranslationConfig
 from ..service import SVGTranslationService
 
 
-def svg_extract_and_inject(
+def svg_translate_between_files(
     *,
     extract_file: Path | str,
     inject_file: Path | str,
@@ -24,7 +24,7 @@ def svg_extract_and_inject(
     Deprecated. Use SVGTranslationService.extract_and_inject() instead.
     """
     warnings.warn(
-        "copy_svg_translation.svg_extract_and_inject() is deprecated. "
+        "copy_svg_translation.svg_translate_between_files() is deprecated. "
         "Use SVGTranslationService.extract_and_inject() instead.",
         DeprecationWarning,
         stacklevel=2,
@@ -52,7 +52,7 @@ def svg_extract_and_inject(
     return result.data
 
 
-def svg_extract_and_injects(
+def svg_inject_translations(
     *,
     translations: Mapping,
     inject_file: Path | str,
@@ -65,7 +65,7 @@ def svg_extract_and_injects(
     Deprecated. Use SVGTranslationService.inject() instead.
     """
     warnings.warn(
-        "copy_svg_translation.svg_extract_and_injects() is deprecated. " "Use SVGTranslationService.inject() instead.",
+        "copy_svg_translation.svg_inject_translations() is deprecated. " "Use SVGTranslationService.inject() instead.",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -84,6 +84,6 @@ def svg_extract_and_injects(
 
 
 __all__ = [
-    "svg_extract_and_inject",
-    "svg_extract_and_injects",
+    "svg_translate_between_files",
+    "svg_inject_translations",
 ]

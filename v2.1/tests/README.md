@@ -256,7 +256,7 @@ Use real fixture files and temp dirs (`tmp_path`).
 | ------------------- | --------------------------------------------- |
 | `test_extract.py`   | old `extract()` still returns dict / None     |
 | `test_inject.py`    | old `inject()` return shapes + `return_stats` |
-| `test_workflows.py` | `svg_extract_and_inject` behaviour            |
+| `test_workflows.py` | `svg_translate_between_files` behaviour            |
 
 All should assert `pytest.warns(DeprecationWarning)`.
 

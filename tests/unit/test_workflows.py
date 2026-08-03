@@ -1,7 +1,7 @@
 """
 Unit tests for CopySVGTranslation/workflows.py module.
 
-Functions to test: svg_extract_and_inject, svg_extract_and_injects
+Functions to test: svg_translate_between_files, svg_inject_translations
 """
 
 from __future__ import annotations
@@ -9,8 +9,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from CopySVGTranslation.workflows import (
-    svg_extract_and_inject,
-    svg_extract_and_injects,
+    svg_translate_between_files,
+    svg_inject_translations,
 )
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -33,12 +33,12 @@ def _write_svg(tmp_path: Path, inner: str, name: str = "test.svg") -> Path:
 
 
 # ===========================================================================
-# svg_extract_and_inject
+# svg_translate_between_files
 # ===========================================================================
 
 
 class TestSvgExtractAndInject:
-    """Tests for the svg_extract_and_inject workflow function."""
+    """Tests for the svg_translate_between_files workflow function."""
 
     def test_basic_extract_and_inject(self, tmp_path: Path):
         """Should extract translations from source and inject into target."""
@@ -64,7 +64,7 @@ class TestSvgExtractAndInject:
         output = tmp_path / "output.svg"
         data_output = tmp_path / "data.json"
 
-        tree = svg_extract_and_inject(
+        tree = svg_translate_between_files(
             extract_file=source,
             inject_file=target,
             target_path=output,
@@ -80,7 +80,7 @@ class TestSvgExtractAndInject:
         """Should return None when the source file does not exist."""
         target = _write_svg(tmp_path, "<switch><text id='t0'><tspan id='t0'>Hi</tspan></text></switch>")
 
-        tree = svg_extract_and_inject(
+        tree = svg_translate_between_files(
             extract_file=tmp_path / "nonexistent.svg",
             inject_file=target,
         )
@@ -89,12 +89,12 @@ class TestSvgExtractAndInject:
 
 
 # ===========================================================================
-# svg_extract_and_injects
+# svg_inject_translations
 # ===========================================================================
 
 
 class TestSvgExtractAndInjects:
-    """Tests for the svg_extract_and_injects workflow function."""
+    """Tests for the svg_inject_translations workflow function."""
 
     def test_basic_inject_from_mapping(self, tmp_path: Path):
         """Should inject translations from a provided mapping dict."""
@@ -114,7 +114,7 @@ class TestSvgExtractAndInjects:
             }
         }
 
-        tree = svg_extract_and_injects(
+        tree = svg_inject_translations(
             translations=translations,
             inject_file=target,
             save_result=True,

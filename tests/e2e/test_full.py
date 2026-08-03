@@ -8,7 +8,7 @@ import pytest
 
 from CopySVGTranslation.extraction import extract
 from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
-from CopySVGTranslation.workflows import svg_extract_and_inject
+from CopySVGTranslation.workflows import svg_translate_between_files
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -21,13 +21,13 @@ def target_svg(tmp_path: Path) -> Path:
     return target
 
 
-def test_svg_extract_and_inject_creates_translation_files(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_inject should persist both JSON mappings and the translated SVG."""
+def test_svg_translate_between_files_creates_translation_files(tmp_path: Path, target_svg: Path) -> None:
+    """svg_translate_between_files should persist both JSON mappings and the translated SVG."""
     source_svg = FIXTURES_DIR / "source.svg"
     data_output = tmp_path / "translations.json"
     output_svg = tmp_path / "translated.svg"
 
-    tree = svg_extract_and_inject(
+    tree = svg_translate_between_files(
         extract_file=source_svg,
         inject_file=target_svg,
         target_path=output_svg,
@@ -74,11 +74,11 @@ def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
     assert "السكان 2020" in content
 
 
-def test_svg_extract_and_inject_nonexistent_source(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_inject should return None if source file doesn't exist."""
+def test_svg_translate_between_files_nonexistent_source(tmp_path: Path, target_svg: Path) -> None:
+    """svg_translate_between_files should return None if source file doesn't exist."""
     nonexistent_source = tmp_path / "nonexistent_source.svg"
 
-    result = svg_extract_and_inject(
+    result = svg_translate_between_files(
         extract_file=nonexistent_source,
         inject_file=target_svg,
         save_result=False,
@@ -87,12 +87,12 @@ def test_svg_extract_and_inject_nonexistent_source(tmp_path: Path, target_svg: P
     assert result is None, "Should return None when source file doesn't exist"
 
 
-def test_svg_extract_and_inject_nonexistent_target(tmp_path: Path) -> None:
-    """svg_extract_and_inject should return None if target file doesn't exist."""
+def test_svg_translate_between_files_nonexistent_target(tmp_path: Path) -> None:
+    """svg_translate_between_files should return None if target file doesn't exist."""
     source_svg = FIXTURES_DIR / "source.svg"
     nonexistent_target = tmp_path / "nonexistent_target.svg"
 
-    result = svg_extract_and_inject(
+    result = svg_translate_between_files(
         extract_file=source_svg,
         inject_file=nonexistent_target,
         save_result=False,
@@ -101,14 +101,14 @@ def test_svg_extract_and_inject_nonexistent_target(tmp_path: Path) -> None:
     assert result is None, "Should return None when target file doesn't exist"
 
 
-def test_svg_extract_and_inject_with_pathlib_and_string_paths(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_inject should handle both Path and string arguments."""
+def test_svg_translate_between_files_with_pathlib_and_string_paths(tmp_path: Path, target_svg: Path) -> None:
+    """svg_translate_between_files should handle both Path and string arguments."""
     source_svg = FIXTURES_DIR / "source.svg"
     output_svg = tmp_path / "output.svg"
     data_output = tmp_path / "data.json"
 
     # Test with string paths
-    tree = svg_extract_and_inject(
+    tree = svg_translate_between_files(
         extract_file=str(source_svg),  # String path
         inject_file=str(target_svg),  # String path
         target_path=str(output_svg),
@@ -239,13 +239,13 @@ def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
     }
 
 
-def test_svg_extract_and_inject_with_overwrite_true(tmp_path: Path, target_svg: Path) -> None:
-    """svg_extract_and_inject should overwrite existing translations when overwrite=True."""
+def test_svg_translate_between_files_with_overwrite_true(tmp_path: Path, target_svg: Path) -> None:
+    """svg_translate_between_files should overwrite existing translations when overwrite=True."""
     source_svg = FIXTURES_DIR / "source.svg"
     output_svg = tmp_path / "output.svg"
 
     # First injection
-    tree1 = svg_extract_and_inject(
+    tree1 = svg_translate_between_files(
         extract_file=source_svg,
         inject_file=target_svg,
         target_path=output_svg,
@@ -257,7 +257,7 @@ def test_svg_extract_and_inject_with_overwrite_true(tmp_path: Path, target_svg: 
     assert output_svg.exists()
 
     # Second injection with overwrite
-    tree2 = svg_extract_and_inject(
+    tree2 = svg_translate_between_files(
         extract_file=source_svg,
         inject_file=target_svg,
         target_path=output_svg,

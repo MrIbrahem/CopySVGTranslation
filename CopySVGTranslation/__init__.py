@@ -3,7 +3,7 @@
 from .extraction import ExtractorData, SVGTranslationExtractor, extract
 from .injection import InjectorData, SVGTranslationInjector, inject_file_tree
 from .nested_analyze import fix_nested_file, match_nested_tags
-from .workflows import svg_extract_and_inject, svg_extract_and_injects
+from .workflows import svg_translate_between_files, svg_inject_translations
 
 __all__ = [
     # main API
@@ -15,8 +15,8 @@ __all__ = [
     "ExtractorData",
     "InjectorData",
     # workflows
-    "svg_extract_and_inject",
-    "svg_extract_and_injects",
+    "svg_translate_between_files",
+    "svg_inject_translations",
     # others
     "match_nested_tags",
     "fix_nested_file",

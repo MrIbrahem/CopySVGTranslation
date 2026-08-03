@@ -44,8 +44,8 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 | `InjectorData` | `CopySVGTranslation.injection` | **Current** (dataclass) |
 | `extract()` | `CopySVGTranslation.extraction` | Deprecated (wrapper) |
 | `inject()` | `CopySVGTranslation.injection` | Deprecated (wrapper) |
-| `svg_extract_and_inject()` | `CopySVGTranslation.workflows` | **Current** |
-| `svg_extract_and_injects()` | `CopySVGTranslation.workflows` | **Current** |
+| `svg_translate_between_files()` | `CopySVGTranslation.workflows` | **Current** |
+| `svg_inject_translations()` | `CopySVGTranslation.workflows` | **Current** |
 
 ### Core Modules
 
@@ -59,7 +59,7 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 
 -   **`CopySVGTranslation/injection/preparation.py`**: SVG normalization and preparation before injection. Wraps loose text nodes in `<tspan>` elements, creates `<switch>` wrappers, normalizes language tags, assigns unique IDs (`trsvg*`), and detects unsupported structures (nested tspans, tref elements).
 
--   **`CopySVGTranslation/workflows.py`**: High-level convenience functions (`svg_extract_and_inject`, `svg_extract_and_injects`) that combine extraction and injection in one call.
+-   **`CopySVGTranslation/workflows.py`**: High-level convenience functions (`svg_translate_between_files`, `svg_inject_translations`) that combine extraction and injection in one call.
 
 -   **`CopySVGTranslation/utils/text_utils.py`**: Shared text normalization (trim whitespace, collapse internal whitespace, optional case-insensitivity).
 
@@ -73,7 +73,7 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 
 2. **Injection**: SVG file + mapping dict → `SVGTranslationInjector.inject()` → `InjectorData` (with `.new_stats` for stats)
 
-3. **Full workflow**: `svg_extract_and_inject()` extracts from source SVG and injects into target SVG in one step.
+3. **Full workflow**: `svg_translate_between_files()` extracts from source SVG and injects into target SVG in one step.
 
 ### Key Data Structures
 

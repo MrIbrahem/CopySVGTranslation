@@ -8,13 +8,13 @@ from pathlib import Path
 from typing import Any
 
 from .extraction import extract
-from .injection import InjectorData, SVGTranslationInjector, inject_file_tree
+from .injection import InjectorData, SVGTranslationInjector
 from .utils import load_all_mappings
 
 logger = logging.getLogger(__name__)
 
 
-def svg_extract_and_inject(
+def svg_translate_between_files(
     *,
     extract_file: Path | str,
     inject_file: Path | str,
@@ -51,25 +51,29 @@ def svg_extract_and_inject(
         logger.error(f"Failed to extract translations from {extract_path}")
         return None
 
-    tree, stats = inject_file_tree(
-        inject_file=inject_path,
-        all_mappings=all_mappings,
-        overwrite=bool(overwrite),
-        save_path=target_path,
-        save_result=save_result,
+    injector = SVGTranslationInjector(
+        case_insensitive=True,
+        overwrite=overwrite,
         pretty_print=pretty_print,
-        return_stats=True,
     )
 
-    if tree is None:
+    result: InjectorData = injector.inject(
+        inject_file=inject_path,
+        all_mappings=all_mappings,
+        save_result=save_result,
+        save_path=target_path,
+    )
+
+    if result.tree is None:
         logger.error(f"Failed to inject translations into {inject_path}")
     else:
+        stats = result.new_stats.to_json()
         logger.debug("Injection stats: %s", stats)
 
-    return tree
+    return result.tree
 
 
-def svg_extract_and_injects(
+def svg_inject_translations(
     *,
     translations: Mapping,
     inject_file: Path | str,
@@ -102,6 +106,6 @@ def svg_extract_and_injects(
 
 
 __all__ = [
-    "svg_extract_and_inject",
-    "svg_extract_and_injects",
+    "svg_translate_between_files",
+    "svg_inject_translations",
 ]

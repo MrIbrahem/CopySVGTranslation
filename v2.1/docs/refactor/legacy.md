@@ -162,7 +162,7 @@ from ..config import TranslationConfig
 from ..service import SVGTranslationService
 
 
-def svg_extract_and_inject(
+def svg_translate_between_files(
     extract_file: Path | str,
     inject_file: Path | str,
     target_path: Path | None = None,
@@ -174,7 +174,7 @@ def svg_extract_and_inject(
     Deprecated. Use SVGTranslationService.extract_and_inject() instead.
     """
     warnings.warn(
-        "copy_svg_translation.svg_extract_and_inject() is deprecated. "
+        "copy_svg_translation.svg_translate_between_files() is deprecated. "
         "Use SVGTranslationService.extract_and_inject() instead.",
         DeprecationWarning,
         stacklevel=2,
@@ -204,7 +204,7 @@ def svg_extract_and_inject(
     return result.data  # ElementTree or None
 
 
-def svg_extract_and_injects(
+def svg_inject_translations(
     translations: Mapping,
     inject_file: Path | str,
     output_dir: Path | None = None,
@@ -216,7 +216,7 @@ def svg_extract_and_injects(
     Deprecated. Use SVGTranslationService.inject() instead.
     """
     warnings.warn(
-        "copy_svg_translation.svg_extract_and_injects() is deprecated. "
+        "copy_svg_translation.svg_inject_translations() is deprecated. "
         "Use SVGTranslationService.inject() instead.",
         DeprecationWarning,
         stacklevel=2,
@@ -242,13 +242,13 @@ def svg_extract_and_injects(
 # legacy/__init__.py
 from .extract import extract
 from .inject import inject_file_tree
-from .workflows import svg_extract_and_inject, svg_extract_and_injects
+from .workflows import svg_translate_between_files, svg_inject_translations
 
 __all__ = [
     "extract",
     "inject_file_tree",
-    "svg_extract_and_inject",
-    "svg_extract_and_injects",
+    "svg_translate_between_files",
+    "svg_inject_translations",
 ]
 ```
 
@@ -261,8 +261,8 @@ __all__ = [
 | `extract(path)`                   | `dict \| None`        | Same shape as old `to_json()`                                   |
 | `inject(..., return_stats=False)` | `ElementTree \| None` | Same as before                                                  |
 | `inject(..., return_stats=True,)`  | `(tree, stats_dict)`  | `stats` includes `error` on failure                             |
-| `svg_extract_and_inject(...)`     | `ElementTree \| None` | Still may write JSON if `all_mappings_file` or default path used |
-| `svg_extract_and_injects(...)`    | same as `inject`      | Thin redirect                                                   |
+| `svg_translate_between_files(...)`     | `ElementTree \| None` | Still may write JSON if `all_mappings_file` or default path used |
+| `svg_inject_translations(...)`    | same as `inject`      | Thin redirect                                                   |
 
 All of them emit `DeprecationWarning`.
 

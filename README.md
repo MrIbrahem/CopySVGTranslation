@@ -77,9 +77,9 @@ For convenience, the high-level workflow functions combine both phases:
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import svg_extract_and_inject
+from CopySVGTranslation import svg_translate_between_files
 
-tree = svg_extract_and_inject(
+tree = svg_translate_between_files(
     extract_file=Path("examples/source_multilingual.svg"),
     inject_file=Path("examples/target_missing_translations.svg"),
     all_mappings_file=Path("examples/data.json"),
@@ -205,14 +205,14 @@ Dataclass returned by `SVGTranslationInjector.inject()`. See the injector docume
 
 ### High-Level Workflows
 
-#### `svg_extract_and_inject()`
+#### `svg_translate_between_files()`
 
 Extract translations from one SVG and inject them into another in a single call.
 
 ```python
-from CopySVGTranslation import svg_extract_and_inject
+from CopySVGTranslation import svg_translate_between_files
 
-tree = svg_extract_and_inject(
+tree = svg_translate_between_files(
     extract_file: Path | str,
     inject_file: Path | str,
     target_path: Path | None = None,
@@ -222,14 +222,14 @@ tree = svg_extract_and_inject(
 )
 ```
 
-#### `svg_extract_and_injects()`
+#### `svg_inject_translations()`
 
 Inject a pre-built translation mapping into an SVG file.
 
 ```python
-from CopySVGTranslation import svg_extract_and_injects
+from CopySVGTranslation import svg_inject_translations
 
-tree = svg_extract_and_injects(
+tree = svg_inject_translations(
     translations: Mapping,
     inject_file: Path | str,
     target_path: Path | str,
