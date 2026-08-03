@@ -46,13 +46,13 @@ class SVGTranslationInjector:
             stats.error = f"preparation_failed: {exc}"
             return None, stats
 
-        if tree is None:
+        if tree is None or root is None:
             stats.error = "preparation_returned_none_tree"
             return None, stats
 
         # 2. Snapshot languages before
-        before = tree_languages(tree)
-        stats.languages_before = sorted(before)
+        before_languages = tree_languages(tree)
+        stats.languages_before = sorted(before_languages)
 
         # 3. Seed IdManager with existing IDs
         self.id_manager.register_many(root.xpath("//@id"))
@@ -66,10 +66,8 @@ class SVGTranslationInjector:
         # self._finalize_switches(root)
 
         # 6. Languages after + stats
-        after = tree_languages(tree)
-        stats.languages_after = sorted(after - before)
-        stats.all_languages = len(after)
-        stats.new_languages = len(after - before)
+        after_languages = tree_languages(tree)
+        self._update_data(stats, before_languages, after_languages)
 
         # 7. Save if requested
         if save and save_path:
@@ -83,12 +81,19 @@ class SVGTranslationInjector:
         tree, _ = self.preparer.run(svg_path)
         return tree
 
-    def _save(self, tree: etree._ElementTree, path: Path) -> None:
+    def _save(self, tree: etree._ElementTree, save_path: Path) -> None:
         if self.config.create_parents:
-            path.parent.mkdir(parents=True, exist_ok=True)
+            save_path.parent.mkdir(parents=True, exist_ok=True)
         tree.write(
-            str(path),
+            str(save_path),
             encoding="utf-8",
             xml_declaration=True,
             pretty_print=self.config.pretty_print,
         )
+
+    def _update_data(self, stats, before_languages: set[str], after_languages: set[str]) -> None:
+        new_languages = after_languages - before_languages
+
+        stats.all_languages = len(after_languages)
+        stats.new_languages = len(new_languages)
+        stats.languages_after = sorted(new_languages)

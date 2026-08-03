@@ -4,7 +4,7 @@ from pathlib import Path
 from CopySVGTranslation.injection.worker import inject_file_tree
 from CopySVGTranslation.utils.elements_utils import (
     file_langs,
-    tree_langs,
+    tree_languages,
 )
 
 
@@ -36,7 +36,7 @@ def test_inject_tracks_new_languages(tmp_path):
         return_stats=True,
     )
 
-    after_languages = tree_langs(tree)
+    after_languages = tree_languages(tree)
 
     assert before_languages == set()
     assert after_languages == {"ar", "fr"}
@@ -91,4 +91,4 @@ def test_file_langs_handles_element_tree(tmp_path):
         return_stats=True,
     )
 
-    assert tree_langs(tree) == {"ar"}
+    assert tree_languages(tree) == {"ar"}
