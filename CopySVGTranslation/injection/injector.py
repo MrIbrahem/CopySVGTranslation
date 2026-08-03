@@ -8,7 +8,7 @@ from pathlib import Path
 
 from lxml import etree
 
-from ..preparation import SvgTranslationPreparer
+from ..preparation import SvgPreparationPipeline
 from ..utils import (
     sort_switch_texts,
     tree_languages,
@@ -69,8 +69,8 @@ class SVGTranslationInjector:
 
     def _parse_svg(self, inject_path) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
         try:
-            preparer = SvgTranslationPreparer(inject_path)
-            tree, root = preparer.prepare()
+            preparer = SvgPreparationPipeline(inject_path)
+            tree, root = preparer.run(inject_path)
             return tree, root
 
         except SvgNestedTspanExceptionError as exc:

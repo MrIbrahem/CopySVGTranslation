@@ -1,7 +1,7 @@
 """Injection phase helpers for CopySVGTranslation."""
 
 from .exceptions import SvgNestedTspanExceptionError, SvgStructureExceptionError
-from .svg_injector import InjectorData, SVGTranslationInjector
+from .injector import InjectorData, SVGTranslationInjector
 from .worker import inject_file_and_save, inject_file_tree
 
 __all__ = [

@@ -8,8 +8,8 @@ from pathlib import Path
 
 from lxml import etree
 
+from CopySVGTranslation.injection.injector import SVGTranslationInjector
 from CopySVGTranslation.injection.objects import InjectorData, InjectorStats
-from CopySVGTranslation.injection.svg_injector import SVGTranslationInjector
 
 SVG_NS = "http://www.w3.org/2000/svg"
 SVG_NSMAP = {"svg": SVG_NS}

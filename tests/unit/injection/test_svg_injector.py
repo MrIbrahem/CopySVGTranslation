@@ -1,10 +1,10 @@
 # ruff: noqa: F401
 """
-pytest tests for CopySVGTranslation.injection.svg_injector.
+pytest tests for CopySVGTranslation.injection.injector.
 """
 
 import json
 
-from CopySVGTranslation.injection.svg_injector import (
+from CopySVGTranslation.injection.injector import (
     SVGTranslationInjector,
 )

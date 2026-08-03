@@ -40,7 +40,7 @@ class TestInjectorStateIsolation:
 
     def test_stats_do_not_accumulate_across_calls(self, tmp_path: Path):
         """Calling inject() twice should produce independent stats, not accumulated ones."""
-        from CopySVGTranslation.injection.svg_injector import SVGTranslationInjector
+        from CopySVGTranslation.injection.injector import SVGTranslationInjector
 
         inner = '<switch><text id="t0"><tspan id="t0">Hello</tspan></text></switch>'
         svg = _write_svg(tmp_path, inner)
@@ -64,7 +64,7 @@ class TestInjectorStateIsolation:
 
     def test_returned_objects_are_independent(self, tmp_path: Path):
         """Each inject() call should return a fresh InjectorData object."""
-        from CopySVGTranslation.injection.svg_injector import SVGTranslationInjector
+        from CopySVGTranslation.injection.injector import SVGTranslationInjector
 
         inner = '<switch><text id="t0"><tspan id="t0">Hello</tspan></text></switch>'
         svg = _write_svg(tmp_path, inner)
@@ -80,7 +80,7 @@ class TestInjectorStateIsolation:
 
     def test_error_does_not_persist_after_successful_call(self, tmp_path: Path):
         """An error from a failed call should not persist into a subsequent successful call."""
-        from CopySVGTranslation.injection.svg_injector import SVGTranslationInjector
+        from CopySVGTranslation.injection.injector import SVGTranslationInjector
 
         inner = '<switch><text id="t0"><tspan id="t0">Hello</tspan></text></switch>'
         svg = _write_svg(tmp_path, inner)
@@ -98,7 +98,7 @@ class TestInjectorStateIsolation:
 
     def test_error_does_not_persist_after_failed_call(self, tmp_path: Path):
         """Each failed call should have its own error, not the previous one's."""
-        from CopySVGTranslation.injection.svg_injector import SVGTranslationInjector
+        from CopySVGTranslation.injection.injector import SVGTranslationInjector
 
         inj = SVGTranslationInjector()
 
@@ -119,7 +119,7 @@ class TestInjectorStateIsolation:
 
     def test_three_consecutive_calls_produce_correct_stats(self, tmp_path: Path):
         """Three consecutive calls should each produce correct, independent stats."""
-        from CopySVGTranslation.injection.svg_injector import SVGTranslationInjector
+        from CopySVGTranslation.injection.injector import SVGTranslationInjector
 
         inner = '<switch><text id="t0"><tspan id="t0">Hello</tspan></text></switch>'
         svg = _write_svg(tmp_path, inner)
@@ -261,35 +261,35 @@ class TestExtractorStateIsolation:
 
 
 # ===========================================================================
-# BUG-05: SvgTranslationPreparer not idempotent
+# BUG-05: SvgPreparationPipeline not idempotent
 # ===========================================================================
 
 
 class TestPreparerIdempotency:
-    """Verify that SvgTranslationPreparer.prepare() is idempotent."""
+    """Verify that SvgPreparationPipeline.run(svg) is idempotent."""
 
     def test_prepare_called_twice_produces_same_result(self, tmp_path: Path):
         """Calling prepare() twice should produce structurally equivalent results."""
-        from CopySVGTranslation.preparation import SvgTranslationPreparer
+        from CopySVGTranslation.preparation import SvgPreparationPipeline
 
         svg = _write_svg(
             tmp_path,
             '<text id="t1"><tspan id="t1">Hello</tspan></text>',
         )
 
-        preparer = SvgTranslationPreparer(svg)
+        preparer = SvgPreparationPipeline(svg)
 
-        _tree1, root1 = preparer.prepare()
+        _tree1, root1 = preparer.run(svg)
         xml1 = etree.tostring(root1, encoding="unicode")
 
-        _tree2, root2 = preparer.prepare()
+        _tree2, root2 = preparer.run(svg)
         xml2 = etree.tostring(root2, encoding="unicode")
 
         assert xml1 == xml2, "Second prepare() call produced different output"
 
     def test_translatable_nodes_do_not_accumulate(self, tmp_path: Path):
         """translatable_nodes should have the same count after each prepare() call."""
-        from CopySVGTranslation.preparation import SvgTranslationPreparer
+        from CopySVGTranslation.preparation import SvgPreparationPipeline
 
         svg = _write_svg(
             tmp_path,
@@ -301,12 +301,12 @@ class TestPreparerIdempotency:
             """,
         )
 
-        preparer = SvgTranslationPreparer(svg)
+        preparer = SvgPreparationPipeline(svg)
 
-        preparer.prepare()
+        preparer.run(svg)
         count_after_first = len(preparer.translatable_nodes)
 
-        preparer.prepare()
+        preparer.run(svg)
         count_after_second = len(preparer.translatable_nodes)
 
         assert (
@@ -315,26 +315,26 @@ class TestPreparerIdempotency:
 
     def test_existing_ids_do_not_accumulate(self, tmp_path: Path):
         """existing_ids should have the same count after each prepare() call."""
-        from CopySVGTranslation.preparation import SvgTranslationPreparer
+        from CopySVGTranslation.preparation import SvgPreparationPipeline
 
         svg = _write_svg(
             tmp_path,
             '<text id="t1"><tspan id="t1">Hello</tspan></text>',
         )
 
-        preparer = SvgTranslationPreparer(svg)
+        preparer = SvgPreparationPipeline(svg)
 
-        preparer.prepare()
+        preparer.run(svg)
         ids_after_first = set(preparer.existing_ids)
 
-        preparer.prepare()
+        preparer.run(svg)
         ids_after_second = set(preparer.existing_ids)
 
         assert ids_after_first == ids_after_second, f"existing_ids changed: {ids_after_first} → {ids_after_second}"
 
     def test_ids_in_use_reset(self, tmp_path: Path):
         """ids_in_use should be reset between prepare() calls."""
-        from CopySVGTranslation.preparation import SvgTranslationPreparer
+        from CopySVGTranslation.preparation import SvgPreparationPipeline
 
         # SVG with no IDs → preparer will allocate trsvg IDs
         svg = _write_svg(
@@ -342,12 +342,12 @@ class TestPreparerIdempotency:
             "<text>No ID</text>",
         )
 
-        preparer = SvgTranslationPreparer(svg)
+        preparer = SvgPreparationPipeline(svg)
 
-        preparer.prepare()
+        preparer.run(svg)
         ids_after_first = list(preparer.ids_in_use)
 
-        preparer.prepare()
+        preparer.run(svg)
         ids_after_second = list(preparer.ids_in_use)
 
         assert ids_after_first == ids_after_second, f"ids_in_use changed: {ids_after_first} → {ids_after_second}"

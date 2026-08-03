@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from ..utils.injection_utils import load_all_mappings
-from .svg_injector import InjectorData, SVGTranslationInjector
+from .injector import InjectorData, SVGTranslationInjector
 
 logger = logging.getLogger(__name__)
 

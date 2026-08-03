@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from CopySVGTranslation.injection.svg_injector import SVGTranslationInjector
+from CopySVGTranslation.injection.injector import SVGTranslationInjector
 
 
 def work_on_switches(

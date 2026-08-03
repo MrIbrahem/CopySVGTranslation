@@ -28,7 +28,7 @@ def _clone_element(el: etree._Element) -> etree._Element:
     return copy.deepcopy(el)
 
 
-class SvgTranslationPreparer:
+class SvgPreparationPipeline:
     """
     Prepares an SVG file for the translation phase.
 
@@ -52,9 +52,16 @@ class SvgTranslationPreparer:
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
-    def prepare(self) -> tuple[etree._ElementTree, etree._Element]:
+    def run(self, path: Path) -> tuple[etree._ElementTree[etree._Element], etree._Element]:
         """Run all preparation steps and return the resulting tree and root."""
         # Reset per-run state to ensure idempotent behavior
+        self.source_file = Path(str(path))
+        self.tree: etree._ElementTree
+        self.root: etree._Element
+        self.existing_ids: set[str] = set()
+        self.ids_in_use: list[int] = [0]
+        self.translatable_nodes: list[etree._Element] = []
+
         self.translatable_nodes = []
         self.existing_ids = set()
         self.ids_in_use = [0]
@@ -405,13 +412,13 @@ class SvgTranslationPreparer:
 
 def make_translation_ready(source_file: Path | str) -> tuple[etree._ElementTree, etree._Element]:
     """
-    Legacy function-style wrapper around SvgTranslationPreparer, kept for
+    Legacy function-style wrapper around SvgPreparationPipeline, kept for
     backward compatibility with existing callers.
     """
-    return SvgTranslationPreparer(source_file).prepare()
+    return SvgPreparationPipeline(source_file).run(source_file)
 
 
 __all__ = [
-    "SvgTranslationPreparer",
+    "SvgPreparationPipeline",
     "make_translation_ready",
 ]
