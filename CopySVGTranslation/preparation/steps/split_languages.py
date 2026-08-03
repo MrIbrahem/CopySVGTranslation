@@ -100,43 +100,13 @@ class SplitLanguages(PreparationStep):
 
         # Phase 2: perform the actual split/clone. No validation or raising
         # happens from this point on — entries is already known to be valid.
-        # gather existing languages for duplicate detection
-        existing_langs: set[str] = set()
-        # collect children first to avoid modifying while iterating
-
-        children = list(switch)
-        for text_el in children:
-            if not self._validate_text_el_children(text_el):
-                continue
-
-            sys_lang = text_el.get("systemLanguage")
-
-            if not sys_lang:
-                # no systemLanguage: this is a single fallback element, no need to split
-                if "fallback" in existing_langs:
-                    raise SvgStructureError(code="structure-error-multiple-text-same-lang", extra=["fallback"])
-                existing_langs.add("fallback")
-                continue
-
-            real_langs = split_lang_list(sys_lang)
-
-            languages_present: set[str] = set()
-            for extra_lang in real_langs:
-                if extra_lang in languages_present:
-                    raise SvgStructureError(code="structure-error-multiple-lang-in-text", extra=[extra_lang])
-
-                languages_present.add(extra_lang)
-                if extra_lang in existing_langs:
-                    raise SvgStructureError(code="structure-error-multiple-text-same-lang", extra=[extra_lang])
-
+        for text_el, real_langs in entries:
             if len(real_langs) == 1:
                 lang_value = real_langs[0]
                 if lang_value == "fallback":
-                    if sys_lang:
                         text_el.attrib.pop("systemLanguage", None)
                 else:
                     text_el.set("systemLanguage", lang_value)
-                existing_langs.add(lang_value)
                 continue
 
             # Split into multiple single-language <text> nodes
@@ -148,12 +118,9 @@ class SplitLanguages(PreparationStep):
                 text_el.attrib.pop("systemLanguage", None)
             else:
                 text_el.set("systemLanguage", original_lang)
-            existing_langs.add(original_lang)
 
             # For subsequent languages, clone the node and allocate new IDs
             for extra_lang in real_langs[1:]:
-                if extra_lang in existing_langs:
-                    raise SvgStructureError(code="structure-error-multiple-text-same-lang", extra=[extra_lang])
                 cloned = _clone_element(text_el)
                 if extra_lang == "fallback":
                     cloned.attrib.pop("systemLanguage", None)
@@ -163,7 +130,6 @@ class SplitLanguages(PreparationStep):
                 # Assign new unique IDs
                 self._reassign_ids(cloned, ctx)
 
-                existing_langs.add(extra_lang)
                 switch.insert(index + 1, cloned)
                 index += 1
 
@@ -203,6 +169,25 @@ class SplitLanguages(PreparationStep):
                 continue
             if text_el.tag not in ({f"{{{SVG_NS}}}text", "text"}):
                 raise SvgStructureError(code="structure-error-switch-child-not-text")
+
+            # --- language validation ---
+            sys_lang = text_el.get("systemLanguage")
+            real_langs = split_lang_list(sys_lang) if sys_lang else ["fallback"]
+
+            languages_present: set[str] = set()
+            for extra_lang in real_langs:
+                if extra_lang in languages_present:
+                    raise SvgStructureError(code="structure-error-multiple-lang-in-text", extra=[extra_lang])
+
+                languages_present.add(extra_lang)
+
+                if extra_lang in existing_langs:
+                    raise SvgStructureError(code="structure-error-multiple-text-same-lang", extra=[extra_lang])
+
+            existing_langs.update(languages_present)
+            entries.append((text_el, real_langs))
+
+        return entries
 
     def _reassign_ids(self, element: etree._Element, ctx: PreparationContext) -> None:
         if ctx.id_manager is None:
