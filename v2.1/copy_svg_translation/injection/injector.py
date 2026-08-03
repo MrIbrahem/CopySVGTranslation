@@ -8,11 +8,11 @@ from lxml import etree
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
+from ..preparation import SvgPreparationPipeline
 from ..result import InjectorStats
 from ..titles.year_handler import YearTitleHandler
 from ..utils.xml import tree_languages
 from .id_manager import IdManager
-from ..preparation import SvgPreparationPipeline
 from .switch_processor import SwitchProcessor
 from .translation_applier import TranslationApplier
 

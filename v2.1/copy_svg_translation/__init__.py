@@ -21,11 +21,11 @@ from .exceptions import (
     SvgStructureError,
 )
 from .extraction import SVGTranslationExtractor
-from .preparation import SvgPreparationPipeline
 from .injection import SVGTranslationInjector
 from .io import MappingStore, SvgDocument
 from .legacy import extract, inject_file_tree
 from .nested import NestedTspanDetector, NestedTspanFlattener
+from .preparation import SvgPreparationPipeline
 from .result import InjectorStats, OperationResult
 from .service import SVGTranslationService
 from .titles import YearTitleHandler
