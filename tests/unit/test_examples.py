@@ -34,8 +34,8 @@ class TestIntegrationWorkflows:
 
     def test_svg_extract_and_inject_end_to_end(self):
         r = svg_extract_and_inject(
-            self.source_svg,
-            self.target_svg,
+            extract_file=self.source_svg,
+            inject_file=self.target_svg,
             target_path=self.output_svg,
             all_mappings_file=self.data_file,
             save_result=True,

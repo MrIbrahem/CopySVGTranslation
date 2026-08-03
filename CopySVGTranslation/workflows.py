@@ -76,6 +76,7 @@ def svg_extract_and_inject(
 
 
 def svg_extract_and_injects(
+    *,
     translations: Mapping,
     inject_file: Path | str,
     output_dir: Path | None = None,
