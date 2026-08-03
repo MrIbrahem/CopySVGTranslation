@@ -21,7 +21,8 @@ from .exceptions import (
     SvgStructureError,
 )
 from .extraction import SVGTranslationExtractor
-from .injection import SvgPreparationPipeline, SVGTranslationInjector
+from .preparation import SvgPreparationPipeline
+from .injection import SVGTranslationInjector
 from .io import MappingStore, SvgDocument
 from .legacy import extract, inject_file_tree
 from .nested import NestedTspanDetector, NestedTspanFlattener
