@@ -63,33 +63,6 @@ def inject_file_tree(
     return result.tree
 
 
-def inject(
-    inject_file: Path | str | None = None,
-    mapping_files: Iterable[Path | str] | None = None,
-    all_mappings: Mapping | None = None,
-    case_insensitive: bool = True,
-    save_path: Path | None = None,
-    output_dir: Path | None = None,
-    overwrite: bool = False,
-    save_result: bool = False,
-    return_stats: bool = False,
-    pretty_print: bool | None = None,
-) -> tuple[Any, Any] | Any:
-    return inject_file_tree(
-        inject_file=inject_file,
-        mapping_files=mapping_files,
-        all_mappings=all_mappings,
-        case_insensitive=case_insensitive,
-        save_path=save_path,
-        output_dir=output_dir,
-        overwrite=overwrite,
-        save_result=save_result,
-        return_stats=return_stats,
-        pretty_print=pretty_print,
-    )
-
-
 __all__ = [
-    "inject",
     "inject_file_tree",
 ]
