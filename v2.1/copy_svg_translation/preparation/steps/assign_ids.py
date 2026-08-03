@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from ...exceptions import SvgInvalidIdError
-from ...utils.xml import collect_ids
+from ...utils import collect_ids
 from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -15,12 +15,11 @@ class AssignIds(PreparationStep):
 
         # Initialize ID manager if not done
         existing_ids = collect_ids(ctx.root)
-        if ctx.id_manager is None:
-            from ...injection.id_manager import IdManager
 
-            ctx.id_manager = IdManager(existing_ids)
-        else:
-            ctx.id_manager.register_many(existing_ids)
+        if ctx.id_manager is None:
+            raise Exception("ID manager is not initialized")
+
+        ctx.id_manager.register_many(existing_ids)
 
         counter = 1
 

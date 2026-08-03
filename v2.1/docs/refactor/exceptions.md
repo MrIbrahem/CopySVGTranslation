@@ -211,7 +211,7 @@ class ConfigurationError(CopySVGTranslationError):
 ```python
 # Inside SVGTranslationService
 try:
-    mapping = self._get_extractor().extract(path)
+    mapping = self._extractor.extract(path)
 except SvgIOError as exc:
     return OperationResult.fail(str(exc), error_code=exc.code)
 except SvgParseError as exc:

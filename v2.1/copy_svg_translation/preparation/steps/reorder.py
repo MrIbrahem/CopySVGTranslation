@@ -1,7 +1,7 @@
 # injection/steps/reorder.py
 from __future__ import annotations
 
-from ...utils.xml import sort_switch_children
+from ...utils import sort_switch_children
 from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"

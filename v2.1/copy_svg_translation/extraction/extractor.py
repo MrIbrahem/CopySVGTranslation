@@ -10,7 +10,7 @@ from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
 from ..core.switch_node import SwitchNode
 from ..io.svg_document import SvgDocument
-from ..titles.year_handler import YearTitleHandler
+from ..titles import YearTitleHandler
 from ..utils.text import normalize_text
 from .strategies import CompositeMatchingStrategy, MatchingStrategy
 

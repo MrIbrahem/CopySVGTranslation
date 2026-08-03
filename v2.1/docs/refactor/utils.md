@@ -61,10 +61,7 @@ def normalize_lang(lang: str) -> str:
     primary = pieces[0].lower()
     if len(pieces) == 1:
         return primary
-    rest = "-".join(
-        p.upper() if len(p) == 2 else p.title()
-        for p in pieces[1:]
-    )
+    rest = "-".join(p.upper() if len(p) == 2 else p.title() for p in pieces[1:])
     return f"{primary}-{rest}"
 
 
@@ -80,11 +77,7 @@ def split_lang_list(value: str | None) -> list[str]:
     """
     if not value or not value.strip():
         return []
-    return [
-        normalize_lang(part)
-        for part in re.split(r"\s*,\s*", value.strip())
-        if part
-    ]
+    return [normalize_lang(part) for part in re.split(r"\s*,\s*", value.strip()) if part]
 ```
 
 ---
@@ -96,7 +89,6 @@ def split_lang_list(value: str | None) -> list[str]:
 from __future__ import annotations
 
 import re
-from typing import Iterable
 
 from lxml import etree
 
@@ -162,10 +154,7 @@ def sort_switch_children(
     Deterministically reorder <text> children of a <switch>.
     Fallback (no systemLanguage) goes last by default.
     """
-    texts = [
-        c for c in switch
-        if isinstance(c.tag, str) and is_svg_element(c, "text")
-    ]
+    texts = [c for c in switch if isinstance(c.tag, str) and is_svg_element(c, "text")]
 
     def sort_key(el: etree._Element):
         lang = el.get("systemLanguage") or "fallback"

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from lxml import etree
 
+from ..injection.id_manager import IdManager
 from ..config import TranslationConfig
 from .steps import (
     AssignIds,
@@ -30,7 +31,11 @@ class SvgPreparationPipeline:
         ]
 
     def run(self, path: Path) -> tuple[etree._ElementTree[etree._Element], etree._Element]:
-        ctx = PreparationContext(path=path, config=self.config)
+        ctx = PreparationContext(
+            path=path,
+            config=self.config,
+            id_manager=IdManager(),
+        )
         for step in self.steps:
             step.execute(ctx)
         return ctx.tree, ctx.root

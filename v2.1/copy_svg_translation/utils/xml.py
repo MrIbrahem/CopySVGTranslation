@@ -44,8 +44,8 @@ def extract_text_segments(node: etree._Element) -> list[str]:
     """
     tspans = node.xpath("./svg:tspan", namespaces=SVG_NSMAP)
     if tspans:
-        return [t.text or "" for t in tspans]
-    return [node.text or ""]
+        return [t.text.strip() if t.text else "" for t in tspans]
+    return [node.text.strip()] if node.text else [""]
 
 
 def get_text_content(element: etree._Element) -> str:

@@ -393,10 +393,9 @@ class SVGTranslationService:
 
     def __init__(self, config: TranslationConfig | None = None) -> None:
         self.config = config or TranslationConfig()
-        self._extractor = None
-        self._injector = None
-        self._mapping_store = None
-        # Lazy init of collaborators is recommended
+        self._extractor = SVGTranslationExtractor(self.config)
+        self._injector = SVGTranslationInjector(self.config)
+        self._mapping_store = MappingStore(self.config)
 
     # ------------------------------------------------------------------
     # Public API
@@ -427,7 +426,7 @@ class SVGTranslationService:
         svg_path = Path(svg_path)
 
         try:
-            mapping = self._get_extractor().extract(svg_path)
+            mapping = self._extractor.extract(svg_path)
         except Exception as exc:
             logger.exception("Extraction failed for %s", svg_path)
             return OperationResult.fail(
@@ -446,7 +445,7 @@ class SVGTranslationService:
         if save_mapping:
             try:
                 out = self._resolve_mapping_output(svg_path, save_mapping)
-                self._get_mapping_store().save(mapping, out)
+                self._mapping_store.save(mapping, out)
             except (OSError, Exception) as exc:
                 warnings.append(f"Failed to save mapping: {exc}")
 
@@ -490,7 +489,7 @@ class SVGTranslationService:
         try:
             normalized = TranslationMapping.from_any(mapping)
             resolved_output = self._resolve_output_path(output) if output else None
-            tree, stats = self._get_injector().inject(
+            tree, stats = self._injector.inject(
                 svg_path,
                 normalized,
                 save_path=resolved_output,
@@ -566,7 +565,7 @@ class SVGTranslationService:
         svg_path = Path(svg_path)
 
         try:
-            tree = self._get_injector().prepare(svg_path)
+            tree = self._injector.prepare(svg_path)
             if output:
                 resolved_output = self._resolve_output_path(output)
                 self._save_tree(tree, resolved_output)
@@ -584,7 +583,7 @@ class SVGTranslationService:
     def load_mapping(self, path: Path | str) -> OperationResult[TranslationMapping]:
         """Load a previously saved JSON mapping file."""
         try:
-            mapping = self._get_mapping_store().load(Path(path))
+            mapping = self._mapping_store.load(Path(path))
             return OperationResult.ok(data=mapping)
         except Exception as exc:
             return OperationResult.fail(error=str(exc), error_code="load_mapping_error")
@@ -597,7 +596,7 @@ class SVGTranslationService:
         """Save a mapping to JSON."""
         path = Path(path)
         try:
-            self._get_mapping_store().save(mapping, path)
+            self._mapping_store.save(mapping, path)
             return OperationResult.ok(data=path)
         except Exception as exc:
             return OperationResult.fail(error=str(exc), error_code="save_mapping_error")
@@ -605,24 +604,6 @@ class SVGTranslationService:
     # ------------------------------------------------------------------
     # Internal helpers (lazy collaborators)
     # ------------------------------------------------------------------
-
-    def _get_extractor(self):
-        if self._extractor is None:
-            from .extraction.extractor import SVGTranslationExtractor
-            self._extractor = SVGTranslationExtractor(self.config)
-        return self._extractor
-
-    def _get_injector(self):
-        if self._injector is None:
-            from .injection.injector import SVGTranslationInjector
-            self._injector = SVGTranslationInjector(self.config)
-        return self._injector
-
-    def _get_mapping_store(self):
-        if self._mapping_store is None:
-            from .io.mapping_store import MappingStore
-            self._mapping_store = MappingStore(self.config)
-        return self._mapping_store
 
     def _resolve_output_path(self, output: Path | str) -> Path:
         """
@@ -639,13 +620,11 @@ class SVGTranslationService:
         svg_path: Path,
         save_mapping: bool | Path,
     ) -> Path:
-        if isinstance(save_mapping, (str, Path)):
+        if isinstance(save_mapping, str | Path):
             return Path(save_mapping)
 
         if self.config.mapping_output_dir is None:
-            raise ValueError(
-                "mapping_output_dir is not configured; cannot resolve mapping output path"
-            )
+            raise ValueError("mapping_output_dir is not configured; cannot resolve mapping output path")
 
         base_dir = self.config.mapping_output_dir
         if self.config.create_parents:
