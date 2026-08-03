@@ -1,7 +1,10 @@
 # injection/steps/normalize_tspans.py
 from __future__ import annotations
+import re
 
 from lxml import etree
+
+from ...injection import SvgStructureExceptionError
 
 from ...exceptions import SvgNestedTspanExceptionError
 from .base import PreparationContext, PreparationStep
@@ -59,4 +62,53 @@ class WrapTspans(PreparationStep):
 
             # accumulate the text element itself as translatable node
             ctx.translatable_nodes.append(text)
+
+        self._clean_ids_and_remove_empty_nodes(ctx)
+        self._rebuild_translatable_nodes(ctx)
+
+
+    def _clean_ids_and_remove_empty_nodes(self, ctx: PreparationContext) -> None:
+        """Normalize/validate ids on translatable nodes and drop empty nodes."""
+        for node in list(ctx.translatable_nodes):
+            node_id = node.get("id")
+            if node_id is not None:
+                original_id = node_id
+                node_id = node_id.strip()
+                if node_id != original_id:
+                    ctx.existing_ids.discard(original_id)
+                if not node_id:
+                    node.attrib.pop("id", None)
+                    node_id = None
+                else:
+                    node.set("id", node_id)
+                    if "|" in node_id or "/" in node_id:
+                        raise SvgStructureExceptionError("structure-error-invalid-node-id", node, [node_id])
+                    m = re.match(r"^trsvg([0-9]+)$", node_id)
+                    if m:
+                        ctx.ids_in_use.append(int(m.group(1)))
+                    if node_id.isdigit():
+                        node.attrib.pop("id", None)
+                        ctx.existing_ids.discard(node_id)
+                        node_id = None
+                    else:
+                        ctx.existing_ids.add(node_id)
+            # remove empty nodes with no children and no text
+            if (not list(node)) and (not (node.text and node.text.strip())):
+                node_id = node.get("id")
+                if node_id:
+                    ctx.existing_ids.discard(node_id)
+                parent = node.getparent()
+                if parent is not None:
+                    parent.remove(node)
+                # also remove from translatable_nodes list
+                try:
+                    ctx.translatable_nodes.remove(node)
+                except ValueError:
+                    pass
+
+    def _rebuild_translatable_nodes(self, ctx: PreparationContext) -> None:
+        """Rebuild translatable_nodes after removals (tspans then texts)."""
+        ctx.translatable_nodes = []
+        ctx.translatable_nodes.extend(ctx.root.findall(".//{%s}tspan" % SVG_NS))
+        ctx.translatable_nodes.extend(ctx.root.findall(".//{%s}text" % SVG_NS))
 

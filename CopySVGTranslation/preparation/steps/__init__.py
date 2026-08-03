@@ -6,8 +6,8 @@ from .assign_ids import AssignIds
 from .normalize_tspans import NormalizeTspans, WrapTspans
 from .validate import ValidateStructure
 
-# from .reorder import ReorderTexts
-# from .split_languages import SplitLanguages
+from .reorder import ReorderTexts
+from .split_languages import SplitLanguages
 
 __all__ = [
     "LoadDocument",
@@ -16,7 +16,7 @@ __all__ = [
     "NormalizeTspans",
     "PreparationContext",
     "PreparationStep",
-    # "ReorderTexts",
-    # "SplitLanguages",
+    "ReorderTexts",
+    "SplitLanguages",
     "ValidateStructure",
 ]

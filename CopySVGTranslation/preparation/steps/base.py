@@ -21,6 +21,7 @@ class PreparationContext:
     # id_manager: IdManager | None = None
     translatable_nodes: list[etree._Element] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    ids_in_use: list[int] = field(default_factory=list)
     existing_ids: set[str] = field(default_factory=set)
 
 class PreparationStep(ABC):

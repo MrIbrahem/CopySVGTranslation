@@ -1,5 +1,8 @@
+"""Utilities to prepare SVG files for the injection phase."""
+
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 from lxml import etree
@@ -16,6 +19,8 @@ from .steps import (
     SplitLanguages,
     ValidateStructure,
 )
+logger = logging.getLogger(__name__)
+
 
 
 class SvgPreparationPipeline:
@@ -53,4 +58,5 @@ class SvgPreparationPipeline:
         )
         for step in self.steps:
             step.execute(ctx)
+
         return ctx.tree, ctx.root
