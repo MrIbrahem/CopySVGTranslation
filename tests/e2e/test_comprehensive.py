@@ -129,8 +129,8 @@ class TestInjector:
         assert tree is not None
         assert stats is not None
 
-    def test_inject_with_output_dir(self, temp_dir):
-        """Test inject with output_dir parameter."""
+    def test_inject_with_save_path(self, temp_dir):
+        """Test inject with save_path parameter."""
         svg_path = temp_dir / "test.svg"
         out_dir = temp_dir / "out"
         out_dir.mkdir()

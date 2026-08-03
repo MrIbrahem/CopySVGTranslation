@@ -56,7 +56,6 @@ def svg_extract_and_injects(
     *,
     translations: Mapping,
     inject_file: Path | str,
-    output_dir: Path | None = None,
     overwrite: bool | None = None,
     pretty_print: bool | None = None,
     save_result: bool = False,
@@ -71,13 +70,6 @@ def svg_extract_and_injects(
         stacklevel=2,
     )
     inject_path = Path(str(inject_file))
-    _target_path: Path | None = target_path
-
-    if save_result and not _target_path:
-        if output_dir:
-            _target_path = Path(str(output_dir)) / inject_path.name
-        else:
-            _target_path = inject_path.parent / "translated" / inject_path.name
 
     from .inject import inject_file_tree
 
@@ -85,7 +77,7 @@ def svg_extract_and_injects(
         inject_file=inject_path,
         all_mappings=translations,
         save_result=save_result,
-        save_path=_target_path,
+        save_path=target_path,
         overwrite=overwrite,
         pretty_print=pretty_print,
     )

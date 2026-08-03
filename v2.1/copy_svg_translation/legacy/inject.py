@@ -45,14 +45,6 @@ def inject_file_tree(
         return (None, {"error": "No valid mappings found"}) if return_stats else None
 
     inject_path = Path(str(inject_file))
-    target: Path | None = None
-    if save_result:
-        if save_path:
-            target = Path(save_path)
-        elif output_dir:
-            target = Path(output_dir) / inject_path.name
-        else:
-            target = inject_path.parent / "translated" / inject_path.name
 
     config = TranslationConfig(
         case_insensitive=case_insensitive,
@@ -76,3 +68,34 @@ def inject_file_tree(
         return result.data, stats
 
     return result.data
+
+
+def inject_file_and_save(
+    *,
+    inject_file: Path | str | None = None,
+    mapping_files: Iterable[Path | str] | None = None,
+    all_mappings: Mapping | None = None,
+    case_insensitive: bool = True,
+    save_path: Path,
+    overwrite: bool = False,
+    return_stats: bool = False,
+    pretty_print: bool | None = None,
+) -> tuple[Any, Any] | Any:
+
+    return inject_file_tree(
+        inject_file=inject_file,
+        mapping_files=mapping_files,
+        all_mappings=all_mappings,
+        case_insensitive=case_insensitive,
+        overwrite=overwrite,
+        pretty_print=pretty_print,
+        save_path=save_path,
+        save_result=True,
+        return_stats=return_stats,
+    )
+
+
+__all__ = [
+    "inject_file_and_save",
+    "inject_file_tree",
+]

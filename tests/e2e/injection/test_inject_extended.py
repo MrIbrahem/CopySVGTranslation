@@ -17,8 +17,8 @@ class TestSetup:
     def setUp(self):
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
-        self.output_dir = self.test_dir / "output"
-        self.output_dir.mkdir()
+        self._output_dir = self.test_dir / "output"
+        self._output_dir.mkdir()
 
         yield
         """Clean up test fixtures."""

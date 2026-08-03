@@ -54,9 +54,9 @@ def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
     """inject should reuse an already-extracted mapping structure."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
-    output_dir = tmp_path / "outputs"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_file = output_dir / target_svg.name
+    _output_dir = tmp_path / "outputs"
+    _output_dir.mkdir(parents=True, exist_ok=True)
+    output_file = _output_dir / target_svg.name
 
     tree, stats = inject_file_and_save(
         inject_file=target_svg,
@@ -119,8 +119,8 @@ def test_svg_extract_and_inject_with_pathlib_and_string_paths(tmp_path: Path, ta
     assert tree is not None
 
 
-def test_inject_without_output_dir(tmp_path: Path, target_svg: Path) -> None:
-    """inject should handle missing output_dir when save_result=False."""
+def test_inject_without_save_path(tmp_path: Path, target_svg: Path) -> None:
+    """inject should handle missing save_path when save_result=False."""
     translations = extract(FIXTURES_DIR / "source.svg")
 
     tree, stats = inject_file_tree(

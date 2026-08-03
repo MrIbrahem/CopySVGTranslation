@@ -78,7 +78,7 @@ class TestExtractorEdgeCases:
 class TestInjectionEdgeCases:
     """Edge case tests for injection."""
 
-    def test_inject_with_output_directory(self, temp_dir):
+    def test_inject_with_save_path(self, temp_dir):
         """Test inject saves to specified output directory."""
         svg = temp_dir / "test.svg"
         out_dir = temp_dir / "out"

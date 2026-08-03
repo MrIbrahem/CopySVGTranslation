@@ -78,5 +78,6 @@ def inject_file_and_save(
 
 
 __all__ = [
+    "inject_file_and_save",
     "inject_file_tree",
 ]

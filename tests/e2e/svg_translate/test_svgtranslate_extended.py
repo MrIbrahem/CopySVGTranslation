@@ -175,18 +175,18 @@ class TestSVGTranslate(TestSetup):
         with open(_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
-        output_dir = self.test_dir / "output"
-        output_dir.mkdir()
+        _output_dir = self.test_dir / "output"
+        _output_dir.mkdir()
 
         tree = inject_file_and_save(
             inject_file=_path,
             mapping_files=[mapping_path],
-            save_path=output_dir / _path.name,
+            save_path=_output_dir / _path.name,
         )
 
         assert tree is not None
         # Check that file was saved in output directory
-        expected_output = output_dir / _path.name
+        expected_output = _output_dir / _path.name
         assert expected_output.exists() is True
 
     def test_inject_preserves_original_structure(self):
