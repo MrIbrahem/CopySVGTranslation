@@ -1,25 +1,6 @@
 ```
 v2.1/
 ├── copy_svg_translation/
-│   ├── preparation/
-│   │   ├── steps/
-│   │   │   ├── __init__.py
-│   │   │   ├── assign_ids.py
-│   │   │   ├── base.py
-│   │   │   ├── load.py
-│   │   │   ├── normalize_tspans.py
-│   │   │   ├── reorder.py
-│   │   │   ├── split_languages.py
-│   │   │   └── validate.py
-│   │   ├── __init__.py
-│   │   └── preparer.py
-│   ├── injection/
-│   │   ├── __init__.py
-│   │   ├── id_manager.py
-│   │   ├── injector.py
-│   │   ├── README.md
-│   │   ├── switch_processor.py
-│   │   └── translation_applier.py
 │   ├── core/
 │   │   ├── __init__.py
 │   │   ├── mapping.py
@@ -32,6 +13,13 @@ v2.1/
 │   │   ├── extractor.py
 │   │   ├── README.md
 │   │   └── strategies.py
+│   ├── injection/
+│   │   ├── __init__.py
+│   │   ├── id_manager.py
+│   │   ├── injector.py
+│   │   ├── README.md
+│   │   ├── switch_processor.py
+│   │   └── translation_applier.py
 │   ├── io/
 │   │   ├── __init__.py
 │   │   ├── mapping_store.py
@@ -46,6 +34,19 @@ v2.1/
 │   │   ├── __init__.py
 │   │   ├── detector.py
 │   │   ├── flattener.py
+│   │   └── README.md
+│   ├── preparation/
+│   │   ├── steps/
+│   │   │   ├── __init__.py
+│   │   │   ├── assign_ids.py
+│   │   │   ├── base.py
+│   │   │   ├── load.py
+│   │   │   ├── normalize_tspans.py
+│   │   │   ├── reorder.py
+│   │   │   ├── split_languages.py
+│   │   │   └── validate.py
+│   │   ├── __init__.py
+│   │   ├── preparer.py
 │   │   └── README.md
 │   ├── titles/
 │   │   ├── __init__.py
