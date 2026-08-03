@@ -30,8 +30,8 @@ class TestWorkflows:
         target_svg.write_text(target_content, encoding="utf-8")
 
         result = svg_extract_and_inject(
-            source_svg,
-            target_svg,
+            extract_file=source_svg,
+            inject_file=target_svg,
             target_path=output_svg,
             all_mappings_file=data_output,
             save_result=True,
@@ -46,8 +46,8 @@ class TestWorkflows:
         target_svg.write_text("<svg></svg>", encoding="utf-8")
 
         result = svg_extract_and_inject(
-            temp_dir / "none.svg",
-            target_svg,
+            extract_file=temp_dir / "none.svg",
+            inject_file=target_svg,
             save_result=False,
         )
         assert result is None

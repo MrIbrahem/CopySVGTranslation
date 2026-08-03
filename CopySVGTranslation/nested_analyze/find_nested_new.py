@@ -177,7 +177,7 @@ def fix_nested_file(source_file: Path, new_path: Path | None = None, pretty_prin
     root = fix_nested_tspans(root, "a")
     # ---
     try:
-        _str = etree.tostring(root, encoding="unicode", pretty_print=pretty_print)
+        _str = etree.tostring(root, encoding="unicode", pretty_print=pretty_print)  # pyright: ignore[reportCallIssue]
         new_path.write_text(_str, encoding="utf-8")
         return True
     except Exception:

@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def svg_extract_and_inject(
+    *,
     extract_file: Path | str,
     inject_file: Path | str,
     target_path: Path | None = None,

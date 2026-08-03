@@ -28,8 +28,8 @@ def test_svg_extract_and_inject_creates_translation_files(tmp_path: Path, target
     output_svg = tmp_path / "translated.svg"
 
     tree = svg_extract_and_inject(
-        source_svg,
-        target_svg,
+        extract_file=source_svg,
+        inject_file=target_svg,
         target_path=output_svg,
         all_mappings_file=data_output,
         overwrite=True,
@@ -78,8 +78,8 @@ def test_svg_extract_and_inject_nonexistent_source(tmp_path: Path, target_svg: P
     nonexistent_source = tmp_path / "nonexistent_source.svg"
 
     result = svg_extract_and_inject(
-        nonexistent_source,
-        target_svg,
+        extract_file=nonexistent_source,
+        inject_file=target_svg,
         save_result=False,
     )
 
@@ -92,8 +92,8 @@ def test_svg_extract_and_inject_nonexistent_target(tmp_path: Path) -> None:
     nonexistent_target = tmp_path / "nonexistent_target.svg"
 
     result = svg_extract_and_inject(
-        source_svg,
-        nonexistent_target,
+        extract_file=source_svg,
+        inject_file=nonexistent_target,
         save_result=False,
     )
 
@@ -108,8 +108,8 @@ def test_svg_extract_and_inject_with_pathlib_and_string_paths(tmp_path: Path, ta
 
     # Test with string paths
     tree = svg_extract_and_inject(
-        str(source_svg),  # String path
-        str(target_svg),  # String path
+        extract_file=str(source_svg),  # String path
+        inject_file=str(target_svg),  # String path
         target_path=str(output_svg),
         all_mappings_file=str(data_output),
         save_result=True,
@@ -245,8 +245,8 @@ def test_svg_extract_and_inject_with_overwrite_true(tmp_path: Path, target_svg: 
 
     # First injection
     tree1 = svg_extract_and_inject(
-        source_svg,
-        target_svg,
+        extract_file=source_svg,
+        inject_file=target_svg,
         target_path=output_svg,
         overwrite=True,
         save_result=True,
@@ -257,8 +257,8 @@ def test_svg_extract_and_inject_with_overwrite_true(tmp_path: Path, target_svg: 
 
     # Second injection with overwrite
     tree2 = svg_extract_and_inject(
-        source_svg,
-        target_svg,
+        extract_file=source_svg,
+        inject_file=target_svg,
         target_path=output_svg,
         overwrite=True,
         save_result=True,
