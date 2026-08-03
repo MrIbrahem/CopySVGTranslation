@@ -18,12 +18,12 @@ class ValidateStructure(PreparationStep):
             return
 
         # <tref> elements are not supported.
-        trefs = ctx.root.findall(".//{%s}tref" % SVG_NS)
+        trefs = ctx.root.findall(f".//{{{SVG_NS}}}tref")
         if len(trefs) != 0:
             raise SvgContainsTrefError("structure-error-contains-tref", element=trefs[0])
 
         # 2. Check CSS styling
-        styles = ctx.root.findall(".//{%s}style" % SVG_NS)
+        styles = ctx.root.findall(f".//{{{SVG_NS}}}style")
         for s in styles:
             css = s.text or ""
             if "#" in css:

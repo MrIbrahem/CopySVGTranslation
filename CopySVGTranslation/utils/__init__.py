@@ -11,7 +11,7 @@ from .injection_utils import (
     generate_unique_id,
     load_all_mappings,
 )
-from .text_utils import normalize_lang, normalize_text
+from .text_utils import normalize_lang, normalize_text, split_lang_list
 
 __all__ = [
     "sort_switch_children",
@@ -25,4 +25,5 @@ __all__ = [
     "load_all_mappings",
     "normalize_text",
     "extract_text_from_node",
+    "split_lang_list",
 ]

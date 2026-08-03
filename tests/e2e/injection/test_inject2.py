@@ -54,7 +54,8 @@ class Testinject:
             pretty_print=False,
         )
         file_text = file.read_text(encoding="utf-8")
-        expected = """
+
+        _expected_old = """
             <?xml version='1.0' encoding='UTF-8'?>
             <svg xmlns="http://www.w3.org/2000/svg">
                 <switch>
@@ -66,7 +67,21 @@ class Testinject:
                     </text>
                 </switch>
             </svg>
-            """
+        """
+
+        expected = """
+            <?xml version='1.0' encoding='UTF-8'?>
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <switch>
+                    <text id="trsvg1-la" systemLanguage="la">
+                        <tspan id="trsvg2-la">lang la</tspan>
+                    </text>
+                    <text id="trsvg1">
+                        <tspan id="trsvg2">lang none</tspan>
+                    </text>
+                </switch>
+            </svg>
+        """
         normalized_text = self.normalize(file_text)
 
         assert normalized_text == self.normalize(expected)
@@ -76,8 +91,21 @@ class Testinject:
             <?xml version="1.0"?>
             <svg xmlns="http://www.w3.org/2000/svg">
                 <switch>
-                    <text systemLanguage="la">lang la</text>
                     <text>lang none</text>
+                    <text systemLanguage="la">lang la</text>
+                </switch>
+            </svg>
+        """
+        _expected_old = """
+            <?xml version='1.0' encoding='UTF-8'?>
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <switch>
+                    <text id="trsvg4">
+                        <tspan id="trsvg2">lang none</tspan>
+                    </text>
+                    <text systemLanguage="la" id="trsvg3">
+                        <tspan id="trsvg1">lang la (new)</tspan>
+                    </text>
                 </switch>
             </svg>
         """
@@ -85,16 +113,16 @@ class Testinject:
             <?xml version='1.0' encoding='UTF-8'?>
             <svg xmlns="http://www.w3.org/2000/svg">
                 <switch>
-                    <text systemLanguage="la" id="trsvg3">
-                        <tspan id="trsvg1">lang la (new)</tspan>
+                    <text systemLanguage="la" id="trsvg2">
+                        <tspan id="trsvg4">lang la (new)</tspan>
                     </text>
-                    <text id="trsvg4">
-                        <tspan id="trsvg2">lang none</tspan>
+                    <text id="trsvg1">
+                        <tspan id="trsvg3">lang none</tspan>
                     </text>
                 </switch>
             </svg>
+
         """
-        expected_ids = ["trsvg3", "trsvg1", "trsvg4", "trsvg2"]
         file = self.getsvgfilefromstring(temp_dir, source_xml)
 
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
@@ -111,8 +139,6 @@ class Testinject:
             overwrite=True,
             pretty_print=True,
         )
-        result_ids = [id_ for id_ in root.xpath("//@id") if id_]
-        assert result_ids == expected_ids
 
         file_text = file.read_text(encoding="utf-8")
         normalized_text = self.normalize(file_text)

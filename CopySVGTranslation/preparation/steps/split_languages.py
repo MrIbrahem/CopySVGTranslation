@@ -7,7 +7,7 @@ import re
 from lxml import etree
 
 from ...exceptions import SvgStructureError
-from ...utils import normalize_lang
+from ...utils import normalize_lang, split_lang_list
 from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -82,77 +82,86 @@ class SplitLanguages(PreparationStep):
     def _split_switch_languages(self, ctx: PreparationContext) -> None:
         """Split comma-separated systemLanguage values into cloned <text> nodes."""
         switches = ctx.root.findall(f".//{{{SVG_NS}}}switch")
-        for sw in switches:
-            # gather existing languages for duplicate detection
-            existing_langs: set[str] = set()
-            # collect children first to avoid modifying while iterating
-            children = list(sw)
-            for child in children:
-                if not isinstance(child.tag, str):
-                    # ignore comments etc, but if there's text content outside elements, check whitespace
-                    if child.text and child.text.strip():
-                        raise SvgStructureError("structure-error-switch-text-content-outside-text")
-                    continue
-                if child.tag not in ({f"{{{SVG_NS}}}text", "text"}):
-                    raise SvgStructureError("structure-error-switch-child-not-text")
+        for switch in switches:
+            self._split_languages_in_switch(switch, ctx)
 
-                language_attr = child.get("systemLanguage")
-                real_langs = re.split(r",\s*", language_attr) if language_attr else ["fallback"]
+    def _split_languages_in_switch(self, switch: etree._Element, ctx: PreparationContext) -> None:
+        # gather existing languages for duplicate detection
+        existing_langs: set[str] = set()
+        # collect children first to avoid modifying while iterating
+        children = list(switch)
+        for text_el in children:
+            if not isinstance(text_el.tag, str):
+                # ignore comments etc, but if there's text content outside elements, check whitespace
+                if text_el.text and text_el.text.strip():
+                    raise SvgStructureError("structure-error-switch-text-content-outside-text")
+                continue
+            if text_el.tag not in ({f"{{{SVG_NS}}}text", "text"}):
+                raise SvgStructureError("structure-error-switch-child-not-text")
 
-                languages_present: set[str] = set()
-                for real in real_langs:
-                    if real in languages_present:
-                        raise SvgStructureError("structure-error-multiple-lang-in-text", extra=[real])
-                    languages_present.add(real)
-                    if real in existing_langs:
-                        raise SvgStructureError("structure-error-multiple-text-same-lang", extra=[real])
+            sys_lang = text_el.get("systemLanguage")
+            real_langs = split_lang_list(sys_lang) if sys_lang else ["fallback"]
 
-                if len(real_langs) == 1:
-                    lang_value = real_langs[0]
-                    if lang_value == "fallback":
-                        if language_attr:
-                            child.attrib.pop("systemLanguage", None)
-                    else:
-                        child.set("systemLanguage", lang_value)
-                    existing_langs.add(lang_value)
-                    continue
+            languages_present: set[str] = set()
+            for extra_lang in real_langs:
+                if extra_lang in languages_present:
+                    raise SvgStructureError("structure-error-multiple-lang-in-text", extra=[extra_lang])
 
-                original_lang = real_langs[0]
-                if original_lang == "fallback":
-                    child.attrib.pop("systemLanguage", None)
+                languages_present.add(extra_lang)
+                if extra_lang in existing_langs:
+                    raise SvgStructureError("structure-error-multiple-text-same-lang", extra=[extra_lang])
+
+            if len(real_langs) == 1:
+                lang_value = real_langs[0]
+                if lang_value == "fallback":
+                    if sys_lang:
+                        text_el.attrib.pop("systemLanguage", None)
                 else:
-                    child.set("systemLanguage", original_lang)
-                existing_langs.add(original_lang)
+                    text_el.set("systemLanguage", lang_value)
+                existing_langs.add(lang_value)
+                continue
 
-                base_id = child.get("id")
-                for real in real_langs[1:]:
-                    if real in existing_langs:
-                        raise SvgStructureError("structure-error-multiple-text-same-lang", extra=[real])
-                    cloned = _clone_element(child)
-                    if real == "fallback":
-                        cloned.attrib.pop("systemLanguage", None)
-                    else:
-                        cloned.set("systemLanguage", real)
-                    new_id = self._allocate_clone_id(ctx, base_id, real)
-                    cloned.set("id", new_id)
-                    existing_langs.add(real)
-                    sw.append(cloned)
+            # Split into multiple single-language <text> nodes
+            parent_list = list(switch)
+            index = parent_list.index(text_el)
 
-    def _allocate_clone_id(self, ctx, base_id: str | None, lang: str) -> str:
+            original_lang = real_langs[0]
+            if original_lang == "fallback":
+                text_el.attrib.pop("systemLanguage", None)
+            else:
+                text_el.set("systemLanguage", original_lang)
+            existing_langs.add(original_lang)
+
+            # For subsequent languages, clone the node and allocate new IDs
+            for extra_lang in real_langs[1:]:
+                if extra_lang in existing_langs:
+                    raise SvgStructureError("structure-error-multiple-text-same-lang", extra=[extra_lang])
+                cloned = _clone_element(text_el)
+                if extra_lang == "fallback":
+                    cloned.attrib.pop("systemLanguage", None)
+                else:
+                    cloned.set("systemLanguage", extra_lang)
+
+                # Assign new unique IDs
+                self._reassign_ids(cloned, ctx, extra_lang)
+
+                existing_langs.add(extra_lang)
+                switch.insert(index + 1, cloned)
+                index += 1
+
+    def _allocate_clone_id(self, ctx, base_id: str, lang: str) -> str:
         """Allocate a unique identifier for a cloned ``<text>`` node."""
-        if base_id and re.match(r"^trsvg[0-9]+$", base_id):
-            return self._allocate_trsvg_id(ctx)
 
-        if base_id:
-            base_candidate = f"{base_id}-{lang}"
-            candidate = base_candidate
-            suffix = 1
-            while candidate in ctx.id_manager.existing_ids:
-                suffix += 1
-                candidate = f"{base_candidate}-{suffix}"
-            ctx.id_manager.register(candidate)
-            return candidate
-        return self._allocate_trsvg_id(ctx)
+        base_candidate = f"{base_id}-{lang}"
+        candidate = base_candidate
+        suffix = 1
+
+        while candidate in ctx.id_manager.existing_ids:
+            suffix += 1
+            candidate = f"{base_candidate}-{suffix}"
+        ctx.id_manager.register(candidate)
+
+        return candidate
 
     # ------------------------------------------------------------------
     # Step 3: id allocation helpers
@@ -168,3 +177,16 @@ class SplitLanguages(PreparationStep):
         # ctx.ids_in_use.append(counter)
         ctx.id_manager.register(new_id)
         return new_id
+
+    def _reassign_ids(self, element: etree._Element, ctx: PreparationContext, extra_lang: str) -> None:
+        if ctx.id_manager is None:
+            return
+
+        el_id = element.get("id")
+
+        if el_id and not re.match(r"^trsvg[0-9]+$", el_id):
+            new_id = self._allocate_clone_id(ctx, el_id, extra_lang)
+        else:
+            new_id = self._allocate_trsvg_id(ctx)
+
+        element.set("id", new_id)

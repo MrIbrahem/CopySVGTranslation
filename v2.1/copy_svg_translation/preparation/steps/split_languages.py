@@ -11,11 +11,19 @@ from .base import PreparationContext, PreparationStep
 SVG_NS = "http://www.w3.org/2000/svg"
 
 
+def _clone_element(el: etree._Element) -> etree._Element:
+    """Deep-clone an element."""
+    return copy.deepcopy(el)
+
+
 class SplitLanguages(PreparationStep):
     def execute(self, ctx: PreparationContext) -> None:
         if ctx.root is None:
             return
 
+        # ------------------------------------------------------------------
+        # Step 6: <switch> language splitting
+        # ------------------------------------------------------------------
         switches = ctx.root.findall(f".//{{{SVG_NS}}}switch")
         for switch in switches:
             self._split_languages_in_switch(switch, ctx)
@@ -27,11 +35,11 @@ class SplitLanguages(PreparationStep):
             if not sys_lang:
                 continue
 
-            langs = split_lang_list(sys_lang)
-            if len(langs) <= 1:
+            real_langs = split_lang_list(sys_lang)
+            if len(real_langs) <= 1:
                 # 0 or 1 languages, standard systemLanguage
-                if langs:
-                    text_el.set("systemLanguage", langs[0])
+                if real_langs:
+                    text_el.set("systemLanguage", real_langs[0])
                 continue
 
             # Split into multiple single-language <text> nodes
@@ -39,11 +47,11 @@ class SplitLanguages(PreparationStep):
             index = parent_list.index(text_el)
 
             # Keep the first language in the original node
-            text_el.set("systemLanguage", langs[0])
+            text_el.set("systemLanguage", real_langs[0])
 
             # For subsequent languages, clone the node and allocate new IDs
-            for extra_lang in langs[1:]:
-                cloned = copy.deepcopy(text_el)
+            for extra_lang in real_langs[1:]:
+                cloned = _clone_element(text_el)
                 cloned.set("systemLanguage", extra_lang)
 
                 # Assign new unique IDs
