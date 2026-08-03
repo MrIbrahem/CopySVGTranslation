@@ -10,11 +10,10 @@ from lxml import etree
 
 from .config import TranslationConfig
 from .core.mapping import TranslationMapping
-from .result import InjectResult, OperationResult
-
 from .extraction.extractor import SVGTranslationExtractor
 from .injection.injector import SVGTranslationInjector
 from .io.mapping_store import MappingStore
+from .result import InjectResult, OperationResult
 
 logger = logging.getLogger(__name__)
 

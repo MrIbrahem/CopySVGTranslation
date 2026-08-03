@@ -4,8 +4,8 @@ from pathlib import Path
 
 from lxml import etree
 
-from ..injection.id_manager import IdManager
 from ..config import TranslationConfig
+from ..injection.id_manager import IdManager
 from .steps import (
     AssignIds,
     LoadDocument,

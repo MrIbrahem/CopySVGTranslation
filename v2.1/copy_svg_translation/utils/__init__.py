@@ -1,4 +1,3 @@
-# utils/__init__.py
 from .text import normalize_lang, normalize_text, split_lang_list
 from .xml import (
     SVG_NS,
@@ -16,19 +15,21 @@ from .xml import (
 )
 
 __all__ = [
+    # text
+    "normalize_text",
+    "normalize_lang",
+    "split_lang_list",
+    # xml
     "SVG_NS",
     "SVG_NSMAP",
-    "collect_ids",
-    "extract_text_segments",
-    "findall_svg",
-    "get_text_content",
-    "is_svg_element",
-    "local_name",
-    "normalize_lang",
-    "normalize_text",
-    "sort_switch_children",
-    "split_lang_list",
     "svg_tag",
-    "tree_languages",
+    "local_name",
+    "is_svg_element",
+    "findall_svg",
     "xpath_svg",
+    "extract_text_segments",
+    "get_text_content",
+    "collect_ids",
+    "sort_switch_children",
+    "tree_languages",
 ]
