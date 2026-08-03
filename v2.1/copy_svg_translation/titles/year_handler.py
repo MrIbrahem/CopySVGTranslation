@@ -23,6 +23,9 @@ class YearTitleHandler:
         self.config = config or TranslationConfig()
         self.enabled = self.config.enable_year_titles
 
+ # ------------------------------------------------------------------
+ # Low-level helpers
+ # ------------------------------------------------------------------
     @staticmethod
     def match_year(text: str) -> str:
         """
@@ -56,10 +59,21 @@ class YearTitleHandler:
         """Replace '{year}' placeholder with a concrete year."""
         return template.replace("{year}", year)
 
+    # ------------------------------------------------------------------
+    # Extraction side
+    # ------------------------------------------------------------------
     def build_templates(self, mapping: TranslationMapping) -> None:
         """
         Populate mapping.title_new (and optionally mapping.title) from
         mapping.new.
+
+        Example
+            -------
+            Input (mapping.new):
+            "COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020", ...}
+
+            Output (mapping.title_new):
+            "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}", ...}
         """
         if not self.enabled:
             return
@@ -83,6 +97,9 @@ class YearTitleHandler:
                 mapping.title_new[source_template] = templated
                 logger.debug("Title template: %r → %s", source_template, list(templated))
 
+    # ------------------------------------------------------------------
+    # Injection side
+    # ------------------------------------------------------------------
     def expand_for_texts(
         self,
         mapping: TranslationMapping,
@@ -93,10 +110,23 @@ class YearTitleHandler:
         """
         Given the default (fallback) texts of a switch, return extra
         translation entries that should be merged into the working map.
+
+        Example
+        -------
+        mapping.title_new = {
+            "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}"}
+            }
+        default_texts = ["COVID-19 pandemic 1990"]
+
+        Returns:
+            {
+            "COVID-19 pandemic 1990": {"ar": "جائحة كوفيد 1990"}
+            }
         """
         if not self.enabled or not mapping.title_new:
             return {}
 
+        # Normalize keys for lookup
         templates = {(k.lower() if case_insensitive else k): v for k, v in mapping.title_new.items()}
 
         expanded: dict[str, dict[str, str]] = {}
@@ -138,6 +168,7 @@ class YearTitleHandler:
         if not extra:
             return mapping
 
+        # Shallow copy + merge the extra entries into .new
         working = TranslationMapping.from_any(mapping.to_dict())
         for source, trans in extra.items():
             key = source.lower() if case_insensitive else source
