@@ -8,12 +8,13 @@ from pathlib import Path
 
 from lxml import etree
 
+from ..config import TranslationConfig
 from ..preparation import SvgPreparationPipeline
 from ..utils import (
     sort_switch_texts,
     tree_languages,
 )
-from .exceptions import (
+from ..exceptions import (
     SvgNestedTspanExceptionError,
     SvgStructureExceptionError,
 )
@@ -44,7 +45,12 @@ class SVGTranslationInjector:
         self.pretty_print = pretty_print
         self.result = InjectorData()
         self.new_stats: InjectorStats = self.result.new_stats
-
+        self.config = TranslationConfig(
+            case_insensitive=case_insensitive,
+            pretty_print=pretty_print,
+            overwrite=overwrite,
+        )
+        self.preparer = SvgPreparationPipeline(self.config)
         self.switch_processor = SwitchProcessor(self.overwrite, self.case_insensitive)
 
     def work_on_switches(
@@ -69,8 +75,7 @@ class SVGTranslationInjector:
 
     def _parse_svg(self, inject_path) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
         try:
-            preparer = SvgPreparationPipeline(inject_path)
-            tree, root = preparer.run(inject_path)
+            tree, root = self.preparer.run(inject_path)
             return tree, root
 
         except SvgNestedTspanExceptionError as exc:

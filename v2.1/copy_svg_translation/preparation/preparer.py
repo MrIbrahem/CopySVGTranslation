@@ -19,6 +19,18 @@ from .steps import (
 
 
 class SvgPreparationPipeline:
+    """
+    Prepares an SVG file for the translation phase.
+
+    Ensures structural invariants are met before translations are injected:
+    - every <text> lives inside a <switch>
+    - every piece of translatable text is wrapped in a <tspan>
+    - every translatable node has a unique, normalized id
+    - systemLanguage attributes are normalized and split (comma-separated
+      values are expanded into cloned <text> nodes)
+    - <text> elements inside each <switch> are deterministically ordered
+    """
+
     def __init__(self, config: TranslationConfig) -> None:
         self.config = config
         self.steps: list[PreparationStep] = [

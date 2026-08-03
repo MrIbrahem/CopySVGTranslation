@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.injection.exceptions import (
+from CopySVGTranslation.exceptions import (
     SvgStructureExceptionError,
 )
 from CopySVGTranslation.preparation import (

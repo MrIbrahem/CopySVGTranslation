@@ -8,7 +8,7 @@ TODO: write tests
 """
 
 
-from CopySVGTranslation.injection.exceptions import (
+from CopySVGTranslation.exceptions import (
     SvgNestedTspanExceptionError,
     SvgStructureExceptionError,
 )

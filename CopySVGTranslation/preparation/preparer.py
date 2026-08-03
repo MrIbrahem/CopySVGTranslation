@@ -9,9 +9,19 @@ from pathlib import Path
 
 from lxml import etree
 
-from ..injection.exceptions import SvgNestedTspanExceptionError, SvgStructureExceptionError
+from ..config import TranslationConfig
+from ..exceptions import SvgNestedTspanExceptionError, SvgStructureExceptionError
 from ..utils import normalize_lang
-
+from .steps import (
+    # AssignIds,
+    LoadDocument,
+    # NormalizeTspans,
+    PreparationContext,
+    PreparationStep,
+    # ReorderTexts,
+    # SplitLanguages,
+    ValidateStructure,
+)
 logger = logging.getLogger(__name__)
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -41,8 +51,17 @@ class SvgPreparationPipeline:
     - <text> elements inside each <switch> are deterministically ordered
     """
 
-    def __init__(self, source_file: Path | str):
-        self.source_file = Path(str(source_file))
+    def __init__(self, config: TranslationConfig | None = None) -> None:
+        self.config = config or TranslationConfig()
+        self.steps: list[PreparationStep] = [
+            LoadDocument(config),
+            ValidateStructure(config),
+            # NormalizeTspans(config),
+            # AssignIds(config),
+            # SplitLanguages(config),
+            # ReorderTexts(config),
+        ]
+        self.path: Path
         self.tree: etree._ElementTree
         self.root: etree._Element
         self.existing_ids: set[str] = set()
@@ -52,29 +71,31 @@ class SvgPreparationPipeline:
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
-    def run(self, path: Path) -> tuple[etree._ElementTree[etree._Element], etree._Element]:
+    def run_new(self, path: Path) -> tuple[etree._ElementTree[etree._Element], etree._Element]:
+        ctx = PreparationContext(
+            path=path,
+            config=self.config,
+            # id_manager=IdManager(),
+        )
+        for step in self.steps:
+            step.execute(ctx)
+        return ctx.tree, ctx.root
+
+    def run(self, source_file: Path) -> tuple[etree._ElementTree[etree._Element], etree._Element]:
         """Run all preparation steps and return the resulting tree and root."""
         # Reset per-run state to ensure idempotent behavior
-        self.source_file = Path(str(path))
+        self.path = Path(str(source_file))
         self.tree: etree._ElementTree
         self.root: etree._Element
         self.existing_ids: set[str] = set()
         self.ids_in_use: list[int] = [0]
         self.translatable_nodes: list[etree._Element] = []
 
-        self.translatable_nodes = []
-        self.existing_ids = set()
-        self.ids_in_use = [0]
+        # self._load_document()
+        self.tree, self.root = self.run_new(self.path)
 
-        self._load_document()
+        # self._check_style_elements()
 
-        # Check for any <text> elements
-        texts = self.root.findall(".//{%s}text" % SVG_NS)
-        if len(texts) == 0:
-            logger.warning("File %s has nothing to translate", self.source_file)
-            return self.tree, self.root
-
-        self._check_style_elements()
         self._collect_tspans_as_translatable()
         self._check_no_trefs()
         self._collect_existing_ids()
@@ -89,29 +110,17 @@ class SvgPreparationPipeline:
         return self.tree, self.root
 
     # ------------------------------------------------------------------
-    # Step 1: loading
-    # ------------------------------------------------------------------
-    def _load_document(self) -> None:
-        """Parse the SVG file and ensure it has a sane default namespace."""
-        if not self.source_file.exists():
-            raise FileNotFoundError(f"SVG file not found: {self.source_file}")
-
-        parser = etree.XMLParser(remove_blank_text=True)
-        self.tree = etree.parse(str(self.source_file), parser)
-        self.root = self.tree.getroot()
-        if self.root is None:
-            raise SvgStructureExceptionError("structure-error-no-doc-element")
-
-        # Ensure default namespace (xmlns) exists and is sane
-        default_ns = self.root.nsmap.get(None)
-        if default_ns is None or re.match(r"^(&[^;]+;)+$", str(default_ns)):
-            self.root.set(XMLNS_ATTR, SVG_NS)
-
-    # ------------------------------------------------------------------
     # Step 2: validation
     # ------------------------------------------------------------------
     def _check_style_elements(self) -> None:
         """Ensure <style> elements don't use IDs or overly complex CSS."""
+
+        # Check for any <text> elements
+        texts = self.root.findall(".//{%s}text" % SVG_NS)
+        if len(texts) == 0:
+            logger.warning("File %s has nothing to translate", self.path)
+            return self.tree, self.root
+
         styles = self.root.findall(".//{%s}style" % SVG_NS)
         css_simple_re = re.compile(r"^([^{]+\{[^}]*\})*[^{]+$")
 
@@ -415,7 +424,7 @@ def make_translation_ready(source_file: Path | str) -> tuple[etree._ElementTree,
     Legacy function-style wrapper around SvgPreparationPipeline, kept for
     backward compatibility with existing callers.
     """
-    return SvgPreparationPipeline(source_file).run(source_file)
+    return SvgPreparationPipeline().run(source_file)
 
 
 __all__ = [

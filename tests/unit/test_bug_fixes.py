@@ -277,7 +277,7 @@ class TestPreparerIdempotency:
             '<text id="t1"><tspan id="t1">Hello</tspan></text>',
         )
 
-        preparer = SvgPreparationPipeline(svg)
+        preparer = SvgPreparationPipeline()
 
         _tree1, root1 = preparer.run(svg)
         xml1 = etree.tostring(root1, encoding="unicode")
@@ -301,7 +301,7 @@ class TestPreparerIdempotency:
             """,
         )
 
-        preparer = SvgPreparationPipeline(svg)
+        preparer = SvgPreparationPipeline()
 
         preparer.run(svg)
         count_after_first = len(preparer.translatable_nodes)
@@ -322,7 +322,7 @@ class TestPreparerIdempotency:
             '<text id="t1"><tspan id="t1">Hello</tspan></text>',
         )
 
-        preparer = SvgPreparationPipeline(svg)
+        preparer = SvgPreparationPipeline()
 
         preparer.run(svg)
         ids_after_first = set(preparer.existing_ids)
@@ -342,7 +342,7 @@ class TestPreparerIdempotency:
             "<text>No ID</text>",
         )
 
-        preparer = SvgPreparationPipeline(svg)
+        preparer = SvgPreparationPipeline()
 
         preparer.run(svg)
         ids_after_first = list(preparer.ids_in_use)
