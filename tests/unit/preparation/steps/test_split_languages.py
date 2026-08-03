@@ -4,7 +4,7 @@ _split_languages_in_switch.
 
 Notes on setup:
 - We use `types.SimpleNamespace` instead of the real `PreparationContext`
-  dataclass, since only `.root` and `.id_manager` are actually read by the
+  dataclass, since only `.rofrom CopySVGTranslation.e actually read by the
   methods under test. This avoids pulling in unrelated dependencies
   (TranslationConfig, IdManager, Path, etc.) that aren't needed here.
 - `FakeIdManager` is a minimal stand-in that mimics the two methods the
@@ -62,6 +62,9 @@ def ctx() -> SimpleNamespace:
 
 
 class TestSplitLanguagesInSwitch:
+    def tostring(self, el: etree._Element) -> str:
+        return etree.tostring(el, pretty_print=True).decode("utf-8").strip()
+
     def test_single_text_without_systemlanguage_is_left_as_fallback(self, step, ctx):
         switch = make_switch('<text id="t1">hello</text>')
 
@@ -132,6 +135,8 @@ class TestSplitLanguagesInSwitch:
         children = list(switch)
         assert len(children) == 2
         assert children[0].get("systemLanguage") == "ar"
+        assert self.tostring(children[1]) == '''<text xmlns="http://www.w3.org/2000/svg" id="t1-ar" systemLanguage="ar">hello</text>'''
+
         assert children[1].get("systemLanguage") is None
 
     def test_duplicate_language_within_same_text_raises(self, step, ctx):

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import re
 
 from lxml import etree
 
@@ -68,6 +69,9 @@ class SplitLanguages(PreparationStep):
             return
 
         el_id = element.get("id")
+
+        if el_id and re.match(r"^trsvg[0-9]+$", el_id):
+            el_id = None
 
         if el_id:
             new_id = ctx.id_manager.allocate_clone(el_id, element.get("systemLanguage", ""))
