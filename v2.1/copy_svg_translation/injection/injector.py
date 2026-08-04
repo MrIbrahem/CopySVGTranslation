@@ -60,7 +60,6 @@ class SVGTranslationInjector:
 
         svg_path = Path(svg_path)
 
-
         logger.debug(f"Injecting translations into {svg_path}")
         # 1. Prepare (pipeline)
         try:

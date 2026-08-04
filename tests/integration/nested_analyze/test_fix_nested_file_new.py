@@ -18,6 +18,7 @@ def _write_svg(tmp_dir: Path, inner_svg: str, name: str = "test.svg", width: int
     p.write_text(_wrap_svg(inner_svg, width, height), encoding="utf-8")
     return p
 
+
 class TestSetup:
     def normalize(self, file_text):
         # return file_text.strip()
@@ -127,6 +128,7 @@ class TestMatchAndFix(TestSetup):
         assert new_text_strip == new_text_expected_strip
 
         # assert self.normalize(new_text) == self.normalize(new_text_expected)
+
 
 class TestTodo(TestSetup):
 

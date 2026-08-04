@@ -5,7 +5,7 @@ from .core.mapping import TranslationEntry, TranslationMapping
 from .extraction import SVGTranslationExtractor, extract
 from .injection import InjectorData, SVGTranslationInjector, inject_file_tree
 from .io.mapping_store import MappingStore
-from .nested_analyze import fix_nested_file, match_nested_tags, NestedTspanDetector
+from .nested_analyze import NestedTspanDetector, fix_nested_file, match_nested_tags
 from .result import InjectorStats, InjectResult, OperationResult
 from .service import SVGTranslationService
 

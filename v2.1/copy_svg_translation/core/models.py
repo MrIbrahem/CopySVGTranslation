@@ -7,7 +7,7 @@ from typing import TypeAlias
 
 class NestedStrategy(str, Enum):
     PRESERVE_STYLE = "preserve_style"
-    SPLIT_NESTED_TSPANS = "split_nested_tspans" # alias PRESERVE_STYLE
+    SPLIT_NESTED_TSPANS = "split_nested_tspans"  # alias PRESERVE_STYLE
     FLATTEN = "flatten"
     RAISE = "raise"
 
