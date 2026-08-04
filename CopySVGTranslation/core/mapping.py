@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Mapping
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any
 
 
@@ -113,3 +113,18 @@ class TranslationMapping:
             "tspans_by_id": self.tspans_by_id,
             "meta": self.meta,
         }
+
+
+@dataclass
+class ExtractorData:
+    """Container for extracted SVG translation data."""
+
+    new: dict[str, dict[str, str]] = field(default_factory=dict)
+    title: dict[str, dict[str, str]] = field(default_factory=dict)
+    title_new: dict[str, dict[str, str]] = field(default_factory=dict)
+    tspans_by_id: dict[str, str] = field(default_factory=dict)
+    error: str = ""
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
+

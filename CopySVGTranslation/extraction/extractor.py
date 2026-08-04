@@ -3,33 +3,18 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
 from lxml import etree
 
+from ..core.mapping import ExtractorData
 from ..config import TranslationConfig
 from ..io.svg_document import SvgDocument
 from ..titles_workers import make_new_title_translations, make_title_translations
 from ..utils import normalize_text
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class ExtractorData:
-    """Container for extracted SVG translation data."""
-
-    new: dict[str, dict[str, str]] = field(default_factory=dict)
-    title: dict[str, dict[str, str]] = field(default_factory=dict)
-    title_new: dict[str, dict[str, str]] = field(default_factory=dict)
-    tspans_by_id: dict[str, str] = field(default_factory=dict)
-    error: str = ""
-
-    def to_json(self) -> dict[str, Any]:
-        return asdict(self)
-
 
 class SVGTranslationExtractor:
     """

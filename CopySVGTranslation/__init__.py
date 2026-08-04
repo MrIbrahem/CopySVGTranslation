@@ -1,7 +1,8 @@
 """Public API for the CopySVGTranslation package."""
 
+from .core.mapping import ExtractorData
 from .config import TranslationConfig
-from .extraction import ExtractorData, SVGTranslationExtractor, extract
+from .extraction import SVGTranslationExtractor, extract
 from .injection import InjectorData, SVGTranslationInjector, inject_file_tree
 from .nested_analyze import fix_nested_file, match_nested_tags
 
