@@ -38,7 +38,9 @@ class SVGTranslationInjector:
         self.preparer = SvgPreparationPipeline(self.config)
         self.switch_processor = SwitchProcessor(self.config.overwrite, self.config.case_insensitive)
 
-    def _parse_svg(self, inject_path, stats: InjectorStats) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
+    def _parse_svg(
+        self, inject_path, stats: InjectorStats
+    ) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
         try:
             tree, root = self.preparer.run(inject_path)
             return tree, root
@@ -188,7 +190,12 @@ class SVGTranslationInjector:
         )
         logger.debug(f"Saved modified SVG to {save_path}")
 
-    def _update_data(self, stats: InjectorStats, before_languages: set[str], after_languages: set[str],) -> None:
+    def _update_data(
+        self,
+        stats: InjectorStats,
+        before_languages: set[str],
+        after_languages: set[str],
+    ) -> None:
         new_languages = after_languages - before_languages
 
         stats.all_languages = len(after_languages)
