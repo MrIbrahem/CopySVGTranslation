@@ -1,7 +1,7 @@
 """
 Unit tests for CopySVGTranslation/nested_analyze/find_nested_new.py module.
 
-Functions to test: fix_nested_tspans, match_nested_tags, fix_nested_file
+Functions to test: fix_nested_tspans, match_nested_tags, fix_nested_file_new
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from lxml import etree
 
 from CopySVGTranslation.nested_analyze.find_nested_new import (
     SVG_NS,
-    fix_nested_file,
+    fix_nested_file_new,
     fix_nested_tspans,
     match_nested_tags,
 )
@@ -80,7 +80,8 @@ class TestFixNestedTspans:
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         texts = [t.text for t in tspans]
         assert "Bold" in texts
-        assert "tail text" in texts
+        # Tail text preserves leading space
+        assert any("tail text" in (t or "") for t in texts)
 
     def test_flatten_nested_tspan_preserves_attributes(self):
         """Nested child attributes should be copied to the new sibling tspan."""
@@ -242,10 +243,10 @@ class TestMatchNestedTags:
 
 
 # ---------------------------------------------------------------------------
-# fix_nested_file
+# fix_nested_file_new
 # ---------------------------------------------------------------------------
 class TestFixNestedFile:
-    """Tests for the fix_nested_file function."""
+    """Tests for the fix_nested_file_new function."""
 
     def test_fix_nested_file_creates_output(self, tmp_path: Path):
         """Should write a fixed SVG to the output path."""
@@ -261,7 +262,7 @@ class TestFixNestedFile:
             ),
             encoding="utf-8",
         )
-        result = fix_nested_file(src, dst)
+        result = fix_nested_file_new(src, dst)
         assert result is True
         assert dst.exists()
         content = dst.read_text(encoding="utf-8")
@@ -277,7 +278,7 @@ class TestFixNestedFile:
         )
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            fix_nested_file(src)
+            fix_nested_file_new(src)
             dep_warnings = [x for x in w if issubclass(x.category, DeprecationWarning)]
             assert len(dep_warnings) >= 1
 
@@ -286,12 +287,12 @@ class TestFixNestedFile:
         src = tmp_path / "bad.svg"
         dst = tmp_path / "out.svg"
         src.write_text("not xml", encoding="utf-8")
-        result = fix_nested_file(src, dst)
+        result = fix_nested_file_new(src, dst)
         assert result is False
 
     def test_fix_nested_file_source_not_found(self, tmp_path: Path):
         """Missing source file should return False."""
-        result = fix_nested_file(tmp_path / "missing.svg", tmp_path / "out.svg")
+        result = fix_nested_file_new(tmp_path / "missing.svg", tmp_path / "out.svg")
         assert result is False
 
     def test_fix_nested_file_pretty_print(self, tmp_path: Path):
@@ -302,7 +303,7 @@ class TestFixNestedFile:
             _svg('<text id="t1"><tspan>Hello</tspan></text>'),
             encoding="utf-8",
         )
-        result = fix_nested_file(src, dst, pretty_print=True)
+        result = fix_nested_file_new(src, dst, pretty_print=True)
         assert result is True
 
     def test_fix_nested_file_also_fixes_a_tags(self, tmp_path: Path):
@@ -319,7 +320,7 @@ class TestFixNestedFile:
             ),
             encoding="utf-8",
         )
-        result = fix_nested_file(src, dst)
+        result = fix_nested_file_new(src, dst)
         assert result is True
         content = dst.read_text(encoding="utf-8")
         assert "Link" in content
