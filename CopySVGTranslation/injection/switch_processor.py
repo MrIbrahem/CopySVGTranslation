@@ -89,80 +89,29 @@ class SwitchProcessor:
         existing_languages = self.get_existing_languages(text_elements)
 
         for lang in langs_to_process:
-            if lang in existing_languages and not self.config.overwrite:
-                stats.skipped_translations += 1
-                continue
+            if lang in existing_languages:
+                if not self.config.overwrite:
+                    stats.skipped_translations += 1
+                    continue
 
-            # Create or update node
-            if lang in existing_languages and self.config.overwrite:
+                # update node
                 for text_elem in text_elements:
-                    if text_elem.get("systemLanguage") != lang:
-                        continue
-
-                    tspans = text_elem.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
-                    for i, tspan in enumerate(tspans):
-                        if i >= len(default_texts):
-                            logger.warning(
-                                "Language node '%s' has more tspans than the default node; stopping at %d",
-                                lang,
-                                i,
-                            )
-                            break
-                        english_text = default_texts[i]
-                        lookup_key = english_text.lower() if self.config.case_insensitive else english_text
-                        if english_text in available_translations and lang in available_translations[english_text]:
-                            tspan.text = available_translations[english_text][lang]
-                        elif lookup_key in available_translations and lang in available_translations[lookup_key]:
-                            tspan.text = available_translations[lookup_key][lang]
-
-                    stats.updated_translations += 1
+                    self.update_node(text_elem, default_texts, available_translations, lang)
                     break
+
+                stats.updated_translations += 1
                 continue
 
-            new_node = etree.Element(default_node.tag, attrib=default_node.attrib)
-            new_node.set("systemLanguage", lang)
-            original_id = default_node.get("id")
-
-            if original_id:
-                new_id = generate_unique_id(original_id, lang, existing_idsz)
-                new_node.set("id", new_id)
-                existing_idsz.add(new_id)
-
-            tspans = default_node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
-
-            if tspans:
-                for tspan in tspans:
-                    new_tspan = etree.Element(tspan.tag, attrib=tspan.attrib)
-                    english_text = normalize_text(tspan.text or "")
-                    key = english_text.lower() if self.config.case_insensitive else english_text
-                    translated = all_mappings.get(key, {}).get(lang, english_text)
-                    new_tspan.text = translated
-
-                    # Generate unique ID for tspan if needed
-                    original_tspan_id = tspan.get("id")
-                    if original_tspan_id:
-                        new_tspan_id = generate_unique_id(original_tspan_id, lang, existing_idsz)
-                        new_tspan.set("id", new_tspan_id)
-                        existing_idsz.add(new_tspan_id)
-
-                    new_node.append(new_tspan)
-
-            else:
-                english_text = normalize_text(default_node.text or "")
-                key = english_text.lower() if self.config.case_insensitive else english_text
-                new_node.text = all_mappings.get(key, {}).get(lang, english_text)
-
-            switch_element.append(new_node)
+            # Create node
+            new_node = self.create_node(existing_idsz, default_node, all_mappings, lang)
             stats.inserted_translations += 1
+            switch_element.append(new_node)
 
         stats.processed_switches += 1
 
-    def all_languages(self, available_translations):
-        langs_to_process = set()
-        for data in available_translations.values():
-            langs_to_process.update(data.keys())
-        return langs_to_process
-
+    # -------------
+    # default_texts
+    # -------------
     def get_default_texts(self, text_elements):
         default_texts = None
         default_node = None
@@ -178,6 +127,16 @@ class SwitchProcessor:
             break
         return default_texts, default_node
 
+    # -------------
+    # existing_languages
+    # -------------
+    def get_existing_languages(self, text_elements):
+        existing_languages = {t.get("systemLanguage") for t in text_elements if t.get("systemLanguage")}
+        return existing_languages
+
+    # -------------
+    #  enrich mappings
+    # -------------
     def enrich_all_mappings(self, mapping, default_texts):
         all_mappings_title_new = mapping.title_new
         new_titles_translations = get_new_titles_translations(all_mappings_title_new, default_texts)
@@ -187,6 +146,9 @@ class SwitchProcessor:
             all_mappings.setdefault(key, {}).update(translations)
         return all_mappings
 
+    # -------------
+    #
+    # -------------
     def get_available_translations(self, default_texts, all_mappings):
         available_translations = {}
         for text in default_texts:
@@ -197,6 +159,91 @@ class SwitchProcessor:
                 logger.debug(f"No mapping for '{key}'")
         return available_translations
 
-    def get_existing_languages(self, text_elements):
-        existing_languages = {t.get("systemLanguage") for t in text_elements if t.get("systemLanguage")}
-        return existing_languages
+    # -------------
+    #
+    # -------------
+    def all_languages(self, available_translations):
+        langs_to_process = set()
+        for data in available_translations.values():
+            langs_to_process.update(data.keys())
+        return langs_to_process
+
+    def get_key_lang(self, key: str, lang: str, data: dict[str, dict[str, str]], normalize: bool=False,):
+
+        def get_key(_key) -> str | None:
+            if _key in data and lang in data[_key]:
+                return data[_key][lang]
+            return None
+
+        if normalize:
+            key = normalize_text(key)
+
+        result = get_key(key)
+
+        if not result and self.config.case_insensitive:
+            result = get_key(key.lower())
+
+        return result
+
+    # -------------
+    # node functions
+    # -------------
+    def create_node(self, existing_idsz, node, all_mappings, lang):
+        new_node = etree.Element(node.tag, attrib=node.attrib)
+        new_node.set("systemLanguage", lang)
+        original_id = node.get("id")
+
+        if original_id:
+            new_id = generate_unique_id(original_id, lang, existing_idsz)
+            new_node.set("id", new_id)
+            existing_idsz.add(new_id)
+
+        tspans = node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
+
+        if tspans:
+            for tspan in tspans:
+                new_tspan = etree.Element(tspan.tag, attrib=tspan.attrib)
+
+                english_text = normalize_text(tspan.text or "")
+                key = english_text.lower() if self.config.case_insensitive else english_text
+                translated = all_mappings.get(key, {}).get(lang, english_text)
+
+                new_tspan.text = translated
+
+                # Generate unique ID for tspan if needed
+                original_tspan_id = tspan.get("id")
+                if original_tspan_id:
+                    new_tspan_id = generate_unique_id(original_tspan_id, lang, existing_idsz)
+                    new_tspan.set("id", new_tspan_id)
+                    existing_idsz.add(new_tspan_id)
+
+                new_node.append(new_tspan)
+
+        else:
+            english_text = normalize_text(node.text or "")
+            key = english_text.lower() if self.config.case_insensitive else english_text
+            new_node.text = all_mappings.get(key, {}).get(lang, english_text)
+
+    def update_node(self, node, default_texts, available_translations, lang):
+        if node.get("systemLanguage") != lang:
+            return
+
+        tspans = node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
+
+        if not tspans:
+            return
+
+        for i, tspan in enumerate(tspans):
+            if i >= len(default_texts):
+                logger.warning(
+                    "Language node '%s' has more tspans than the default node; stopping at %d",
+                    lang,
+                    i,
+                )
+                break
+            english_text = default_texts[i]
+
+            text = self.get_key_lang(english_text, lang, available_translations)
+
+            if text:
+                tspan.text = text
