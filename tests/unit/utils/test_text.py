@@ -1,3 +1,4 @@
+# ruff: noqa: F401
 """
 Extended comprehensive unit tests for CopySVGTranslation covering additional edge cases
 and previously untested functions.
@@ -5,6 +6,7 @@ and previously untested functions.
 
 from CopySVGTranslation.utils.text import (
     normalize_lang,
+    split_lang_list,
     normalize_text,
 )
 

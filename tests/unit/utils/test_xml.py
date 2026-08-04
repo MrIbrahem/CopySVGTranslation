@@ -1,6 +1,7 @@
+
+# ruff: noqa: F401
 """
 Unit tests for CopySVGTranslation/injection/xml.py module.
-
 
 TODO: write tests
 """
@@ -14,11 +15,20 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation.utils.xml import (
+    svg_tag,
+    local_name,
+    is_svg_element,
+    findall_svg,
+    xpath_svg,
+    extract_text_segments,
+    get_text_content,
     extract_root_languages,
-    extract_text_from_node,
     file_langs,
-    sort_switch_texts,
+    collect_ids,
+    sort_switch_children,
     tree_languages,
+    sort_switch_texts,
+    extract_text_from_node,
 )
 
 
