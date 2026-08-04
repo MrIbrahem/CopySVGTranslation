@@ -35,7 +35,9 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+
 from lxml import etree
+
 from .nested_base import FixNestedTagsBase
 
 logger = logging.getLogger(__name__)
@@ -108,6 +110,7 @@ class FixNestedTagsNew(FixNestedTagsBase):
 
         return root
 
+
 def fix_nested_file_new(
     source_file: Path,
     new_path: Path | None = None,
@@ -119,6 +122,7 @@ def fix_nested_file_new(
         source_file=source_file,
         new_path=new_path,
     )
+
 
 def fix_nested_tspans(root, tag=None):
     """

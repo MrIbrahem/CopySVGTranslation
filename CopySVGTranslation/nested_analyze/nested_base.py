@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 import logging
 import warnings
+from abc import ABC, abstractmethod
 from pathlib import Path
 
 from lxml import etree
@@ -17,8 +17,7 @@ class FixNestedTagsBase(ABC):
         self.pretty_print = pretty_print
 
     @abstractmethod
-    def _flatten_all(self, root, tag=None) -> None:
-        ...
+    def _flatten_all(self, root, tag=None) -> None: ...
 
     def fix_file(self, source_file: Path, new_path: Path | None = None) -> bool:
         """

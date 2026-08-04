@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+
 from .nested_base import FixNestedTagsBase
 
 logger = logging.getLogger(__name__)
 
 SVG_NS = "http://www.w3.org/2000/svg"
+
 
 def flatten_text(elem):
     """Recursively collect text and tails preserving order."""
@@ -18,6 +20,7 @@ def flatten_text(elem):
         if child.tail:
             parts.append(child.tail)
     return "".join(parts)
+
 
 class FixNestedTags(FixNestedTagsBase):
 
@@ -39,6 +42,7 @@ class FixNestedTags(FixNestedTagsBase):
 
         return root
 
+
 def fix_nested_file(
     source_file: Path,
     new_path: Path | None = None,
@@ -50,6 +54,7 @@ def fix_nested_file(
         source_file=source_file,
         new_path=new_path,
     )
+
 
 def fix_nested_tspans(root, tag=None):
     """

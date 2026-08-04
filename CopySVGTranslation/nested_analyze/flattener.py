@@ -14,6 +14,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 
 NestedStrategy = Literal["preserve_style", "flatten", "raise"]
 
+
 def _flatten_text(elem: etree._Element) -> str:
     """Recursively collect text and tails preserving order."""
     parts: list[str] = []
