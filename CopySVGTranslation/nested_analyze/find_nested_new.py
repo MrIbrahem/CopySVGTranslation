@@ -39,6 +39,7 @@ from lxml import etree
 from .nested_base import FixNestedTagsBase
 
 logger = logging.getLogger(__name__)
+
 SVG_NS = "http://www.w3.org/2000/svg"
 
 
@@ -107,7 +108,6 @@ class FixNestedTagsNew(FixNestedTagsBase):
 
         return root
 
-
 def fix_nested_file_new(
     source_file: Path,
     new_path: Path | None = None,
@@ -130,5 +130,6 @@ def fix_nested_tspans(root, tag=None):
 
 __all__ = [
     "FixNestedTagsNew",
+    "fix_nested_tspans",
     "fix_nested_file_new",
 ]

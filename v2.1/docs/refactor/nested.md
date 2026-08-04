@@ -36,7 +36,7 @@ This package offers three strategies (controlled by `TranslationConfig.nested_st
 | ---------------- | -------------------------------------------------------------------------- |
 | `preserve_style` | Turn nested styled tspans into **sibling** tspans (keeps bold/italic etc.) |
 | `flatten`        | Concatenate all text into a single tspan (loses inner styling)             |
-| `raise`          | Raise `SvgNestedTspanError`                                       |
+| `raise`          | Raise `SvgNestedTspanError`                                                |
 
 ---
 

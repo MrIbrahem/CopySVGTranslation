@@ -58,11 +58,14 @@ class NestedTspanFlattener:
             return root
 
         # preserve_style (default)
-        self._preserve_style(root, tag="tspan")
-        if self.also_fix_a:
-            # <a> inside tspan is also invalid for many tools
-            self._preserve_style(root, tag="a")
-        return root
+        if self.strategy == "preserve_style":
+            self._preserve_style(root, tag="tspan")
+            if self.also_fix_a:
+                # <a> inside tspan is also invalid for many tools
+                self._preserve_style(root, tag="a")
+            return root
+
+        raise ValueError(f"Unknown strategy: {self.strategy}")
 
     # ------------------------------------------------------------------
     # Strategy: raise

@@ -25,7 +25,7 @@ class TranslationConfig:
     """Pretty-print the output SVG when saving."""
 
     # --- Nested tspan handling ---
-    nested_strategy: Literal["preserve_style", "flatten", "raise"] = "preserve_style"
+    nested_strategy: Literal["preserve_style", "flatten", "raise"] = "raise"
     """
     How to handle nested <tspan> (and <a>) elements:
     - preserve_style: convert nested styled tspans into sibling tspans (preferred)

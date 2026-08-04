@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-
 from .nested_base import FixNestedTagsBase
 
 logger = logging.getLogger(__name__)
@@ -45,6 +44,7 @@ def fix_nested_file(
     pretty_print: bool | None = None,
 ) -> bool:
     processer = FixNestedTags(pretty_print=pretty_print)
+
     return processer.fix_file(
         source_file=source_file,
         new_path=new_path,
@@ -56,6 +56,7 @@ def fix_nested_tspans(root, tag=None):
     """
     processer = FixNestedTags()
     return processer.fix_nested_tspans(root, tag=tag)
+
 
 __all__ = [
     "FixNestedTags",
