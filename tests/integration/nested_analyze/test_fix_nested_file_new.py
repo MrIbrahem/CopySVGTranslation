@@ -2,7 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.nested_analyze.find_nested_new import fix_nested_file_new, match_nested_tags
+from CopySVGTranslation.nested_analyze.find_nested_new import fix_nested_file_new
+from CopySVGTranslation.nested_analyze.match_tags import match_nested_tags
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
