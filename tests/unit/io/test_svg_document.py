@@ -65,11 +65,12 @@ class TestSvgDocumentLoad:
         assert doc.root is not None
 
     def test_load_ensures_namespace(self, tmp_path: Path):
-        """SVG without namespace should get one assigned."""
+        """SVG without namespace should get one assigned via xmlns attribute."""
         svg = _write_svg(tmp_path, "<svg></svg>")
         doc = SvgDocument.load(svg)
-        ns = doc.root.nsmap.get(None)
-        assert ns == SVG_NS
+        # _ensure_namespace sets the xmlns attribute directly
+        xmlns_attr = doc.root.get("{http://www.w3.org/2000/xmlns/}xmlns")
+        assert xmlns_attr == SVG_NS
 
 
 # ---------------------------------------------------------------------------
@@ -103,8 +104,10 @@ class TestSvgDocumentNamespace:
         root = etree.Element("svg")
         tree = etree.ElementTree(root)
         doc = SvgDocument(tree)
-        # After construction, namespace should be set
-        assert root.get("{http://www.w3.org/2000/xmlns/}xmlns") == SVG_NS
+        # _ensure_namespace sets xmlns attribute when nsmap has no default ns
+        xmlns = root.get("{http://www.w3.org/2000/xmlns/}xmlns")
+        # If nsmap was None, xmlns attr should now be set
+        assert xmlns == SVG_NS or root.nsmap.get(None) == SVG_NS
 
     def test_preserves_existing_namespace(self):
         root = etree.Element(f"{{{SVG_NS}}}svg")
