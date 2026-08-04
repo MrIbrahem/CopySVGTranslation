@@ -9,8 +9,8 @@ from typing import Any
 from lxml import etree
 
 from ..config import TranslationConfig
-from ..core.mapping import TranslationMapping
 from ..core import SwitchNode, TextNode
+from ..core.mapping import TranslationMapping
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
 from ..utils.text import normalize_text
@@ -112,7 +112,6 @@ class SVGTranslationExtractor:
         result = self.extract(path)
 
         return result.to_json()
-
 
     def get_english_default_texts(self, text_elements):
         """
@@ -216,6 +215,7 @@ class SVGTranslationExtractor:
                     mapping.new[store_key][system_lang] = normalized_translation
 
         return switch_translations
+
 
 __all__ = [
     "SVGTranslationExtractor",

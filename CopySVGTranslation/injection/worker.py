@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any
 
 from ..config import TranslationConfig
-
 from ..utils.injection_utils import load_all_mappings
 from .injector import InjectorData, SVGTranslationInjector
 

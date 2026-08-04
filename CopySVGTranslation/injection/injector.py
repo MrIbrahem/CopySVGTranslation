@@ -32,8 +32,7 @@ class SVGTranslationInjector:
         self,
         config: TranslationConfig | None = None,
     ) -> None:
-        """
-        """
+        """ """
         self.result = InjectorData()
         self.new_stats: InjectorStats = self.result.new_stats
 

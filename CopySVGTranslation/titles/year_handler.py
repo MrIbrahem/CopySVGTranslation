@@ -4,11 +4,10 @@ from __future__ import annotations
 import logging
 import re
 
-from .titles_new import make_new_title_translations
-from .titles import make_title_translations
-
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
+from .titles import make_title_translations
+from .titles_new import make_new_title_translations
 
 logger = logging.getLogger(__name__)
 

@@ -9,8 +9,8 @@ from typing import Any
 from lxml import etree
 
 from ..config import TranslationConfig
-from ..core.mapping import TranslationMapping
 from ..core import SwitchNode, TextNode
+from ..core.mapping import TranslationMapping
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
 from ..utils.text import normalize_text
