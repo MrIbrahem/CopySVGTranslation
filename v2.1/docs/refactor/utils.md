@@ -134,12 +134,6 @@ def extract_text_segments(node: etree._Element) -> list[str]:
         return [t.text.strip() if t.text else "" for t in tspans]
     return [node.text.strip()] if node.text else [""]
 
-
-def get_text_content(element: etree._Element) -> str:
-    """Return concatenated text content (like DOM textContent)."""
-    return "".join(element.itertext())
-
-
 def collect_ids(root: etree._Element) -> set[str]:
     """Return the set of all id attribute values in the tree."""
     return {id_ for id_ in root.xpath("//@id") if id_}
@@ -201,7 +195,6 @@ from .xml import (
     findall_svg,
     xpath_svg,
     extract_text_segments,
-    get_text_content,
     collect_ids,
     sort_switch_children,
     tree_languages,
@@ -221,7 +214,6 @@ __all__ = [
     "findall_svg",
     "xpath_svg",
     "extract_text_segments",
-    "get_text_content",
     "collect_ids",
     "sort_switch_children",
     "tree_languages",
@@ -237,7 +229,6 @@ __all__ = [
 | `normalize_text`                        | Extractor, Injector, TextNode, YearTitleHandler, MatchingStrategy |
 | `normalize_lang` / `split_lang_list`    | Preparation (`SplitLanguages`), any language handling             |
 | `extract_text_segments`                 | TextNode, legacy paths                                            |
-| `get_text_content`                      | Validation steps                                                  |
 | `collect_ids`                           | IdManager, AssignIds step                                         |
 | `sort_switch_children`                  | ReorderTexts step, final housekeeping in injector                 |
 | `tree_languages`                        | Injector stats (before/after)                                     |
