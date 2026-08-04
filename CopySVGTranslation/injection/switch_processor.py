@@ -95,8 +95,9 @@ class SwitchProcessor:
 
                 # update node
                 for text_elem in text_elements:
-                    self.update_node(text_elem, default_texts, available_translations, lang)
-                    break
+                    if text_elem.get("systemLanguage") == lang:
+                        self.update_node(text_elem, default_texts, available_translations, lang)
+                        break
 
                 stats.updated_translations += 1
                 continue
@@ -203,9 +204,6 @@ class SwitchProcessor:
         return new_node
 
     def update_node(self, node, default_texts, available_translations, lang):
-        if node.get("systemLanguage") != lang:
-            return
-
         tspans = node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
 
         if not tspans:
