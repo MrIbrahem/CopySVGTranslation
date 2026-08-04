@@ -6,7 +6,6 @@ Classes to test: YearTitleHandler
 
 from __future__ import annotations
 
-
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.core.mapping import TranslationMapping
 from CopySVGTranslation.titles.year_handler import YearTitleHandler

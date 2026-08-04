@@ -94,9 +94,7 @@ class TestFixNestedTspans:
 
     def test_nested_tspan_flattened(self):
         """Nested tspans should be flattened into the parent."""
-        svg = _svg(
-            '<text id="t1">' "<tspan>" '<tspan style="font-weight: 700;">Bold</tspan>' " normal</tspan></text>"
-        )
+        svg = _svg('<text id="t1">' "<tspan>" '<tspan style="font-weight: 700;">Bold</tspan>' " normal</tspan></text>")
         root = _parse(svg)
         fix_nested_tspans(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
@@ -182,9 +180,7 @@ class TestMatchNestedTags:
         """Results should be string representations of tspan elements."""
         svg_path = tmp_path / "test.svg"
         svg_path.write_text(
-            _svg(
-                '<text id="t1">' "<tspan>" '<tspan style="font-weight: 700;">Bold</tspan>' " text</tspan></text>"
-            ),
+            _svg('<text id="t1">' "<tspan>" '<tspan style="font-weight: 700;">Bold</tspan>' " text</tspan></text>"),
             encoding="utf-8",
         )
         result = match_nested_tags(svg_path)
