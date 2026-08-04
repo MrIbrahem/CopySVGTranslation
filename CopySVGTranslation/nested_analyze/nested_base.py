@@ -17,7 +17,7 @@ class FixNestedTagsBase(ABC):
         self.pretty_print = pretty_print
 
     @abstractmethod
-    def fix_nested_tspans(self, root, tag=None) -> None:
+    def _flatten_all(self, root, tag=None) -> None:
         ...
 
     def fix_file(self, source_file: Path, new_path: Path | None = None) -> bool:
@@ -48,12 +48,12 @@ class FixNestedTagsBase(ABC):
         if root is None:
             return False
         # ---
-        root = self.fix_nested_tspans(root)
+        root = self._flatten_all(root)
         # ---
         # NOTE: <a tags can also be nested inside <tspan>, so fix those too
         # https://svgtranslate.toolforge.org/ result: This file has unexpected content within a text element.
         # Only tspan elements should be used within text.
-        root = self.fix_nested_tspans(root, "a")
+        root = self._flatten_all(root, "a")
         # ---
         try:
             _str = etree.tostring(

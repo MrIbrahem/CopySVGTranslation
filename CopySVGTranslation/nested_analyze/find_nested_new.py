@@ -45,7 +45,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 
 class FixNestedTagsNew(FixNestedTagsBase):
 
-    def fix_nested_tspans(self, root, tag=None):
+    def _flatten_all(self, root, tag=None):
         """
         Flatten nested <tspan> elements while preserving text order and spacing.
 
@@ -125,7 +125,7 @@ def fix_nested_tspans(root, tag=None):
     Flatten nested <tspan> elements while preserving text order and spacing.
     """
     processer = FixNestedTagsNew()
-    return processer.fix_nested_tspans(root, tag=tag)
+    return processer._flatten_all(root, tag=tag)
 
 
 __all__ = [
