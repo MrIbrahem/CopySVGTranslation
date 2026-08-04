@@ -59,55 +59,35 @@ class SwitchProcessor:
         mapping = TranslationMapping.from_any(mapping)
 
         text_elements = switch_element.xpath("./svg:text", namespaces={"svg": SVG_NS})
+
         if not text_elements:
             return
 
-        default_texts = None
-        default_node = None
-
-        for text_elem in text_elements:
-            system_lang = text_elem.get("systemLanguage")
-            if system_lang:
-                continue
-
-            text_contents = extract_text_from_node(text_elem)
-            default_texts = [normalize_text(text, self.config.case_insensitive) for text in text_contents]
-            default_node = text_elem
-            break
+        # Find all text elements within this switch
+        default_texts, default_node = self.get_default_texts(text_elements)
 
         if not default_texts or default_node is None:
             return
 
-        all_mappings_title_new = mapping.title_new
-        new_titles_translations = get_new_titles_translations(all_mappings_title_new, default_texts)
-
-        all_mappings = dict(mapping.new)
-        for key, translations in new_titles_translations.items():
-            all_mappings.setdefault(key, {}).update(translations)
+        all_mappings = self.enrich_all_mappings(mapping, default_texts)
 
         # Enrich mapping with year-title logic
         # Determine translations for each text line
-        available_translations = {}
-        for text in default_texts:
-            key = text.lower() if self.config.case_insensitive else text
-            if key in all_mappings:
-                available_translations[key] = all_mappings[key]
-            else:
-                logger.debug(f"No mapping for '{key}'")
+        available_translations = self.get_available_translations(default_texts, all_mappings)
 
         if not available_translations:
             return
 
-        # Gather existing translation nodes
-        existing_languages = self.existing_languages(text_elements)
-
         # Collect translation mappings per-language for this fallback
         # We assume all texts share same set of languages
-        all_langs = set()
-        for data in available_translations.values():
-            all_langs.update(data.keys())
+        langs_to_process = self.all_languages(available_translations)
+        if not langs_to_process:
+            return
 
-        for lang in all_langs:
+        # Gather existing translation nodes
+        existing_languages = self.get_existing_languages(text_elements)
+
+        for lang in langs_to_process:
             if lang in existing_languages and not self.config.overwrite:
                 stats.skipped_translations += 1
                 continue
@@ -176,6 +156,46 @@ class SwitchProcessor:
 
         stats.processed_switches += 1
 
-    def existing_languages(self, text_elements):
+    def all_languages(self, available_translations):
+        langs_to_process = set()
+        for data in available_translations.values():
+            langs_to_process.update(data.keys())
+        return langs_to_process
+
+    def get_default_texts(self, text_elements):
+        default_texts = None
+        default_node = None
+
+        for text_elem in text_elements:
+            system_lang = text_elem.get("systemLanguage")
+            if system_lang:
+                continue
+
+            text_contents = extract_text_from_node(text_elem)
+            default_texts = [normalize_text(text, self.config.case_insensitive) for text in text_contents]
+            default_node = text_elem
+            break
+        return default_texts,default_node
+
+    def enrich_all_mappings(self, mapping, default_texts):
+        all_mappings_title_new = mapping.title_new
+        new_titles_translations = get_new_titles_translations(all_mappings_title_new, default_texts)
+
+        all_mappings = dict(mapping.new)
+        for key, translations in new_titles_translations.items():
+            all_mappings.setdefault(key, {}).update(translations)
+        return all_mappings
+
+    def get_available_translations(self, default_texts, all_mappings):
+        available_translations = {}
+        for text in default_texts:
+            key = text.lower() if self.config.case_insensitive else text
+            if key in all_mappings:
+                available_translations[key] = all_mappings[key]
+            else:
+                logger.debug(f"No mapping for '{key}'")
+        return available_translations
+
+    def get_existing_languages(self, text_elements):
         existing_languages = {t.get("systemLanguage") for t in text_elements if t.get("systemLanguage")}
         return existing_languages
