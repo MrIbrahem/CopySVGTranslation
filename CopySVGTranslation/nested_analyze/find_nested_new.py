@@ -1,5 +1,4 @@
 """
-
 TODO:
 - Implement a function to transform the SVG text as described in the comments.
 
