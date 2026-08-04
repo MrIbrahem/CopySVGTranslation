@@ -2,13 +2,11 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping
 
 from lxml import etree
 
 from ..config import TranslationConfig
-
-# from ..core.mapping import TranslationMapping
+from ..core.mapping import TranslationMapping
 # from ..core.switch_node import SwitchNode
 # from ..core.text_node import TextNode
 from ..result import InjectorStats
@@ -43,7 +41,7 @@ class SwitchProcessor:
     def process(
         self,
         switch_element: etree._Element,
-        mapping: Mapping,
+        mapping: TranslationMapping | dict,
         stats: InjectorStats,
         existing_ids: set[str],
     ) -> None:
@@ -58,11 +56,12 @@ class SwitchProcessor:
               - update stats
         6. Optionally re-sort children of the switch
         """
+        mapping = TranslationMapping.from_any(mapping)
         svg_ns = {"svg": "http://www.w3.org/2000/svg"}
 
         # all_mappings_title = mapping.get("title", {})
-        all_mappings_title_new = mapping.get("title_new", {})
-        all_mappings = dict(mapping.get("new", mapping))
+        all_mappings_title_new = mapping.title_new
+        all_mappings = dict(mapping.new)
 
         text_elements = switch_element.xpath("./svg:text", namespaces=svg_ns)
         if not text_elements:
