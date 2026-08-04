@@ -12,7 +12,7 @@ from ..core.mapping import TranslationMapping
 from ..config import TranslationConfig
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
-from ..titles_workers import make_new_title_translations, make_title_translations
+from ..titles import make_new_title_translations, make_title_translations
 from ..utils import normalize_text
 
 logger = logging.getLogger(__name__)

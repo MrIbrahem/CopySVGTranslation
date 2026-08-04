@@ -7,7 +7,7 @@ from collections.abc import Mapping
 from lxml import etree
 
 from ..result import InjectorStats
-from ..titles_workers import get_new_titles_translations
+from ..titles import get_new_titles_translations
 from ..utils import (
     extract_text_from_node,
     normalize_text,
