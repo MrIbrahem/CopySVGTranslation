@@ -39,19 +39,9 @@ class SVGTranslationExtractor:
     def __init__(
         self,
         config: TranslationConfig | None = None,
-        case_insensitive: bool = True,
     ) -> None:
-        """
-        Parameters:
-            source_file (str | Path): Path to the SVG file to process.
-            case_insensitive (bool): If True, default text keys are treated
-                case-insensitively (lowercased).
-        """
-        self.case_insensitive = case_insensitive
-
-        self.config = config or TranslationConfig(
-            case_insensitive=case_insensitive,
-        )
+        """ """
+        self.config = config or TranslationConfig()
 
     def get_english_default_texts(self, text_elements):
         """
@@ -81,8 +71,8 @@ class SVGTranslationExtractor:
             else:
                 text_contents = [text_elem.text.strip()] if text_elem.text else [""]
 
-            default_texts = [normalize_text(text, self.case_insensitive) for text in text_contents]
-            # for text in default_texts: key = text.lower() if self.case_insensitive else text
+            default_texts = [normalize_text(text, self.config.case_insensitive) for text in text_contents]
+            # for text in default_texts: key = text.lower() if self.config.case_insensitive else text
             new_keys.extend(default_texts)
 
         logger.debug(f"new_keys: {len(new_keys):,}, default_tspans_by_id: {len(default_tspans_by_id):,}")
@@ -150,7 +140,7 @@ class SVGTranslationExtractor:
                     continue
 
                 # store_key = english_text if english_text in new_translations else english_text.lower()
-                store_key = normalize_text(english_text, self.case_insensitive)
+                store_key = normalize_text(english_text, self.config.case_insensitive)
                 if store_key in translations.new:
                     translations.new[store_key][system_lang] = normalized_translation
 
@@ -175,7 +165,7 @@ class SVGTranslationExtractor:
 
             translations.tspans_by_id.update(default_tspans_by_id)
             for x in new_keys:
-                store_key = normalize_text(x, self.case_insensitive)
+                store_key = normalize_text(x, self.config.case_insensitive)
                 if store_key not in translations.new:
                     translations.new[store_key] = {}
 
@@ -197,34 +187,20 @@ class SVGTranslationExtractor:
     def extract(self, path: Path | str) -> ExtractorData:
         """
         Extract translation strings from an SVG file into a structured dictionary.
-
-        Parses the SVG, collects default (source) text and corresponding
-        translations found in sibling text elements with a systemLanguage
-        attribute, and returns a mapping suitable for localization workflows.
-        Title-like entries that end with a four-digit year are separated
-        into a "title" section with the year removed.
-
-        Returns:
-            Translations: A dictionary containing extracted translations (may
-            include a "new" mapping of source text to per-language
-            translations and a "title" mapping), or None if the file does
-            not exist or could not be parsed.
         """
-        translations = ExtractorData()
-        source_file = Path(str(path))
-
+        mapping = ExtractorData()
         logger.debug(f"Extracting translations from {path}")
 
         try:
             doc = SvgDocument.load(path, config=self.config)
         except FileNotFoundError:
             logger.error(f"SVG file not found: {path}")
-            translations.error = "File not found"
-            return translations
+            mapping.error = "File not found"
+            return mapping
         except (etree.XMLSyntaxError, OSError) as exc:
-            logger.error(f"Failed to parse SVG file {source_file}: {exc}")
-            translations.error = "Failed to parse SVG file"
-            return translations
+            logger.error(f"Failed to parse SVG file {path}: {exc}")
+            mapping.error = "Failed to parse SVG file"
+            return mapping
 
         return self.extract_from_root(doc.root)
 

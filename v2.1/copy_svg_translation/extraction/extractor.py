@@ -103,11 +103,22 @@ class SVGTranslationExtractor:
     # ------------------------------------------------------------------
     def extract(self, path: Path | str) -> TranslationMapping:
         """
-        Load the SVG and return a TranslationMapping.
-        Raises on fatal I/O or parse errors; returns an empty mapping
-        when no switches/translations are found.
+        Extract translation strings from an SVG file into a structured dictionary.
         """
-        doc = SvgDocument.load(path, config=self.config)
+        mapping = TranslationMapping()
+        logger.debug(f"Extracting translations from {path}")
+
+        try:
+            doc = SvgDocument.load(path, config=self.config)
+        except FileNotFoundError:
+            logger.error(f"SVG file not found: {path}")
+            mapping.meta = {"error": "File not found"}
+            return mapping
+        except (etree.XMLSyntaxError, OSError) as exc:
+            logger.error(f"Failed to parse SVG file {path}: {exc}")
+            mapping.meta = {"error": "Failed to parse SVG file"}
+            return mapping
+
         return self.extract_from_root(doc.root)
 
 

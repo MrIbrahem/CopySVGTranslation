@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.extraction.extractor import (
     ExtractorData,
     SVGTranslationExtractor,
@@ -94,13 +95,15 @@ class TestSVGTranslationExtractorInit:
 
     def test_default_case_insensitive(self):
         ext = SVGTranslationExtractor()
-        assert ext.case_insensitive is True
+        assert ext.config.case_insensitive is True
 
     def test_case_insensitive_false(self):
-        ext = SVGTranslationExtractor(
+        config = TranslationConfig(
             case_insensitive=False,
         )
-        assert ext.case_insensitive is False
+        ext = SVGTranslationExtractor(config)
+
+        assert ext.config.case_insensitive is False
 
 
 # ===========================================================================
@@ -158,7 +161,10 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(case_insensitive=True)
+        config = TranslationConfig(
+            case_insensitive=True,
+        )
+        ext = SVGTranslationExtractor(config)
         result = ext.extract(svg)
 
         assert "hello world" in result.new
@@ -172,9 +178,10 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(
+        config = TranslationConfig(
             case_insensitive=False,
         )
+        ext = SVGTranslationExtractor(config)
         result = ext.extract(svg)
 
         assert "Hello World" in result.new

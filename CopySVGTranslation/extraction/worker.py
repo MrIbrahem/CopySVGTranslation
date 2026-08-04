@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Any
 
+from ..config import TranslationConfig
 from .extractor import SVGTranslationExtractor
 
 
@@ -23,9 +24,10 @@ def extract(
         dict | None: A dictionary containing extracted translations, or
         None if the file does not exist or could not be parsed.
     """
-    extractor = SVGTranslationExtractor(
+    config = TranslationConfig(
         case_insensitive=case_insensitive,
     )
+    extractor = SVGTranslationExtractor(config)
 
     result = extractor.extract(source_file)
     if result.error:
