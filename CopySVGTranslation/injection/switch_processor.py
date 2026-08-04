@@ -167,32 +167,6 @@ class SwitchProcessor:
             langs_to_process.update(data.keys())
         return langs_to_process
 
-    def get_key_lang(
-        self,
-        key: str | None,
-        lang: str,
-        data: dict[str, dict[str, str]],
-        normalize: bool = False,
-    ) -> str | None:
-
-        def get_key(_key) -> str | None:
-            if _key in data and lang in data[_key]:
-                return data[_key][lang]
-            return None
-
-        if key is None:
-            return None
-
-        if normalize:
-            key = normalize_text(key)
-
-        result = get_key(key)
-
-        if not result and self.config.case_insensitive:
-            result = get_key(key.lower())
-
-        return result
-
     # -------------
     # node functions
     # -------------
@@ -251,3 +225,30 @@ class SwitchProcessor:
 
             if text:
                 tspan.text = text
+
+    @staticmethod
+    def get_key_lang(
+        key: str | None,
+        lang: str,
+        data: dict[str, dict[str, str]],
+        normalize: bool = False,
+        case_insensitive: bool = False,
+    ) -> str | None:
+
+        def get_key(_key) -> str | None:
+            if _key in data and lang in data[_key]:
+                return data[_key][lang]
+            return None
+
+        if key is None:
+            return None
+
+        if normalize:
+            key = normalize_text(key)
+
+        result = get_key(key)
+
+        if not result and case_insensitive:
+            result = get_key(key.lower())
+
+        return result
