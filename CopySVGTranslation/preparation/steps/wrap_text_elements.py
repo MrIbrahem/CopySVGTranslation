@@ -5,7 +5,7 @@ import re
 
 from lxml import etree
 
-from ...exceptions import SvgStructureError, SvgNonTspanInsideTextError
+from ...exceptions import SvgNonTspanInsideTextError, SvgStructureError
 from ...utils import normalize_lang
 from .base import PreparationContext, PreparationStep
 

@@ -154,7 +154,6 @@ class TestValidateStructure:
         validate_step.execute(ctx)
 
 
-
 class SkipTestValidateStructure:
     def test_switch_child_not_text_raises(self, validate_step):
         root = make_root('<switch><rect id="r1"/></switch><text id="t1">hello</text>')
@@ -171,7 +170,9 @@ class SkipTestValidateStructure:
         assert exc_info.value.code == "structure-error-switch-text-content-outside-text"
 
     def test_switch_duplicate_languages_raises(self, validate_step):
-        root = make_root('<switch><text id="t1" systemLanguage="ar">1</text><text id="t2" systemLanguage="ar">2</text></switch>')
+        root = make_root(
+            '<switch><text id="t1" systemLanguage="ar">1</text><text id="t2" systemLanguage="ar">2</text></switch>'
+        )
         ctx = make_ctx(root=root)
         with pytest.raises(SvgStructureError) as exc_info:
             validate_step.execute(ctx)

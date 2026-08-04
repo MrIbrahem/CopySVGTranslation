@@ -7,6 +7,7 @@ from lxml import etree
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
+
 # from ..core.switch_node import SwitchNode
 # from ..core.text_node import TextNode
 from ..result import InjectorStats
@@ -175,7 +176,7 @@ class SwitchProcessor:
             default_texts = [normalize_text(text, self.config.case_insensitive) for text in text_contents]
             default_node = text_elem
             break
-        return default_texts,default_node
+        return default_texts, default_node
 
     def enrich_all_mappings(self, mapping, default_texts):
         all_mappings_title_new = mapping.title_new

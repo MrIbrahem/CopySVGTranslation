@@ -57,6 +57,7 @@ def get_text_content(element: etree._Element) -> str:
     """Return concatenated text content (like DOM textContent)."""
     return "".join(element.itertext())
 
+
 def extract_root_languages(root: etree._Element) -> set[str]:
     languages: set[str] = set()
     try:

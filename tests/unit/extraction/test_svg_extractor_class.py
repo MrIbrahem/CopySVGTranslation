@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+
 import pytest
 
 from CopySVGTranslation.config import TranslationConfig
@@ -279,12 +280,14 @@ class TestSVGTranslationExtractorErrors:
 
     def test_nonexistent_file(self, tmp_path: Path):
         from CopySVGTranslation.exceptions import SvgIOError
+
         ext = SVGTranslationExtractor()
         with pytest.raises(SvgIOError):
             ext.extract(tmp_path / "missing.svg")
 
     def test_invalid_xml(self, tmp_path: Path):
         from CopySVGTranslation.exceptions import SvgParseError
+
         svg = tmp_path / "bad.svg"
         svg.write_text("<svg><unclosed>", encoding="utf-8")
         ext = SVGTranslationExtractor()
@@ -293,6 +296,7 @@ class TestSVGTranslationExtractorErrors:
 
     def test_empty_file(self, tmp_path: Path):
         from CopySVGTranslation.exceptions import SvgParseError
+
         svg = tmp_path / "empty.svg"
         svg.write_text("", encoding="utf-8")
         ext = SVGTranslationExtractor()

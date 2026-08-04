@@ -5,13 +5,12 @@ Unit tests for SVGTranslationService.
 from __future__ import annotations
 
 from pathlib import Path
-import pytest
-from lxml import etree
+
 
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.core.mapping import TranslationMapping
+from CopySVGTranslation.result import InjectorData
 from CopySVGTranslation.service import SVGTranslationService
-from CopySVGTranslation.result import OperationResult, InjectorData
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
