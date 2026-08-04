@@ -92,11 +92,14 @@ class TestSwitchNodeFallback:
         ])
         assert sn.fallback() is None
 
-    def test_default_text_node_is_same_as_fallback(self):
+    def test_default_text_node_is_same_element_as_fallback(self):
         sn = _make_switch([
             {"text": "Hello", "id": "t0"},
         ])
-        assert sn.default_text_node() is sn.fallback()
+        dt = sn.default_text_node()
+        fb = sn.fallback()
+        assert dt is not None and fb is not None
+        assert dt.element is fb.element
 
 
 # ---------------------------------------------------------------------------

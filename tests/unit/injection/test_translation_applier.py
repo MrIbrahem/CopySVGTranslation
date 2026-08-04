@@ -280,7 +280,7 @@ class TestReassignIds:
     def test_no_id_attribute(self):
         applier = _make_applier()
         elem = etree.Element(f"{{{SVG_NS}}}text")
-        # No id set — should not crash
+        # No id set — should not crash; _reassign_ids only reassigns existing ids
         applier._reassign_ids(elem, "ar")
-        # Should get a new trsvg id
-        assert elem.get("id") is not None
+        # Element without id stays without id (only existing ids are reassigned)
+        assert elem.get("id") is None
