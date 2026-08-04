@@ -92,7 +92,12 @@ class SVGTranslationInjector:
         root: etree._Element,
         mapping: TranslationMapping,
         stats: InjectorStats | None = None,
-    ) -> None:
+    ) -> InjectorStats:
+        """Process ``<switch>`` elements and insert or update translations."""
+        if not stats:
+            stats = InjectorStats()
+
+
         # Process every switch
         switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})
         logger.debug("Found %s switch elements", len(switches))
@@ -103,6 +108,7 @@ class SVGTranslationInjector:
                 mapping=mapping,
                 stats=stats,
             )
+        return stats
 
     def prepare(self, svg_path: Path | str) -> etree._ElementTree:
         """Public helper used by service.prepare_only()."""
