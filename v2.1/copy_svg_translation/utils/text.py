@@ -1,51 +1,30 @@
-# utils/text.py
+"""Shared text-handling helpers used by both extraction and injection."""
+
 from __future__ import annotations
 
+import logging
 import re
 
-
-def normalize_text(text: str | None, case_insensitive: bool = False) -> str:
-    """
-    Trim, collapse internal whitespace, optionally lowercase.
-
-    Examples
-    --------
-    >>> normalize_text("  Hello   World  ")
-    'Hello World'
-    >>> normalize_text("  Hello   World  ", case_insensitive=True)
-    'hello world'
-    """
-    if not text:
-        return ""
-    normalized = " ".join(text.strip().split())
-    if case_insensitive:
-        normalized = normalized.lower()
-    return normalized
+logger = logging.getLogger(__name__)
 
 
 def normalize_lang(lang: str) -> str:
     """
-    Lightweight language-tag normalizer (not a full BCP-47 parser).
-
-    Examples
-    --------
-    >>> normalize_lang("en_us")
-    'en-US'
-    >>> normalize_lang("EN")
-    'en'
-    >>> normalize_lang("pt-br")
-    'pt-BR'
-    >>> normalize_lang("zh_hans")
-    'zh-Hans'
+    Normalize a language tag to a simple IETF-like form.
+    This is a lightweight normalizer not a full BCP47 parser.
+    Examples:
+      'en_us' -> 'en-US'
+      'EN' -> 'en'
+      'pt-br' -> 'pt-BR'
     """
     if not lang:
         return lang
     pieces = re.split(r"[_\-\s]+", lang.strip())
     primary = pieces[0].lower()
-    if len(pieces) == 1:
-        return primary
-    rest = "-".join(p.upper() if len(p) == 2 else p.title() for p in pieces[1:])
-    return f"{primary}-{rest}"
+    if len(pieces) > 1:
+        rest = "-".join(p.upper() if len(p) == 2 else p.title() for p in pieces[1:])
+        return f"{primary}-{rest}"
+    return primary
 
 
 def split_lang_list(value: str | None) -> list[str]:
@@ -60,4 +39,26 @@ def split_lang_list(value: str | None) -> list[str]:
     """
     if not value or not value.strip():
         return []
+    # re.split(r",\s*", value)
     return [normalize_lang(part) for part in re.split(r"\s*,\s*", value.strip()) if part]
+
+
+def normalize_text(text: str | None, case_insensitive: bool = False) -> str:
+    """
+    Normalize text by trimming whitespace and optionally lowering the case.
+    """
+    if not text:
+        return ""
+
+    normalized = " ".join(text.strip().split())
+    if case_insensitive:
+        normalized = normalized.lower()
+
+    return normalized
+
+
+__all__ = [
+    "split_lang_list",
+    "normalize_lang",
+    "normalize_text",
+]

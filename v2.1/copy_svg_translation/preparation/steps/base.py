@@ -24,7 +24,7 @@ class PreparationContext:
 
 class PreparationStep(ABC):
     def __init__(self, config: TranslationConfig) -> None:
-        self.config = config
+        self.config = config or TranslationConfig()
 
     @abstractmethod
     def execute(self, ctx: PreparationContext) -> None:

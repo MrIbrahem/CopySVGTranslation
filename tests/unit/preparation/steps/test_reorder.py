@@ -83,8 +83,7 @@ class TestReorderTexts:
 
         switch = root.find(f".//{{{SVG_NS}}}switch")
         children = list(switch)
-        # assert children[-1].get("systemLanguage") is None
-        assert children[-1].get("systemLanguage") == "ar"
+        assert children[-1].get("systemLanguage") is None
 
     def test_multiple_switches_are_each_sorted_independently(self, reorder_step):
         root = make_root(

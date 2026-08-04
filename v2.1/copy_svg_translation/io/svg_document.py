@@ -95,6 +95,7 @@ class SvgDocument:
 
         cfg = self.config
         pretty = cfg.pretty_print if pretty_print is None else pretty_print
+        pretty = pretty if pretty is not None else True
         create = cfg.create_parents if create_parents is None else create_parents
 
         if create:

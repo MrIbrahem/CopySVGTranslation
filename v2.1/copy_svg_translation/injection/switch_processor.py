@@ -34,7 +34,7 @@ class SwitchProcessor:
     def process(
         self,
         switch_element: etree._Element,
-        mapping: TranslationMapping,
+        mapping: TranslationMapping | dict,
         stats: InjectorStats,
     ) -> None:
         """
@@ -48,6 +48,7 @@ class SwitchProcessor:
               - update stats
         6. Optionally re-sort children of the switch
         """
+        mapping = TranslationMapping.from_any(mapping)
         switch = SwitchNode(switch_element)
         default: TextNode | None = switch.default_text_node()
         if default is None:

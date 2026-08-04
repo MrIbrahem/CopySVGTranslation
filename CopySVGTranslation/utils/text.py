@@ -44,7 +44,9 @@ def split_lang_list(value: str | None) -> list[str]:
 
 
 def normalize_text(text: str | None, case_insensitive: bool = False) -> str:
-    """Normalize text by trimming whitespace and optionally lowering the case."""
+    """
+    Normalize text by trimming whitespace and optionally lowering the case.
+    """
     if not text:
         return ""
 
