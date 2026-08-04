@@ -78,35 +78,35 @@ class SVGTranslationInjector:
         """Inject translations into the provided SVG file."""
 
         # Reset state to prevent accumulation across calls
-        self.result = InjectorData()
-        self.new_stats = self.result.new_stats
+        result = InjectorData()
+        self.new_stats = result.new_stats
 
         inject_path = Path(str(inject_file))
 
         if not inject_path.exists():
             logger.error(f"SVG file not found: {inject_path}")
-            self.new_stats.error = "File does not exist"
-            return self.result
+            result.new_stats.error = "File does not exist"
+            return result
 
         if not all_mappings:
             logger.error("No valid mappings found")
-            self.new_stats.error = "No valid mappings found"
-            return self.result
+            result.new_stats.error = "No valid mappings found"
+            return result
 
         logger.debug(f"Injecting translations into {inject_path}")
-        stats = self.new_stats
+        stats = result.new_stats
         # 1. Prepare (pipeline)
         try:
             tree, root = self._parse_svg(inject_path)
         except Exception as exc:
             stats.error = f"preparation_failed: {exc}"
-            return self.result
+            return result
 
         if tree is None or root is None:
             stats.error = "preparation_returned_none_tree"
-            return self.result
+            return result
 
-        self.result.tree = tree
+        result.tree = tree
 
         # 2. Snapshot languages before
         before_languages = tree_languages(tree)
@@ -127,17 +127,21 @@ class SVGTranslationInjector:
         self._update_data(stats, before_languages, after_languages)
 
         if not save_result:
-            return self.result
+            return result
 
         # 7. Save if requested
         if save_path is None:
             logger.error("save_result is True but no save_path was provided")
-            self.new_stats.error = "No target path provided"
-            return self.result
+            result.new_stats.error = "No target path provided"
+            return result
 
-        self._save(tree, save_path)
+        try:
+            self._save(tree, save_path)
+        except OSError as e:
+            logger.error(f"Failed writing {str(save_path)}: {e}")
+            self.new_stats.error = f"Failed writing {str(save_path)}: {e}"
 
-        return self.result
+        return result
 
     def work_on_switches(
         self,
@@ -148,7 +152,7 @@ class SVGTranslationInjector:
     ) -> None:
         """Process ``<switch>`` elements and insert or update translations."""
         if not stats:
-            stats = self.new_stats
+            stats = InjectorStats()
 
         if not existing_ids:
             # Collect all existing IDs to ensure uniqueness
@@ -178,19 +182,13 @@ class SVGTranslationInjector:
         tree: etree._ElementTree,
         save_path: Path,
     ) -> None:
-        str_save_path = str(save_path)
-        try:
-            tree.write(
-                str_save_path,
-                encoding="utf-8",
-                xml_declaration=True,
-                pretty_print=self.config.pretty_print,
-            )
-            logger.debug(f"Saved modified SVG to {save_path}")
-        except OSError as e:
-            logger.error(f"Failed writing {str_save_path}: {e}")
-            self.new_stats.error = f"Failed writing {str_save_path}: {e}"
-            self.result.tree = None
+        tree.write(
+            str(save_path),
+            encoding="utf-8",
+            xml_declaration=True,
+            pretty_print=self.config.pretty_print,
+        )
+        logger.debug(f"Saved modified SVG to {save_path}")
 
     def _update_data(self, stats, before_languages: set[str], after_languages: set[str]) -> None:
         new_languages = after_languages - before_languages
