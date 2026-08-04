@@ -23,7 +23,9 @@ def flatten_text(elem):
 
 
 def fix_nested_tspans(root, tag=None):
-    """Flatten nested <tspan> elements while preserving text order and spacing."""
+    """
+    Flatten nested <tspan> elements while preserving text order and spacing.
+    """
     tag = tag or "tspan"
     # Process all tspans that contain nested tspans
     for tspan in root.findall(f".//{{{SVG_NS}}}tspan"):
@@ -101,6 +103,9 @@ def fix_nested_file(source_file: Path, new_path: Path | None = None, pretty_prin
     # ---
     root = tree.getroot()
     # ---
+    if root is None:
+        return False
+    # ---
     root = fix_nested_tspans(root)
     # ---
     # NOTE: <a tags can also be nested inside <tspan>, so fix those too
@@ -108,17 +113,16 @@ def fix_nested_file(source_file: Path, new_path: Path | None = None, pretty_prin
     # Only tspan elements should be used within text.
     root = fix_nested_tspans(root, "a")
     # ---
-    if root is not None:
-        try:
-            _str = etree.tostring(
-                root,
-                encoding="unicode",
-                pretty_print=pretty_print,
-            )  # pyright: ignore[reportCallIssue]
-            new_path.write_text(_str, encoding="utf-8")
-            return True
-        except Exception:
-            logger.error(f"Failed to write fixed svg file to: {str(new_path)}")
+    try:
+        _str = etree.tostring(
+            root,
+            encoding="unicode",
+            pretty_print=pretty_print,
+        )  # pyright: ignore[reportCallIssue]
+        new_path.write_text(_str, encoding="utf-8")
+        return True
+    except Exception:
+        logger.error(f"Failed to write fixed svg file to: {str(new_path)}")
     # ---
     return False
 
