@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from CopySVGTranslation.nested_analyze.find_nested import fix_nested_file
 from CopySVGTranslation.nested_analyze.find_nested_new import fix_nested_file_new
 from CopySVGTranslation.nested_analyze.match_tags import match_nested_tags
 
@@ -34,6 +35,7 @@ def test_match_and_fix_2(temp_dir: Path):
     p = _write_svg(temp_dir, text, name="testx.svg")
     before = len(match_nested_tags(p))
     fixed = fix_nested_file_new(p)
+
     assert fixed is True
 
     after = len(match_nested_tags(p))
@@ -55,45 +57,6 @@ def test_match_and_fix_2(temp_dir: Path):
     new_text_expected_strip = "".join(new_text_expected.split())
 
     assert new_text_strip == new_text_expected_strip
-
-
-@pytest.mark.todo
-def test_match_and_fix_to_do(temp_dir: Path):
-    text = """
-        <g class="markdown-text-wrap">
-            <text x="16.0" y="581.0" style="font-size: 13px; line-height: 1.2;">
-                <tspan x="16" y="581.0">
-                    <tspan style="font-weight: 700;">Data source:</tspan> United Nations Inter-agency Group for Child
-                    Mortality Estimation (2025)
-                </tspan>
-            </text>
-        </g>
-    """
-    p = _write_svg(temp_dir, text, name="testx.svg")
-    before = len(match_nested_tags(p))
-    fixed = fix_nested_file_new(p)
-    assert fixed is True
-
-    after = len(match_nested_tags(p))
-    assert before == 1
-    assert after == 0
-
-    new_text = p.read_text(encoding="utf-8")
-    new_text_expected = """
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100" height="100">
-            <g class="markdown-text-wrap">
-                <text x="16.0" y="581.0" style="font-size: 13px; line-height: 1.2;">
-                    <tspan style="font-weight: 700;">Data source: </tspan>
-                    <tspan>United Nations Inter-agency Group for Child Mortality Estimation (2025)</tspan>
-                </text>
-            </g>
-        </svg>
-    """
-    new_text_strip = "".join(new_text.split())
-    new_text_expected_strip = "".join(new_text_expected.split())
-
-    assert new_text_strip == new_text_expected_strip
-
 
 def test_match_and_fix_3(temp_dir: Path):
     text = """
@@ -155,3 +118,41 @@ def test_match_and_fix_3(temp_dir: Path):
     new_text_expected_strip = "".join(new_text_expected.split())
 
     assert new_text_strip == new_text_expected_strip
+
+@pytest.mark.todo
+def test_match_and_fix_to_do(temp_dir: Path):
+    text = """
+        <g class="markdown-text-wrap">
+            <text x="16.0" y="581.0" style="font-size: 13px; line-height: 1.2;">
+                <tspan x="16" y="581.0">
+                    <tspan style="font-weight: 700;">Data source:</tspan> United Nations Inter-agency Group for Child
+                    Mortality Estimation (2025)
+                </tspan>
+            </text>
+        </g>
+    """
+    p = _write_svg(temp_dir, text, name="testx.svg")
+    before = len(match_nested_tags(p))
+    fixed = fix_nested_file_new(p)
+    assert fixed is True
+
+    after = len(match_nested_tags(p))
+    assert before == 1
+    assert after == 0
+
+    new_text = p.read_text(encoding="utf-8")
+    new_text_expected = """
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100" height="100">
+            <g class="markdown-text-wrap">
+                <text x="16.0" y="581.0" style="font-size: 13px; line-height: 1.2;">
+                    <tspan style="font-weight: 700;">Data source: </tspan>
+                    <tspan>United Nations Inter-agency Group for Child Mortality Estimation (2025)</tspan>
+                </text>
+            </g>
+        </svg>
+    """
+    new_text_strip = "".join(new_text.split())
+    new_text_expected_strip = "".join(new_text_expected.split())
+
+    assert new_text_strip == new_text_expected_strip
+
