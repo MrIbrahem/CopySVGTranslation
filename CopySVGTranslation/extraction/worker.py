@@ -5,6 +5,7 @@ from typing import Any
 
 from ..config import TranslationConfig
 from .extractor import SVGTranslationExtractor
+from ..exceptions import SvgIOError, SvgParseError
 
 
 def extract(
@@ -29,7 +30,11 @@ def extract(
     )
     extractor = SVGTranslationExtractor(config)
 
-    result = extractor.extract(source_file)
+    try:
+        result = extractor.extract(source_file)
+    except (SvgIOError, SvgParseError):
+        return None
+
     if result.error:
         return None
 
