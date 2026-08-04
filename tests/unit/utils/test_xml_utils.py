@@ -1,5 +1,5 @@
 """
-Unit tests for CopySVGTranslation/injection/elements_utils.py module.
+Unit tests for CopySVGTranslation/injection/xml.py module.
 
 
 TODO: write tests
@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from CopySVGTranslation.utils.elements_utils import (
+from CopySVGTranslation.utils.xml import (
     extract_root_languages,
     extract_text_from_node,
     file_langs,

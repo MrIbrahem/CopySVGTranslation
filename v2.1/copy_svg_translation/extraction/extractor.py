@@ -8,8 +8,8 @@ from typing import Any
 
 from lxml import etree
 
-from ..core.mapping import TranslationMapping
 from ..config import TranslationConfig
+from ..core.mapping import TranslationMapping
 from ..core.switch_node import SwitchNode
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler

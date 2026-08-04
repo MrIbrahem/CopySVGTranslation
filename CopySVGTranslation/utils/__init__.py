@@ -1,4 +1,9 @@
-from .elements_utils import (
+from .injection_utils import (
+    generate_unique_id,
+    load_all_mappings,
+)
+from .text import normalize_lang, normalize_text, split_lang_list
+from .xml import (
     collect_ids,
     extract_root_languages,
     extract_text_from_node,
@@ -7,11 +12,6 @@ from .elements_utils import (
     sort_switch_texts,
     tree_languages,
 )
-from .injection_utils import (
-    generate_unique_id,
-    load_all_mappings,
-)
-from .text_utils import normalize_lang, normalize_text, split_lang_list
 
 __all__ = [
     "sort_switch_children",

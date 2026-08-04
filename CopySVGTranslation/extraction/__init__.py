@@ -1,6 +1,6 @@
 """Extraction phase helpers for CopySVGTranslation."""
 
-from .extractor import TranslationMapping, SVGTranslationExtractor
+from .extractor import SVGTranslationExtractor, TranslationMapping
 from .worker import extract
 
 __all__ = [

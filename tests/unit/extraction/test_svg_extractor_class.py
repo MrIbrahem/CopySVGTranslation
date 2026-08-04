@@ -7,8 +7,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from CopySVGTranslation.core.mapping import TranslationMapping
 from CopySVGTranslation.config import TranslationConfig
+from CopySVGTranslation.core.mapping import TranslationMapping
 from CopySVGTranslation.extraction.extractor import (
     SVGTranslationExtractor,
 )

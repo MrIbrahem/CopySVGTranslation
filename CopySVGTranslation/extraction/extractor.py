@@ -8,10 +8,9 @@ from typing import Any
 
 from lxml import etree
 
-from ..core.mapping import TranslationMapping
 from ..config import TranslationConfig
+from ..core.mapping import TranslationMapping
 from ..io.svg_document import SvgDocument
-from ..titles import YearTitleHandler
 from ..titles import make_new_title_translations, make_title_translations
 from ..utils import normalize_text
 
