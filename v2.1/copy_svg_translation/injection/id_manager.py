@@ -20,12 +20,12 @@ class IdManager:
     def allocate_trsvg(self) -> str:
         """Allocate a new unique ``trsvg`` identifier."""
 
-        while True:
-            candidate = f"trsvg{self._trsvg_counter}"
+        while f"trsvg{self._trsvg_counter}" in self.existing_ids:
             self._trsvg_counter += 1
-            if candidate not in self.existing_ids:
-                self.existing_ids.add(candidate)
-                return candidate
+
+        candidate = f"trsvg{self._trsvg_counter}"
+        self.existing_ids.add(candidate)
+        return candidate
 
     def allocate_clone(self, base_id: str | None, lang: str) -> str:
         if not base_id:
