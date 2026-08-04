@@ -52,12 +52,6 @@ def extract_text_segments(node: etree._Element) -> list[str]:
         return [t.text.strip() if t.text else "" for t in tspans]
     return [node.text.strip()] if node.text else [""]
 
-
-def get_text_content(element: etree._Element) -> str:
-    """Return concatenated text content (like DOM textContent)."""
-    return "".join(element.itertext())
-
-
 def extract_root_languages(root: etree._Element) -> set[str]:
     languages: set[str] = set()
     try:
