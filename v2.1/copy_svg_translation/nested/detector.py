@@ -21,18 +21,21 @@ class NestedTspanDetector:
     def find_in_tree(self, root: etree._Element) -> list[etree._Element]:
         """Return all tspan elements that have element children."""
         result: list[etree._Element] = []
-        for tspan in root.findall(f".//{{{SVG_NS}}}tspan"):
+        # Find all <tspan> elements
+        tspans = root.findall(f".//{{{SVG_NS}}}tspan")
+        for tspan in tspans:
+            # Check if <tspan> has element children (nested tags)
             element_children = [c for c in tspan if isinstance(c.tag, str)]
             if element_children:
                 result.append(tspan)
         return result
 
-    def find_in_file(self, path: Path | str) -> list[str]:
+    def find_in_file(self, source_file: Path | str) -> list[str]:
         """
         Parse a file and return serialised representations of nested tspans.
         Returns an empty list on parse errors.
         """
-        path = Path(path)
+        path = Path(source_file)
         if not path.exists():
             logger.error("File does not exist: %s", path)
             return []
@@ -50,10 +53,10 @@ class NestedTspanDetector:
         nested = self.find_in_tree(root)
         return [
             etree.tostring(
-                t,
+                tspan,
                 pretty_print=False,
             ).decode("utf-8")
-            for t in nested
+            for tspan in nested
         ]
 
     def has_nested(self, root: etree._Element) -> bool:

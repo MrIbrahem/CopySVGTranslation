@@ -10,9 +10,10 @@ from pathlib import Path
 
 
 from CopySVGTranslation.nested_analyze.match_tags import (
-    SVG_NS,
     match_nested_tags,
 )
+
+SVG_NS = "http://www.w3.org/2000/svg"
 
 def _svg(inner: str) -> str:
     return f'<svg xmlns="{SVG_NS}">{inner}</svg>'
