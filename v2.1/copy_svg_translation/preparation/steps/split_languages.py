@@ -23,6 +23,7 @@ class SplitLanguages(PreparationStep):
             return
 
         self._split_switch_languages(ctx)
+
         # ------------------------------------------------------------------
         # Step 6: <switch> language splitting
         # ------------------------------------------------------------------
@@ -31,8 +32,8 @@ class SplitLanguages(PreparationStep):
         """Split comma-separated systemLanguage values into cloned <text> nodes."""
         if ctx.root is None:
             return
-        switches = ctx.root.findall(f".//{{{SVG_NS}}}switch")
 
+        switches = ctx.root.findall(f".//{{{SVG_NS}}}switch")
         for switch in switches:
             self._split_languages_in_switch(switch, ctx)
 
