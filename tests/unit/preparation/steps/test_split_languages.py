@@ -22,21 +22,7 @@ from lxml import etree
 
 from CopySVGTranslation.exceptions import SvgStructureError
 from CopySVGTranslation.preparation.steps.split_languages import SVG_NS, SplitLanguages
-
-
-class FakeIdManager:
-    """Minimal stand-in for the real IdManager used across tests."""
-
-    def __init__(self) -> None:
-        self._counter = 0
-
-    def allocate_trsvg(self) -> str:
-        self._counter += 1
-        return f"trsvg{self._counter}"
-
-    def allocate_clone(self, base_id: str, lang: str) -> str:
-        return f"{base_id}-{lang}"
-
+from CopySVGTranslation.injection.id_manager import IdManager
 
 def make_switch(children_xml: str) -> etree._Element:
     """Build a standalone <switch> element (SVG namespace) with given children."""
@@ -52,8 +38,8 @@ def step() -> SplitLanguages:
 
 @pytest.fixture
 def ctx() -> SimpleNamespace:
-    """Lightweight context stub with a fresh FakeIdManager per test."""
-    return SimpleNamespace(root=None, id_manager=FakeIdManager())
+    """Lightweight context stub with a fresh IdManager per test."""
+    return SimpleNamespace(root=None, id_manager=IdManager())
 
 
 # ---------------------------------------------------------------------------
@@ -113,11 +99,13 @@ class TestSplitLanguagesInSwitch(TestSetup):
         children = list(switch)
         assert len(children) == 3
         assert [c.get("systemLanguage") for c in children] == ["ar", "fr", "pt-BR"]
+
         # original node keeps its id; clones get ids from id_manager.allocate_clone
         assert children[0].get("id") == "t1"
         assert children[1].get("id") == "t1-fr"
-        assert children[2].get("id") == "t1-pt-BR"
-        expected_output = """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text><text id="t1-fr" systemLanguage="fr">hello</text><text id="t1-pt-BR" systemLanguage="pt-BR">hello</text></switch>"""
+        assert children[2].get("id") == "t1-pt-br"
+
+        expected_output = """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text><text id="t1-fr" systemLanguage="fr">hello</text><text id="t1-pt-br" systemLanguage="pt-BR">hello</text></switch>"""
         assert self.tostring(switch) == expected_output
 
     def test_clone_without_original_id_uses_allocate_trsvg(self, step, ctx):

@@ -10,22 +10,8 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation.exceptions import SvgStructureError
+from CopySVGTranslation.injection.id_manager import IdManager
 from CopySVGTranslation.preparation.steps.wrap_text_elements import SVG_NS, WrapTextElements
-
-
-class FakeIdManager:
-    """Minimal stand-in for the real IdManager used across tests."""
-
-    def __init__(self) -> None:
-        self._counter = 0
-
-    def allocate_trsvg(self) -> str:
-        self._counter += 1
-        return f"trsvg{self._counter}"
-
-    def allocate_clone(self, base_id: str, lang: str) -> str:
-        return f"{base_id}-{lang}"
-
 
 class TestSetup:
     def tostring(self, el: etree._Element, pretty_print=False) -> str:
@@ -62,7 +48,7 @@ def make_root(svg_body: str) -> etree._Element:
 
 def make_ctx(root: etree._Element) -> SimpleNamespace:
     """Lightweight context stub carrying only what _process_text_elements reads."""
-    return SimpleNamespace(root=root, id_manager=FakeIdManager())
+    return SimpleNamespace(root=root, id_manager=IdManager())
 
 
 # ---------------------------------------------------------------------------
@@ -74,7 +60,7 @@ class TestProcessTextElements(TestSetup):
 
     def test_root_none_is_a_noop(self, step_factory):
         step = step_factory(normalize_languages=False)
-        ctx = SimpleNamespace(root=None, id_manager=FakeIdManager())
+        ctx = SimpleNamespace(root=None, id_manager=IdManager())
 
         # should return immediately without raising
         step._process_text_elements(ctx)
@@ -305,7 +291,7 @@ class TestProcessTextElementsErrors(TestSetup):
         assert orphan_text.getparent() is None
 
         fake_root = SimpleNamespace(findall=lambda _pattern: [orphan_text])
-        ctx = SimpleNamespace(root=fake_root, id_manager=FakeIdManager())
+        ctx = SimpleNamespace(root=fake_root, id_manager=IdManager())
 
         with pytest.raises(SvgStructureError) as exc_info:
             step._process_text_elements(ctx)

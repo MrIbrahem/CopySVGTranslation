@@ -23,24 +23,6 @@ from CopySVGTranslation.exceptions import (
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
-class FakeIdManager:
-    """Minimal stand-in exposing the subset of IdManager used by these steps."""
-
-    def __init__(self) -> None:
-        self.existing_ids: set[str] = set()
-        self.registered: list[str] = []
-        self.registered_many_calls: list[set[str]] = []
-
-    def register(self, id_value: str) -> None:
-        self.existing_ids.add(id_value)
-        self.registered.append(id_value)
-
-    def register_many(self, ids) -> None:
-        ids = set(ids)
-        self.existing_ids.update(ids)
-        self.registered_many_calls.append(ids)
-
-
 def make_root(svg_body: str) -> etree._Element:
     """Build a standalone <svg> root element with the given inner XML."""
     xml = f'<svg xmlns="{SVG_NS}">{svg_body}</svg>'
