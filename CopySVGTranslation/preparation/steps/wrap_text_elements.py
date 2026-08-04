@@ -11,6 +11,7 @@ from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
+
 class WrapTextElements(PreparationStep):
     def execute(self, ctx: PreparationContext) -> None:
         if ctx.root is None:

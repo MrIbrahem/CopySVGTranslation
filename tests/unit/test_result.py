@@ -9,7 +9,7 @@ TODO: write tests
 
 
 from CopySVGTranslation.result import (
-    InjectorStats,
     InjectorData,
+    InjectorStats,
     OperationResult,
 )

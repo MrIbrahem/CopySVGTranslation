@@ -6,7 +6,6 @@ Classes to test: ApplyResult, TranslationApplier
 
 from __future__ import annotations
 
-import pytest
 from lxml import etree
 
 from CopySVGTranslation.config import TranslationConfig

@@ -6,7 +6,6 @@ Classes to test: YearTitleHandler
 
 from __future__ import annotations
 
-import pytest
 
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.core.mapping import TranslationMapping
@@ -105,18 +104,14 @@ class TestBuildTemplates:
     def test_disabled_does_nothing(self):
         config = TranslationConfig(enable_year_titles=False)
         handler = YearTitleHandler(config)
-        mapping = TranslationMapping(
-            new={"COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020"}}
-        )
+        mapping = TranslationMapping(new={"COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020"}})
         handler.build_templates(mapping)
         assert mapping.title == {}
         assert mapping.title_new == {}
 
     def test_builds_title_and_title_new(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            new={"COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020"}}
-        )
+        mapping = TranslationMapping(new={"COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020"}})
         handler.build_templates(mapping)
         # title should have the year stripped
         assert "COVID-19 pandemic" in mapping.title
@@ -125,9 +120,7 @@ class TestBuildTemplates:
 
     def test_no_year_entries(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            new={"No year here": {"ar": "ترجمة"}}
-        )
+        mapping = TranslationMapping(new={"No year here": {"ar": "ترجمة"}})
         handler.build_templates(mapping)
         assert mapping.title == {}
         assert mapping.title_new == {}
@@ -139,34 +132,26 @@ class TestBuildTemplatesNew:
     def test_disabled_does_nothing(self):
         config = TranslationConfig(enable_year_titles=False)
         handler = YearTitleHandler(config)
-        mapping = TranslationMapping(
-            new={"COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020"}}
-        )
+        mapping = TranslationMapping(new={"COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020"}})
         handler.build_templates_new(mapping)
         assert mapping.title_new == {}
 
     def test_builds_title_new(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            new={"COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020"}}
-        )
+        mapping = TranslationMapping(new={"COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020"}})
         handler.build_templates_new(mapping)
         assert "COVID-19 pandemic {year}" in mapping.title_new
         assert mapping.title_new["COVID-19 pandemic {year}"]["ar"] == "جائحة كوفيد {year}"
 
     def test_skips_entries_without_year(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            new={"No year text": {"ar": "ترجمة"}}
-        )
+        mapping = TranslationMapping(new={"No year text": {"ar": "ترجمة"}})
         handler.build_templates_new(mapping)
         assert mapping.title_new == {}
 
     def test_skips_translation_without_year(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            new={"Text 2020": {"ar": "بدون سنة"}}
-        )
+        mapping = TranslationMapping(new={"Text 2020": {"ar": "بدون سنة"}})
         handler.build_templates_new(mapping)
         # Translation doesn't end with 2020, so it should be skipped
         assert mapping.title_new == {}
@@ -177,11 +162,7 @@ class TestExpandForTexts:
 
     def test_basic_expansion(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            title_new={
-                "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}"}
-            }
-        )
+        mapping = TranslationMapping(title_new={"COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}"}})
         result = handler.expand_for_texts(mapping, ["COVID-19 pandemic 1990"])
         assert "COVID-19 pandemic 1990" in result
         assert result["COVID-19 pandemic 1990"]["ar"] == "جائحة كوفيد 1990"
@@ -189,11 +170,7 @@ class TestExpandForTexts:
     def test_disabled_returns_empty(self):
         config = TranslationConfig(enable_year_titles=False)
         handler = YearTitleHandler(config)
-        mapping = TranslationMapping(
-            title_new={
-                "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}"}
-            }
-        )
+        mapping = TranslationMapping(title_new={"COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}"}})
         result = handler.expand_for_texts(mapping, ["COVID-19 pandemic 1990"])
         assert result == {}
 
@@ -205,55 +182,31 @@ class TestExpandForTexts:
 
     def test_no_matching_template(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            title_new={
-                "Other title {year}": {"ar": "عنوان {year}"}
-            }
-        )
+        mapping = TranslationMapping(title_new={"Other title {year}": {"ar": "عنوان {year}"}})
         result = handler.expand_for_texts(mapping, ["COVID-19 pandemic 1990"])
         assert result == {}
 
     def test_text_without_year(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            title_new={
-                "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}"}
-            }
-        )
+        mapping = TranslationMapping(title_new={"COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}"}})
         result = handler.expand_for_texts(mapping, ["No year text"])
         assert result == {}
 
     def test_case_insensitive_lookup(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            title_new={
-                "covid-19 pandemic {year}": {"ar": "جائحة كوفيد {year}"}
-            }
-        )
-        result = handler.expand_for_texts(
-            mapping, ["COVID-19 Pandemic 1990"], case_insensitive=True
-        )
+        mapping = TranslationMapping(title_new={"covid-19 pandemic {year}": {"ar": "جائحة كوفيد {year}"}})
+        result = handler.expand_for_texts(mapping, ["COVID-19 Pandemic 1990"], case_insensitive=True)
         assert "COVID-19 Pandemic 1990" in result
 
     def test_case_sensitive_no_match(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            title_new={
-                "covid-19 pandemic {year}": {"ar": "جائحة كوفيد {year}"}
-            }
-        )
-        result = handler.expand_for_texts(
-            mapping, ["COVID-19 Pandemic 1990"], case_insensitive=False
-        )
+        mapping = TranslationMapping(title_new={"covid-19 pandemic {year}": {"ar": "جائحة كوفيد {year}"}})
+        result = handler.expand_for_texts(mapping, ["COVID-19 Pandemic 1990"], case_insensitive=False)
         assert result == {}
 
     def test_multiple_languages(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            title_new={
-                "pandemic {year}": {"ar": "جائحة {year}", "fr": "pandémie {year}"}
-            }
-        )
+        mapping = TranslationMapping(title_new={"pandemic {year}": {"ar": "جائحة {year}", "fr": "pandémie {year}"}})
         result = handler.expand_for_texts(mapping, ["pandemic 2020"])
         assert result["pandemic 2020"]["ar"] == "جائحة 2020"
         assert result["pandemic 2020"]["fr"] == "pandémie 2020"
@@ -270,11 +223,7 @@ class TestEnrichMappingForSwitch:
 
     def test_returns_enriched_mapping(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            title_new={
-                "pandemic {year}": {"ar": "جائحة {year}"}
-            }
-        )
+        mapping = TranslationMapping(title_new={"pandemic {year}": {"ar": "جائحة {year}"}})
         result = handler.enrich_mapping_for_switch(mapping, ["pandemic 2020"])
         assert result is not mapping
         assert "pandemic 2020" in result.new
@@ -282,11 +231,7 @@ class TestEnrichMappingForSwitch:
 
     def test_does_not_mutate_original(self):
         handler = YearTitleHandler()
-        mapping = TranslationMapping(
-            title_new={
-                "pandemic {year}": {"ar": "جائحة {year}"}
-            }
-        )
+        mapping = TranslationMapping(title_new={"pandemic {year}": {"ar": "جائحة {year}"}})
         original_new = dict(mapping.new)
         handler.enrich_mapping_for_switch(mapping, ["pandemic 2020"])
         assert mapping.new == original_new

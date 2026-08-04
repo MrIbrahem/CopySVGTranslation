@@ -1,4 +1,3 @@
-
 """
 Tests for injection.switch_processor.SwitchProcessor.
 
@@ -67,6 +66,7 @@ NSMAP = {"svg": SVG_NS}
 # Fakes / stubs for SwitchProcessor's collaborators
 # ---------------------------------------------------------------------------
 
+
 def fake_extract_text_from_node(node: etree._Element) -> list[str]:
     """
     Return one text entry per <tspan> child (document order), or a single
@@ -79,9 +79,11 @@ def fake_extract_text_from_node(node: etree._Element) -> list[str]:
         return [t.text or "" for t in tspans]
     return [node.text or ""]
 
+
 # ---------------------------------------------------------------------------
 # Common fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def id_manager():
@@ -95,6 +97,7 @@ def stats():
 
 def make_config(overwrite: bool = False, case_insensitive: bool = False) -> TranslationConfig:
     return TranslationConfig(overwrite=overwrite, case_insensitive=case_insensitive)
+
 
 def make_processor(config=None, id_manager=None, applier=None) -> SwitchProcessor:
     return SwitchProcessor(
@@ -235,9 +238,7 @@ class TestProcessInsertion:
         assert stats.inserted_translations == 2
 
     def test_tspans_are_translated_individually_in_new_node(self, id_manager, stats):
-        switch = make_switch(
-            '<text id="t1"><tspan id="s1">hello</tspan><tspan id="s2">world</tspan></text>'
-        )
+        switch = make_switch('<text id="t1"><tspan id="s1">hello</tspan><tspan id="s2">world</tspan></text>')
         processor = make_processor(id_manager=id_manager)
 
         processor.process(
@@ -263,15 +264,13 @@ class TestProcessInsertion:
 
         processor.process(switch, {"new": {"hello": {"ar": "مرحبا"}}}, stats)
 
-        assert id_manager.existing_ids == {'s1-ar', 't1-ar'}
+        assert id_manager.existing_ids == {"s1-ar", "t1-ar"}
 
         new_tspan = find_texts(switch)[-1].xpath("./svg:tspan", namespaces=NSMAP)[0]
         assert new_tspan.get("id") == "s1-ar"
 
     def test_missing_translation_for_a_tspan_falls_back_to_empty_string(self, id_manager, stats):
-        switch = make_switch(
-            '<text id="t1"><tspan id="s1">hello</tspan><tspan id="s2">world</tspan></text>'
-        )
+        switch = make_switch('<text id="t1"><tspan id="s1">hello</tspan><tspan id="s2">world</tspan></text>')
         processor = make_processor(id_manager=id_manager)
 
         # only "hello" has an "ar" translation; "world" has none
@@ -302,10 +301,7 @@ class TestProcessInsertion:
 
 class TestProcessExistingLanguage:
     def test_existing_language_is_skipped_when_overwrite_disabled(self, id_manager, stats):
-        switch = make_switch(
-            '<text id="t1">hello</text>'
-            '<text id="t1-ar" systemLanguage="ar">مرحبا قديم</text>'
-        )
+        switch = make_switch('<text id="t1">hello</text><text id="t1-ar" systemLanguage="ar">مرحبا قديم</text>')
         processor = make_processor(config=make_config(overwrite=False), id_manager=id_manager)
 
         processor.process(switch, {"new": {"hello": {"ar": "مرحبا جديد"}}}, stats)
@@ -326,9 +322,7 @@ class TestProcessExistingLanguage:
 
         processor.process(switch, {"new": {"hello": {"ar": "مرحبا جديد"}}}, stats)
 
-        ar_tspan = switch.xpath(
-            './svg:text[@systemLanguage="ar"]/svg:tspan', namespaces=NSMAP
-        )[0]
+        ar_tspan = switch.xpath('./svg:text[@systemLanguage="ar"]/svg:tspan', namespaces=NSMAP)[0]
 
         assert ar_tspan.text == "مرحبا جديد"
         assert stats.updated_translations == 1
@@ -366,9 +360,7 @@ class TestProcessExistingLanguage:
 
         processor.process(switch, {"new": {"hello": {"fr": "bonjour2"}}}, stats)
 
-        fr_tspan = switch.xpath(
-            './svg:text[@systemLanguage="fr"]/svg:tspan', namespaces=NSMAP
-        )[0]
+        fr_tspan = switch.xpath('./svg:text[@systemLanguage="fr"]/svg:tspan', namespaces=NSMAP)[0]
         assert fr_tspan.text == "bonjour2"
         assert stats.updated_translations == 1
 
@@ -400,9 +392,7 @@ class TestProcessExistingLanguage:
 
         processor.process(switch, {"new": {"hello": {"ar": "new"}}}, stats)
 
-        ar_tspans = switch.xpath(
-            './svg:text[@systemLanguage="ar"]/svg:tspan', namespaces=NSMAP
-        )
+        ar_tspans = switch.xpath('./svg:text[@systemLanguage="ar"]/svg:tspan', namespaces=NSMAP)
         assert ar_tspans[0].text == "new"
         assert ar_tspans[1].text == "old2"  # beyond default_texts length: untouched
 
@@ -415,10 +405,7 @@ class TestProcessExistingLanguage:
 class TestGetDefaultTexts:
     def test_returns_first_node_without_systemlanguage(self, id_manager):
         processor = make_processor(id_manager=id_manager)
-        switch = make_switch(
-            '<text id="ar1" systemLanguage="ar">a</text>'
-            '<text id="t1">hello</text>'
-        )
+        switch = make_switch('<text id="ar1" systemLanguage="ar">a</text><text id="t1">hello</text>')
         text_elements = find_texts(switch)
 
         default_texts, default_node = processor.get_default_texts(text_elements)
@@ -438,9 +425,7 @@ class TestGetDefaultTexts:
         assert default_node is None
 
     def test_texts_are_normalized_with_case_insensitive_flag(self, id_manager):
-        processor = make_processor(
-            config=make_config(case_insensitive=True), id_manager=id_manager
-        )
+        processor = make_processor(config=make_config(case_insensitive=True), id_manager=id_manager)
         switch = make_switch('<text id="t1">  Hello  </text>')
         text_elements = find_texts(switch)
 
@@ -518,6 +503,7 @@ class TestEnrichAllMappings:
 
         assert result["hello 2020"] == {"ar": "مرحبا 2020", "fr": "bonjour 2020"}
 
+
 # ---------------------------------------------------------------------------
 # get_available_translations
 # ---------------------------------------------------------------------------
@@ -527,18 +513,14 @@ class TestGetAvailableTranslations:
     def test_returns_only_texts_present_in_mappings(self, id_manager):
         processor = make_processor(id_manager=id_manager)
 
-        result = processor.get_available_translations(
-            ["hello", "missing"], {"hello": {"ar": "مرحبا"}}
-        )
+        result = processor.get_available_translations(["hello", "missing"], {"hello": {"ar": "مرحبا"}})
 
         assert result == {"hello": {"ar": "مرحبا"}}
 
     def test_case_insensitive_lookup_uses_lowercased_key(self, id_manager):
         processor = make_processor(config=make_config(case_insensitive=True), id_manager=id_manager)
 
-        result = processor.get_available_translations(
-            ["Hello"], {"hello": {"ar": "مرحبا"}}
-        )
+        result = processor.get_available_translations(["Hello"], {"hello": {"ar": "مرحبا"}})
 
         assert result == {"hello": {"ar": "مرحبا"}}
 
@@ -593,21 +575,17 @@ class TestGetKeyLang:
 
     def test_normalize_flag_applies_normalize_text_before_lookup(self):
 
-        result = make_processor().get_key_lang(
-            "  hello  ", "ar", {"hello": {"ar": "مرحبا"}}, normalize=True
-        )
+        result = make_processor().get_key_lang("  hello  ", "ar", {"hello": {"ar": "مرحبا"}}, normalize=True)
         assert result == "مرحبا"
 
     def test_case_insensitive_fallback_when_exact_key_misses(self):
         processor = make_processor(config=make_config(case_insensitive=True))
-        result = processor.get_key_lang(
-            "Hello", "ar", {"hello": {"ar": "مرحبا"}}
-        )
+        result = processor.get_key_lang("Hello", "ar", {"hello": {"ar": "مرحبا"}})
         assert result == "مرحبا"
 
     def test_no_case_insensitive_fallback_when_flag_is_false(self):
         processor = make_processor(config=make_config(case_insensitive=False))
-        result = processor.get_key_lang( "Hello", "ar", {"hello": {"ar": "مرحبا"}} )
+        result = processor.get_key_lang("Hello", "ar", {"hello": {"ar": "مرحبا"}})
         assert result is None
 
     def test_exact_match_is_tried_before_case_insensitive_fallback(self):

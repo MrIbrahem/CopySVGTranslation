@@ -6,7 +6,6 @@ Classes to test: TextNode
 
 from __future__ import annotations
 
-import pytest
 from lxml import etree
 
 from CopySVGTranslation.core.text_node import TextNode

@@ -6,8 +6,8 @@ and previously untested functions.
 
 from CopySVGTranslation.utils.text import (
     normalize_lang,
-    split_lang_list,
     normalize_text,
+    split_lang_list,
 )
 
 

@@ -6,14 +6,14 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from lxml import etree
 
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.core.mapping import TranslationMapping
-from CopySVGTranslation.result import InjectorData, InjectorStats, OperationResult
+from CopySVGTranslation.result import InjectorData, InjectorStats
 from CopySVGTranslation.service import SVGTranslationService
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -367,9 +367,7 @@ class TestServiceResolveHelpers:
 
     def test_resolve_mapping_output_explicit_path(self, tmp_path: Path):
         service = SVGTranslationService()
-        result = service._resolve_mapping_output(
-            Path("/some/file.svg"), tmp_path / "explicit.json"
-        )
+        result = service._resolve_mapping_output(Path("/some/file.svg"), tmp_path / "explicit.json")
         assert result == tmp_path / "explicit.json"
 
     def test_resolve_mapping_output_no_dir_raises(self):

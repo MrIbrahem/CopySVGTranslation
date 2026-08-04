@@ -127,12 +127,17 @@ def _fix_nested_file(source_file: Path, new_path: Path | None = None, pretty_pri
     return False
 
 
-def fix_nested_file(source_file: Path, new_path: Path | None = None, pretty_print: bool | None = None,) -> bool:
+def fix_nested_file(
+    source_file: Path,
+    new_path: Path | None = None,
+    pretty_print: bool | None = None,
+) -> bool:
     return _fix_nested_file(
         source_file=source_file,
         new_path=new_path,
         pretty_print=pretty_print,
     )
+
 
 __all__ = [
     "match_nested_tags",

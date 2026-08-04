@@ -145,7 +145,7 @@ def match_nested_tags(source_file: Path) -> list:
     return result
 
 
-def fix_nested_file_new(source_file: Path, new_path: Path | None = None, pretty_print: bool | None = None) -> bool:
+def _fix_nested_file(source_file: Path, new_path: Path | None = None, pretty_print: bool | None = None) -> bool:
     """
     !
     """
@@ -194,8 +194,19 @@ def fix_nested_file_new(source_file: Path, new_path: Path | None = None, pretty_
     return False
 
 
+def fix_nested_file_new(
+    source_file: Path,
+    new_path: Path | None = None,
+    pretty_print: bool | None = None,
+) -> bool:
+    return _fix_nested_file(
+        source_file=source_file,
+        new_path=new_path,
+        pretty_print=pretty_print,
+    )
+
+
 __all__ = [
-    "fix_nested_tspans",
     "match_nested_tags",
     "fix_nested_file_new",
 ]

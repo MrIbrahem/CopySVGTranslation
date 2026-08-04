@@ -6,7 +6,6 @@ Classes to test: SegmentMatch, ByTspanIdStrategy, ByPositionStrategy, CompositeM
 
 from __future__ import annotations
 
-import pytest
 from lxml import etree
 
 from CopySVGTranslation.core.text_node import TextNode
@@ -71,9 +70,7 @@ class TestByTspanIdStrategy:
 
     def test_matches_by_base_id(self):
         default = _make_text_node([("Hello", "t0"), ("World", "t1")])
-        translated = _make_text_node(
-            [("مرحبا", "t0-ar"), ("عالم", "t1-ar")], lang="ar"
-        )
+        translated = _make_text_node([("مرحبا", "t0-ar"), ("عالم", "t1-ar")], lang="ar")
         strategy = ByTspanIdStrategy()
         matches = strategy.match(default, translated)
         assert len(matches) == 2
@@ -127,9 +124,7 @@ class TestByTspanIdStrategy:
     def test_default_node_empty_tspan(self):
         """Default tspan with empty text should be skipped."""
         default = _make_text_node([("", "t0"), ("World", "t1")])
-        translated = _make_text_node(
-            [("", "t0-ar"), ("عالم", "t1-ar")], lang="ar"
-        )
+        translated = _make_text_node([("", "t0-ar"), ("عالم", "t1-ar")], lang="ar")
         strategy = ByTspanIdStrategy()
         matches = strategy.match(default, translated)
         assert len(matches) == 1
@@ -152,9 +147,7 @@ class TestByPositionStrategy:
 
     def test_matches_by_index(self):
         default = _make_text_node([("Hello", "t0"), ("World", "t1")])
-        translated = _make_text_node(
-            [("مرحبا", "x0"), ("عالم", "x1")], lang="ar"
-        )
+        translated = _make_text_node([("مرحبا", "x0"), ("عالم", "x1")], lang="ar")
         strategy = ByPositionStrategy()
         matches = strategy.match(default, translated)
         assert len(matches) == 2
@@ -170,9 +163,7 @@ class TestByPositionStrategy:
 
     def test_more_translated_segments(self):
         default = _make_text_node([("Hello", "t0")])
-        translated = _make_text_node(
-            [("مرحبا", "x0"), ("عالم", "x1")], lang="ar"
-        )
+        translated = _make_text_node([("مرحبا", "x0"), ("عالم", "x1")], lang="ar")
         strategy = ByPositionStrategy()
         matches = strategy.match(default, translated)
         assert len(matches) == 1  # only matches up to default count
