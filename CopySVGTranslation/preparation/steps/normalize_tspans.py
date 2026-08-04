@@ -39,6 +39,9 @@ class WrapTspans(PreparationStep):
     # ------------------------------------------------------------------
     def execute(self, ctx: PreparationContext) -> None:
         """Wrap raw text nodes (before first child, or as tails) into <tspan>."""
+        if ctx.root is None:
+            return
+
         # 2. Wrap loose text directly under <text> into <tspan>
         for text_el in ctx.root.findall(f".//{{{SVG_NS}}}text"):
             _translatable_nodes = self._wrap_loose_text(text_el)
@@ -78,6 +81,9 @@ class WrapTspans(PreparationStep):
 
     def _clean_ids_and_remove_empty_nodes(self, ctx: PreparationContext) -> None:
         """Normalize/validate ids on translatable nodes and drop empty nodes."""
+        if ctx.id_manager is None:
+            raise ValueError("id_manager is not set")
+
         for node in list(ctx.translatable_nodes):
             node_id = node.get("id")
             if node_id is not None:
@@ -117,6 +123,9 @@ class WrapTspans(PreparationStep):
 
     def _rebuild_translatable_nodes(self, ctx: PreparationContext) -> None:
         """Rebuild translatable_nodes after removals (tspans then texts)."""
+        if ctx.root is None:
+            return
+
         ctx.translatable_nodes = []
         ctx.translatable_nodes.extend(ctx.root.findall(f".//{{{SVG_NS}}}tspan"))
         ctx.translatable_nodes.extend(ctx.root.findall(f".//{{{SVG_NS}}}text"))

@@ -23,7 +23,7 @@ def _clone_element(el: etree._Element) -> etree._Element:
     return copy.deepcopy(el)
 
 
-class SplitLanguages(PreparationStep):
+class WrapTextElements(PreparationStep):
     def execute(self, ctx: PreparationContext) -> None:
         if ctx.root is None:
             return

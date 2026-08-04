@@ -16,6 +16,7 @@ from .steps import (
     PreparationContext,
     PreparationStep,
     ReorderTexts,
+    WrapTextElements,
     SplitLanguages,
     ValidateStructure,
     WrapTspans,
@@ -39,12 +40,13 @@ class SvgPreparationPipeline:
 
     def __init__(self, config: TranslationConfig | None = None) -> None:
         self.config = config or TranslationConfig()
-        self.steps: list[PreparationStep] = [
+        self.steps: list[PreparationStep] = [ # type: ignore
             LoadDocument(config),
             ValidateStructure(config),
             NormalizeTspans(config),
             AssignIds(config),
             WrapTspans(config),
+            WrapTextElements(config),
             SplitLanguages(config),
             ReorderTexts(config),
         ]
