@@ -45,7 +45,8 @@ SVG_NS = "http://www.w3.org/2000/svg"
 
 
 def fix_nested_tspans(root, tag=None):
-    """Flatten nested <tspan> elements while preserving text order and spacing.
+    """
+    Flatten nested <tspan> elements while preserving text order and spacing.
 
     For tspans with styled nested children, convert them to sibling tspans instead
     of flattening into a single tspan.
@@ -173,15 +174,21 @@ def fix_nested_file(source_file: Path, new_path: Path | None = None, pretty_prin
     root = fix_nested_tspans(root)
     # ---
     # NOTE: <a tags can also be nested inside <tspan>, so fix those too
-    # https://svgtranslate.toolforge.org/ result: This file has unexpected content within a text element. Only tspan elements should be used within text.
+    # https://svgtranslate.toolforge.org/ result: This file has unexpected content within a text element.
+    # Only tspan elements should be used within text.
     root = fix_nested_tspans(root, "a")
     # ---
-    try:
-        _str = etree.tostring(root, encoding="unicode", pretty_print=pretty_print)  # pyright: ignore[reportCallIssue]
-        new_path.write_text(_str, encoding="utf-8")
-        return True
-    except Exception:
-        logger.error(f"Failed to write fixed svg file to: {str(new_path)}")
+    if root is not None:
+        try:
+            _str = etree.tostring(
+                root,
+                encoding="unicode",
+                pretty_print=pretty_print,
+            )  # pyright: ignore[reportCallIssue]
+            new_path.write_text(_str, encoding="utf-8")
+            return True
+        except Exception:
+            logger.error(f"Failed to write fixed svg file to: {str(new_path)}")
     # ---
     return False
 
