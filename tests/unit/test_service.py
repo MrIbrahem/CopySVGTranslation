@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.core.mapping import TranslationMapping
 from CopySVGTranslation.result import InjectorData

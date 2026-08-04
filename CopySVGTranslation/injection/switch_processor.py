@@ -168,11 +168,20 @@ class SwitchProcessor:
             langs_to_process.update(data.keys())
         return langs_to_process
 
-    def get_key_lang(self, key: str, lang: str, data: dict[str, dict[str, str]], normalize: bool=False,):
+    def get_key_lang(
+        self,
+        key: str | None,
+        lang: str,
+        data: dict[str, dict[str, str]],
+        normalize: bool = False,
+    ) -> str | None:
 
         def get_key(_key) -> str | None:
             if _key in data and lang in data[_key]:
                 return data[_key][lang]
+            return None
+
+        if key is None:
             return None
 
         if normalize:
@@ -204,11 +213,8 @@ class SwitchProcessor:
             for tspan in tspans:
                 new_tspan = etree.Element(tspan.tag, attrib=tspan.attrib)
 
-                english_text = normalize_text(tspan.text or "")
-                key = english_text.lower() if self.config.case_insensitive else english_text
-                translated = all_mappings.get(key, {}).get(lang, english_text)
-
-                new_tspan.text = translated
+                translated = self.get_key_lang(tspan.text, lang, all_mappings, normalize=True)
+                new_tspan.text = translated or ""
 
                 # Generate unique ID for tspan if needed
                 original_tspan_id = tspan.get("id")
@@ -220,9 +226,8 @@ class SwitchProcessor:
                 new_node.append(new_tspan)
 
         else:
-            english_text = normalize_text(node.text or "")
-            key = english_text.lower() if self.config.case_insensitive else english_text
-            new_node.text = all_mappings.get(key, {}).get(lang, english_text)
+            translated = self.get_key_lang(node.text, lang, all_mappings, normalize=True)
+            new_node.text = translated or ""
 
         return new_node
 
