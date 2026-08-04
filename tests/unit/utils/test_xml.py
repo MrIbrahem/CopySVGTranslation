@@ -21,7 +21,6 @@ from CopySVGTranslation.utils.xml import (
     findall_svg,
     xpath_svg,
     extract_text_segments,
-    get_text_content,
     extract_root_languages,
     file_langs,
     collect_ids,
