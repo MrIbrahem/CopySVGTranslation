@@ -12,15 +12,14 @@ from types import SimpleNamespace
 import pytest
 from lxml import etree
 
+from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.injection.id_manager import IdManager
+from CopySVGTranslation.preparation.preparer import PreparationContext
 from CopySVGTranslation.preparation.steps.normalize_tspans import (
     NormalizeTspans,
     WrapTspans,
 )
 
-from CopySVGTranslation.config import TranslationConfig
-from CopySVGTranslation.injection.id_manager import IdManager
-from CopySVGTranslation.preparation.preparer import PreparationContext
 SVG_NS = "http://www.w3.org/2000/svg"
 
 # ---------------------------------------------------------------------------

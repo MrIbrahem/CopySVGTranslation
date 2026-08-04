@@ -10,13 +10,12 @@ from types import SimpleNamespace
 import pytest
 from lxml import etree
 
+from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.exceptions import SvgStructureError
 from CopySVGTranslation.injection.id_manager import IdManager
+from CopySVGTranslation.preparation.preparer import PreparationContext
 from CopySVGTranslation.preparation.steps.wrap_text_elements import SVG_NS, WrapTextElements
 
-from CopySVGTranslation.config import TranslationConfig
-from CopySVGTranslation.injection.id_manager import IdManager
-from CopySVGTranslation.preparation.preparer import PreparationContext
 
 class TestSetup:
     def tostring(self, el: etree._Element, pretty_print=False) -> str:
@@ -50,6 +49,7 @@ def make_root(svg_body: str) -> etree._Element:
     xml = f'<svg xmlns="{SVG_NS}">{svg_body}</svg>'
     return etree.fromstring(xml)
 
+
 def make_ctx(root: etree._Element | None = None, **overrides) -> PreparationContext:
     """Lightweight context stub carrying the attributes these steps read."""
     defaults = {
@@ -63,6 +63,7 @@ def make_ctx(root: etree._Element | None = None, **overrides) -> PreparationCont
     }
     defaults.update(overrides)
     return PreparationContext(**defaults)
+
 
 # ---------------------------------------------------------------------------
 # _process_text_elements

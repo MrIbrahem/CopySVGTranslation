@@ -12,17 +12,16 @@ from types import SimpleNamespace
 import pytest
 from lxml import etree
 
+from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.exceptions import (
     SvgCssTooComplexError,
     SvgStructureError,
 )
+from CopySVGTranslation.preparation.preparer import PreparationContext
 from CopySVGTranslation.preparation.steps.validate import (
     ValidateStructure,
 )
 
-from CopySVGTranslation.config import TranslationConfig
-from CopySVGTranslation.injection.id_manager import IdManager
-from CopySVGTranslation.preparation.preparer import PreparationContext
 SVG_NS = "http://www.w3.org/2000/svg"
 
 
