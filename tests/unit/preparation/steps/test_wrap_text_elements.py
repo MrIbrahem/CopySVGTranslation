@@ -258,7 +258,7 @@ class TestProcessTextElements(TestSetup):
         assert self.tostring(root) == expected_output
 
 
-class TestProcessTextElementsRaises(TestSetup):
+class TestProcessTextElementsErrors(TestSetup):
     def test_dollar_placeholder_raises(self, step_factory):
         step = step_factory(normalize_languages=False)
         root = make_root('<text id="t1">Hello $1 world</text>')

@@ -65,7 +65,6 @@ class TestSetup:
     def tostring(self, el: etree._Element, pretty_print=False) -> str:
         return etree.tostring(el, pretty_print=pretty_print).decode("utf-8").strip()
 
-
 class TestSplitLanguagesInSwitch(TestSetup):
 
     def test_single_text_without_systemlanguage_is_left_as_fallback(self, step, ctx):
@@ -159,6 +158,35 @@ class TestSplitLanguagesInSwitch(TestSetup):
 
         assert children[1].get("systemLanguage") is None
 
+    def test_multiple_independent_single_language_texts(self, step, ctx):
+        switch = make_switch('<text id="t1" systemLanguage="ar">a</text><text id="t2" systemLanguage="fr">b</text>')
+
+        step._split_languages_in_switch(switch, ctx)
+
+        children = list(switch)
+        assert len(children) == 2
+        assert children[0].get("systemLanguage") == "ar"
+        assert children[1].get("systemLanguage") == "fr"
+
+        expected_output = """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">a</text><text id="t2" systemLanguage="fr">b</text></switch>"""
+        assert self.tostring(switch) == expected_output
+
+    def test_clones_are_inserted_immediately_after_original_in_order(self, step, ctx):
+        switch = make_switch('<text id="t1" systemLanguage="ar,fr">a</text><text id="t2" systemLanguage="en">b</text>')
+
+        step._split_languages_in_switch(switch, ctx)
+
+        children = list(switch)
+        # expected order: t1(ar), clone(fr), t2(en)
+        assert len(children) == 3
+        assert [c.get("systemLanguage") for c in children] == ["ar", "fr", "en"]
+        expected_output = """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">a</text><text id="t1-fr" systemLanguage="fr">a</text><text id="t2" systemLanguage="en">b</text></switch>"""
+        assert self.tostring(switch) == expected_output
+
+
+
+class TestSplitLanguagesInSwitchErrors(TestSetup):
+
     def test_duplicate_language_within_same_text_raises(self, step, ctx):
         switch = make_switch('<text id="t1" systemLanguage="ar,ar">hello</text>')
 
@@ -207,31 +235,18 @@ class TestSplitLanguagesInSwitch(TestSetup):
         assert self.tostring(switch) == expected_output
 
 
-    def test_multiple_independent_single_language_texts(self, step, ctx):
-        switch = make_switch('<text id="t1" systemLanguage="ar">a</text><text id="t2" systemLanguage="fr">b</text>')
+    def test_error_in_one_switch_propagates(self, step, ctx):
+        svg = f"""
+        <svg xmlns="{SVG_NS}">
+            <switch>
+                <text id="a1" systemLanguage="ar,ar">a</text>
+            </switch>
+        </svg>
+        """
+        ctx.root = etree.fromstring(svg)
 
-        step._split_languages_in_switch(switch, ctx)
-
-        children = list(switch)
-        assert len(children) == 2
-        assert children[0].get("systemLanguage") == "ar"
-        assert children[1].get("systemLanguage") == "fr"
-
-        expected_output = """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">a</text><text id="t2" systemLanguage="fr">b</text></switch>"""
-        assert self.tostring(switch) == expected_output
-
-    def test_clones_are_inserted_immediately_after_original_in_order(self, step, ctx):
-        switch = make_switch('<text id="t1" systemLanguage="ar,fr">a</text><text id="t2" systemLanguage="en">b</text>')
-
-        step._split_languages_in_switch(switch, ctx)
-
-        children = list(switch)
-        # expected order: t1(ar), clone(fr), t2(en)
-        assert len(children) == 3
-        assert [c.get("systemLanguage") for c in children] == ["ar", "fr", "en"]
-        expected_output = """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">a</text><text id="t1-fr" systemLanguage="fr">a</text><text id="t2" systemLanguage="en">b</text></switch>"""
-        assert self.tostring(switch) == expected_output
-
+        with pytest.raises(SvgStructureError):
+            step._split_switch_languages(ctx)
 
 # ---------------------------------------------------------------------------
 # _split_switch_languages (drives every <switch> found under ctx.root)
@@ -254,10 +269,8 @@ class TestSplitSwitchLanguages(TestSetup):
         second_switch_texts = list(switches[1])
         assert [t.get("systemLanguage") for t in second_switch_texts] == ["en"]
 
-        assert (
-            self.tostring(ctx.root, False)
-            == """<svg xmlns="http://www.w3.org/2000/svg"><switch><text id="a1" systemLanguage="ar">a</text><text id="a1-fr" systemLanguage="fr">a</text></switch><g><switch><text id="b1" systemLanguage="en">b</text></switch></g></svg>"""
-        )
+        expected_output = """<svg xmlns="http://www.w3.org/2000/svg"><switch><text id="a1" systemLanguage="ar">a</text><text id="a1-fr" systemLanguage="fr">a</text></switch><g><switch><text id="b1" systemLanguage="en">b</text></switch></g></svg>"""
+        assert self.tostring(ctx.root) == expected_output
 
     def test_no_switches_is_a_no_op(self, step, ctx):
         svg = f'<svg xmlns="{SVG_NS}"><text id="a1">a</text></svg>'
@@ -265,16 +278,3 @@ class TestSplitSwitchLanguages(TestSetup):
 
         # should not raise even though there is no <switch> element at all
         step._split_switch_languages(ctx)
-
-    def test_error_in_one_switch_propagates(self, step, ctx):
-        svg = f"""
-        <svg xmlns="{SVG_NS}">
-            <switch>
-                <text id="a1" systemLanguage="ar,ar">a</text>
-            </switch>
-        </svg>
-        """
-        ctx.root = etree.fromstring(svg)
-
-        with pytest.raises(SvgStructureError):
-            step._split_switch_languages(ctx)
