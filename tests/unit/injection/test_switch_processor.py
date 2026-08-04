@@ -12,8 +12,6 @@ Notes on setup:
 
     * TranslationMapping.from_any(mapping) -> object with `.title_new` and
       `.new` (a dict of {original_text: {lang: translated_text}}).
-      Our FakeTranslationMapping.from_any accepts either an existing
-      FakeTranslationMapping instance (passthrough) or a plain dict shaped
       like {"new": {...}, "title_new": {...}}.
 
     * extract_text_from_node(node) -> list[str], one entry per <tspan>
@@ -55,7 +53,8 @@ from types import SimpleNamespace
 import pytest
 from lxml import etree
 
-from CopySVGTranslation import TranslationConfig
+from CopySVGTranslation import InjectorStats, TranslationConfig
+from CopySVGTranslation.core import TranslationMapping
 from CopySVGTranslation.injection.id_manager import IdManager
 from CopySVGTranslation.injection.switch_processor import (
     SVG_NS,
@@ -67,40 +66,6 @@ NSMAP = {"svg": SVG_NS}
 # ---------------------------------------------------------------------------
 # Fakes / stubs for SwitchProcessor's collaborators
 # ---------------------------------------------------------------------------
-
-
-class FakeTranslationMapping:
-    """
-    Minimal stand-in for TranslationMapping.
-
-    `.new` is a dict of {original_text: {lang: translated_text}}.
-    `.title_new` is passed through to get_new_titles_translations as-is
-    (tests control what that fake returns, so its exact shape rarely
-    matters beyond being some truthy/falsy value).
-    """
-
-    def __init__(self, new: dict | None = None, title_new: dict | None = None) -> None:
-        self.new = new or {}
-        self.title_new = title_new or {}
-
-    @classmethod
-    def from_any(cls, mapping):
-        if isinstance(mapping, cls):
-            return mapping
-        if isinstance(mapping, dict):
-            return cls(new=mapping.get("new", {}), title_new=mapping.get("title_new", {}))
-        raise TypeError(f"Cannot build FakeTranslationMapping from {mapping!r}")
-
-
-class FakeStats:
-    """Plain counters object mirroring InjectorStats' relevant fields."""
-
-    def __init__(self) -> None:
-        self.skipped_translations = 0
-        self.updated_translations = 0
-        self.inserted_translations = 0
-        self.processed_switches = 0
-
 
 def fake_extract_text_from_node(node: etree._Element) -> list[str]:
     """
@@ -114,43 +79,9 @@ def fake_extract_text_from_node(node: etree._Element) -> list[str]:
         return [t.text or "" for t in tspans]
     return [node.text or ""]
 
-
-def fake_normalize_text(text: str, case_insensitive: bool = False) -> str:
-    text = (text or "").strip()
-    return text.lower() if case_insensitive else text
-
-
-def make_get_new_titles_translations(return_value: dict | None = None):
-    """Factory so each test can control/inspect calls independently."""
-    calls = []
-
-    def _fake(title_new, default_texts):
-        calls.append((title_new, list(default_texts)))
-        return return_value or {}
-
-    _fake.calls = calls
-    return _fake
-
-
 # ---------------------------------------------------------------------------
 # Common fixtures
 # ---------------------------------------------------------------------------
-
-
-@pytest.fixture(autouse=True)
-def patch_collaborators(monkeypatch):
-    """
-    Patch the free functions SwitchProcessor imports at module scope, and
-    patch TranslationMapping.from_any to use our fake. Applied to every
-    test in this file automatically.
-    """
-    import CopySVGTranslation.injection.switch_processor as sp_module
-
-    monkeypatch.setattr(sp_module, "extract_text_from_node", fake_extract_text_from_node)
-    monkeypatch.setattr(sp_module, "normalize_text", fake_normalize_text)
-    monkeypatch.setattr(sp_module, "get_new_titles_translations", make_get_new_titles_translations())
-    monkeypatch.setattr(sp_module, "TranslationMapping", FakeTranslationMapping)
-
 
 @pytest.fixture
 def id_manager():
@@ -159,12 +90,11 @@ def id_manager():
 
 @pytest.fixture
 def stats():
-    return FakeStats()
+    return InjectorStats()
 
 
 def make_config(overwrite: bool = False, case_insensitive: bool = False) -> TranslationConfig:
     return TranslationConfig(overwrite=overwrite, case_insensitive=case_insensitive)
-
 
 def make_processor(config=None, id_manager=None, applier=None) -> SwitchProcessor:
     return SwitchProcessor(
@@ -216,7 +146,7 @@ class TestProcessEarlyExits:
         assert stats.processed_switches == 0
         assert len(find_texts(switch)) == 1
 
-    def test_no_languages_to_process_returns_without_processing(self, id_manager, stats, monkeypatch):
+    def test_no_languages_to_process_returns_without_processing(self, id_manager, stats):
         import CopySVGTranslation.injection.switch_processor as sp_module  # noqa: F401
 
         switch = make_switch('<text id="t1">hello</text>')
@@ -241,7 +171,7 @@ class TestProcessEarlyExits:
     def test_accepts_translation_mapping_instance_directly(self, id_manager, stats):
         switch = make_switch('<text id="t1">hello</text>')
         processor = make_processor(id_manager=id_manager)
-        mapping = FakeTranslationMapping(new={"hello": {"ar": "مرحبا"}})
+        mapping = TranslationMapping(new={"hello": {"ar": "مرحبا"}})
 
         processor.process(switch, mapping, stats)
 
@@ -549,54 +479,44 @@ class TestGetExistingLanguages:
 # ---------------------------------------------------------------------------
 # enrich_all_mappings
 # ---------------------------------------------------------------------------
-
-
 class TestEnrichAllMappings:
-    def test_merges_title_translations_into_new_mapping(self, id_manager, monkeypatch):
-        import CopySVGTranslation.injection.switch_processor as sp_module
-
-        fake_fn = make_get_new_titles_translations({"hello": {"de": "hallo"}})
-        monkeypatch.setattr(sp_module, "get_new_titles_translations", fake_fn)
-
+    def test_merges_title_translations_into_new_mapping(self, id_manager):
         processor = make_processor(id_manager=id_manager)
-        mapping = FakeTranslationMapping(new={"hello": {"ar": "مرحبا"}}, title_new={"some": "title-map"})
+        mapping = TranslationMapping(
+            new={"hello 2020": {"ar": "مرحبا 2020"}},
+            title_new={"hello {year}": {"de": "hallo {year}"}},
+        )
 
-        result = processor.enrich_all_mappings(mapping, ["hello"])
+        result = processor.enrich_all_mappings(mapping, ["hello 2020"])
 
-        assert result["hello"] == {"ar": "مرحبا", "de": "hallo"}
-        assert fake_fn.calls == [({"some": "title-map"}, ["hello"])]
+        assert result["hello 2020"] == {"ar": "مرحبا 2020", "de": "hallo 2020"}
 
-    def test_title_translations_can_introduce_new_keys(self, id_manager, monkeypatch):
-        import CopySVGTranslation.injection.switch_processor as sp_module
-
-        fake_fn = make_get_new_titles_translations({"brand new key": {"ar": "جديد"}})
-        monkeypatch.setattr(sp_module, "get_new_titles_translations", fake_fn)
-
+    def test_title_translations_can_introduce_new_keys(self, id_manager):
         processor = make_processor(id_manager=id_manager)
-        mapping = FakeTranslationMapping(new={"hello": {"ar": "مرحبا"}})
+        mapping = TranslationMapping(
+            new={"hello 2020": {"ar": "مرحبا 2020"}},
+            title_new={"brand new key {year}": {"ar": "جديد {year}"}},
+        )
 
-        result = processor.enrich_all_mappings(mapping, ["hello"])
+        result = processor.enrich_all_mappings(mapping, ["brand new key 2020"])
 
-        assert result["brand new key"] == {"ar": "جديد"}
+        assert result["brand new key 2020"] == {"ar": "جديد 2020"}
         # original mapping.new must be unaffected (a copy is used)
-        assert "brand new key" not in mapping.new
+        assert "brand new key 2020" not in mapping.new
 
-    def test_does_not_overwrite_existing_language_for_existing_key(self, id_manager, monkeypatch):
+    def test_does_not_overwrite_existing_language_for_existing_key(self, id_manager):
         # setdefault(key, {}).update(translations) means title-derived
         # languages are added/overwritten on top of the existing per-key
         # dict, not replacing the whole dict.
-        import CopySVGTranslation.injection.switch_processor as sp_module
-
-        fake_fn = make_get_new_titles_translations({"hello": {"fr": "bonjour"}})
-        monkeypatch.setattr(sp_module, "get_new_titles_translations", fake_fn)
-
         processor = make_processor(id_manager=id_manager)
-        mapping = FakeTranslationMapping(new={"hello": {"ar": "مرحبا"}})
+        mapping = TranslationMapping(
+            new={"hello 2020": {"ar": "مرحبا 2020"}},
+            title_new={"hello {year}": {"fr": "bonjour {year}"}},
+        )
 
-        result = processor.enrich_all_mappings(mapping, ["hello"])
+        result = processor.enrich_all_mappings(mapping, ["hello 2020"])
 
-        assert result["hello"] == {"ar": "مرحبا", "fr": "bonjour"}
-
+        assert result["hello 2020"] == {"ar": "مرحبا 2020", "fr": "bonjour 2020"}
 
 # ---------------------------------------------------------------------------
 # get_available_translations
@@ -671,10 +591,7 @@ class TestGetKeyLang:
         result = make_processor().get_key_lang(None, "ar", {"hello": {"ar": "مرحبا"}})
         assert result is None
 
-    def test_normalize_flag_applies_normalize_text_before_lookup(self, monkeypatch):
-        import CopySVGTranslation.injection.switch_processor as sp_module
-
-        monkeypatch.setattr(sp_module, "normalize_text", fake_normalize_text)
+    def test_normalize_flag_applies_normalize_text_before_lookup(self):
 
         result = make_processor().get_key_lang(
             "  hello  ", "ar", {"hello": {"ar": "مرحبا"}}, normalize=True
