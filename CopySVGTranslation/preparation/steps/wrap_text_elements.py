@@ -11,12 +11,6 @@ from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
-
-def get_text_content(el: etree._Element) -> str:
-    """Return concatenated text content of element (like DOM textContent)."""
-    return "".join(el.itertext())
-
-
 class WrapTextElements(PreparationStep):
     def execute(self, ctx: PreparationContext) -> None:
         if ctx.root is None:
@@ -38,7 +32,7 @@ class WrapTextElements(PreparationStep):
 
         texts = ctx.root.findall(f".//{{{SVG_NS}}}text")
         for text in texts:
-            content = get_text_content(text)
+            content = "".join(text.itertext())
             if re.search(r"\$[0-9]+", content):
                 raise SvgStructureError(code="structure-error-text-contains-dollar")
 
@@ -77,5 +71,4 @@ class WrapTextElements(PreparationStep):
 
 __all__ = [
     "WrapTextElements",
-    "get_text_content",
 ]
