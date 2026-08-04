@@ -130,6 +130,7 @@ class SwitchProcessor:
             new_node = etree.Element(default_node.tag, attrib=default_node.attrib)
             new_node.set("systemLanguage", lang)
             original_id = default_node.get("id")
+
             if original_id:
                 new_id = generate_unique_id(original_id, lang, existing_ids)
                 new_node.set("id", new_id)

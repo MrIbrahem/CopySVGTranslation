@@ -29,7 +29,7 @@ class SVGTranslationInjector:
         self.switch_processor = SwitchProcessor(config, self.id_manager, self.applier, YearTitleHandler(config))
         self.preparer = SvgPreparationPipeline(config)
 
-    def inject(
+    def _inject(
         self,
         svg_path: Path | str,
         mapping: TranslationMapping,
@@ -37,6 +37,51 @@ class SVGTranslationInjector:
         save_path: Path | None = None,
         save: bool = False,
     ) -> InjectorData:
+        svg_path = Path(svg_path)
+        stats = InjectorStats()
+
+        # 1. Prepare (pipeline)
+        try:
+            tree, root = self.preparer.run(svg_path)
+        except Exception as exc:
+            stats.error = f"preparation_failed: {exc}"
+            return None, stats
+
+        if tree is None or root is None:
+            stats.error = "preparation_returned_none_tree"
+            return None, stats
+
+        # 2. Snapshot languages before
+        before_languages = tree_languages(tree)
+        stats.languages_before = sorted(before_languages)
+
+        # 3. Seed IdManager with existing IDs
+        self.id_manager.register_many(root.xpath("//@id"))
+
+        # 4. Process every switch
+        self.work_on_switches(root, mapping, stats)
+
+        # 5. Final housekeeping
+        # self._finalize_switches(root)
+
+        # 6. Languages after + stats
+        after_languages = tree_languages(tree)
+        self._update_data(stats, before_languages, after_languages)
+
+        # 7. Save if requested
+        if save and save_path:
+            self._save(tree, save_path)
+
+        return tree, stats
+
+    def inject(
+        self,
+        svg_path: Path | str,
+        mapping: TranslationMapping,
+        *,
+        save_path: Path | None = None,
+        save: bool = False,
+    ) -> tuple[etree._ElementTree | None, InjectorStats]:
         svg_path = Path(svg_path)
         stats = InjectorStats()
 

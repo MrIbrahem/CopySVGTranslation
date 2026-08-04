@@ -74,7 +74,12 @@ class SVGTranslationInjector:
         switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})
         logger.debug(f"Found {len(switches)} switch elements")
         for switch in switches:
-            self.switch_processor.process(switch, mapping, self.new_stats, existing_ids)
+            self.switch_processor.process(
+                switch_element=switch,
+                mapping=mapping,
+                stats=self.new_stats,
+                existing_ids=existing_ids,
+            )
 
     def _parse_svg(self, inject_path) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
         try:
