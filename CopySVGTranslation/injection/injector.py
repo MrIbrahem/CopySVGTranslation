@@ -149,7 +149,7 @@ class SVGTranslationInjector:
         stats.languages_before = sorted(before_languages)
 
         # 4. Process every switch
-        self.work_on_switches(root=root, mapping=all_mappings, stats=stats)
+        self.work_on_switches(root, all_mappings, stats)
 
         # 5. Final housekeeping
         self._finalize_switches(root)

@@ -59,7 +59,7 @@ class SVGTranslationInjector:
         self.id_manager.register_many(root.xpath("//@id"))
 
         # 4. Process every switch
-        self.work_on_switches(root=root, mapping=all_mappings, stats=stats)
+        self.work_on_switches(root, mapping, stats)
 
         # 5. Final housekeeping
         # self._finalize_switches(root)
