@@ -197,10 +197,10 @@ def svg_path(svg_dir: Path):
 
 #### `unit/nested/`
 
-| File                | Focus                                                |
-| ------------------- | ---------------------------------------------------- |
-| `test_detector.py`  | finds nested nodes; empty when flat                  |
-| `test_flattener.py` | `preserve_style`, `flatten`, `raise`; `<a>` handling |
+| File                | Focus                                                                       |
+| ------------------- | --------------------------------------------------------------------------- |
+| `test_detector.py`  | finds nested nodes; empty when flat                                         |
+| `test_flattener.py` | `split_nested_tspans`, `preserve_style`, `flatten`, `raise`; `<a>` handling |
 
 #### `unit/extraction/`
 

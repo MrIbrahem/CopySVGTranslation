@@ -32,11 +32,12 @@ SVG files often contain structures like:
 The translation pipeline requires **flat** tspans (no element children).
 This package offers three strategies (controlled by `TranslationConfig.nested_strategy`):
 
-| Strategy         | Behaviour                                                                  |
-| ---------------- | -------------------------------------------------------------------------- |
-| `preserve_style` | Turn nested styled tspans into **sibling** tspans (keeps bold/italic etc.) |
-| `flatten`        | Concatenate all text into a single tspan (loses inner styling)             |
-| `raise`          | Raise `SvgNestedTspanError`                                                |
+| Strategy              | Behaviour                                                                  |
+| --------------------- | -------------------------------------------------------------------------- |
+| `preserve_style`      | Turn nested styled tspans into **sibling** tspans (keeps bold/italic etc.) |
+| `split_nested_tspans` | Turn nested styled tspans into **sibling** tspans (keeps bold/italic etc.) |
+| `flatten`             | Concatenate all text into a single tspan (loses inner styling)             |
+| `raise`               | Raise `SvgNestedTspanError`                                                |
 
 ---
 
@@ -121,7 +122,7 @@ from ..exceptions import SvgNestedTspanError
 logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"
 
-NestedStrategy = Literal["preserve_style", "flatten", "raise"]
+NestedStrategy = Literal["split_nested_tspans", "preserve_style", "flatten", "raise"]
 
 
 def _flatten_text(elem: etree._Element) -> str:
@@ -167,7 +168,7 @@ class NestedTspanFlattener:
                 self._flatten_all(root, tag="a")
             return root
 
-        # preserve_style (default)
+        # preserve_style / split_nested_tspans (default)
         self._preserve_style(root, tag="tspan")
         if self.also_fix_a:
             # <a> inside tspan is also invalid for many tools

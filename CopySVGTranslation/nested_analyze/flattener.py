@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
-NestedStrategy = Literal["preserve_style", "flatten", "raise"]
+NestedStrategy = Literal["split_nested_tspans", "preserve_style", "flatten", "raise"]
 
 
 def _flatten_text(elem: etree._Element) -> str:
@@ -58,8 +58,8 @@ class NestedTspanFlattener:
                 self._flatten_all(root, tag="a")
             return root
 
-        # preserve_style (default)
-        if self.strategy == "preserve_style":
+        # preserve_style / split_nested_tspans (default)
+        if self.strategy == "preserve_style" or self.strategy == "split_nested_tspans":
             self._preserve_style(root, tag="tspan")
             if self.also_fix_a:
                 # <a> inside tspan is also invalid for many tools
@@ -97,7 +97,7 @@ class NestedTspanFlattener:
             tspan.tail = None
 
     # ------------------------------------------------------------------
-    # Strategy: preserve_style
+    # Strategy: split_nested_tspans / preserve_style
     # ------------------------------------------------------------------
     def _preserve_style(self, root: etree._Element, tag: str) -> None:
         """

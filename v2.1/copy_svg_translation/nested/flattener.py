@@ -11,7 +11,7 @@ from ..exceptions import SvgNestedTspanError
 logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"
 
-NestedStrategy = Literal["preserve_style", "flatten", "raise"]
+NestedStrategy = Literal["split_nested_tspans", "preserve_style", "flatten", "raise"]
 
 
 def _flatten_text(elem: etree._Element) -> str:
