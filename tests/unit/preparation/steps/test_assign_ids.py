@@ -99,15 +99,13 @@ class TestAssignIds:
 
     def test_missing_text_id_not_assigned_when_config_disabled(self, assign_ids_step):
         root = make_root("<text>hello</text>")
-        ctx = make_ctx(root=root)
-        ctx.config = SimpleNamespace(assign_missing_ids=False)
+        ctx = make_ctx(root=root, config=SimpleNamespace(assign_missing_ids=False))
 
         assign_ids_step.execute(ctx)
 
         text = root.find(f".//{{{SVG_NS}}}text")
         assert text is not None
 
-        assert text.get("id") == "trsvg1"
         assert text.get("id") is None
 
     def test_missing_tspan_id_is_assigned(self, assign_ids_step):
