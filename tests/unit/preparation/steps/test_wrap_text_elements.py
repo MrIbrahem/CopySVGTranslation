@@ -104,7 +104,7 @@ class TestProcessTextElements(TestSetup):
         assert text is not None
         assert text.get("systemLanguage") == "pt-br"
 
-        expected_output = ""
+        expected_output = """<svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t1" systemLanguage="pt-br">hello</text></switch></svg>"""
         assert self.tostring(root) == expected_output
 
     def test_already_normalized_language_is_unaffected(self, step_factory):
@@ -118,7 +118,7 @@ class TestProcessTextElements(TestSetup):
         assert text is not None
         assert text.get("systemLanguage") == "ar"
 
-        expected_output = ""
+        expected_output = """<svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t1" systemLanguage="ar">hello</text></switch></svg>"""
         assert self.tostring(root) == expected_output
 
     def test_text_without_switch_parent_gets_wrapped_in_new_switch(self, step_factory):
@@ -139,7 +139,9 @@ class TestProcessTextElements(TestSetup):
         assert len(switch_children) == 1
         assert switch_children[0].get("id") == "t1"
 
-        expected_output = ""
+        expected_output = (
+            """<svg xmlns="http://www.w3.org/2000/svg"><g><switch><text id="t1">hello</text></switch></g></svg>"""
+        )
         assert self.tostring(root) == expected_output
 
     def test_text_already_inside_switch_is_not_rewrapped(self, step_factory):
@@ -153,7 +155,9 @@ class TestProcessTextElements(TestSetup):
         assert len(switches) == 1
         assert list(switches[0])[0].get("id") == "t1"
 
-        expected_output = ""
+        expected_output = (
+            """<svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t1">hello</text></switch></svg>"""
+        )
         assert self.tostring(root) == expected_output
 
     def test_new_switch_is_inserted_at_original_text_position(self, step_factory):
@@ -168,7 +172,7 @@ class TestProcessTextElements(TestSetup):
         tags = ["switch" if c.tag == f"{{{SVG_NS}}}switch" else c.get("id") for c in children]
         assert tags == ["before", "switch", "after"]
 
-        expected_output = ""
+        expected_output = """<svg xmlns="http://www.w3.org/2000/svg"><g><rect id="before"/><switch><text id="t1">hello</text></switch><rect id="after"/></g></svg>"""
         assert self.tostring(root) == expected_output
 
     def test_style_attribute_is_copied_from_text_to_new_switch(self, step_factory):
@@ -190,7 +194,7 @@ class TestProcessTextElements(TestSetup):
         # from the original <text> element
         assert text.get("style") == "fill:red"
 
-        expected_output = ""
+        expected_output = """<svg xmlns="http://www.w3.org/2000/svg"><g><switch style="fill:red"><text id="t1" style="fill:red">hello</text></switch></g></svg>"""
         assert self.tostring(root) == expected_output
 
     def test_style_attribute_is_copied_to_existing_switch_parent(self, step_factory):
@@ -204,7 +208,7 @@ class TestProcessTextElements(TestSetup):
         assert switch is not None
         assert switch.get("style") == "fill:blue"
 
-        expected_output = ""
+        expected_output = """<svg xmlns="http://www.w3.org/2000/svg"><switch style="fill:blue"><text id="t1" style="fill:blue">hello</text></switch></svg>"""
         assert self.tostring(root) == expected_output
 
     def test_no_style_attribute_means_switch_gets_no_style(self, step_factory):
@@ -222,7 +226,9 @@ class TestProcessTextElements(TestSetup):
 
         assert switch.get("style") is None
 
-        expected_output = ""
+        expected_output = (
+            """<svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t1">hello</text></switch></svg>"""
+        )
         assert self.tostring(root) == expected_output
 
     def test_tspan_children_are_allowed(self, step_factory):
@@ -233,7 +239,7 @@ class TestProcessTextElements(TestSetup):
         # should not raise
         step._process_text_elements(ctx)
 
-        expected_output = ""
+        expected_output = """<svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t1"><tspan>hello</tspan><tspan>world</tspan></text></switch></svg>"""
         assert self.tostring(root) == expected_output
 
     def test_multiple_text_elements_are_each_processed_independently(self, step_factory):
@@ -248,7 +254,7 @@ class TestProcessTextElements(TestSetup):
         assert list(switches[0])[0].get("id") == "t1"
         assert list(switches[1])[0].get("id") == "t2"
 
-        expected_output = ""
+        expected_output = """<svg xmlns="http://www.w3.org/2000/svg"><g><switch><text id="t1">a</text></switch></g><g><switch><text id="t2">b</text></switch></g></svg>"""
         assert self.tostring(root) == expected_output
 
 
