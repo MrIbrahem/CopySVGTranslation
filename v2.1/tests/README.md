@@ -178,7 +178,7 @@ def svg_path(svg_dir: Path):
 
 | File                  | Focus                                                                      |
 | --------------------- | -------------------------------------------------------------------------- |
-| `test_mapping.py`     | `from_any`, `add`, `merge`, `lookup`, `is_empty`, `to_dict`, case handling |
+| `test_mapping.py`     | `from_any`, `add`, `merge`, `lookup`, `is_empty`, `to_json`, case handling |
 | `test_text_node.py`   | `texts()`, `set_texts()`, language property, clone, tspans                 |
 | `test_switch_node.py` | `fallback()`, `existing_languages()`, `find_by_language()`, `reorder()`    |
 

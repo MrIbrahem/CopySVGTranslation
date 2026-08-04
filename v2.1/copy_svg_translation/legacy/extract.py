@@ -32,4 +32,4 @@ def extract(
     if not result.success or result.data is None:
         return None
 
-    return result.data.to_dict()
+    return result.data.to_json()

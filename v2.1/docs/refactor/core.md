@@ -122,7 +122,7 @@ class TranslationMapping:
             self.title_new.setdefault(source, {}).update(trans)
         self.tspans_by_id.update(other.tspans_by_id)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         return {
             "new": self.new,
             "title": self.title,
@@ -362,7 +362,7 @@ __all__ = [
 | **TranslationApplier** | Works with `TextNode` (clone, set_texts, language, id)                   |
 | **YearTitleHandler**   | Reads/writes `TranslationMapping.title` / `title_new`                    |
 | **Service**            | Returns `TranslationMapping` inside `OperationResult`                    |
-| **MappingStore**       | Serializes `TranslationMapping.to_dict()` to JSON                        |
+| **MappingStore**       | Serializes `TranslationMapping.to_json()` to JSON                        |
 
 ---
 

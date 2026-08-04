@@ -169,7 +169,7 @@ class YearTitleHandler:
             return mapping
 
         # Shallow copy + merge the extra entries into .new
-        working = TranslationMapping.from_any(mapping.to_dict())
+        working = TranslationMapping.from_any(mapping.to_json())
         for source, trans in extra.items():
             key = source.lower() if case_insensitive else source
             working.new.setdefault(key, {}).update(trans)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 from lxml import etree
 
@@ -101,6 +102,7 @@ class SVGTranslationExtractor:
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
+
     def extract(self, path: Path | str) -> TranslationMapping:
         """
         Extract translation strings from an SVG file into a structured dictionary.
@@ -120,6 +122,14 @@ class SVGTranslationExtractor:
             return mapping
 
         return self.extract_from_root(doc.root)
+
+    def extract_json(self, path: Path | str) -> dict[str, Any]:
+        """
+        Extract translation strings from an SVG file into a structured dictionary.
+        """
+        result = self.extract(path)
+
+        return result.to_json()
 
 
 __all__ = [

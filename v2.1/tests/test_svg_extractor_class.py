@@ -50,7 +50,7 @@ class TestExtractorData:
 
     def test_to_json_returns_dict(self):
         data = TranslationMapping()
-        result = data.to_dict()
+        result = data.to_json()
         assert isinstance(result, dict)
         assert "new" in result
         assert "tspans_by_id" in result
@@ -66,7 +66,7 @@ class TestExtractorData:
             title={"greeting": {"fr": "Salut"}},
             title_new={},
         )
-        result = data.to_dict()
+        result = data.to_json()
         assert result["new"] == {"hello": {"ar": "مرحبا"}}
         assert result["tspans_by_id"] == {"t0": "Hello"}
         assert result["title"] == {"greeting": {"fr": "Salut"}}
@@ -278,12 +278,12 @@ class TestSVGTranslationExtractorErrors:
 
 
 # ===========================================================================
-# to_dict round-trip test
+# to_json round-trip test
 # ===========================================================================
 
 
 class TestExtractorDataToJson:
-    """Tests for TranslationMapping.to_dict() method."""
+    """Tests for TranslationMapping.to_json() method."""
 
     def test_roundtrip_structure(self, tmp_path: Path):
         inner = """
@@ -295,7 +295,7 @@ class TestExtractorDataToJson:
         svg = _write_svg(tmp_path, inner)
         ext = SVGTranslationExtractor()
         result = ext.extract(svg)
-        data = result.to_dict()
+        data = result.to_json()
 
         assert isinstance(data, dict)
         assert set(data.keys()) == {"new", "tspans_by_id", "title", "title_new", "meta"}
@@ -312,7 +312,7 @@ class TestExtractorDataToJson:
         """
         svg = _write_svg(tmp_path, inner)
         ext = SVGTranslationExtractor()
-        data = ext.extract(svg).to_dict()
+        data = ext.extract(svg).to_json()
 
         # Should be JSON-serializable without errors
         serialized = json.dumps(data, ensure_ascii=False)

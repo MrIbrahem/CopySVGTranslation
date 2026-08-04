@@ -42,7 +42,7 @@ def inject_file_tree(
     # ---- resolve mapping ----
     if all_mappings is None and mapping_files:
         store = MappingStore()
-        all_mappings = store.load_many(mapping_files).to_dict()
+        all_mappings = store.load_many(mapping_files).to_json()
 
     if not all_mappings:
         return (None, {"error": "No valid mappings found"}) if return_stats else None

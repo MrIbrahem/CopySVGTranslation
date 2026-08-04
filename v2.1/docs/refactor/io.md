@@ -211,7 +211,7 @@ class MappingStore:
 
         with open(path, "w", encoding="utf-8") as f:
             json.dump(
-                mapping.to_dict(),
+                mapping.to_json(),
                 f,
                 indent=indent,
                 ensure_ascii=False,
