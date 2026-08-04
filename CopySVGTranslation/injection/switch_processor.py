@@ -226,8 +226,8 @@ class SwitchProcessor:
             if text:
                 tspan.text = text
 
-    @staticmethod
     def get_key_lang(
+        self,
         key: str | None,
         lang: str,
         data: dict[str, dict[str, str]],
@@ -248,7 +248,7 @@ class SwitchProcessor:
 
         result = get_key(key)
 
-        if not result and case_insensitive:
+        if not result and self.config.case_insensitive:
             result = get_key(key.lower())
 
         return result
