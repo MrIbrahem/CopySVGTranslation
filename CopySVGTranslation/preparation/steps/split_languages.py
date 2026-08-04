@@ -64,6 +64,7 @@ class SplitLanguages(PreparationStep):
                 parent_of_text = parent
                 if parent_of_text is None:
                     raise SvgStructureError(code="structure-error-no-parent-for-text")
+
                 # insert switch before text
                 idx = list(parent_of_text).index(text)
                 parent_of_text.insert(idx, switch)
