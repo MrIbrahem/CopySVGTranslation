@@ -7,17 +7,13 @@ from lxml import etree
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
-
-# from ..core.switch_node import SwitchNode
-# from ..core.text_node import TextNode
+from ..core.switch_node import SwitchNode
+from ..core.text_node import TextNode
 from ..result import InjectorStats
 from ..titles import YearTitleHandler, get_new_titles_translations
 from ..utils import (
     extract_text_from_node,
     normalize_text,
-)
-from ..utils.injection_utils import (
-    generate_unique_id,
 )
 from .id_manager import IdManager
 from .translation_applier import TranslationApplier
@@ -44,7 +40,6 @@ class SwitchProcessor:
         switch_element: etree._Element,
         mapping: TranslationMapping | dict,
         stats: InjectorStats,
-        existing_idsz: set[str],
     ) -> None:
         """
         1. Find fallback (default) <text> node
@@ -58,6 +53,10 @@ class SwitchProcessor:
         6. Optionally re-sort children of the switch
         """
         mapping = TranslationMapping.from_any(mapping)
+        switch = SwitchNode(switch_element)
+        default: TextNode | None = switch.default_text_node()
+        if default is None:
+            return
 
         text_elements = switch_element.xpath("./svg:text", namespaces={"svg": SVG_NS})
 
@@ -103,7 +102,7 @@ class SwitchProcessor:
                 continue
 
             # Create node
-            new_node = self.create_node(existing_idsz, default_node, all_mappings, lang)
+            new_node = self.create_node(default_node, all_mappings, lang)
             stats.inserted_translations += 1
             switch_element.append(new_node)
 
@@ -197,15 +196,14 @@ class SwitchProcessor:
     # -------------
     # node functions
     # -------------
-    def create_node(self, existing_idsz, node, all_mappings, lang) -> etree.Element:
+    def create_node(self, node, all_mappings, lang) -> etree.Element:
         new_node = etree.Element(node.tag, attrib=node.attrib)
         new_node.set("systemLanguage", lang)
         original_id = node.get("id")
 
         if original_id:
-            new_id = generate_unique_id(original_id, lang, existing_idsz)
+            new_id = self.id_manager.allocate_clone(original_id, lang)
             new_node.set("id", new_id)
-            existing_idsz.add(new_id)
 
         tspans = node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
 
@@ -219,9 +217,8 @@ class SwitchProcessor:
                 # Generate unique ID for tspan if needed
                 original_tspan_id = tspan.get("id")
                 if original_tspan_id:
-                    new_tspan_id = generate_unique_id(original_tspan_id, lang, existing_idsz)
+                    new_tspan_id = self.id_manager.allocate_clone(original_tspan_id, lang)
                     new_tspan.set("id", new_tspan_id)
-                    existing_idsz.add(new_tspan_id)
 
                 new_node.append(new_tspan)
 

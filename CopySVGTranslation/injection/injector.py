@@ -182,7 +182,6 @@ class SVGTranslationInjector:
                 switch_element=switch,
                 mapping=mapping,
                 stats=stats,
-                existing_idsz=existing_ids,
             )
         return stats
 
