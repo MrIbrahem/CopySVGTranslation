@@ -13,6 +13,7 @@ from lxml import etree
 
 from CopySVGTranslation import TranslationConfig
 from CopySVGTranslation.injection.injector import SVGTranslationInjector
+from CopySVGTranslation.result import InjectorStats
 
 
 def work_on_switches(
@@ -25,13 +26,15 @@ def work_on_switches(
     """Process ``<switch>`` elements and insert or update translations."""
     config = TranslationConfig(case_insensitive=case_insensitive, overwrite=overwrite)
     injector = SVGTranslationInjector(config)
+
+    stats = InjectorStats()
     injector.work_on_switches(
         root=root,
         mapping=mapping,
         existing_ids=existing_ids,
+        stats=stats,
     )
-    stats = injector.result.new_stats.to_json()
-    return stats
+    return stats.to_json()
 
 
 class TestSetup:

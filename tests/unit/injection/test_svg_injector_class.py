@@ -159,11 +159,6 @@ class TestSVGTranslationInjectorInit:
         assert inj.config.overwrite is True
         assert inj.config.pretty_print is False
 
-    def test_result_initialized(self):
-        inj = SVGTranslationInjector()
-        assert isinstance(inj.result, InjectorData)
-        assert isinstance(inj.new_stats, InjectorStats)
-
 
 # ===========================================================================
 # SVGTranslationInjector.inject() — basic insertion
@@ -657,12 +652,12 @@ class TestWorkOnSwitches:
         )
         inj = SVGTranslationInjector()
 
-        inj.work_on_switches(root, mapping={"new": {"hello": {"ar": "مرحبا"}}})
+        stats = inj.work_on_switches(root, mapping={"new": {"hello": {"ar": "مرحبا"}}})
 
         # No new nodes should be added
         ar_nodes = root.xpath('.//svg:text[@systemLanguage="ar"]', namespaces=SVG_NSMAP)
         assert len(ar_nodes) == 0
-        assert inj.new_stats.processed_switches == 0
+        assert stats.processed_switches == 0
 
 
 # ===========================================================================

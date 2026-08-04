@@ -33,31 +33,29 @@ class SVGTranslationInjector:
         config: TranslationConfig | None = None,
     ) -> None:
         """ """
-        self.result = InjectorData()
-        self.new_stats: InjectorStats = self.result.new_stats
 
         self.config = config or TranslationConfig()
         self.preparer = SvgPreparationPipeline(self.config)
         self.switch_processor = SwitchProcessor(self.config.overwrite, self.config.case_insensitive)
 
-    def _parse_svg(self, inject_path) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
+    def _parse_svg(self, inject_path, stats: InjectorStats) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
         try:
             tree, root = self.preparer.run(inject_path)
             return tree, root
 
         except SvgNestedTspanError as exc:
-            self.new_stats.error = "nested_tspan_error"
+            stats.error = "nested_tspan_error"
 
         except SvgStructureError as exc:
-            self.new_stats.error = str(exc)
+            stats.error = str(exc)
 
         except etree.XMLSyntaxError as exc:
             logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
-            self.new_stats.error = str(exc)
+            stats.error = str(exc)
 
         except Exception as exc:
             logger.error("Failed to parse SVG file: %s", exc)
-            self.new_stats.error = str(exc)
+            stats.error = str(exc)
 
         return None, None
 
@@ -79,7 +77,6 @@ class SVGTranslationInjector:
 
         # Reset state to prevent accumulation across calls
         result = InjectorData()
-        self.new_stats = result.new_stats
 
         inject_path = Path(str(inject_file))
 
@@ -97,7 +94,7 @@ class SVGTranslationInjector:
         stats = result.new_stats
         # 1. Prepare (pipeline)
         try:
-            tree, root = self._parse_svg(inject_path)
+            tree, root = self._parse_svg(inject_path, result.new_stats)
         except Exception as exc:
             stats.error = f"preparation_failed: {exc}"
             return result
@@ -139,7 +136,7 @@ class SVGTranslationInjector:
             self._save(tree, save_path)
         except OSError as e:
             logger.error(f"Failed writing {str(save_path)}: {e}")
-            self.new_stats.error = f"Failed writing {str(save_path)}: {e}"
+            result.new_stats.error = f"Failed writing {str(save_path)}: {e}"
 
         return result
 
@@ -149,7 +146,7 @@ class SVGTranslationInjector:
         mapping: Mapping,
         existing_ids: set[str] | None = None,
         stats: InjectorStats | None = None,
-    ) -> None:
+    ) -> InjectorStats:
         """Process ``<switch>`` elements and insert or update translations."""
         if not stats:
             stats = InjectorStats()
@@ -170,6 +167,7 @@ class SVGTranslationInjector:
                 stats=stats,
                 existing_ids=existing_ids,
             )
+        return stats
 
     def prepare(self, svg_path: Path | str) -> etree._ElementTree:
         """Public helper used by service.prepare_only()."""
@@ -190,7 +188,7 @@ class SVGTranslationInjector:
         )
         logger.debug(f"Saved modified SVG to {save_path}")
 
-    def _update_data(self, stats, before_languages: set[str], after_languages: set[str]) -> None:
+    def _update_data(self, stats: InjectorStats, before_languages: set[str], after_languages: set[str],) -> None:
         new_languages = after_languages - before_languages
 
         stats.all_languages = len(after_languages)
