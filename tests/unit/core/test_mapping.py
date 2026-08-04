@@ -236,3 +236,4 @@ class TestTranslationMappingMutation:
         m2 = TranslationMapping.from_any(data)
         assert m2.new == m.new
         assert m2.title == m.title
+        # Note: meta is not round-tripped through to_json (it's excluded)
