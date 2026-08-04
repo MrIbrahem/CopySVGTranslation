@@ -51,12 +51,17 @@ class SvgPreparationPipeline:
     # Public API
     # ------------------------------------------------------------------
     def run(self, path: Path) -> tuple[etree._ElementTree[etree._Element], etree._Element]:
-        ctx = PreparationContext(
+        self.ctx = PreparationContext(
             path=path,
             config=self.config,
             id_manager=IdManager(),
         )
         for step in self.steps:
-            step.execute(ctx)
+            step.execute(self.ctx)
 
-        return ctx.tree, ctx.root
+        return self.ctx.tree, self.ctx.root
+
+
+__all__ = [
+    "SvgPreparationPipeline",
+]

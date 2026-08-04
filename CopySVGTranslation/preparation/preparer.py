@@ -38,9 +38,9 @@ class SvgPreparationPipeline:
     - <text> elements inside each <switch> are deterministically ordered
     """
 
-    def __init__(self, config: TranslationConfig | None = None) -> None:
-        self.config = config or TranslationConfig()
-        self.steps: list[PreparationStep] = [  # type: ignore
+    def __init__(self, config: TranslationConfig) -> None:
+        self.config = config
+        self.steps: list[PreparationStep] = [
             LoadDocument(config),
             ValidateStructure(config),
             NormalizeTspans(config),
@@ -75,7 +75,8 @@ def make_translation_ready(source_file: Path | str) -> tuple[etree._ElementTree,
     Legacy function-style wrapper around SvgPreparationPipeline, kept for
     backward compatibility with existing callers.
     """
-    return SvgPreparationPipeline().run(source_file)
+    config = TranslationConfig()
+    return SvgPreparationPipeline(config).run(source_file)
 
 
 __all__ = [
