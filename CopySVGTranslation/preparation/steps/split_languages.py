@@ -84,6 +84,7 @@ class SplitLanguages(PreparationStep):
     # ------------------------------------------------------------------
     # Step 6: <switch> language splitting
     # ------------------------------------------------------------------
+
     def _split_switch_languages(self, ctx: PreparationContext) -> None:
         """Split comma-separated systemLanguage values into cloned <text> nodes."""
         switches = ctx.root.findall(f".//{{{SVG_NS}}}switch")

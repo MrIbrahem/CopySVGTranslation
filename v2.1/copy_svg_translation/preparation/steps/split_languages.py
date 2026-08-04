@@ -46,7 +46,10 @@ class SplitLanguages(PreparationStep):
                 # 0 or 1 languages, standard systemLanguage
                 if real_langs:
                     lang_value = real_langs[0]
-                    text_el.set("systemLanguage", lang_value)
+                    if lang_value == "fallback":
+                        text_el.attrib.pop("systemLanguage", None)
+                    else:
+                        text_el.set("systemLanguage", lang_value)
                 continue
 
             # Split into multiple single-language <text> nodes
@@ -55,12 +58,18 @@ class SplitLanguages(PreparationStep):
 
             # Keep the first language in the original node
             original_lang = real_langs[0]
-            text_el.set("systemLanguage", original_lang)
+            if original_lang == "fallback":
+                text_el.attrib.pop("systemLanguage", None)
+            else:
+                text_el.set("systemLanguage", original_lang)
 
             # For subsequent languages, clone the node and allocate new IDs
             for extra_lang in real_langs[1:]:
                 cloned = _clone_element(text_el)
-                cloned.set("systemLanguage", extra_lang)
+                if extra_lang == "fallback":
+                    cloned.attrib.pop("systemLanguage", None)
+                else:
+                    cloned.set("systemLanguage", extra_lang)
 
                 # Assign new unique IDs
                 self._reassign_ids(cloned, ctx)
