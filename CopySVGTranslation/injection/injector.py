@@ -119,6 +119,9 @@ class SVGTranslationInjector:
         before_languages = tree_languages(tree)
         stats.languages_before = sorted(before_languages)
 
+        # 3. Seed IdManager with existing IDs
+        self.id_manager.register_many(root.xpath("//@id"))
+
         # 4. Process every switch
         mapping_obj = TranslationMapping.from_any(all_mappings)
         self.work_on_switches(
