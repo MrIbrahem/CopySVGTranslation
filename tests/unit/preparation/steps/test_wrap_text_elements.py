@@ -4,6 +4,7 @@ Tests for WrapTextElements._process_text_elements
 Unit tests for CopySVGTranslation/preparation/steps/wrap_text_elements.py module.
 """
 
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -13,6 +14,9 @@ from CopySVGTranslation.exceptions import SvgStructureError
 from CopySVGTranslation.injection.id_manager import IdManager
 from CopySVGTranslation.preparation.steps.wrap_text_elements import SVG_NS, WrapTextElements
 
+from CopySVGTranslation.config import TranslationConfig
+from CopySVGTranslation.injection.id_manager import IdManager
+from CopySVGTranslation.preparation.preparer import PreparationContext
 
 class TestSetup:
     def tostring(self, el: etree._Element, pretty_print=False) -> str:
@@ -46,11 +50,19 @@ def make_root(svg_body: str) -> etree._Element:
     xml = f'<svg xmlns="{SVG_NS}">{svg_body}</svg>'
     return etree.fromstring(xml)
 
-
-def make_ctx(root: etree._Element) -> SimpleNamespace:
-    """Lightweight context stub carrying only what _process_text_elements reads."""
-    return SimpleNamespace(root=root, id_manager=IdManager())
-
+def make_ctx(root: etree._Element | None = None, **overrides) -> PreparationContext:
+    """Lightweight context stub carrying the attributes these steps read."""
+    defaults = {
+        "root": root,
+        "tree": None,
+        "translatable_nodes": [],
+        "warnings": [],
+        "id_manager": IdManager(),
+        "config": TranslationConfig(assign_missing_ids=True),
+        "path": Path("dummy.svg"),
+    }
+    defaults.update(overrides)
+    return PreparationContext(**defaults)
 
 # ---------------------------------------------------------------------------
 # _process_text_elements

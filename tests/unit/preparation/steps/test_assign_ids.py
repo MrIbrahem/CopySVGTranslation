@@ -11,7 +11,9 @@ from types import SimpleNamespace
 import pytest
 from lxml import etree
 
+from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.injection.id_manager import IdManager
+from CopySVGTranslation.preparation.preparer import PreparationContext
 from CopySVGTranslation.preparation.steps.assign_ids import (
     AssignIds,
 )
@@ -35,7 +37,7 @@ def make_root(svg_body: str) -> etree._Element:
     return etree.fromstring(xml)
 
 
-def make_ctx(root: etree._Element | None = None, **overrides) -> SimpleNamespace:
+def make_ctx(root: etree._Element | None = None, **overrides) -> PreparationContext:
     """Lightweight context stub carrying the attributes these steps read."""
     defaults = {
         "root": root,
@@ -43,11 +45,11 @@ def make_ctx(root: etree._Element | None = None, **overrides) -> SimpleNamespace
         "translatable_nodes": [],
         "warnings": [],
         "id_manager": IdManager(),
-        "config": SimpleNamespace(assign_missing_ids=True),
+        "config": TranslationConfig(assign_missing_ids=True),
         "path": Path("dummy.svg"),
     }
     defaults.update(overrides)
-    return SimpleNamespace(**defaults)
+    return PreparationContext(**defaults)
 
 
 class TestAssignIds:
@@ -97,13 +99,15 @@ class TestAssignIds:
 
     def test_missing_text_id_not_assigned_when_config_disabled(self, assign_ids_step):
         root = make_root("<text>hello</text>")
-        ctx = make_ctx(root=root, config=SimpleNamespace(assign_missing_ids=False))
+        ctx = make_ctx(root=root)
+        ctx.config = SimpleNamespace(assign_missing_ids=False)
 
         assign_ids_step.execute(ctx)
 
         text = root.find(f".//{{{SVG_NS}}}text")
         assert text is not None
 
+        assert text.get("id") == "trsvg1"
         assert text.get("id") is None
 
     def test_missing_tspan_id_is_assigned(self, assign_ids_step):

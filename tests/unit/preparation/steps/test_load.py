@@ -17,6 +17,9 @@ from CopySVGTranslation.preparation.steps.load import (
     LoadDocument,
 )
 
+from CopySVGTranslation.config import TranslationConfig
+from CopySVGTranslation.injection.id_manager import IdManager
+from CopySVGTranslation.preparation.preparer import PreparationContext
 SVG_NS = "http://www.w3.org/2000/svg"
 
 # ---------------------------------------------------------------------------
@@ -30,7 +33,7 @@ def make_root(svg_body: str) -> etree._Element:
     return etree.fromstring(xml)
 
 
-def make_ctx(root: etree._Element | None = None, **overrides) -> SimpleNamespace:
+def make_ctx(root: etree._Element | None = None, **overrides) -> PreparationContext:
     """Lightweight context stub carrying the attributes these steps read."""
     defaults = {
         "root": root,
@@ -38,11 +41,11 @@ def make_ctx(root: etree._Element | None = None, **overrides) -> SimpleNamespace
         "id_manager": IdManager(),
         "translatable_nodes": [],
         "warnings": [],
-        "config": SimpleNamespace(assign_missing_ids=True),
+        "config": TranslationConfig(assign_missing_ids=True),
         "path": Path("dummy.svg"),
     }
     defaults.update(overrides)
-    return SimpleNamespace(**defaults)
+    return PreparationContext(**defaults)
 
 
 @pytest.fixture
