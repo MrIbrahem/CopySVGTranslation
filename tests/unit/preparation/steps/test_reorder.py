@@ -1,4 +1,3 @@
-# ruff: noqa: F401
 """
 Unit tests for CopySVGTranslation/CopySVGTranslation/preparation/steps/reorder.py module.
 
@@ -7,12 +6,11 @@ Classes to test: ReorderTexts
 TODO: write tests
 """
 
-
 from pathlib import Path
 from types import SimpleNamespace
 
-from lxml import etree
 import pytest
+from lxml import etree
 
 from CopySVGTranslation.preparation.steps.reorder import (
     ReorderTexts,
@@ -34,12 +32,12 @@ def make_root(svg_body: str) -> etree._Element:
 def make_ctx(root: etree._Element | None = None, **overrides) -> SimpleNamespace:
     """Lightweight context stub carrying the attributes these steps read."""
     defaults = {
-        'root': root,
-        'tree': None,
-        'translatable_nodes': [],
-        'warnings': [],
-        'config': SimpleNamespace(assign_missing_ids=True),
-        'path': Path("dummy.svg"),
+        "root": root,
+        "tree": None,
+        "translatable_nodes": [],
+        "warnings": [],
+        "config": SimpleNamespace(assign_missing_ids=True),
+        "path": Path("dummy.svg"),
     }
     defaults.update(overrides)
     return SimpleNamespace(**defaults)
@@ -75,10 +73,7 @@ class TestReorderTexts:
 
     def test_fallback_text_is_placed_last(self, reorder_step):
         root = make_root(
-            "<switch>"
-            '<text id="trsvg1">fallback</text>'
-            '<text id="trsvg2" systemLanguage="ar">a</text>'
-            "</switch>"
+            '<switch><text id="trsvg1">fallback</text><text id="trsvg2" systemLanguage="ar">a</text></switch>'
         )
         ctx = make_ctx(root=root)
 

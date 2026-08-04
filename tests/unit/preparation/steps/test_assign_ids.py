@@ -4,16 +4,18 @@ Unit tests for CopySVGTranslation/CopySVGTranslation/preparation/steps/assign_id
 Classes to test: AssignIds
 
 """
+
 from pathlib import Path
 from types import SimpleNamespace
 
-from lxml import etree
 import pytest
+from lxml import etree
 
 from CopySVGTranslation.injection.id_manager import IdManager
 from CopySVGTranslation.preparation.steps.assign_ids import (
     AssignIds,
 )
+
 SVG_NS = "http://www.w3.org/2000/svg"
 
 
@@ -26,21 +28,23 @@ SVG_NS = "http://www.w3.org/2000/svg"
 def assign_ids_step():
     return AssignIds(config=SimpleNamespace(assign_missing_ids=True))
 
+
 def make_root(svg_body: str) -> etree._Element:
     """Build a standalone <svg> root element with the given inner XML."""
     xml = f'<svg xmlns="{SVG_NS}">{svg_body}</svg>'
     return etree.fromstring(xml)
 
+
 def make_ctx(root: etree._Element | None = None, **overrides) -> SimpleNamespace:
     """Lightweight context stub carrying the attributes these steps read."""
     defaults = {
-        'root': root,
-        'tree': None,
-        'translatable_nodes': [],
-        'warnings': [],
-        'id_manager': IdManager(),
-        'config': SimpleNamespace(assign_missing_ids=True),
-        'path': Path("dummy.svg"),
+        "root": root,
+        "tree": None,
+        "translatable_nodes": [],
+        "warnings": [],
+        "id_manager": IdManager(),
+        "config": SimpleNamespace(assign_missing_ids=True),
+        "path": Path("dummy.svg"),
     }
     defaults.update(overrides)
     return SimpleNamespace(**defaults)
@@ -80,7 +84,7 @@ class TestAssignIds:
         assert exc_info.value.code == "structure-error-invalid-node-id"
 
     def test_missing_text_id_is_assigned_when_config_enabled(self, assign_ids_step):
-        root = make_root('<text>hello</text>')
+        root = make_root("<text>hello</text>")
         ctx = make_ctx(root=root, config=SimpleNamespace(assign_missing_ids=True))
 
         assign_ids_step.execute(ctx)
@@ -92,7 +96,7 @@ class TestAssignIds:
         assert "trsvg1" in ctx.id_manager.existing_ids
 
     def test_missing_text_id_not_assigned_when_config_disabled(self, assign_ids_step):
-        root = make_root('<text>hello</text>')
+        root = make_root("<text>hello</text>")
         ctx = make_ctx(root=root, config=SimpleNamespace(assign_missing_ids=False))
 
         assign_ids_step.execute(ctx)
@@ -126,10 +130,7 @@ class TestAssignIds:
         assert texts[1].get("id") == "trsvg2"
 
     def test_multiple_missing_ids_each_get_unique_trsvg_ids(self, assign_ids_step):
-        root = make_root(
-            '<text>a<tspan>x</tspan></text>'
-            '<text>b</text>'
-        )
+        root = make_root("<text>a<tspan>x</tspan></text><text>b</text>")
         ctx = make_ctx(root=root)
 
         assign_ids_step.execute(ctx)
@@ -138,4 +139,3 @@ class TestAssignIds:
         # all ids must be unique
         assert len(assigned) == len(set(assigned))
         assert len(assigned) == 3  # 2 <text> + 1 <tspan>
-

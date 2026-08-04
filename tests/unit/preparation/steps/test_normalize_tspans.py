@@ -6,12 +6,11 @@ Classes to test: NormalizeTspans, WrapTspans
 TODO: write tests
 """
 
-
 from pathlib import Path
 from types import SimpleNamespace
 
-from lxml import etree
 import pytest
+from lxml import etree
 
 from CopySVGTranslation.injection.id_manager import IdManager
 from CopySVGTranslation.preparation.steps.normalize_tspans import (
@@ -25,25 +24,26 @@ SVG_NS = "http://www.w3.org/2000/svg"
 # WrapTspans
 # ---------------------------------------------------------------------------
 
+
 def make_root(svg_body: str) -> etree._Element:
     """Build a standalone <svg> root element with the given inner XML."""
     xml = f'<svg xmlns="{SVG_NS}">{svg_body}</svg>'
     return etree.fromstring(xml)
 
+
 def make_ctx(root: etree._Element | None = None, **overrides) -> SimpleNamespace:
     """Lightweight context stub carrying the attributes these steps read."""
     defaults = {
-        'root': root,
-        'tree': None,
-        'translatable_nodes': [],
-        'warnings': [],
-        'id_manager': IdManager(),
-        'config': SimpleNamespace(assign_missing_ids=True),
-        'path': Path("dummy.svg"),
+        "root": root,
+        "tree": None,
+        "translatable_nodes": [],
+        "warnings": [],
+        "id_manager": IdManager(),
+        "config": SimpleNamespace(assign_missing_ids=True),
+        "path": Path("dummy.svg"),
     }
     defaults.update(overrides)
     return SimpleNamespace(**defaults)
-
 
 
 @pytest.fixture
@@ -174,6 +174,7 @@ class TestWrapTspans:
         with pytest.raises(ValueError, match="id_manager is not set"):
             wrap_tspans_step.execute(ctx)
 
+
 # ---------------------------------------------------------------------------
 # NormalizeTspans
 # ---------------------------------------------------------------------------
@@ -202,9 +203,7 @@ class TestNormalizeTspans:
         assert ctx.translatable_nodes[0].get("id") == "s1"
 
     def test_multiple_leaf_tspans_are_all_collected(self, normalize_tspans_step):
-        root = make_root(
-            '<text id="t1"><tspan id="s1">a</tspan><tspan id="s2">b</tspan></text>'
-        )
+        root = make_root('<text id="t1"><tspan id="s1">a</tspan><tspan id="s2">b</tspan></text>')
         ctx = make_ctx(root=root)
 
         normalize_tspans_step.execute(ctx)
@@ -215,9 +214,7 @@ class TestNormalizeTspans:
     def test_nested_tspan_raises(self, normalize_tspans_step):
         from CopySVGTranslation.exceptions import SvgNestedTspanError
 
-        root = make_root(
-            '<text id="t1"><tspan id="outer"><tspan id="inner">x</tspan></tspan></text>'
-        )
+        root = make_root('<text id="t1"><tspan id="outer"><tspan id="inner">x</tspan></tspan></text>')
         ctx = make_ctx(root=root)
 
         with pytest.raises(SvgNestedTspanError):
@@ -230,4 +227,3 @@ class TestNormalizeTspans:
         normalize_tspans_step.execute(ctx)
 
         assert ctx.translatable_nodes == []
-

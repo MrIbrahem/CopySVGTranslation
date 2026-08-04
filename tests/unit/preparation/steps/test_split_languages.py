@@ -21,8 +21,9 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation.exceptions import SvgStructureError
-from CopySVGTranslation.preparation.steps.split_languages import SVG_NS, SplitLanguages
 from CopySVGTranslation.injection.id_manager import IdManager
+from CopySVGTranslation.preparation.steps.split_languages import SVG_NS, SplitLanguages
+
 
 def make_switch(children_xml: str) -> etree._Element:
     """Build a standalone <switch> element (SVG namespace) with given children."""

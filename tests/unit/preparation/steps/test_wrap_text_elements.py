@@ -13,6 +13,7 @@ from CopySVGTranslation.exceptions import SvgStructureError
 from CopySVGTranslation.injection.id_manager import IdManager
 from CopySVGTranslation.preparation.steps.wrap_text_elements import SVG_NS, WrapTextElements
 
+
 class TestSetup:
     def tostring(self, el: etree._Element, pretty_print=False) -> str:
         return etree.tostring(el, pretty_print=pretty_print).decode("utf-8").strip()

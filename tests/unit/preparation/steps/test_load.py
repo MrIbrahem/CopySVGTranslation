@@ -6,12 +6,11 @@ Classes to test: LoadDocument
 TODO: write tests
 """
 
-
 from pathlib import Path
 from types import SimpleNamespace
 
-from lxml import etree
 import pytest
+from lxml import etree
 
 from CopySVGTranslation.injection.id_manager import IdManager
 from CopySVGTranslation.preparation.steps.load import (
@@ -44,6 +43,7 @@ def make_ctx(root: etree._Element | None = None, **overrides) -> SimpleNamespace
     }
     defaults.update(overrides)
     return SimpleNamespace(**defaults)
+
 
 @pytest.fixture
 def load_step():
@@ -91,4 +91,3 @@ class TestLoadDocument:
 
         with pytest.raises(ValueError, match="bad svg"):
             load_step.execute(ctx)
-

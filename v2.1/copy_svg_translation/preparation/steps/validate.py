@@ -1,6 +1,8 @@
 # injection/steps/validate.py
 from __future__ import annotations
 
+import re
+
 from ...exceptions import (
     SvgContainsTrefError,
     SvgCssHasIdsError,
