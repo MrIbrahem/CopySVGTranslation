@@ -3,7 +3,7 @@ Extended comprehensive unit tests for CopySVGTranslation covering additional edg
 and previously untested functions.
 """
 
-from CopySVGTranslation.utils.text_utils import (
+from CopySVGTranslation.utils.text import (
     normalize_lang,
     normalize_text,
 )

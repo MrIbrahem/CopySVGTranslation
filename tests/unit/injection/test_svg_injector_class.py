@@ -8,8 +8,9 @@ from pathlib import Path
 
 from lxml import etree
 
-from CopySVGTranslation.injection.objects import InjectorData, InjectorStats
-from CopySVGTranslation.injection.svg_injector import SVGTranslationInjector
+from CopySVGTranslation.config import TranslationConfig
+from CopySVGTranslation.injection.injector import SVGTranslationInjector
+from CopySVGTranslation.result import InjectorData, InjectorStats
 
 SVG_NS = "http://www.w3.org/2000/svg"
 SVG_NSMAP = {"svg": SVG_NS}
@@ -141,25 +142,22 @@ class TestSVGTranslationInjectorInit:
     """Tests for SVGTranslationInjector initialization."""
 
     def test_default_parameters(self):
-        inj = SVGTranslationInjector()
-        assert inj.case_insensitive is True
-        assert inj.overwrite is False
-        assert inj.pretty_print is None
+        config = TranslationConfig()
+        inj = SVGTranslationInjector(config)
+        assert inj.config.case_insensitive is True
+        assert inj.config.overwrite is False
+        assert inj.config.pretty_print is None
 
     def test_custom_parameters(self):
-        inj = SVGTranslationInjector(
+        config = TranslationConfig(
             case_insensitive=False,
             overwrite=True,
             pretty_print=False,
         )
-        assert inj.case_insensitive is False
-        assert inj.overwrite is True
-        assert inj.pretty_print is False
-
-    def test_result_initialized(self):
-        inj = SVGTranslationInjector()
-        assert isinstance(inj.result, InjectorData)
-        assert isinstance(inj.new_stats, InjectorStats)
+        inj = SVGTranslationInjector(config)
+        assert inj.config.case_insensitive is False
+        assert inj.config.overwrite is True
+        assert inj.config.pretty_print is False
 
 
 # ===========================================================================
@@ -254,7 +252,8 @@ class TestSVGTranslationInjectorCaseSensitivity:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(case_insensitive=True)
+        config = TranslationConfig(case_insensitive=True)
+        inj = SVGTranslationInjector(config)
         # Key is lowercase; source text is mixed case
         mappings = {"new": {"hello world": {"ar": "مرحبا بالعالم"}}}
 
@@ -268,9 +267,8 @@ class TestSVGTranslationInjectorCaseSensitivity:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(
-            case_insensitive=False,
-        )
+        config = TranslationConfig(case_insensitive=False)
+        inj = SVGTranslationInjector(config)
         # Key is lowercase; source text is mixed case — should NOT match
         mappings = {"new": {"hello world": {"ar": "مرحبا بالعالم"}}}
 
@@ -284,9 +282,8 @@ class TestSVGTranslationInjectorCaseSensitivity:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(
-            case_insensitive=False,
-        )
+        config = TranslationConfig(case_insensitive=False)
+        inj = SVGTranslationInjector(config)
         mappings = {"new": {"Hello World": {"ar": "مرحبا بالعالم"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
@@ -309,7 +306,8 @@ class TestSVGTranslationInjectorOverwrite:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(overwrite=False)
+        config = TranslationConfig(overwrite=False)
+        inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "New"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
@@ -325,7 +323,8 @@ class TestSVGTranslationInjectorOverwrite:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(overwrite=True)
+        config = TranslationConfig(overwrite=True)
+        inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "New"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
@@ -341,7 +340,8 @@ class TestSVGTranslationInjectorOverwrite:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(overwrite=True)
+        config = TranslationConfig(overwrite=True)
+        inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "New Arabic"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
@@ -361,7 +361,8 @@ class TestSVGTranslationInjectorOverwrite:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(overwrite=False)
+        config = TranslationConfig(overwrite=False)
+        inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "Should skip", "fr": "Should insert"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
@@ -584,7 +585,7 @@ class TestWorkOnSwitches:
         inj = SVGTranslationInjector()
         existing_ids = set(root.xpath("//@id"))
 
-        inj.work_on_switches(root, mappings={"new": {"hello": {"ar": "مرحبا"}}}, existing_ids=existing_ids)
+        inj.work_on_switches(root, mapping={"new": {"hello": {"ar": "مرحبا"}}}, existing_ids=existing_ids)
 
         ar_nodes = root.xpath('.//svg:text[@systemLanguage="ar"]', namespaces=SVG_NSMAP)
         assert len(ar_nodes) == 1
@@ -602,7 +603,7 @@ class TestWorkOnSwitches:
 
         inj.work_on_switches(
             root,
-            mappings={"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}},
+            mapping={"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}},
             existing_ids=existing_ids,
         )
 
@@ -625,7 +626,7 @@ class TestWorkOnSwitches:
 
         inj.work_on_switches(
             root,
-            mappings={"new": {"hello": {"ar": "مرحبا"}}},
+            mapping={"new": {"hello": {"ar": "مرحبا"}}},
             existing_ids=existing_ids,
         )
 
@@ -651,12 +652,12 @@ class TestWorkOnSwitches:
         )
         inj = SVGTranslationInjector()
 
-        inj.work_on_switches(root, mappings={"new": {"hello": {"ar": "مرحبا"}}})
+        stats = inj.work_on_switches(root, mapping={"new": {"hello": {"ar": "مرحبا"}}})
 
         # No new nodes should be added
         ar_nodes = root.xpath('.//svg:text[@systemLanguage="ar"]', namespaces=SVG_NSMAP)
         assert len(ar_nodes) == 0
-        assert inj.new_stats.processed_switches == 0
+        assert stats.processed_switches == 0
 
 
 # ===========================================================================
@@ -668,7 +669,7 @@ class TestExtractorInjectorE2E:
     """End-to-end tests using SVGTranslationExtractor and SVGTranslationInjector together."""
 
     def test_extract_then_inject(self, tmp_path: Path):
-        from CopySVGTranslation.extraction.svg_extractor import SVGTranslationExtractor
+        from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor
 
         # Source SVG with translations
         source_inner = """
@@ -697,8 +698,8 @@ class TestExtractorInjectorE2E:
         output_svg = tmp_path / "output.svg"
 
         # Extract
-        extractor = SVGTranslationExtractor(source_svg)
-        extract_result = extractor.extract()
+        extractor = SVGTranslationExtractor()
+        extract_result = extractor.extract(source_svg)
         assert extract_result.error == ""
 
         # Inject
@@ -722,7 +723,7 @@ class TestExtractorInjectorE2E:
         assert len(root.xpath('.//svg:text[@systemLanguage="fr"]', namespaces=SVG_NSMAP)) == 1
 
     def test_extract_inject_preserves_content(self, tmp_path: Path):
-        from CopySVGTranslation.extraction.svg_extractor import SVGTranslationExtractor
+        from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor
 
         source_inner = """
             <switch>
@@ -740,8 +741,8 @@ class TestExtractorInjectorE2E:
         target_svg = _write_svg(tmp_path, target_inner, name="target.svg")
         output_svg = tmp_path / "output.svg"
 
-        extractor = SVGTranslationExtractor(source_svg)
-        data = extractor.extract().to_json()
+        extractor = SVGTranslationExtractor()
+        data = extractor.extract(source_svg).to_json()
 
         injector = SVGTranslationInjector()
         result = injector.inject(

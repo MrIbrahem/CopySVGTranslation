@@ -23,11 +23,10 @@ from pathlib import Path
 from CopySVGTranslation import SVGTranslationExtractor
 
 extractor = SVGTranslationExtractor(
-    source_file=Path("examples/source_multilingual.svg"),
     case_insensitive=True,
 )
 
-result = extractor.extract()
+result = extractor.extract(Path("examples/source_multilingual.svg"))
 
 if not result.error:
     print(result.to_json())
@@ -43,13 +42,14 @@ if not result.error:
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import SVGTranslationInjector
+from CopySVGTranslation import SVGTranslationInjector, TranslationConfig
 
-injector = SVGTranslationInjector(
+config = TranslationConfig(
     case_insensitive=True,
     overwrite=False,
     pretty_print=True,
 )
+injector = SVGTranslationInjector(config)
 
 translations = {
     "new": {
@@ -81,11 +81,12 @@ The primary class for extracting translation data from SVG files.
 from CopySVGTranslation import SVGTranslationExtractor
 
 extractor = SVGTranslationExtractor(
-    source_file: str | Path,
     case_insensitive: bool = True,
 )
 
-result: ExtractorData = extractor.extract()
+result: ExtractorData = extractor.extract(
+    source_file: str | Path,
+)
 ```
 
 **Parameters:**
@@ -114,13 +115,14 @@ Use `result.to_json()` to get a plain dictionary suitable for JSON serialization
 The primary class for injecting translations into SVG files.
 
 ```python
-from CopySVGTranslation import SVGTranslationInjector
+from CopySVGTranslation import SVGTranslationInjector, TranslationConfig
 
-injector = SVGTranslationInjector(
+config = TranslationConfig(
     case_insensitive: bool = True,
     overwrite: bool = False,
     pretty_print: bool | None = None,
 )
+injector = SVGTranslationInjector(config)
 
 result: InjectorData = injector.inject(
     inject_file: Path | str,
@@ -207,8 +209,8 @@ translations = extract(source_file=Path("arabic.svg"), case_insensitive=True)
 
 # After (recommended)
 from CopySVGTranslation import SVGTranslationExtractor
-extractor = SVGTranslationExtractor(source_file=Path("arabic.svg"), case_insensitive=True)
-result = extractor.extract()
+extractor = SVGTranslationExtractor( case_insensitive=True)
+result = extractor.extract(Path("arabic.svg"))
 translations = result.to_json() if not result.error else None
 ```
 
@@ -240,8 +242,9 @@ tree, stats = inject_file_and_save(
 )
 
 # After (recommended)
-from CopySVGTranslation import SVGTranslationInjector
-injector = SVGTranslationInjector(case_insensitive=True, overwrite=False)
+from CopySVGTranslation import SVGTranslationInjector, TranslationConfig
+config = TranslationConfig(case_insensitive=True, overwrite=False)
+injector = SVGTranslationInjector(config)
 result = injector.inject(
     inject_file=Path("target.svg"),
     all_mappings=translations,
@@ -330,11 +333,10 @@ from pathlib import Path
 from CopySVGTranslation import SVGTranslationExtractor
 
 extractor = SVGTranslationExtractor(
-    source_file=Path("arabic.svg"),
     case_insensitive=True,
 )
 
-result = extractor.extract()
+result = extractor.extract(Path("arabic.svg"))
 print(result.to_json())
 ```
 
@@ -391,13 +393,14 @@ print(result.to_json())
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import SVGTranslationInjector
+from CopySVGTranslation import SVGTranslationInjector, TranslationConfig
 
-injector = SVGTranslationInjector(
+config = TranslationConfig(
     case_insensitive=True,
     overwrite=False,
     pretty_print=True,
 )
+injector = SVGTranslationInjector(config)
 
 translations = {
     "new": {
@@ -480,5 +483,5 @@ The tool includes comprehensive error handling for:
 -   Invalid XML structure
 -   Missing required attributes
 -   File permission issues
--   Nested `<tspan>` structures (raises `SvgNestedTspanExceptionError`)
--   Invalid SVG structures like `<tref>` elements (raises `SvgStructureExceptionError`)
+-   Nested `<tspan>` structures (raises `SvgNestedTspanError`)
+-   Invalid SVG structures like `<tref>` elements (raises `SvgStructureError`)

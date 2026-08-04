@@ -1,4 +1,5 @@
-# injection/__init__.py
+"""pre-injection phase helpers for CopySVGTranslation."""
+
 from .preparer import SvgPreparationPipeline
 
 __all__ = [

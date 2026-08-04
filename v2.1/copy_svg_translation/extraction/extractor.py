@@ -1,14 +1,16 @@
-# extraction/extractor.py
+"""Utilities for extracting translation data from SVG files."""
+
 from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 from lxml import etree
 
 from ..config import TranslationConfig
+from ..core import SwitchNode, TextNode
 from ..core.mapping import TranslationMapping
-from ..core.switch_node import SwitchNode
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
 from ..utils.text import normalize_text
@@ -29,33 +31,8 @@ class SVGTranslationExtractor:
         matching_strategy: MatchingStrategy | None = None,
     ) -> None:
         self.config = config or TranslationConfig()
-        self.strategy = matching_strategy or CompositeMatchingStrategy()
         self.year_handler = YearTitleHandler(self.config)
-
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
-    def extract(self, path: Path | str) -> TranslationMapping:
-        """
-        Load the SVG and return a TranslationMapping.
-        Raises on fatal I/O or parse errors; returns an empty mapping
-        when no switches/translations are found.
-        """
-        doc = SvgDocument.load(path, config=self.config)
-        return self.extract_from_root(doc.root)
-
-    def extract_from_root(self, root: etree._Element) -> TranslationMapping:
-        mapping = TranslationMapping()
-        switches = root.xpath("//svg:switch", namespaces=SVG_NS)
-        logger.debug("Found %d switch elements", len(switches))
-
-        for switch_el in switches:
-            self._process_switch(SwitchNode(switch_el), mapping)
-
-        if self.config.enable_year_titles and mapping.new:
-            self.year_handler.build_templates(mapping)
-
-        return mapping
+        self.strategy = matching_strategy or CompositeMatchingStrategy()
 
     # ------------------------------------------------------------------
     # Per-switch logic
@@ -65,10 +42,12 @@ class SVGTranslationExtractor:
         switch: SwitchNode,
         mapping: TranslationMapping,
     ) -> None:
-        default = switch.fallback()
+        # Return the default (no systemLanguage) text node, if any.
+        default: TextNode | None = switch.default_text_node()
         if default is None:
             return
 
+        # Find all text elements within this switch
         default_texts = default.texts(
             normalize=True,
             case_insensitive=self.config.case_insensitive,
@@ -83,8 +62,8 @@ class SVGTranslationExtractor:
                 mapping.tspans_by_id[tid] = tspan.text.strip()
 
         # Ensure keys exist in mapping.new
-        for text in default_texts:
-            key = normalize_text(text, self.config.case_insensitive)
+        for x in default_texts:
+            key = normalize_text(x, self.config.case_insensitive)
             mapping.new.setdefault(key, {})
 
         # Match every language node
@@ -108,3 +87,54 @@ class SVGTranslationExtractor:
                     m.translated_text,
                     case_insensitive=False,  # key already normalized
                 )
+
+    def extract_from_root(self, root: etree._Element) -> TranslationMapping:
+        mapping = TranslationMapping()
+        # Find all switch elements
+        switches = root.xpath("//svg:switch", namespaces=SVG_NS)
+        logger.debug("Found %d switch elements", len(switches))
+
+        for switch_el in switches:
+            self._process_switch(SwitchNode(switch_el), mapping)
+
+        if self.config.enable_year_titles and mapping.new:
+            self.year_handler.build_templates(mapping)
+
+        return mapping
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def extract(self, path: Path | str) -> TranslationMapping:
+        """
+        Extract translation strings from an SVG file into a structured dictionary.
+        """
+        mapping = TranslationMapping()
+        logger.debug(f"Extracting translations from {path}")
+
+        try:
+            doc = SvgDocument.load(path, config=self.config)
+        except FileNotFoundError:
+            logger.error(f"SVG file not found: {path}")
+            mapping.meta = {"error": "File not found"}
+            return mapping
+        except (etree.XMLSyntaxError, OSError) as exc:
+            logger.error(f"Failed to parse SVG file {path}: {exc}")
+            mapping.meta = {"error": "Failed to parse SVG file"}
+            return mapping
+
+        return self.extract_from_root(doc.root)
+
+    def extract_json(self, path: Path | str) -> dict[str, Any]:
+        """
+        Extract translation strings from an SVG file into a structured dictionary.
+        """
+        result = self.extract(path)
+
+        return result.to_json()
+
+
+__all__ = [
+    "SVGTranslationExtractor",
+]

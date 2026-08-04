@@ -47,11 +47,11 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 
 ### Core Modules
 
--   **`CopySVGTranslation/extraction/svg_extractor.py`**: Contains `SVGTranslationExtractor` class and `ExtractorData` dataclass. Parses SVG files and extracts translation pairs from `<switch>` elements. Collects default (English) text and corresponding translations from sibling `<text>` elements with `systemLanguage` attributes.
+-   **`CopySVGTranslation/extraction/extractor.py`**: Contains `SVGTranslationExtractor` class and `ExtractorData` dataclass. Parses SVG files and extracts translation pairs from `<switch>` elements. Collects default (English) text and corresponding translations from sibling `<text>` elements with `systemLanguage` attributes.
 
 -   **`CopySVGTranslation/extraction/worker.py`**: Contains the deprecated `extract()` function — a thin wrapper around `SVGTranslationExtractor` for backward compatibility.
 
--   **`CopySVGTranslation/injection/svg_injector.py`**: Contains `SVGTranslationInjector` class, `InjectorData`, and `InjectorStats` dataclasses. The main injection engine that processes `<switch>` elements, matches default text against mappings, and inserts/updates translation nodes with `systemLanguage` attributes.
+-   **`CopySVGTranslation/injection/injector.py`**: Contains `SVGTranslationInjector` class, `InjectorData`, and `InjectorStats` dataclasses. The main injection engine that processes `<switch>` elements, matches default text against mappings, and inserts/updates translation nodes with `systemLanguage` attributes.
 
 -   **`CopySVGTranslation/injection/worker.py`**: Contains the deprecated `inject()` function — a thin wrapper around `SVGTranslationInjector` for backward compatibility.
 
@@ -61,7 +61,7 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 
 -   **`CopySVGTranslation/titles_workers/`**: Handles title-like text (entries ending with 4-digit years) with special handling.
 
--   **`CopySVGTranslation/nested_analyze/`**: Utilities for detecting and fixing nested `<tspan>` structures that would otherwise cause `SvgNestedTspanExceptionError`.
+-   **`CopySVGTranslation/nested_analyze/`**: Utilities for detecting and fixing nested `<tspan>` structures that would otherwise cause `SvgNestedTspanError`.
 
 ### Data Flow
 
@@ -125,8 +125,8 @@ The extractor produces JSON in this format:
 
 ### Exception Types
 
--   **`SvgStructureExceptionError`**: Raised for invalid SVG structures (tref elements, CSS with IDs, non-tspan children in text, etc.)
--   **`SvgNestedTspanExceptionError`**: Raised when nested `<tspan>` elements are detected. Use `fix_nested_tspans()` or `fix_nested_file()` to resolve.
+-   **`SvgStructureError`**: Raised for invalid SVG structures (tref elements, CSS with IDs, non-tspan children in text, etc.)
+-   **`SvgNestedTspanError`**: Raised when nested `<tspan>` elements are detected. Use `fix_nested_tspans()` or `fix_nested_file()` to resolve.
 
 ## Dependencies
 

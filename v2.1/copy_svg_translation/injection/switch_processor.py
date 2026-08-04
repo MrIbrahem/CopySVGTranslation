@@ -49,10 +49,11 @@ class SwitchProcessor:
         6. Optionally re-sort children of the switch
         """
         switch = SwitchNode(switch_element)
-        default = switch.fallback()
+        default: TextNode | None = switch.default_text_node()
         if default is None:
             return
 
+        # Find all text elements within this switch
         default_texts = default.texts(
             normalize=True,
             case_insensitive=self.config.case_insensitive,

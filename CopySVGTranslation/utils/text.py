@@ -27,6 +27,22 @@ def normalize_lang(lang: str) -> str:
     return primary
 
 
+def split_lang_list(value: str | None) -> list[str]:
+    """
+    Split a (possibly comma-separated) systemLanguage value
+    and normalize each tag.
+
+    >>> split_lang_list("ar, fr, pt-br")
+    ['ar', 'fr', 'pt-BR']
+    >>> split_lang_list(None)
+    []
+    """
+    if not value or not value.strip():
+        return []
+    # re.split(r",\s*", value)
+    return [normalize_lang(part) for part in re.split(r"\s*,\s*", value.strip()) if part]
+
+
 def normalize_text(text: str | None, case_insensitive: bool = False) -> str:
     """Normalize text by trimming whitespace and optionally lowering the case."""
     if not text:
@@ -40,6 +56,7 @@ def normalize_text(text: str | None, case_insensitive: bool = False) -> str:
 
 
 __all__ = [
+    "split_lang_list",
     "normalize_lang",
     "normalize_text",
 ]

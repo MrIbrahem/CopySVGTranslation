@@ -7,8 +7,9 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
+from ..config import TranslationConfig
 from ..utils.injection_utils import load_all_mappings
-from .svg_injector import InjectorData, SVGTranslationInjector
+from .injector import InjectorData, SVGTranslationInjector
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +34,12 @@ def inject_file_tree(
         mapping_files = list(mapping_files)
         all_mappings = load_all_mappings(mapping_files)
 
-    injector = SVGTranslationInjector(
+    config = TranslationConfig(
         case_insensitive=case_insensitive,
         overwrite=overwrite,
         pretty_print=pretty_print,
     )
+    injector = SVGTranslationInjector(config)
 
     result: InjectorData = injector.inject(
         inject_file=inject_file,

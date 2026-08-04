@@ -1,6 +1,9 @@
 """
 Extended comprehensive unit tests for CopySVGTranslation covering additional edge cases
 and previously untested functions.
+
+Classes to test: SvgPreparationPipeline
+Functions to test: make_translation_ready
 """
 
 import shutil
@@ -9,10 +12,8 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.injection.exceptions import (
-    SvgStructureExceptionError,
-)
-from CopySVGTranslation.preparation import (
+from CopySVGTranslation.exceptions import SvgStructureError
+from CopySVGTranslation.preparation import (  # SvgPreparationPipeline,
     make_translation_ready,
 )
 
@@ -38,7 +39,7 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with pytest.raises(SvgStructureExceptionError) as exc_info:
+        with pytest.raises(SvgStructureError) as exc_info:
             make_translation_ready(svg_path)
 
         assert "tref" in str(exc_info.value)
@@ -52,7 +53,7 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with pytest.raises(SvgStructureExceptionError) as exc_info:
+        with pytest.raises(SvgStructureError) as exc_info:
             make_translation_ready(svg_path)
 
         assert "css" in str(exc_info.value).lower()
@@ -65,7 +66,7 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with pytest.raises(SvgStructureExceptionError) as exc_info:
+        with pytest.raises(SvgStructureError) as exc_info:
             make_translation_ready(svg_path)
 
         assert "dollar" in str(exc_info.value).lower()
@@ -78,7 +79,7 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with pytest.raises(SvgStructureExceptionError) as exc_info:
+        with pytest.raises(SvgStructureError) as exc_info:
             make_translation_ready(svg_path)
 
         assert "nested" in str(exc_info.value).lower()
@@ -136,7 +137,7 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with pytest.raises(SvgStructureExceptionError) as exc_info:
+        with pytest.raises(SvgStructureError) as exc_info:
             make_translation_ready(svg_path)
 
         assert "lang" in str(exc_info.value).lower()
@@ -170,7 +171,21 @@ class TestMakeTranslationReadyEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        with pytest.raises(SvgStructureExceptionError) as exc_info:
+        with pytest.raises(SvgStructureError) as exc_info:
             make_translation_ready(svg_path)
 
         assert "id" in str(exc_info.value).lower()
+
+    def test_make_translation_ready_nonexistent_file(self):
+        """Test make_translation_ready with nonexistent file."""
+        with pytest.raises(FileNotFoundError):
+            make_translation_ready(Path("/nonexistent/file.svg"))
+
+    def test_make_translation_ready_with_valid_svg(self, temp_dir):
+        """Test make_translation_ready with valid SVG."""
+        svg_path = temp_dir / "test.svg"
+        svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t1"><tspan>Hello</tspan></text></switch></svg>"""
+        svg_path.write_text(svg_content, encoding="utf-8")
+        tree, root = make_translation_ready(svg_path)
+        assert tree is not None
+        assert root is not None

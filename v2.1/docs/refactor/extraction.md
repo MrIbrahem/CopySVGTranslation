@@ -284,7 +284,7 @@ class SVGTranslationExtractor:
         switch: SwitchNode,
         mapping: TranslationMapping,
     ) -> None:
-        default = switch.fallback()
+        default = switch.default_text_node()
         if default is None:
             return
 

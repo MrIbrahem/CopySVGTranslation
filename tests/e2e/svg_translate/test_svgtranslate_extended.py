@@ -12,7 +12,6 @@ from lxml import etree
 
 from CopySVGTranslation.extraction import extract
 from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
-from CopySVGTranslation.utils import generate_unique_id
 
 
 class TestSetup:
@@ -68,26 +67,6 @@ class TestSetup:
 
 
 class TestSVGTranslate(TestSetup):
-
-    def test_generate_unique_id_empty_base(self):
-        """Test unique ID generation with empty base ID."""
-        existing_ids = set()
-        new_id = generate_unique_id("", "fr", existing_ids)
-        assert new_id == "-fr"
-
-    def test_generate_unique_id_numeric_suffix_collision(self):
-        """Test unique ID generation with existing numeric suffixes."""
-        existing_ids = {"base-ar", "base-ar-1", "base-ar-2", "base-ar-5"}
-        # Should find the next available number (not necessarily 3)
-        new_id = generate_unique_id("base", "ar", existing_ids)
-        assert "base-ar" in new_id
-        assert new_id not in existing_ids
-
-    def test_generate_unique_id_with_special_characters(self):
-        """Test unique ID generation with special characters in base ID."""
-        existing_ids = set()
-        new_id = generate_unique_id("text_2205-tspan", "ar", existing_ids)
-        assert new_id == "text_2205-tspan-ar"
 
     def test_extract_with_multiple_switches(self):
         """Test extraction with multiple switch elements."""

@@ -2,7 +2,7 @@ import textwrap
 from pathlib import Path
 
 from CopySVGTranslation.injection.worker import inject_file_tree
-from CopySVGTranslation.utils.elements_utils import (
+from CopySVGTranslation.utils.xml import (
     file_langs,
     tree_languages,
 )

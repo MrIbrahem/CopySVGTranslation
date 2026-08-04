@@ -1,5 +1,5 @@
 """
-Unit tests for CopySVGTranslation/extraction/svg_extractor.py module.
+Unit tests for CopySVGTranslation/extraction/extractor.py module.
 
 Functions to test: extract
 """
@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.extraction.svg_extractor import SVGTranslationExtractor  # noqa: F401
+from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor  # noqa: F401
 
 FIXTURES_DIR = Path(__file__).parent.parent.parent
 

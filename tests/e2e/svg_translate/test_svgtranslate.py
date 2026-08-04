@@ -12,7 +12,6 @@ from lxml import etree
 
 from CopySVGTranslation.extraction import extract
 from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
-from CopySVGTranslation.utils import generate_unique_id
 
 
 class TestSetup:
@@ -68,23 +67,6 @@ class TestSetup:
 
 
 class TestSVGTranslate(TestSetup):
-
-    def test_generate_unique_id(self):
-        """Test unique ID generation."""
-        existing_ids = {"id1", "id2", "id1-ar"}
-
-        # Test with no collision
-        new_id = generate_unique_id("id1", "fr", existing_ids)
-        assert new_id == "id1-fr"
-
-        # Test with collision
-        new_id = generate_unique_id("id1", "ar", existing_ids)
-        assert new_id == "id1-ar-1"
-
-        # Test with multiple collisions
-        existing_ids.add("id1-ar-1")
-        new_id = generate_unique_id("id1", "ar", existing_ids)
-        assert new_id == "id1-ar-2"
 
     def test_extract(self):
         """Test extraction of translations from SVG."""

@@ -1,6 +1,8 @@
 # injection/steps/validate.py
 from __future__ import annotations
 
+import re
+
 from ...exceptions import (
     SvgContainsTrefError,
     SvgCssHasIdsError,
@@ -17,27 +19,37 @@ class ValidateStructure(PreparationStep):
         if ctx.root is None:
             return
 
-        # 1. No <tref>
+        # <tref> elements are not supported.
         trefs = ctx.root.findall(f".//{{{SVG_NS}}}tref")
-        if trefs:
-            raise SvgContainsTrefError("structure-error-contains-tref", element=trefs[0])
+        if len(trefs) != 0:
+            raise SvgContainsTrefError(element=trefs[0])
 
         # 2. Check CSS styling
         styles = ctx.root.findall(f".//{{{SVG_NS}}}style")
+        css_simple_re = re.compile(r"^([^{]+\{[^}]*\})*[^{]+$")
+
         for s in styles:
-            content = s.text or ""
-            if "#" in content:
+            css = s.text or ""
+            if "#" in css:
                 # CSS has IDs, too complex
-                raise SvgCssHasIdsError("structure-error-css-has-ids", element=s)
+                if not css_simple_re.match(css):
+                    raise SvgCssTooComplexError(extra=[s.get("id", "")])
+
+                # split selectors roughly and ensure no '#' in selectors portion
+                selectors = re.split(r"\{[^}]*\}", css)
+                for selector in selectors:
+                    if "#" in selector:
+                        raise SvgCssHasIdsError(extra=[s.get("id", "")])
+
             # Find complex selectors
-            if "{" in content:
-                selectors = [part.split("{")[0].strip() for part in content.split("}") if "{" in part]
+            if "{" in css:
+                selectors = [part.split("{")[0].strip() for part in css.split("}") if "{" in part]
                 for sel in selectors:
                     if "," in sel or " " in sel or ">" in sel or ":" in sel:
-                        raise SvgCssTooComplexError("structure-error-css-too-complex", element=s)
+                        raise SvgCssTooComplexError(element=s)
 
         # 3. Check for '$' placeholders in text content
         for text_el in ctx.root.findall(f".//{{{SVG_NS}}}text"):
             text_content = "".join(text_el.itertext())
             if "$" in text_content:
-                raise SvgTextContainsDollarError("structure-error-text-contains-dollar", element=text_el)
+                raise SvgTextContainsDollarError(code="structure-error-text-contains-dollar", element=text_el)
