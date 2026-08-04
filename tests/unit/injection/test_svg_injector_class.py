@@ -697,8 +697,8 @@ class TestExtractorInjectorE2E:
         output_svg = tmp_path / "output.svg"
 
         # Extract
-        extractor = SVGTranslationExtractor(source_svg)
-        extract_result = extractor.extract()
+        extractor = SVGTranslationExtractor()
+        extract_result = extractor.extract(source_svg)
         assert extract_result.error == ""
 
         # Inject
@@ -740,8 +740,8 @@ class TestExtractorInjectorE2E:
         target_svg = _write_svg(tmp_path, target_inner, name="target.svg")
         output_svg = tmp_path / "output.svg"
 
-        extractor = SVGTranslationExtractor(source_svg)
-        data = extractor.extract().to_json()
+        extractor = SVGTranslationExtractor()
+        data = extractor.extract(source_svg).to_json()
 
         injector = SVGTranslationInjector()
         result = injector.inject(

@@ -34,14 +34,13 @@ class SVGTranslationExtractor:
     Extract translations from an SVG into a TranslationMapping.
     """
 
-    def __init__(self, source_file: str | Path, case_insensitive: bool = True):
+    def __init__(self, case_insensitive: bool = True):
         """
         Parameters:
             source_file (str | Path): Path to the SVG file to process.
             case_insensitive (bool): If True, default text keys are treated
                 case-insensitively (lowercased).
         """
-        self.source_file = Path(str(source_file))
         self.case_insensitive = case_insensitive
 
     def get_english_default_texts(self, text_elements):
@@ -173,7 +172,7 @@ class SVGTranslationExtractor:
             translations.title = make_title_translations(translations.new)
             translations.title_new = make_new_title_translations(translations.new)
 
-    def extract(self) -> ExtractorData:
+    def extract(self, path: Path | str) -> ExtractorData:
         """
         Extract translation strings from an SVG file into a structured dictionary.
 
@@ -189,23 +188,24 @@ class SVGTranslationExtractor:
             translations and a "title" mapping), or None if the file does
             not exist or could not be parsed.
         """
+        source_file = Path(str(path))
         # Reset state to prevent accumulation across calls
         translations = ExtractorData()
 
-        if not self.source_file.exists():
-            logger.error(f"SVG file not found: {self.source_file}")
+        if not source_file.exists():
+            logger.error(f"SVG file not found: {source_file}")
             translations.error = "File not found"
             return translations
 
-        logger.debug(f"Extracting translations from {self.source_file}")
+        logger.debug(f"Extracting translations from {source_file}")
 
         # Parse SVG as XML
         parser = etree.XMLParser(remove_blank_text=True)
 
         try:
-            tree = etree.parse(str(self.source_file), parser)
+            tree = etree.parse(str(source_file), parser)
         except (etree.XMLSyntaxError, OSError) as exc:
-            logger.error(f"Failed to parse SVG file {self.source_file}: {exc}")
+            logger.error(f"Failed to parse SVG file {source_file}: {exc}")
             translations.error = "Failed to parse SVG file"
             return translations
 

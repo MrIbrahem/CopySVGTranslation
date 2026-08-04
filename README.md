@@ -23,11 +23,10 @@ from pathlib import Path
 from CopySVGTranslation import SVGTranslationExtractor
 
 extractor = SVGTranslationExtractor(
-    source_file=Path("examples/source_multilingual.svg"),
     case_insensitive=True,
 )
 
-result = extractor.extract()
+result = extractor.extract(Path("examples/source_multilingual.svg"))
 
 if not result.error:
     print(result.to_json())
@@ -81,11 +80,12 @@ The primary class for extracting translation data from SVG files.
 from CopySVGTranslation import SVGTranslationExtractor
 
 extractor = SVGTranslationExtractor(
-    source_file: str | Path,
     case_insensitive: bool = True,
 )
 
-result: ExtractorData = extractor.extract()
+result: ExtractorData = extractor.extract(
+    source_file: str | Path,
+)
 ```
 
 **Parameters:**
@@ -207,8 +207,8 @@ translations = extract(source_file=Path("arabic.svg"), case_insensitive=True)
 
 # After (recommended)
 from CopySVGTranslation import SVGTranslationExtractor
-extractor = SVGTranslationExtractor(source_file=Path("arabic.svg"), case_insensitive=True)
-result = extractor.extract()
+extractor = SVGTranslationExtractor( case_insensitive=True)
+result = extractor.extract(Path("arabic.svg"))
 translations = result.to_json() if not result.error else None
 ```
 
@@ -330,11 +330,10 @@ from pathlib import Path
 from CopySVGTranslation import SVGTranslationExtractor
 
 extractor = SVGTranslationExtractor(
-    source_file=Path("arabic.svg"),
     case_insensitive=True,
 )
 
-result = extractor.extract()
+result = extractor.extract(Path("arabic.svg"))
 print(result.to_json())
 ```
 

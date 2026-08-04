@@ -24,11 +24,10 @@ def extract(
         None if the file does not exist or could not be parsed.
     """
     extractor = SVGTranslationExtractor(
-        source_file=source_file,
         case_insensitive=case_insensitive,
     )
 
-    result = extractor.extract()
+    result = extractor.extract(source_file)
     if result.error:
         return None
 

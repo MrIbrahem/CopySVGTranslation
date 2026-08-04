@@ -92,26 +92,12 @@ class TestExtractorData:
 class TestSVGTranslationExtractorInit:
     """Tests for SVGTranslationExtractor initialization."""
 
-    def test_accepts_path_object(self, tmp_path: Path):
-        p = tmp_path / "f.svg"
-        p.write_text("<svg/>", encoding="utf-8")
-        ext = SVGTranslationExtractor(source_file=p)
-        assert ext.source_file == p
-        assert isinstance(ext.source_file, Path)
-
-    def test_accepts_string_path(self, tmp_path: Path):
-        p = tmp_path / "f.svg"
-        p.write_text("<svg/>", encoding="utf-8")
-        ext = SVGTranslationExtractor(source_file=str(p))
-        assert isinstance(ext.source_file, Path)
-
     def test_default_case_insensitive(self):
-        ext = SVGTranslationExtractor(source_file=Path("/fake.svg"))
+        ext = SVGTranslationExtractor()
         assert ext.case_insensitive is True
 
     def test_case_insensitive_false(self):
         ext = SVGTranslationExtractor(
-            source_file=Path("/fake.svg"),
             case_insensitive=False,
         )
         assert ext.case_insensitive is False
@@ -133,8 +119,8 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(svg)
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(svg)
 
         assert isinstance(result, ExtractorData)
         assert result.error == ""
@@ -154,8 +140,8 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(svg)
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(svg)
 
         assert result.error == ""
         assert "hello" in result.new
@@ -172,8 +158,8 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(svg, case_insensitive=True)
-        result = ext.extract()
+        ext = SVGTranslationExtractor(case_insensitive=True)
+        result = ext.extract(svg)
 
         assert "hello world" in result.new
         assert "Hello World" not in result.new
@@ -187,10 +173,9 @@ class TestSVGTranslationExtractorExtract:
         """
         svg = _write_svg(tmp_path, inner)
         ext = SVGTranslationExtractor(
-            svg,
             case_insensitive=False,
         )
-        result = ext.extract()
+        result = ext.extract(svg)
 
         assert "Hello World" in result.new
 
@@ -204,8 +189,8 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(svg)
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(svg)
 
         assert result.tspans_by_id["t0"] == "Hello"
         assert result.tspans_by_id["t1"] == "World"
@@ -218,8 +203,8 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(svg)
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(svg)
 
         assert result.error == ""
         # The full text should be in "new"
@@ -230,8 +215,8 @@ class TestSVGTranslationExtractorExtract:
     def test_no_switches_returns_empty(self, tmp_path: Path):
         inner = '<text id="t0"><tspan>Just text</tspan></text>'
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(svg)
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(svg)
 
         assert result.error == ""
         assert result.new == {}
@@ -244,8 +229,8 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(svg)
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(svg)
 
         # Without tspan children the text node content is used directly.
         # The key may not appear in "new" if there's no tspan id to match,
@@ -254,8 +239,8 @@ class TestSVGTranslationExtractorExtract:
 
     def test_empty_svg(self, tmp_path: Path):
         svg = _write_svg(tmp_path, "")
-        ext = SVGTranslationExtractor(svg)
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(svg)
 
         assert result.error == ""
         assert result.new == {}
@@ -268,8 +253,8 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(svg)
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(svg)
 
         # Keys should be normalized (trimmed + collapsed whitespace)
         assert "hello world" in result.new
@@ -285,8 +270,8 @@ class TestSVGTranslationExtractorErrors:
     """Tests for error handling in SVGTranslationExtractor."""
 
     def test_nonexistent_file(self, tmp_path: Path):
-        ext = SVGTranslationExtractor(source_file=tmp_path / "missing.svg")
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(tmp_path / "missing.svg")
 
         assert result.error == "File not found"
         assert result.new == {}
@@ -294,8 +279,8 @@ class TestSVGTranslationExtractorErrors:
     def test_invalid_xml(self, tmp_path: Path):
         svg = tmp_path / "bad.svg"
         svg.write_text("<svg><unclosed>", encoding="utf-8")
-        ext = SVGTranslationExtractor(source_file=svg)
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(svg)
 
         assert result.error == "Failed to parse SVG file"
         assert result.new == {}
@@ -303,8 +288,8 @@ class TestSVGTranslationExtractorErrors:
     def test_empty_file(self, tmp_path: Path):
         svg = tmp_path / "empty.svg"
         svg.write_text("", encoding="utf-8")
-        ext = SVGTranslationExtractor(source_file=svg)
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(svg)
 
         assert result.error != ""
 
@@ -312,8 +297,8 @@ class TestSVGTranslationExtractorErrors:
         """Each call to extract() should use the same translations instance,
         but a successful call should not carry over an old error."""
         svg = _write_svg(tmp_path, '<switch><text id="t0"><tspan id="t0">Hi</tspan></text></switch>')
-        ext = SVGTranslationExtractor(svg)
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(svg)
         assert result.error == ""
 
 
@@ -333,8 +318,8 @@ class TestExtractorDataToJson:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(svg)
-        result = ext.extract()
+        ext = SVGTranslationExtractor()
+        result = ext.extract(svg)
         data = result.to_json()
 
         assert isinstance(data, dict)
@@ -352,8 +337,8 @@ class TestExtractorDataToJson:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor(svg)
-        data = ext.extract().to_json()
+        ext = SVGTranslationExtractor()
+        data = ext.extract(svg).to_json()
 
         # Should be JSON-serializable without errors
         serialized = json.dumps(data, ensure_ascii=False)
