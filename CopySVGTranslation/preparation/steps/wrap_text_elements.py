@@ -5,7 +5,7 @@ import re
 
 from lxml import etree
 
-from ...exceptions import SvgStructureError
+from ...exceptions import SvgStructureError, SvgNonTspanInsideTextError
 from ...utils import normalize_lang
 from .base import PreparationContext, PreparationStep
 
@@ -71,5 +71,5 @@ class WrapTextElements(PreparationStep):
 
             # verify that children of text are only tspans or text nodes
             for child in text:
-                if child.tag not in ({f"{{{SVG_NS}}}tspan", "tspan"}):
-                    raise SvgStructureError(code="structure-error-non-tspan-inside-text")
+                if isinstance(child.tag, str) and child.tag not in ({f"{{{SVG_NS}}}tspan", "tspan"}):
+                    raise SvgNonTspanInsideTextError(code="structure-error-non-tspan-inside-text", element=child)

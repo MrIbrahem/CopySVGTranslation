@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import pytest
 
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.core.mapping import TranslationMapping
@@ -277,28 +278,26 @@ class TestSVGTranslationExtractorErrors:
     """Tests for error handling in SVGTranslationExtractor."""
 
     def test_nonexistent_file(self, tmp_path: Path):
+        from CopySVGTranslation.exceptions import SvgIOError
         ext = SVGTranslationExtractor()
-        result = ext.extract(tmp_path / "missing.svg")
-
-        assert result.error == "File not found"
-        assert result.new == {}
+        with pytest.raises(SvgIOError):
+            ext.extract(tmp_path / "missing.svg")
 
     def test_invalid_xml(self, tmp_path: Path):
+        from CopySVGTranslation.exceptions import SvgParseError
         svg = tmp_path / "bad.svg"
         svg.write_text("<svg><unclosed>", encoding="utf-8")
         ext = SVGTranslationExtractor()
-        result = ext.extract(svg)
-
-        assert result.error == "Failed to parse SVG file"
-        assert result.new == {}
+        with pytest.raises(SvgParseError):
+            ext.extract(svg)
 
     def test_empty_file(self, tmp_path: Path):
+        from CopySVGTranslation.exceptions import SvgParseError
         svg = tmp_path / "empty.svg"
         svg.write_text("", encoding="utf-8")
         ext = SVGTranslationExtractor()
-        result = ext.extract(svg)
-
-        assert result.error != ""
+        with pytest.raises(SvgParseError):
+            ext.extract(svg)
 
     def test_error_cleared_between_calls(self, tmp_path: Path):
         """Each call to extract() should use the same translations instance,

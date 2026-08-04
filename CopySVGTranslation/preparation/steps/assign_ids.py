@@ -21,8 +21,6 @@ class AssignIds(PreparationStep):
 
         ctx.id_manager.register_many(existing_ids)
 
-        counter = 1
-
         # Check all existing IDs for validity
         for element in ctx.root.xpath("//*[@id]"):
             el_id = element.get("id")
@@ -34,17 +32,11 @@ class AssignIds(PreparationStep):
             for text_el in ctx.root.findall(f".//{{{SVG_NS}}}text"):
                 # Check text element itself
                 if not text_el.get("id"):
-                    while f"trsvg{counter}" in ctx.id_manager.existing_ids:
-                        counter += 1
-                    new_id = f"trsvg{counter}"
+                    new_id = ctx.id_manager.allocate_trsvg()
                     text_el.set("id", new_id)
-                    ctx.id_manager.register(new_id)
 
                 # Check children tspans
                 for tspan in text_el.findall(f"./{{{SVG_NS}}}tspan"):
                     if not tspan.get("id"):
-                        while f"trsvg{counter}" in ctx.id_manager.existing_ids:
-                            counter += 1
-                        new_id = f"trsvg{counter}"
+                        new_id = ctx.id_manager.allocate_trsvg()
                         tspan.set("id", new_id)
-                        ctx.id_manager.register(new_id)

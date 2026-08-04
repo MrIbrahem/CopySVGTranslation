@@ -29,7 +29,13 @@ def extract(
     )
     extractor = SVGTranslationExtractor(config)
 
-    result = extractor.extract(source_file)
+    from ..exceptions import SvgIOError, SvgParseError
+
+    try:
+        result = extractor.extract(source_file)
+    except (SvgIOError, SvgParseError):
+        return None
+
     if result.error:
         return None
 

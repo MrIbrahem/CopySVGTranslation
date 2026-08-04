@@ -61,8 +61,8 @@ class SwitchNode:
 
             m = re.search(r"trsvg(\d+)", n.id or "")
             num = int(m.group(1)) if m else 10**9
-            is_fallback = 0 if n.is_fallback else 1
-            return (is_fallback if put_fallback_last else 0, num, lang)
+            is_fallback = 1 if n.is_fallback else 0
+            return (is_fallback if put_fallback_last else (1 - is_fallback), num, lang)
 
         ordered = sorted(nodes, key=sort_key)
         for n in ordered:

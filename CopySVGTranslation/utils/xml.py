@@ -72,7 +72,8 @@ def sort_switch_children(
         lang = el.get("systemLanguage") or "fallback"
         m = re.search(r"trsvg(\d+)", (el.get("id") or ""))
         num = int(m.group(1)) if m else 10**9
-        return (0 if lang == "fallback" else 1, num, lang)
+        fallback_val = 1 if lang == "fallback" else 0
+        return (fallback_val if put_fallback_last else (1 - fallback_val), num, lang)
 
     texts_sorted = sorted(texts, key=sort_key)
     # re-append in sorted order, leaving non-text children (if any) as-is

@@ -9,6 +9,7 @@ from pathlib import Path
 from lxml import etree
 
 from ..config import TranslationConfig
+from ..core.mapping import TranslationMapping
 from ..exceptions import (
     SvgNestedTspanError,
     SvgStructureError,
@@ -16,7 +17,6 @@ from ..exceptions import (
 from ..preparation import SvgPreparationPipeline
 from ..result import InjectorData, InjectorStats
 from ..titles import YearTitleHandler
-from ..utils import sort_switch_texts
 from ..utils.xml import tree_languages
 from .id_manager import IdManager
 from .switch_processor import SwitchProcessor
@@ -68,12 +68,6 @@ class SVGTranslationInjector:
 
         return None, None
 
-    def _finalize_switches(self, root) -> None:
-        # Fix old <svg:switch> tags if present
-        for elem in root.findall(".//svg:switch", namespaces={"svg": SVG_NS}):
-            elem.tag = "switch"
-            sort_switch_texts(elem)
-
     def inject(
         self,
         inject_file: Path | str,
@@ -118,24 +112,25 @@ class SVGTranslationInjector:
         before_languages = tree_languages(tree)
         stats.languages_before = sorted(before_languages)
 
+        # 3. Seed IdManager with existing IDs
+        self.id_manager.register_many(root.xpath("//@id"))
+
         # 4. Process every switch
+        mapping_obj = TranslationMapping.from_any(all_mappings)
         self.work_on_switches(
             root=root,
-            mapping=all_mappings,
+            mapping=mapping_obj,
             stats=stats,
         )
 
-        # 5. Final housekeeping
-        self._finalize_switches(root)
-
-        # 6. Languages after + stats
+        # 5. Languages after + stats
         after_languages = tree_languages(tree)
         self._update_data(stats, before_languages, after_languages)
 
         if not save_result:
             return result
 
-        # 7. Save if requested
+        # 6. Save if requested
         if save_path is None:
             logger.error("save_result is True but no save_path was provided")
             result.new_stats.error = "No target path provided"
@@ -152,7 +147,7 @@ class SVGTranslationInjector:
     def work_on_switches(
         self,
         root: etree._Element,
-        mapping: Mapping,
+        mapping: TranslationMapping,
         existing_ids: set[str] | None = None,
         stats: InjectorStats | None = None,
     ) -> InjectorStats:
@@ -160,10 +155,8 @@ class SVGTranslationInjector:
         if not stats:
             stats = InjectorStats()
 
-        if not existing_ids:
-            # Collect all existing IDs to ensure uniqueness
-            # existing_ids = {elem.get('id') for elem in root.xpath('//*[@id]') if elem.get('id')}
-            existing_ids = set(root.xpath("//@id"))
+        if existing_ids:
+            self.id_manager.register_many(existing_ids)
 
         # Process every switch
         switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})
@@ -174,7 +167,6 @@ class SVGTranslationInjector:
                 switch_element=switch,
                 mapping=mapping,
                 stats=stats,
-                existing_ids=existing_ids,
             )
         return stats
 
@@ -189,11 +181,15 @@ class SVGTranslationInjector:
         tree: etree._ElementTree,
         save_path: Path,
     ) -> None:
+        if self.config.create_parents:
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+
+        pretty = self.config.pretty_print if self.config.pretty_print is not None else True
         tree.write(
             str(save_path),
             encoding="utf-8",
             xml_declaration=True,
-            pretty_print=self.config.pretty_print,
+            pretty_print=pretty,
         )
         logger.debug(f"Saved modified SVG to {save_path}")
 
