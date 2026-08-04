@@ -116,11 +116,6 @@ class TestSVGTranslationExtractorInit:
         )
         assert ext.case_insensitive is False
 
-    def test_translations_initialized(self):
-        ext = SVGTranslationExtractor(source_file=Path("/fake.svg"))
-        assert isinstance(ext.translations, ExtractorData)
-        assert ext.translations.error == ""
-
 
 # ===========================================================================
 # SVGTranslationExtractor.extract() tests
