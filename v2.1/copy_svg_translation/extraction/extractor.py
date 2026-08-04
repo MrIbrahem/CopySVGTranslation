@@ -111,7 +111,6 @@ class SVGTranslationExtractor:
         return self.extract_from_root(doc.root)
 
 
-
 __all__ = [
     "SVGTranslationExtractor",
 ]

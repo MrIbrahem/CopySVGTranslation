@@ -10,8 +10,8 @@ from typing import Any
 from lxml import etree
 
 from ..config import TranslationConfig
-from ..titles_workers import make_new_title_translations, make_title_translations
 from ..io.svg_document import SvgDocument
+from ..titles_workers import make_new_title_translations, make_title_translations
 from ..utils import normalize_text
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,6 @@ class SVGTranslationExtractor:
         self.config = config or TranslationConfig(
             case_insensitive=case_insensitive,
         )
-
 
     def get_english_default_texts(self, text_elements):
         """
@@ -228,7 +227,6 @@ class SVGTranslationExtractor:
             return translations
 
         return self.extract_from_root(doc.root)
-
 
 
 __all__ = [
