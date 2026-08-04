@@ -24,7 +24,7 @@ Notes on setup:
       semantics.
 
     * get_new_titles_translations(title_new, default_texts) -> dict shaped
-      like all_mappings ({key: {lang: translated}}), merged into
+      like mapping ({key: {lang: translated}}), merged into
       mapping.new via setdefault(...).update(...).
 
     * IdManager.allocate_clone(base_id, lang) -> str. Our fake returns a

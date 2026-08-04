@@ -199,7 +199,7 @@ class TestInjectManual:
         result = inject_file_and_save(
             inject_file=svg_file,
             save_path=svg_file,
-            all_mappings=data,
+            mapping=data,
             overwrite=True,
             pretty_print=False,
         )

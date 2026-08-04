@@ -25,7 +25,7 @@ class TestWorkflowFunctions:
         translations = {"new": {"hi": {"ar": "مرحبا"}}}
 
         tree, stats = inject_file_tree(
-            all_mappings=translations,
+            mapping=translations,
             inject_file=target,
             return_stats=True,
         )
@@ -88,7 +88,7 @@ class TestInjectionEdgeCases:
         mappings = {"new": {"hi": {"ar": "مرحبا"}}}
         tree = inject_file_and_save(
             inject_file=svg,
-            all_mappings=mappings,
+            mapping=mappings,
             save_path=out_dir / "test.svg",
         )
         assert tree is not None
@@ -102,7 +102,7 @@ class TestInjectionEdgeCases:
         mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
         tree, stats = inject_file_tree(
             inject_file=svg,
-            all_mappings=mappings,
+            mapping=mappings,
             case_insensitive=False,
             return_stats=True,
         )

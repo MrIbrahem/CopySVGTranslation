@@ -31,7 +31,7 @@ def test_inject_tracks_new_languages(tmp_path):
 
     tree, stats = inject_file_tree(
         inject_file=svg_path,
-        all_mappings=mapping,
+        mapping=mapping,
         save_result=False,
         return_stats=True,
     )
@@ -62,7 +62,7 @@ def test_inject_tracks_only_truly_new_languages(tmp_path):
 
     _, stats = inject_file_tree(
         inject_file=svg_path,
-        all_mappings=mapping,
+        mapping=mapping,
         save_result=False,
         return_stats=True,
     )
@@ -86,7 +86,7 @@ def test_file_langs_handles_element_tree(tmp_path):
 
     tree, _ = inject_file_tree(
         inject_file=svg_path,
-        all_mappings={"new": {"hello": {"ar": "مرحبا"}}},
+        mapping={"new": {"hello": {"ar": "مرحبا"}}},
         save_result=False,
         return_stats=True,
     )

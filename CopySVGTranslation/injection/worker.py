@@ -18,7 +18,7 @@ def inject_file_tree(
     *,
     inject_file: Path | str | None = None,
     mapping_files: Iterable[Path | str] | None = None,
-    all_mappings: Mapping | None = None,
+    mapping: Mapping | None = None,
     case_insensitive: bool = True,
     save_path: Path | None = None,
     overwrite: bool = False,
@@ -30,9 +30,9 @@ def inject_file_tree(
     Legacy function-style wrapper around SVGTranslationInjector, kept for
     backward compatibility with existing callers.
     """
-    if not all_mappings and mapping_files:
+    if not mapping and mapping_files:
         mapping_files = list(mapping_files)
-        all_mappings = load_all_mappings(mapping_files)
+        mapping = load_all_mappings(mapping_files)
 
     config = TranslationConfig(
         case_insensitive=case_insensitive,
@@ -43,7 +43,7 @@ def inject_file_tree(
 
     result: InjectorData = injector.inject(
         inject_file=inject_file,
-        all_mappings=all_mappings,
+        mapping=mapping,
         save_result=save_result,
         save_path=save_path,
     )
@@ -58,7 +58,7 @@ def inject_file_and_save(
     *,
     inject_file: Path | str | None = None,
     mapping_files: Iterable[Path | str] | None = None,
-    all_mappings: Mapping | None = None,
+    mapping: Mapping | None = None,
     case_insensitive: bool = True,
     save_path: Path,
     overwrite: bool = False,
@@ -69,7 +69,7 @@ def inject_file_and_save(
     return inject_file_tree(
         inject_file=inject_file,
         mapping_files=mapping_files,
-        all_mappings=all_mappings,
+        mapping=mapping,
         case_insensitive=case_insensitive,
         overwrite=overwrite,
         pretty_print=pretty_print,

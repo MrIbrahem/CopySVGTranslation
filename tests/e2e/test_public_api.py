@@ -117,7 +117,7 @@ class TestIntegrationWorkflows:
         # Inject using the dict
         result, stats = inject_file_and_save(
             inject_file=target_svg,
-            all_mappings=translations,
+            mapping=translations,
             save_path=tmp_path / "target2.svg",
             return_stats=True,
         )

@@ -22,7 +22,7 @@ class TestWorkflows:
         )
         translations = {"new": {"hello": {"ar": "مرحبا"}}}
         tree, stats = inject_file_tree(
-            all_mappings=translations,
+            mapping=translations,
             inject_file=target,
             save_result=False,
             return_stats=True,
@@ -42,7 +42,7 @@ class TestWorkflows:
         )
         translations = {"new": {"hello": {"ar": "New"}}}
         tree, stats = inject_file_tree(
-            all_mappings=translations,
+            mapping=translations,
             inject_file=target,
             overwrite=True,
             return_stats=True,

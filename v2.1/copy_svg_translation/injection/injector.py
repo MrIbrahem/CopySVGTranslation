@@ -10,7 +10,7 @@ from lxml import etree
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
 from ..preparation import SvgPreparationPipeline
-from ..result import InjectorStats
+from ..result import InjectorData, InjectorStats
 from ..titles import YearTitleHandler
 from ..utils.xml import tree_languages
 from .id_manager import IdManager
@@ -68,9 +68,10 @@ class SVGTranslationInjector:
         self.id_manager.register_many(root.xpath("//@id"))
 
         # 4. Process every switch
+        mapping_obj = TranslationMapping.from_any(mapping)
         self.work_on_switches(
             root=root,
-            mapping=mapping,
+            mapping=mapping_obj,
             stats=stats,
         )
 
@@ -99,12 +100,17 @@ class SVGTranslationInjector:
     def work_on_switches(
         self,
         root: etree._Element,
-        mapping: TranslationMapping,
+        mapping: TranslationMapping | dict,
+        existing_ids: set[str] | None = None,
         stats: InjectorStats | None = None,
     ) -> InjectorStats:
         """Process ``<switch>`` elements and insert or update translations."""
+        mapping = TranslationMapping.from_any(mapping)
         if not stats:
             stats = InjectorStats()
+
+        if existing_ids:
+            self.id_manager.register_many(existing_ids)
 
         # Process every switch
         switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})
@@ -131,17 +137,22 @@ class SVGTranslationInjector:
     ) -> None:
         if self.config.create_parents:
             save_path.parent.mkdir(parents=True, exist_ok=True)
-        str_save_path = str(save_path)
 
+        pretty = self.config.pretty_print if self.config.pretty_print is not None else True
         tree.write(
-            str_save_path,
+            str(save_path),
             encoding="utf-8",
             xml_declaration=True,
-            pretty_print=self.config.pretty_print,
+            pretty_print=pretty,
         )
         logger.debug(f"Saved modified SVG to {save_path}")
 
-    def _update_data(self, stats, before_languages: set[str], after_languages: set[str]) -> None:
+    def _update_data(
+        self,
+        stats: InjectorStats,
+        before_languages: set[str],
+        after_languages: set[str],
+    ) -> None:
         new_languages = after_languages - before_languages
 
         stats.all_languages = len(after_languages)

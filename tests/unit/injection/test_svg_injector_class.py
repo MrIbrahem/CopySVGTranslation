@@ -178,7 +178,7 @@ class TestSVGTranslationInjectorBasic:
         inj = SVGTranslationInjector()
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
 
         assert isinstance(result, InjectorData)
         assert result.tree is not None
@@ -195,7 +195,7 @@ class TestSVGTranslationInjectorBasic:
         inj = SVGTranslationInjector()
         mappings = {"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
 
         assert result.new_stats.inserted_translations == 2
         assert result.new_stats.all_languages == 2
@@ -213,7 +213,7 @@ class TestSVGTranslationInjectorBasic:
         inj = SVGTranslationInjector()
         mappings = {"new": {"hello": {"ar": "مرحبا"}, "goodbye": {"ar": "وداعا"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
 
         assert result.new_stats.processed_switches == 2
         assert result.new_stats.inserted_translations == 2
@@ -228,7 +228,7 @@ class TestSVGTranslationInjectorBasic:
         inj = SVGTranslationInjector()
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
         assert result is not None
         assert result.tree is not None
 
@@ -257,7 +257,7 @@ class TestSVGTranslationInjectorCaseSensitivity:
         # Key is lowercase; source text is mixed case
         mappings = {"new": {"hello world": {"ar": "مرحبا بالعالم"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
         assert result.new_stats.inserted_translations == 1
 
     def test_case_sensitive_no_match(self, tmp_path: Path):
@@ -272,7 +272,7 @@ class TestSVGTranslationInjectorCaseSensitivity:
         # Key is lowercase; source text is mixed case — should NOT match
         mappings = {"new": {"hello world": {"ar": "مرحبا بالعالم"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
         assert result.new_stats.inserted_translations == 0
 
     def test_case_sensitive_exact_match(self, tmp_path: Path):
@@ -286,7 +286,7 @@ class TestSVGTranslationInjectorCaseSensitivity:
         inj = SVGTranslationInjector(config)
         mappings = {"new": {"Hello World": {"ar": "مرحبا بالعالم"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
         assert result.new_stats.inserted_translations == 1
 
 
@@ -310,7 +310,7 @@ class TestSVGTranslationInjectorOverwrite:
         inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "New"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
 
         assert result.new_stats.skipped_translations == 1
         assert result.new_stats.updated_translations == 0
@@ -327,7 +327,7 @@ class TestSVGTranslationInjectorOverwrite:
         inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "New"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
 
         assert result.new_stats.updated_translations == 1
         assert result.new_stats.skipped_translations == 0
@@ -344,7 +344,7 @@ class TestSVGTranslationInjectorOverwrite:
         inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "New Arabic"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
         assert result is not None
         assert result.tree is not None
 
@@ -365,7 +365,7 @@ class TestSVGTranslationInjectorOverwrite:
         inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "Should skip", "fr": "Should insert"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
 
         assert result.new_stats.skipped_translations == 1
         assert result.new_stats.inserted_translations == 1
@@ -392,7 +392,7 @@ class TestSVGTranslationInjectorSave:
 
         result = inj.inject(
             inject_file=svg,
-            all_mappings=mappings,
+            mapping=mappings,
             save_path=target,
             save_result=True,
         )
@@ -413,7 +413,7 @@ class TestSVGTranslationInjectorSave:
 
         inj.inject(
             inject_file=svg,
-            all_mappings=mappings,
+            mapping=mappings,
             save_path=target,
             save_result=False,
         )
@@ -432,7 +432,7 @@ class TestSVGTranslationInjectorSave:
 
         result = inj.inject(
             inject_file=svg,
-            all_mappings=mappings,
+            mapping=mappings,
             save_result=True,
             save_path=None,
         )
@@ -452,7 +452,7 @@ class TestSVGTranslationInjectorSave:
 
         inj.inject(
             inject_file=svg,
-            all_mappings=mappings,
+            mapping=mappings,
             save_path=target,
             save_result=True,
         )
@@ -481,7 +481,7 @@ class TestSVGTranslationInjectorLanguageTracking:
         inj = SVGTranslationInjector()
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
 
         assert result.new_stats.languages_before == []
 
@@ -495,7 +495,7 @@ class TestSVGTranslationInjectorLanguageTracking:
         inj = SVGTranslationInjector()
         mappings = {"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
 
         assert result.new_stats.new_languages == 2
         assert sorted(result.new_stats.languages_after) == ["ar", "fr"]
@@ -511,7 +511,7 @@ class TestSVGTranslationInjectorLanguageTracking:
         inj = SVGTranslationInjector()
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
 
         assert "es" in result.new_stats.languages_before
         assert result.new_stats.all_languages == 2  # es + ar
@@ -529,7 +529,7 @@ class TestSVGTranslationInjectorErrors:
         inj = SVGTranslationInjector()
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        result = inj.inject(inject_file=tmp_path / "missing.svg", all_mappings=mappings)
+        result = inj.inject(inject_file=tmp_path / "missing.svg", mapping=mappings)
 
         assert result.new_stats.error == "File does not exist"
         assert result.tree is None
@@ -538,7 +538,7 @@ class TestSVGTranslationInjectorErrors:
         svg = _write_svg(tmp_path, '<switch><text id="t0"><tspan>Hi</tspan></text></switch>')
         inj = SVGTranslationInjector()
 
-        result = inj.inject(inject_file=svg, all_mappings=None)
+        result = inj.inject(inject_file=svg, mapping=None)
 
         assert result.new_stats.error == "No valid mappings found"
         assert result.tree is None
@@ -547,7 +547,7 @@ class TestSVGTranslationInjectorErrors:
         svg = _write_svg(tmp_path, '<switch><text id="t0"><tspan>Hi</tspan></text></switch>')
         inj = SVGTranslationInjector()
 
-        result = inj.inject(inject_file=svg, all_mappings={})
+        result = inj.inject(inject_file=svg, mapping={})
 
         assert result.new_stats.error == "No valid mappings found"
 
@@ -557,7 +557,7 @@ class TestSVGTranslationInjectorErrors:
         inj = SVGTranslationInjector()
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        result = inj.inject(inject_file=svg, all_mappings=mappings)
+        result = inj.inject(inject_file=svg, mapping=mappings)
 
         assert result.new_stats.error != ""
         assert result.tree is None
@@ -706,7 +706,7 @@ class TestExtractorInjectorE2E:
         injector = SVGTranslationInjector()
         inject_result = injector.inject(
             inject_file=target_svg,
-            all_mappings=extract_result.to_json(),
+            mapping=extract_result.to_json(),
             save_path=output_svg,
             save_result=True,
         )
@@ -747,7 +747,7 @@ class TestExtractorInjectorE2E:
         injector = SVGTranslationInjector()
         result = injector.inject(
             inject_file=target_svg,
-            all_mappings=data,
+            mapping=data,
             save_path=output_svg,
             save_result=True,
         )

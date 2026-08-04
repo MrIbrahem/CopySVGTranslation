@@ -50,7 +50,7 @@ class Testinject:
         _result = inject_file_and_save(
             inject_file=file,
             save_path=file,
-            all_mappings=data,
+            mapping=data,
             pretty_print=False,
         )
         file_text = file.read_text(encoding="utf-8")
@@ -134,7 +134,7 @@ class Testinject:
         _result = inject_file_and_save(
             inject_file=file,
             save_path=file,
-            all_mappings=data,
+            mapping=data,
             overwrite=True,
             pretty_print=True,
         )

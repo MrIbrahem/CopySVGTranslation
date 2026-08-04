@@ -30,7 +30,7 @@ def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path) -> None:
 
     tree, stats = inject_file_and_save(
         inject_file=target_svg,
-        all_mappings=translations,
+        mapping=translations,
         save_path=output_file,
         return_stats=True,
     )
@@ -50,7 +50,7 @@ def test_inject_without_save_path(tmp_path: Path, target_svg: Path) -> None:
 
     tree, stats = inject_file_tree(
         inject_file=target_svg,
-        all_mappings=translations,
+        mapping=translations,
         save_result=False,
         return_stats=True,
     )
@@ -65,7 +65,7 @@ def test_inject_returns_stats(tmp_path: Path, target_svg: Path) -> None:
 
     result = inject_file_tree(
         inject_file=target_svg,
-        all_mappings=translations,
+        mapping=translations,
         return_stats=True,
     )
 
@@ -86,7 +86,7 @@ def test_inject_without_stats(tmp_path: Path, target_svg: Path) -> None:
 
     result = inject_file_tree(
         inject_file=target_svg,
-        all_mappings=translations,
+        mapping=translations,
         return_stats=False,
     )
 
@@ -170,7 +170,7 @@ def test_inject_with_empty_translations(tmp_path: Path, target_svg: Path) -> Non
 
     tree, stats = inject_file_tree(
         inject_file=target_svg,
-        all_mappings=empty_translations,
+        mapping=empty_translations,
         save_result=False,
         return_stats=True,
     )
@@ -247,7 +247,7 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
     output1.mkdir()
     tree1, stats1 = inject_file_and_save(
         inject_file=target_svg,
-        all_mappings=translations,
+        mapping=translations,
         save_path=output1 / target_svg.name,
         return_stats=True,
     )
@@ -257,7 +257,7 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path) -> None:
     output2.mkdir()
     tree2, stats2 = inject_file_and_save(
         inject_file=target_svg,
-        all_mappings=translations,
+        mapping=translations,
         save_path=output2 / target_svg.name,
         return_stats=True,
     )

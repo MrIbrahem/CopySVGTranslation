@@ -41,7 +41,7 @@ class TestInjectEdgeCases(TestSetup):
 
         result, stats = inject_file_tree(
             inject_file=svg_path,
-            all_mappings=mappings,
+            mapping=mappings,
             return_stats=True,
         )
 
@@ -60,7 +60,7 @@ class TestInjectEdgeCases(TestSetup):
 
         result = inject_file_tree(
             inject_file=svg_path,
-            all_mappings=mappings,
+            mapping=mappings,
             case_insensitive=False,
         )
 
@@ -79,7 +79,7 @@ class TestInjectEdgeCases(TestSetup):
 
         inject_file_and_save(
             inject_file=svg_path,
-            all_mappings=mappings,
+            mapping=mappings,
             save_path=_output_file,
         )
 
@@ -98,7 +98,7 @@ class TestInjectEdgeCases(TestSetup):
 
         inject_file_tree(
             inject_file=svg_path,
-            all_mappings=mappings,
+            mapping=mappings,
             save_path=_output_file,
             save_result=False,
         )

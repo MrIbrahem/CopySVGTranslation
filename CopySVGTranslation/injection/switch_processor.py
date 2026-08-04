@@ -69,11 +69,11 @@ class SwitchProcessor:
         if not default_texts or default_node is None:
             return
 
-        all_mappings = self.enrich_all_mappings(mapping, default_texts)
+        mapping = self.enrich_all_mappings(mapping, default_texts)
 
         # Enrich mapping with year-title logic
         # Determine translations for each text line
-        available_translations = self.get_available_translations(default_texts, all_mappings)
+        available_translations = self.get_available_translations(default_texts, mapping)
 
         if not available_translations:
             return
@@ -103,7 +103,7 @@ class SwitchProcessor:
                 continue
 
             # Create node
-            new_node = self.create_node(default_node, all_mappings, lang)
+            new_node = self.create_node(default_node, mapping, lang)
             stats.inserted_translations += 1
             switch_element.append(new_node)
 
@@ -141,20 +141,20 @@ class SwitchProcessor:
         all_mappings_title_new = mapping.title_new
         new_titles_translations = get_new_titles_translations(all_mappings_title_new, default_texts)
 
-        all_mappings = dict(mapping.new)
+        mapping = dict(mapping.new)
         for key, translations in new_titles_translations.items():
-            all_mappings.setdefault(key, {}).update(translations)
-        return all_mappings
+            mapping.setdefault(key, {}).update(translations)
+        return mapping
 
     # -------------
     #
     # -------------
-    def get_available_translations(self, default_texts, all_mappings):
+    def get_available_translations(self, default_texts, mapping):
         available_translations = {}
         for text in default_texts:
             key = text.lower() if self.config.case_insensitive else text
-            if key in all_mappings:
-                available_translations[key] = all_mappings[key]
+            if key in mapping:
+                available_translations[key] = mapping[key]
             else:
                 logger.debug(f"No mapping for '{key}'")
         return available_translations
@@ -171,7 +171,7 @@ class SwitchProcessor:
     # -------------
     # node functions
     # -------------
-    def create_node(self, node, all_mappings, lang) -> etree.Element:
+    def create_node(self, node, mapping, lang) -> etree.Element:
         new_node = etree.Element(node.tag, attrib=node.attrib)
         new_node.set("systemLanguage", lang)
         original_id = node.get("id")
@@ -186,7 +186,7 @@ class SwitchProcessor:
             for tspan in tspans:
                 new_tspan = etree.Element(tspan.tag, attrib=tspan.attrib)
 
-                translated = self.get_key_lang(tspan.text, lang, all_mappings, normalize=True)
+                translated = self.get_key_lang(tspan.text, lang, mapping, normalize=True)
                 new_tspan.text = translated or ""
 
                 # Generate unique ID for tspan if needed
@@ -198,7 +198,7 @@ class SwitchProcessor:
                 new_node.append(new_tspan)
 
         else:
-            translated = self.get_key_lang(node.text, lang, all_mappings, normalize=True)
+            translated = self.get_key_lang(node.text, lang, mapping, normalize=True)
             new_node.text = translated or ""
 
         return new_node

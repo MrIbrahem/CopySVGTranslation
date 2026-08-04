@@ -28,7 +28,7 @@ def generate_unique_id(base_id: str, lang: str, existing_ids: set[str]) -> str:
 
 def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
     """Load and merge translation mapping JSON files into a single dictionary."""
-    all_mappings: dict = {}
+    mapping: dict = {}
 
     for mapping_file in mapping_files:
         mapping_path = Path(str(mapping_file))
@@ -45,11 +45,11 @@ def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
             continue
 
         for key, value in mappings.items():
-            all_mappings.setdefault(key, {}).update(value)
+            mapping.setdefault(key, {}).update(value)
 
         logger.debug("Loaded mappings from %s, entries: %s", mapping_path, len(mappings))
 
-    return all_mappings
+    return mapping
 
 
 __all__ = [

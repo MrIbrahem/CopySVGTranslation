@@ -145,19 +145,19 @@ class TestBoth:
         assert result == {"Elections": {"ss": "Lukhetfo lwa-", "es": "Elecciones de"}}
 
     def test_get_titles_translations_basic(self):
-        all_mappings = {"COVID-19 pandemic": {"en": "COVID-19 pandemic", "es": "Pandemia de COVID-19"}}
+        _mapping = {"COVID-19 pandemic": {"en": "COVID-19 pandemic", "es": "Pandemia de COVID-19"}}
         default_texts = ["COVID-19 pandemic 2020"]
-        result = get_titles_translations(all_mappings, default_texts)
+        result = get_titles_translations(_mapping, default_texts)
         assert "COVID-19 pandemic 2020" in result
         assert result["COVID-19 pandemic 2020"]["es"] == "Pandemia de COVID-19 2020"
 
     def test_get_titles_translations_multiple_years(self):
-        all_mappings = {
+        _mapping = {
             "Elections": {"ss": "Lukhetfo", "es": "Elecciones"},
             "Pandemic": {"ar": "جائحة", "es": "Pandemia"},
         }
         texts = ["Elections 2019", "Pandemic 2020"]
-        result = get_titles_translations(all_mappings, texts)
+        result = get_titles_translations(_mapping, texts)
         assert result["Pandemic 2020"]["es"] == "Pandemia 2020"
         assert result["Pandemic 2020"]["ar"] == "جائحة 2020"
         assert result["Elections 2019"]["ss"] == "Lukhetfo 2019"

@@ -78,7 +78,7 @@ class SVGTranslationInjector:
     def inject(
         self,
         inject_file: Path | str,
-        all_mappings: Mapping | None = None,
+        mapping: TranslationMapping | dict,
         *,
         save_path: Path | None = None,
         save_result: bool = False,
@@ -95,7 +95,7 @@ class SVGTranslationInjector:
             result.new_stats.error = "File does not exist"
             return result
 
-        if not all_mappings:
+        if not mapping:
             logger.error("No valid mappings found")
             result.new_stats.error = "No valid mappings found"
             return result
@@ -123,7 +123,7 @@ class SVGTranslationInjector:
         self.id_manager.register_many(root.xpath("//@id"))
 
         # 4. Process every switch
-        mapping_obj = TranslationMapping.from_any(all_mappings)
+        mapping_obj = TranslationMapping.from_any(mapping)
         self.work_on_switches(
             root=root,
             mapping=mapping_obj,
@@ -168,10 +168,6 @@ class SVGTranslationInjector:
 
         if existing_ids:
             self.id_manager.register_many(existing_ids)
-        else:
-            # Collect all existing IDs to ensure uniqueness
-            # existing_ids = {elem.get('id') for elem in root.xpath('//*[@id]') if elem.get('id')}
-            existing_ids = set(root.xpath("//@id"))
 
         # Process every switch
         switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})

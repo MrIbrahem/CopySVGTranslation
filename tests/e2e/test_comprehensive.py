@@ -16,14 +16,14 @@ class TestInjector:
     """Test cases for injection functions."""
 
     def test_inject_with_all_mappings_parameter(self, temp_dir):
-        """Test inject using all_mappings parameter."""
+        """Test inject using mapping parameter."""
         svg_path = temp_dir / "test.svg"
         svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="text1"><tspan>Hello</tspan></text></switch></svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
         tree, stats = inject_file_tree(
             inject_file=svg_path,
-            all_mappings=mappings,
+            mapping=mappings,
             return_stats=True,
         )
         assert tree is not None
@@ -39,7 +39,7 @@ class TestInjector:
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
         tree = inject_file_and_save(
             inject_file=svg_path,
-            all_mappings=mappings,
+            mapping=mappings,
             save_path=out_dir / "test.svg",
         )
         assert tree is not None
@@ -53,7 +53,7 @@ class TestInjector:
         mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
         tree, stats = inject_file_tree(
             inject_file=svg_path,
-            all_mappings=mappings,
+            mapping=mappings,
             case_insensitive=False,
             return_stats=True,
         )
@@ -89,7 +89,7 @@ class TestEdgeCases:
         )
         result = inject_file_tree(
             inject_file=svg,
-            all_mappings={},
+            mapping={},
         )
         assert result is None
 
@@ -103,7 +103,7 @@ class TestEdgeCases:
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
         result = inject_file_tree(
             inject_file=svg,
-            all_mappings=mappings,
+            mapping=mappings,
             return_stats=False,
         )
         assert result is not None
