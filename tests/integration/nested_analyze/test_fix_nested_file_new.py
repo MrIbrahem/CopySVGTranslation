@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.nested_analyze.find_nested_new import fix_nested_file, match_nested_tags
+from CopySVGTranslation.nested_analyze.find_nested_new import fix_nested_file_new, match_nested_tags
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -32,7 +32,7 @@ def test_match_and_fix_2(temp_dir: Path):
     """
     p = _write_svg(temp_dir, text, name="testx.svg")
     before = len(match_nested_tags(p))
-    fixed = fix_nested_file(p)
+    fixed = fix_nested_file_new(p)
     assert fixed is True
 
     after = len(match_nested_tags(p))
@@ -70,7 +70,7 @@ def test_match_and_fix_to_do(temp_dir: Path):
     """
     p = _write_svg(temp_dir, text, name="testx.svg")
     before = len(match_nested_tags(p))
-    fixed = fix_nested_file(p)
+    fixed = fix_nested_file_new(p)
     assert fixed is True
 
     after = len(match_nested_tags(p))
@@ -122,7 +122,7 @@ def test_match_and_fix_3(temp_dir: Path):
     """
     p = _write_svg(temp_dir, text, name="testx.svg")
     before = len(match_nested_tags(p))
-    fixed = fix_nested_file(p)
+    fixed = fix_nested_file_new(p)
     assert fixed is True
 
     after = len(match_nested_tags(p))
