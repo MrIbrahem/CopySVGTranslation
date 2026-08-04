@@ -80,8 +80,9 @@ v2.1/
 │       └── utils.md
 ├── tests/
 │   ├── README.md
-│   └── test_extractor_class.py
-├── pyproject.toml
-└── tree.md
+│   └── test_svg_extractor_class.py
+├── _pyproject.toml
+├── tree.md
+└── v2.1_review.md
 
 ```
