@@ -97,10 +97,11 @@ class TestAssignIds:
         assert text.get("id") == "trsvg1"
         assert "trsvg1" in ctx.id_manager.existing_ids
 
-    def test_missing_text_id_not_assigned_when_config_disabled(self, assign_ids_step):
+    def test_missing_text_id_not_assigned_when_config_disabled(self):
         root = make_root("<text>hello</text>")
-        ctx = make_ctx(root=root, config=SimpleNamespace(assign_missing_ids=False))
+        ctx = make_ctx(root=root)
 
+        assign_ids_step = AssignIds(config=SimpleNamespace(assign_missing_ids=False))
         assign_ids_step.execute(ctx)
 
         text = root.find(f".//{{{SVG_NS}}}text")
