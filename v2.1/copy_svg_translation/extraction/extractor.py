@@ -34,31 +34,6 @@ class SVGTranslationExtractor:
         self.year_handler = YearTitleHandler(self.config)
 
     # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
-    def extract(self, path: Path | str) -> TranslationMapping:
-        """
-        Load the SVG and return a TranslationMapping.
-        Raises on fatal I/O or parse errors; returns an empty mapping
-        when no switches/translations are found.
-        """
-        doc = SvgDocument.load(path, config=self.config)
-        return self.extract_from_root(doc.root)
-
-    def extract_from_root(self, root: etree._Element) -> TranslationMapping:
-        mapping = TranslationMapping()
-        switches = root.xpath("//svg:switch", namespaces=SVG_NS)
-        logger.debug("Found %d switch elements", len(switches))
-
-        for switch_el in switches:
-            self._process_switch(SwitchNode(switch_el), mapping)
-
-        if self.config.enable_year_titles and mapping.new:
-            self.year_handler.build_templates(mapping)
-
-        return mapping
-
-    # ------------------------------------------------------------------
     # Per-switch logic
     # ------------------------------------------------------------------
     def _process_switch(
@@ -109,3 +84,34 @@ class SVGTranslationExtractor:
                     m.translated_text,
                     case_insensitive=False,  # key already normalized
                 )
+
+    def extract_from_root(self, root: etree._Element) -> TranslationMapping:
+        mapping = TranslationMapping()
+        switches = root.xpath("//svg:switch", namespaces=SVG_NS)
+        logger.debug("Found %d switch elements", len(switches))
+
+        for switch_el in switches:
+            self._process_switch(SwitchNode(switch_el), mapping)
+
+        if self.config.enable_year_titles and mapping.new:
+            self.year_handler.build_templates(mapping)
+
+        return mapping
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+    def extract(self, path: Path | str) -> TranslationMapping:
+        """
+        Load the SVG and return a TranslationMapping.
+        Raises on fatal I/O or parse errors; returns an empty mapping
+        when no switches/translations are found.
+        """
+        doc = SvgDocument.load(path, config=self.config)
+        return self.extract_from_root(doc.root)
+
+
+
+__all__ = [
+    "SVGTranslationExtractor",
+]

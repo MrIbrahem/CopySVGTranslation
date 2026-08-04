@@ -9,7 +9,9 @@ from typing import Any
 
 from lxml import etree
 
+from ..config import TranslationConfig
 from ..titles_workers import make_new_title_translations, make_title_translations
+from ..io.svg_document import SvgDocument
 from ..utils import normalize_text
 
 logger = logging.getLogger(__name__)
@@ -34,7 +36,11 @@ class SVGTranslationExtractor:
     Extract translations from an SVG into a TranslationMapping.
     """
 
-    def __init__(self, case_insensitive: bool = True):
+    def __init__(
+        self,
+        config: TranslationConfig | None = None,
+        case_insensitive: bool = True,
+    ) -> None:
         """
         Parameters:
             source_file (str | Path): Path to the SVG file to process.
@@ -42,6 +48,11 @@ class SVGTranslationExtractor:
                 case-insensitively (lowercased).
         """
         self.case_insensitive = case_insensitive
+
+        self.config = config or TranslationConfig(
+            case_insensitive=case_insensitive,
+        )
+
 
     def get_english_default_texts(self, text_elements):
         """
@@ -146,6 +157,9 @@ class SVGTranslationExtractor:
 
         return switch_translations
 
+    # ------------------------------------------------------------------
+    # Per-switch logic
+    # ------------------------------------------------------------------
     def process_switches(self, root: etree.Element, translations) -> None:
         # Find all switch elements
         switches = root.xpath("//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"})
@@ -172,6 +186,15 @@ class SVGTranslationExtractor:
             translations.title = make_title_translations(translations.new)
             translations.title_new = make_new_title_translations(translations.new)
 
+    def extract_from_root(self, root: etree._Element) -> ExtractorData:
+        mapping = ExtractorData()
+        self.process_switches(root, mapping)
+
+        return mapping
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
     def extract(self, path: Path | str) -> ExtractorData:
         """
         Extract translation strings from an SVG file into a structured dictionary.
@@ -188,31 +211,24 @@ class SVGTranslationExtractor:
             translations and a "title" mapping), or None if the file does
             not exist or could not be parsed.
         """
-        source_file = Path(str(path))
-        # Reset state to prevent accumulation across calls
         translations = ExtractorData()
+        source_file = Path(str(path))
 
-        if not source_file.exists():
-            logger.error(f"SVG file not found: {source_file}")
-            translations.error = "File not found"
-            return translations
-
-        logger.debug(f"Extracting translations from {source_file}")
-
-        # Parse SVG as XML
-        parser = etree.XMLParser(remove_blank_text=True)
+        logger.debug(f"Extracting translations from {path}")
 
         try:
-            tree = etree.parse(str(source_file), parser)
+            doc = SvgDocument.load(path, config=self.config)
+        except FileNotFoundError:
+            logger.error(f"SVG file not found: {path}")
+            translations.error = "File not found"
+            return translations
         except (etree.XMLSyntaxError, OSError) as exc:
             logger.error(f"Failed to parse SVG file {source_file}: {exc}")
             translations.error = "Failed to parse SVG file"
             return translations
 
-        root = tree.getroot()
+        return self.extract_from_root(doc.root)
 
-        self.process_switches(root, translations)
-        return translations
 
 
 __all__ = [
