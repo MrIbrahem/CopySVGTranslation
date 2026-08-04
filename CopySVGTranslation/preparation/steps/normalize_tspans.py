@@ -47,8 +47,9 @@ class WrapTspans(PreparationStep):
             _translatable_nodes = self._wrap_loose_text(text_el)
             ctx.translatable_nodes.extend(_translatable_nodes)
 
-        self._clean_ids_and_remove_empty_nodes(ctx)
+        # _rebuild_translatable_nodes before _clean_ids_and_remove_empty_nodes
         self._rebuild_translatable_nodes(ctx)
+        self._clean_ids_and_remove_empty_nodes(ctx)
 
     def _wrap_loose_text(self, text_el: etree._Element) -> None:
         # If there are no children, we wrap the entire text
@@ -107,8 +108,10 @@ class WrapTspans(PreparationStep):
                         node_id = None
                     else:
                         ctx.id_manager.register(node_id)
+
             # remove empty nodes with no children and no text
-            if (not list(node)) and (not (node.text and node.text.strip())):
+            # if (not list(node)) and (not (node.text and node.text.strip())):
+            if (not list(node)) and (not node.text):
                 node_id = node.get("id")
                 if node_id:
                     ctx.id_manager.existing_ids.discard(node_id)
