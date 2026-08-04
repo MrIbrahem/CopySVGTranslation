@@ -47,7 +47,7 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 
 ### Core Modules
 
--   **`CopySVGTranslation/extraction/svg_extractor.py`**: Contains `SVGTranslationExtractor` class and `ExtractorData` dataclass. Parses SVG files and extracts translation pairs from `<switch>` elements. Collects default (English) text and corresponding translations from sibling `<text>` elements with `systemLanguage` attributes.
+-   **`CopySVGTranslation/extraction/extractor.py`**: Contains `SVGTranslationExtractor` class and `ExtractorData` dataclass. Parses SVG files and extracts translation pairs from `<switch>` elements. Collects default (English) text and corresponding translations from sibling `<text>` elements with `systemLanguage` attributes.
 
 -   **`CopySVGTranslation/extraction/worker.py`**: Contains the deprecated `extract()` function — a thin wrapper around `SVGTranslationExtractor` for backward compatibility.
 

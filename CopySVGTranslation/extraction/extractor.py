@@ -1,5 +1,7 @@
 """Utilities for extracting translation data from SVG files."""
 
+from __future__ import annotations
+
 import logging
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -28,7 +30,9 @@ class ExtractorData:
 
 
 class SVGTranslationExtractor:
-    """Extracts translation data from an SVG file."""
+    """
+    Extract translations from an SVG into a TranslationMapping.
+    """
 
     def __init__(self, source_file: str | Path, case_insensitive: bool = True):
         """

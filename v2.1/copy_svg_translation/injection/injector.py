@@ -1,4 +1,5 @@
-# injection/injector.py
+"""Helpers for injecting translations into SVG files."""
+
 from __future__ import annotations
 
 import logging
@@ -58,9 +59,7 @@ class SVGTranslationInjector:
         self.id_manager.register_many(root.xpath("//@id"))
 
         # 4. Process every switch
-        switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})
-        for switch in switches:
-            self.switch_processor.process(switch, mapping, stats)
+        self.work_on_switches(root=root, mapping=all_mappings, stats=stats)
 
         # 5. Final housekeeping
         # self._finalize_switches(root)
@@ -74,6 +73,11 @@ class SVGTranslationInjector:
             self._save(tree, save_path)
 
         return tree, stats
+
+    def work_on_switches(self, root, mapping, stats):
+        switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})
+        for switch in switches:
+            self.switch_processor.process(switch, mapping, stats)
 
     def prepare(self, svg_path: Path | str) -> etree._ElementTree:
         """Public helper used by service.prepare_only()."""

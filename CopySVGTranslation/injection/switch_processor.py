@@ -6,6 +6,7 @@ from collections.abc import Mapping
 
 from lxml import etree
 
+from ..result import InjectorStats
 from ..titles_workers import get_new_titles_translations
 from ..utils import (
     extract_text_from_node,
@@ -14,7 +15,6 @@ from ..utils import (
 from ..utils.injection_utils import (
     generate_unique_id,
 )
-from .objects import InjectorStats
 
 logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"

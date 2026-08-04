@@ -14,11 +14,11 @@ from ..exceptions import (
     SvgStructureError,
 )
 from ..preparation import SvgPreparationPipeline
+from ..result import InjectorData, InjectorStats
 from ..utils import (
     sort_switch_texts,
     tree_languages,
 )
-from .objects import InjectorData, InjectorStats
 from .switch_processor import SwitchProcessor
 
 logger = logging.getLogger(__name__)
@@ -56,11 +56,14 @@ class SVGTranslationInjector:
     def work_on_switches(
         self,
         root: etree._Element,
-        mappings: Mapping,
+        mapping: Mapping,
         existing_ids: set[str] | None = None,
+        stats: InjectorStats | None = None,
     ) -> None:
         """Process ``<switch>`` elements and insert or update translations."""
         svg_ns = {"svg": "http://www.w3.org/2000/svg"}
+        if not stats:
+            stats = self.new_stats
 
         if not existing_ids:
             # Collect all existing IDs to ensure uniqueness
@@ -71,7 +74,7 @@ class SVGTranslationInjector:
         switches = root.xpath("//svg:switch", namespaces=svg_ns)
         logger.debug(f"Found {len(switches)} switch elements")
         for switch in switches:
-            self.switch_processor.process(switch, mappings, self.new_stats, existing_ids)
+            self.switch_processor.process(switch, mapping, self.new_stats, existing_ids)
 
     def _parse_svg(self, inject_path) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
         try:
@@ -94,7 +97,7 @@ class SVGTranslationInjector:
 
         return None, None
 
-    def _fix_old_switches(self, root) -> None:
+    def _finalize_switches(self, root) -> None:
         # Fix old <svg:switch> tags if present
         for elem in root.findall(".//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"}):
             elem.tag = "switch"
@@ -146,9 +149,10 @@ class SVGTranslationInjector:
         stats.languages_before = sorted(before_languages)
 
         # 4. Process every switch
-        self.work_on_switches(root=root, mappings=all_mappings)
+        self.work_on_switches(root=root, mapping=all_mappings, stats=stats)
 
-        self._fix_old_switches(root=root)
+        # 5. Final housekeeping
+        self._finalize_switches(root)
 
         # 6. Languages after + stats
         after_languages = tree_languages(tree)

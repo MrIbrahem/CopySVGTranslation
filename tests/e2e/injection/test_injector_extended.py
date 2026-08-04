@@ -17,7 +17,7 @@ from CopySVGTranslation.injection.injector import SVGTranslationInjector
 def work_on_switches(
     root: etree._Element,
     existing_ids: set[str],
-    mappings: Mapping,
+    mapping: Mapping,
     case_insensitive: bool = True,
     overwrite: bool = False,
 ) -> dict:
@@ -25,7 +25,7 @@ def work_on_switches(
     injector = SVGTranslationInjector(case_insensitive=case_insensitive, overwrite=overwrite)
     injector.work_on_switches(
         root=root,
-        mappings=mappings,
+        mapping=mapping,
         existing_ids=existing_ids,
     )
     stats = injector.result.new_stats.to_json()
@@ -59,9 +59,9 @@ class TestWorkOnSwitches(TestSetup):
         </svg>"""
         root = etree.fromstring(svg_content)
         existing_ids = {"text1"}
-        mappings = {"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}}
+        mapping = {"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}}
 
-        stats = work_on_switches(root, existing_ids, mappings, case_insensitive=True)
+        stats = work_on_switches(root, existing_ids, mapping, case_insensitive=True)
 
         assert stats["processed_switches"] == 1
         assert stats["inserted_translations"] == 2
@@ -76,9 +76,9 @@ class TestWorkOnSwitches(TestSetup):
         </svg>"""
         root = etree.fromstring(svg_content)
         existing_ids = {"text1", "text1-ar"}
-        mappings = {"new": {"hello": {"ar": "مرحبا جديد", "fr": "Bonjour"}}}
+        mapping = {"new": {"hello": {"ar": "مرحبا جديد", "fr": "Bonjour"}}}
 
-        stats = work_on_switches(root, existing_ids, mappings, overwrite=False)
+        stats = work_on_switches(root, existing_ids, mapping, overwrite=False)
 
         assert stats["skipped_translations"] == 1
         assert stats["inserted_translations"] == 1
@@ -93,9 +93,9 @@ class TestWorkOnSwitches(TestSetup):
         </svg>"""
         root = etree.fromstring(svg_content)
         existing_ids = {"text1", "text1-ar"}
-        mappings = {"new": {"hello": {"ar": "New"}}}
+        mapping = {"new": {"hello": {"ar": "New"}}}
 
-        stats = work_on_switches(root, existing_ids, mappings, overwrite=True)
+        stats = work_on_switches(root, existing_ids, mapping, overwrite=True)
 
         assert stats["updated_translations"] == 1
 
@@ -108,12 +108,12 @@ class TestWorkOnSwitches(TestSetup):
         </svg>"""
         root = etree.fromstring(svg_content)
         existing_ids = {"text1"}
-        mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
+        mapping = {"new": {"Hello": {"ar": "مرحبا"}}}
 
         stats = work_on_switches(
             root,
             existing_ids,
-            mappings,
+            mapping,
             case_insensitive=False,
         )
 
@@ -128,9 +128,9 @@ class TestWorkOnSwitches(TestSetup):
         </svg>"""
         root = etree.fromstring(svg_content)
         existing_ids = {"text1"}
-        mappings = {"title": {"Population ": {"ar": "السكان ", "fr": "Population "}}, "new": {}}
+        mapping = {"title": {"Population ": {"ar": "السكان ", "fr": "Population "}}, "new": {}}
 
-        stats = work_on_switches(root, existing_ids, mappings, case_insensitive=True)
+        stats = work_on_switches(root, existing_ids, mapping, case_insensitive=True)
 
         # Year suffix logic should be applied
         assert stats["processed_switches"] >= 0

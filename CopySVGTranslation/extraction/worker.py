@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Any
 
-from .svg_extractor import SVGTranslationExtractor
+from .extractor import SVGTranslationExtractor
 
 
 def extract(

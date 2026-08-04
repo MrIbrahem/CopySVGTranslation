@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from CopySVGTranslation.extraction.svg_extractor import (
+from CopySVGTranslation.extraction.extractor import (
     ExtractorData,
     SVGTranslationExtractor,
 )

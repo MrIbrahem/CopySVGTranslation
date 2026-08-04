@@ -54,10 +54,10 @@ class SvgPreparationPipeline:
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
-    def run(self, source_file: Path) -> tuple[etree._ElementTree[etree._Element], etree._Element]:
+    def run(self, path: Path) -> tuple[etree._ElementTree[etree._Element], etree._Element]:
         """Run all preparation steps and return the resulting tree and root."""
         # Reset per-run state to ensure idempotent behavior
-        path = Path(str(source_file))
+        path = Path(str(path))
 
         self.ctx = PreparationContext(
             path=path,
@@ -76,7 +76,8 @@ def make_translation_ready(source_file: Path | str) -> tuple[etree._ElementTree,
     backward compatibility with existing callers.
     """
     config = TranslationConfig()
-    return SvgPreparationPipeline(config).run(source_file)
+    preparer = SvgPreparationPipeline(config)
+    return preparer.run(path=source_file)
 
 
 __all__ = [

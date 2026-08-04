@@ -1,4 +1,5 @@
-# extraction/extractor.py
+"""Utilities for extracting translation data from SVG files."""
+
 from __future__ import annotations
 
 import logging

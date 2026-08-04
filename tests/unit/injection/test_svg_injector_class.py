@@ -9,7 +9,7 @@ from pathlib import Path
 from lxml import etree
 
 from CopySVGTranslation.injection.injector import SVGTranslationInjector
-from CopySVGTranslation.injection.objects import InjectorData, InjectorStats
+from CopySVGTranslation.result import InjectorData, InjectorStats
 
 SVG_NS = "http://www.w3.org/2000/svg"
 SVG_NSMAP = {"svg": SVG_NS}
@@ -584,7 +584,7 @@ class TestWorkOnSwitches:
         inj = SVGTranslationInjector()
         existing_ids = set(root.xpath("//@id"))
 
-        inj.work_on_switches(root, mappings={"new": {"hello": {"ar": "مرحبا"}}}, existing_ids=existing_ids)
+        inj.work_on_switches(root, mapping={"new": {"hello": {"ar": "مرحبا"}}}, existing_ids=existing_ids)
 
         ar_nodes = root.xpath('.//svg:text[@systemLanguage="ar"]', namespaces=SVG_NSMAP)
         assert len(ar_nodes) == 1
@@ -602,7 +602,7 @@ class TestWorkOnSwitches:
 
         inj.work_on_switches(
             root,
-            mappings={"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}},
+            mapping={"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}},
             existing_ids=existing_ids,
         )
 
@@ -625,7 +625,7 @@ class TestWorkOnSwitches:
 
         inj.work_on_switches(
             root,
-            mappings={"new": {"hello": {"ar": "مرحبا"}}},
+            mapping={"new": {"hello": {"ar": "مرحبا"}}},
             existing_ids=existing_ids,
         )
 
@@ -651,7 +651,7 @@ class TestWorkOnSwitches:
         )
         inj = SVGTranslationInjector()
 
-        inj.work_on_switches(root, mappings={"new": {"hello": {"ar": "مرحبا"}}})
+        inj.work_on_switches(root, mapping={"new": {"hello": {"ar": "مرحبا"}}})
 
         # No new nodes should be added
         ar_nodes = root.xpath('.//svg:text[@systemLanguage="ar"]', namespaces=SVG_NSMAP)
@@ -668,7 +668,7 @@ class TestExtractorInjectorE2E:
     """End-to-end tests using SVGTranslationExtractor and SVGTranslationInjector together."""
 
     def test_extract_then_inject(self, tmp_path: Path):
-        from CopySVGTranslation.extraction.svg_extractor import SVGTranslationExtractor
+        from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor
 
         # Source SVG with translations
         source_inner = """
@@ -722,7 +722,7 @@ class TestExtractorInjectorE2E:
         assert len(root.xpath('.//svg:text[@systemLanguage="fr"]', namespaces=SVG_NSMAP)) == 1
 
     def test_extract_inject_preserves_content(self, tmp_path: Path):
-        from CopySVGTranslation.extraction.svg_extractor import SVGTranslationExtractor
+        from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor
 
         source_inner = """
             <switch>

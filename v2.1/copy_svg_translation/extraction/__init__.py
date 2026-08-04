@@ -1,4 +1,5 @@
-# extraction/__init__.py
+"""Extraction phase helpers for CopySVGTranslation."""
+
 from .extractor import SVGTranslationExtractor
 from .strategies import (
     ByPositionStrategy,
