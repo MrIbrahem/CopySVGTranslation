@@ -100,3 +100,8 @@ class SplitLanguages(PreparationStep):
         # Children
         for child in element:
             self._reassign_ids(child, ctx)
+
+
+__all__ = [
+    "SplitLanguages",
+]

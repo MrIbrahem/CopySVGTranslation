@@ -58,3 +58,8 @@ class ValidateStructure(PreparationStep):
             text_content = "".join(text_el.itertext())
             if "$" in text_content:
                 raise SvgTextContainsDollarError(code="structure-error-text-contains-dollar", element=text_el)
+
+
+__all__ = [
+    "ValidateStructure",
+]

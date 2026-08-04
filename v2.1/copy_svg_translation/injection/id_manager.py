@@ -49,3 +49,8 @@ class IdManager:
 
     def allocate_for_tspan(self, original_id: str | None, lang: str) -> str:
         return self.allocate_clone(original_id, lang)
+
+
+__all__ = [
+    "IdManager",
+]

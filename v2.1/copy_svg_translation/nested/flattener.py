@@ -148,3 +148,8 @@ class NestedTspanFlattener:
                 parent.remove(tspan)
                 for i, sibling in enumerate(new_siblings):
                     parent.insert(index + i, sibling)
+
+
+__all__ = [
+    "NestedTspanFlattener",
+]

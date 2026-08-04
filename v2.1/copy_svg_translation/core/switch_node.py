@@ -69,3 +69,8 @@ class SwitchNode:
             self.element.remove(n.element)
         for n in ordered:
             self.element.append(n.element)
+
+
+__all__ = [
+    "SwitchNode",
+]

@@ -113,3 +113,9 @@ class TranslationMapping:
             "tspans_by_id": self.tspans_by_id,
             "meta": self.meta,
         }
+
+
+__all__ = [
+    "TranslationEntry",
+    "TranslationMapping",
+]

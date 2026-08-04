@@ -24,3 +24,8 @@ class ReorderTexts(PreparationStep):
         switches = ctx.root.findall(f".//{{{SVG_NS}}}switch")
         for switch in switches:
             sort_switch_children(switch, put_fallback_last=True)
+
+
+__all__ = [
+    "ReorderTexts",
+]

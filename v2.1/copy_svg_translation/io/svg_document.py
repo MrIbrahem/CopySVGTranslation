@@ -120,3 +120,8 @@ class SvgDocument:
     def findall(self, tag: str):
         """Find all elements with the given local tag name in the SVG namespace."""
         return self.root.findall(f".//{{{SVG_NS}}}{tag}")
+
+
+__all__ = [
+    "SvgDocument",
+]

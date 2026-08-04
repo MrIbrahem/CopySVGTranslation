@@ -278,3 +278,8 @@ class SVGTranslationService:
             xml_declaration=True,
             pretty_print=pretty,
         )
+
+
+__all__ = [
+    "SVGTranslationService",
+]

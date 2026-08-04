@@ -82,3 +82,8 @@ class MappingStore:
         """Return the conventional path for a mapping extracted from an SVG."""
         base_dir = self.config.mapping_output_dir or svg_path.parent / "data"
         return base_dir / f"{svg_path.name}.json"
+
+
+__all__ = [
+    "MappingStore",
+]

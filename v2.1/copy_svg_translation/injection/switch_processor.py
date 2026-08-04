@@ -112,3 +112,8 @@ class SwitchProcessor:
 
         # Sort the switch elements deterministically
         switch.reorder(put_fallback_last=True)
+
+
+__all__ = [
+    "SwitchProcessor",
+]

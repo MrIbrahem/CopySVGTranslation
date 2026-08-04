@@ -51,3 +51,8 @@ class NormalizeTspans(PreparationStep):
                 # insert after child
                 idx = text_el.index(child)
                 text_el.insert(idx + 1, new_tspan)
+
+
+__all__ = [
+    "NormalizeTspans",
+]

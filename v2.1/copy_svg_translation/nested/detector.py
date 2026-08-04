@@ -59,3 +59,8 @@ class NestedTspanDetector:
 
     def has_nested(self, root: etree._Element) -> bool:
         return bool(self.find_in_tree(root))
+
+
+__all__ = [
+    "NestedTspanDetector",
+]
