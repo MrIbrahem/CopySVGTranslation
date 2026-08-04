@@ -8,6 +8,7 @@ from pathlib import Path
 
 from lxml import etree
 
+from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.injection.injector import SVGTranslationInjector
 from CopySVGTranslation.result import InjectorData, InjectorStats
 
@@ -141,20 +142,22 @@ class TestSVGTranslationInjectorInit:
     """Tests for SVGTranslationInjector initialization."""
 
     def test_default_parameters(self):
-        inj = SVGTranslationInjector()
-        assert inj.case_insensitive is True
-        assert inj.overwrite is False
-        assert inj.pretty_print is None
+        config = TranslationConfig()
+        inj = SVGTranslationInjector(config)
+        assert inj.config.case_insensitive is True
+        assert inj.config.overwrite is False
+        assert inj.config.pretty_print is None
 
     def test_custom_parameters(self):
-        inj = SVGTranslationInjector(
+        config = TranslationConfig(
             case_insensitive=False,
             overwrite=True,
             pretty_print=False,
         )
-        assert inj.case_insensitive is False
-        assert inj.overwrite is True
-        assert inj.pretty_print is False
+        inj = SVGTranslationInjector(config)
+        assert inj.config.case_insensitive is False
+        assert inj.config.overwrite is True
+        assert inj.config.pretty_print is False
 
     def test_result_initialized(self):
         inj = SVGTranslationInjector()
@@ -254,7 +257,8 @@ class TestSVGTranslationInjectorCaseSensitivity:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(case_insensitive=True)
+        config = TranslationConfig(case_insensitive=True)
+        inj = SVGTranslationInjector(config)
         # Key is lowercase; source text is mixed case
         mappings = {"new": {"hello world": {"ar": "مرحبا بالعالم"}}}
 
@@ -268,9 +272,8 @@ class TestSVGTranslationInjectorCaseSensitivity:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(
-            case_insensitive=False,
-        )
+        config = TranslationConfig(case_insensitive=False)
+        inj = SVGTranslationInjector(config)
         # Key is lowercase; source text is mixed case — should NOT match
         mappings = {"new": {"hello world": {"ar": "مرحبا بالعالم"}}}
 
@@ -284,9 +287,8 @@ class TestSVGTranslationInjectorCaseSensitivity:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(
-            case_insensitive=False,
-        )
+        config = TranslationConfig(case_insensitive=False)
+        inj = SVGTranslationInjector(config)
         mappings = {"new": {"Hello World": {"ar": "مرحبا بالعالم"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
@@ -309,7 +311,8 @@ class TestSVGTranslationInjectorOverwrite:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(overwrite=False)
+        config = TranslationConfig(overwrite=False)
+        inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "New"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
@@ -325,7 +328,8 @@ class TestSVGTranslationInjectorOverwrite:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(overwrite=True)
+        config = TranslationConfig(overwrite=True)
+        inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "New"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
@@ -341,7 +345,8 @@ class TestSVGTranslationInjectorOverwrite:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(overwrite=True)
+        config = TranslationConfig(overwrite=True)
+        inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "New Arabic"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)
@@ -361,7 +366,8 @@ class TestSVGTranslationInjectorOverwrite:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        inj = SVGTranslationInjector(overwrite=False)
+        config = TranslationConfig(overwrite=False)
+        inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "Should skip", "fr": "Should insert"}}}
 
         result = inj.inject(inject_file=svg, all_mappings=mappings)

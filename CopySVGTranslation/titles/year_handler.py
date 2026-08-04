@@ -4,6 +4,9 @@ from __future__ import annotations
 import logging
 import re
 
+from .titles_new import make_new_title_translations
+from .titles import make_title_translations
+
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
 
@@ -63,6 +66,28 @@ class YearTitleHandler:
     # Extraction side
     # ------------------------------------------------------------------
     def build_templates(self, mapping: TranslationMapping) -> None:
+        """
+        Populate mapping.title_new (and optionally mapping.title) from
+        mapping.new.
+
+        Example
+            -------
+            Input (mapping.new):
+            "COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020", ...}
+
+            Output (mapping.title_new):
+            "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}", ...}
+        """
+        if not self.enabled:
+            return
+
+        mapping.title = make_title_translations(mapping.new)
+        mapping.title_new = make_new_title_translations(mapping.new)
+
+    # ------------------------------------------------------------------
+    # Extraction side
+    # ------------------------------------------------------------------
+    def build_templates_new(self, mapping: TranslationMapping) -> None:
         """
         Populate mapping.title_new (and optionally mapping.title) from
         mapping.new.

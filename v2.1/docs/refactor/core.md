@@ -268,6 +268,10 @@ class SwitchNode:
                 return node
         return None
 
+    def default_text_node(self) -> TextNode | None:
+        """Return the default (no systemLanguage) text node, if any."""
+        return self.fallback()
+
     def existing_languages(self) -> set[str]:
         return {n.language for n in self.text_nodes() if n.language}
 

@@ -18,6 +18,8 @@ class IdManager:
         self.existing_ids.update(ids)
 
     def allocate_trsvg(self) -> str:
+        """Allocate a new unique ``trsvg`` identifier."""
+
         while True:
             candidate = f"trsvg{self._trsvg_counter}"
             self._trsvg_counter += 1

@@ -30,56 +30,16 @@ class SVGTranslationInjector:
 
     def __init__(
         self,
-        case_insensitive: bool = True,
-        overwrite: bool = False,
-        pretty_print: bool | None = None,
+        config: TranslationConfig | None = None,
     ) -> None:
         """
-        Parameters:
-            case_insensitive (bool): If True, translation lookups are
-                case-insensitive (keys are lowercased).
-            overwrite (bool): If True, existing language nodes are updated
-                in place instead of being skipped.
         """
-        self.case_insensitive = case_insensitive
-        self.overwrite = overwrite
-        self.pretty_print = pretty_print
         self.result = InjectorData()
         self.new_stats: InjectorStats = self.result.new_stats
-        self.config = TranslationConfig(
-            case_insensitive=case_insensitive,
-            pretty_print=pretty_print,
-            overwrite=overwrite,
-        )
+
+        self.config = config or TranslationConfig()
         self.preparer = SvgPreparationPipeline(self.config)
-        self.switch_processor = SwitchProcessor(self.overwrite, self.case_insensitive)
-
-    def work_on_switches(
-        self,
-        root: etree._Element,
-        mapping: Mapping,
-        existing_ids: set[str] | None = None,
-        stats: InjectorStats | None = None,
-    ) -> None:
-        """Process ``<switch>`` elements and insert or update translations."""
-        if not stats:
-            stats = self.new_stats
-
-        if not existing_ids:
-            # Collect all existing IDs to ensure uniqueness
-            # existing_ids = {elem.get('id') for elem in root.xpath('//*[@id]') if elem.get('id')}
-            existing_ids = set(root.xpath("//@id"))
-
-        # 4. Process every switch
-        switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})
-        logger.debug(f"Found {len(switches)} switch elements")
-        for switch in switches:
-            self.switch_processor.process(
-                switch_element=switch,
-                mapping=mapping,
-                stats=self.new_stats,
-                existing_ids=existing_ids,
-            )
+        self.switch_processor = SwitchProcessor(self.config.overwrite, self.config.case_insensitive)
 
     def _parse_svg(self, inject_path) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
         try:
@@ -165,49 +125,85 @@ class SVGTranslationInjector:
 
         # 6. Languages after + stats
         after_languages = tree_languages(tree)
-        self._update_data(before_languages, after_languages)
+        self._update_data(stats, before_languages, after_languages)
+
+        if not save_result:
+            return self.result
 
         # 7. Save if requested
-        if save_result:
-            self._save(save_path, inject_path.name, tree)
-
-        return self.result
-
-    def _save(
-        self,
-        save_path: Path | None,
-        inject_file_name: str,
-        tree: etree._ElementTree,
-    ) -> None:
         if save_path is None:
             logger.error("save_result is True but no save_path was provided")
             self.new_stats.error = "No target path provided"
-            return
+            return self.result
 
+        self._save(tree, save_path)
+
+        return self.result
+
+    def work_on_switches(
+        self,
+        root: etree._Element,
+        mapping: Mapping,
+        existing_ids: set[str] | None = None,
+        stats: InjectorStats | None = None,
+    ) -> None:
+        """Process ``<switch>`` elements and insert or update translations."""
+        if not stats:
+            stats = self.new_stats
+
+        if not existing_ids:
+            # Collect all existing IDs to ensure uniqueness
+            # existing_ids = {elem.get('id') for elem in root.xpath('//*[@id]') if elem.get('id')}
+            existing_ids = set(root.xpath("//@id"))
+
+        # Process every switch
+        switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})
+        logger.debug("Found %s switch elements", len(switches))
+
+        for switch in switches:
+            self.switch_processor.process(
+                switch_element=switch,
+                mapping=mapping,
+                stats=stats,
+                existing_ids=existing_ids,
+            )
+
+    def prepare(self, svg_path: Path | str) -> etree._ElementTree:
+        """Public helper used by service.prepare_only()."""
+        svg_path = Path(svg_path)
+        tree, _ = self.preparer.run(svg_path)
+        return tree
+
+    def _save(
+        self,
+        tree: etree._ElementTree,
+        save_path: Path,
+    ) -> None:
+        str_save_path = str(save_path)
         try:
             tree.write(
-                str(save_path),
+                str_save_path,
                 encoding="utf-8",
                 xml_declaration=True,
-                pretty_print=self.pretty_print,
+                pretty_print=self.config.pretty_print,
             )
             logger.debug(f"Saved modified SVG to {save_path}")
         except OSError as e:
-            logger.error(f"Failed writing {inject_file_name}: {e}")
-            self.new_stats.error = f"Failed writing {inject_file_name}: {e}"
+            logger.error(f"Failed writing {str_save_path}: {e}")
+            self.new_stats.error = f"Failed writing {str_save_path}: {e}"
             self.result.tree = None
 
-    def _update_data(self, before_languages: set[str], after_languages: set[str]) -> None:
+    def _update_data(self, stats, before_languages: set[str], after_languages: set[str]) -> None:
         new_languages = after_languages - before_languages
 
-        self.new_stats.all_languages = len(after_languages)
-        self.new_stats.new_languages = len(new_languages)
-        self.new_stats.languages_after = sorted(new_languages)
+        stats.all_languages = len(after_languages)
+        stats.new_languages = len(new_languages)
+        stats.languages_after = sorted(new_languages)
 
-        logger.debug(f"Processed {self.new_stats.processed_switches} switches")
-        logger.debug(f"Inserted {self.new_stats.inserted_translations} translations")
-        logger.debug(f"Updated {self.new_stats.updated_translations} translations")
-        logger.debug(f"Skipped {self.new_stats.skipped_translations} existing translations")
+        logger.debug(f"Processed {stats.processed_switches} switches")
+        logger.debug(f"Inserted {stats.inserted_translations} translations")
+        logger.debug(f"Updated {stats.updated_translations} translations")
+        logger.debug(f"Skipped {stats.skipped_translations} existing translations")
 
 
 __all__ = [

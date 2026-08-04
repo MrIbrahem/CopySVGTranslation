@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
+from CopySVGTranslation import TranslationConfig
 from CopySVGTranslation.injection.injector import SVGTranslationInjector
 
 
@@ -22,7 +23,8 @@ def work_on_switches(
     overwrite: bool = False,
 ) -> dict:
     """Process ``<switch>`` elements and insert or update translations."""
-    injector = SVGTranslationInjector(case_insensitive=case_insensitive, overwrite=overwrite)
+    config = TranslationConfig(case_insensitive=case_insensitive, overwrite=overwrite)
+    injector = SVGTranslationInjector(config)
     injector.work_on_switches(
         root=root,
         mapping=mapping,

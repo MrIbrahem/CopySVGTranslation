@@ -42,13 +42,14 @@ if not result.error:
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import SVGTranslationInjector
+from CopySVGTranslation import SVGTranslationInjector, TranslationConfig
 
-injector = SVGTranslationInjector(
+config = TranslationConfig(
     case_insensitive=True,
     overwrite=False,
     pretty_print=True,
 )
+injector = SVGTranslationInjector(config)
 
 translations = {
     "new": {
@@ -114,13 +115,14 @@ Use `result.to_json()` to get a plain dictionary suitable for JSON serialization
 The primary class for injecting translations into SVG files.
 
 ```python
-from CopySVGTranslation import SVGTranslationInjector
+from CopySVGTranslation import SVGTranslationInjector, TranslationConfig
 
-injector = SVGTranslationInjector(
+config = TranslationConfig(
     case_insensitive: bool = True,
     overwrite: bool = False,
     pretty_print: bool | None = None,
 )
+injector = SVGTranslationInjector(config)
 
 result: InjectorData = injector.inject(
     inject_file: Path | str,
@@ -240,8 +242,9 @@ tree, stats = inject_file_and_save(
 )
 
 # After (recommended)
-from CopySVGTranslation import SVGTranslationInjector
-injector = SVGTranslationInjector(case_insensitive=True, overwrite=False)
+from CopySVGTranslation import SVGTranslationInjector, TranslationConfig
+config = TranslationConfig(case_insensitive=True, overwrite=False)
+injector = SVGTranslationInjector(config)
 result = injector.inject(
     inject_file=Path("target.svg"),
     all_mappings=translations,
@@ -390,13 +393,14 @@ print(result.to_json())
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import SVGTranslationInjector
+from CopySVGTranslation import SVGTranslationInjector, TranslationConfig
 
-injector = SVGTranslationInjector(
+config = TranslationConfig(
     case_insensitive=True,
     overwrite=False,
     pretty_print=True,
 )
+injector = SVGTranslationInjector(config)
 
 translations = {
     "new": {

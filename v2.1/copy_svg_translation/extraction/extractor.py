@@ -10,7 +10,7 @@ from lxml import etree
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
-from ..core.switch_node import SwitchNode
+from ..core import SwitchNode, TextNode
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
 from ..utils.text import normalize_text
@@ -31,8 +31,8 @@ class SVGTranslationExtractor:
         matching_strategy: MatchingStrategy | None = None,
     ) -> None:
         self.config = config or TranslationConfig()
-        self.strategy = matching_strategy or CompositeMatchingStrategy()
         self.year_handler = YearTitleHandler(self.config)
+        self.strategy = matching_strategy or CompositeMatchingStrategy()
 
     # ------------------------------------------------------------------
     # Per-switch logic
@@ -42,7 +42,8 @@ class SVGTranslationExtractor:
         switch: SwitchNode,
         mapping: TranslationMapping,
     ) -> None:
-        default = switch.fallback()
+        # Return the default (no systemLanguage) text node, if any.
+        default: TextNode | None = switch.default_text_node()
         if default is None:
             return
 
