@@ -188,7 +188,7 @@ class SwitchProcessor:
     # -------------
     # node functions
     # -------------
-    def create_node(self, existing_idsz, node, all_mappings, lang):
+    def create_node(self, existing_idsz, node, all_mappings, lang) -> etree.Element:
         new_node = etree.Element(node.tag, attrib=node.attrib)
         new_node.set("systemLanguage", lang)
         original_id = node.get("id")
@@ -223,6 +223,8 @@ class SwitchProcessor:
             english_text = normalize_text(node.text or "")
             key = english_text.lower() if self.config.case_insensitive else english_text
             new_node.text = all_mappings.get(key, {}).get(lang, english_text)
+
+        return new_node
 
     def update_node(self, node, default_texts, available_translations, lang):
         if node.get("systemLanguage") != lang:
