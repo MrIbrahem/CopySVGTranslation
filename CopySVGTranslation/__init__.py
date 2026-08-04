@@ -1,6 +1,6 @@
 """Public API for the CopySVGTranslation package."""
 
-from .core.mapping import ExtractorData
+from .core.mapping import TranslationMapping
 from .config import TranslationConfig
 from .extraction import SVGTranslationExtractor, extract
 from .injection import InjectorData, SVGTranslationInjector, inject_file_tree
@@ -14,7 +14,7 @@ __all__ = [
     "inject_file_tree",  # to be deprecated
     "extract",  # to be deprecated
     # dataclasses
-    "ExtractorData",
+    "TranslationMapping",
     "InjectorData",
     # others
     "match_nested_tags",

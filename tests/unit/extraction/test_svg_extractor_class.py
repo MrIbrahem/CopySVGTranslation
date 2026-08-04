@@ -1,5 +1,5 @@
 """
-Unit tests for SVGTranslationExtractor class and ExtractorData dataclass.
+Unit tests for SVGTranslationExtractor class and TranslationMapping dataclass.
 """
 
 from __future__ import annotations
@@ -7,9 +7,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from CopySVGTranslation.core.mapping import TranslationMapping
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.extraction.extractor import (
-    ExtractorData,
     SVGTranslationExtractor,
 )
 
@@ -32,15 +32,15 @@ def _write_svg(tmp_path: Path, inner: str, name: str = "test.svg") -> Path:
 
 
 # ===========================================================================
-# ExtractorData dataclass tests
+# TranslationMapping dataclass tests
 # ===========================================================================
 
 
 class TestExtractorData:
-    """Tests for the ExtractorData dataclass."""
+    """Tests for the TranslationMapping dataclass."""
 
     def test_default_values(self):
-        data = ExtractorData()
+        data = TranslationMapping()
         assert data.new == {}
         assert data.tspans_by_id == {}
         assert data.title == {}
@@ -48,7 +48,7 @@ class TestExtractorData:
         assert data.error == ""
 
     def test_to_json_returns_dict(self):
-        data = ExtractorData()
+        data = TranslationMapping()
         result = data.to_json()
         assert isinstance(result, dict)
         assert "new" in result
@@ -60,7 +60,7 @@ class TestExtractorData:
         assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "error": ""}
 
     def test_to_json_reflects_data(self):
-        data = ExtractorData(
+        data = TranslationMapping(
             new={"hello": {"ar": "مرحبا"}},
             tspans_by_id={"t0": "Hello"},
             title={"greeting": {"fr": "Salut"}},
@@ -73,14 +73,14 @@ class TestExtractorData:
         assert result["title"] == {"greeting": {"fr": "Salut"}}
 
     def test_to_json_error_field(self):
-        data = ExtractorData(error="File not found")
+        data = TranslationMapping(error="File not found")
         result = data.to_json()
         assert result["error"] == "File not found"
 
     def test_fields_are_independent(self):
         """Each instance should have independent mutable defaults."""
-        a = ExtractorData()
-        b = ExtractorData()
+        a = TranslationMapping()
+        b = TranslationMapping()
         a.new["key"] = {"ar": "val"}
         assert "key" not in b.new
 
@@ -125,7 +125,7 @@ class TestSVGTranslationExtractorExtract:
         ext = SVGTranslationExtractor()
         result = ext.extract(svg)
 
-        assert isinstance(result, ExtractorData)
+        assert isinstance(result, TranslationMapping)
         assert result.error == ""
         assert "hello" in result.new
         assert result.new["hello"]["ar"] == "مرحبا"
@@ -315,7 +315,7 @@ class TestSVGTranslationExtractorErrors:
 
 
 class TestExtractorDataToJson:
-    """Tests for ExtractorData.to_json() method."""
+    """Tests for TranslationMapping.to_json() method."""
 
     def test_roundtrip_structure(self, tmp_path: Path):
         inner = """

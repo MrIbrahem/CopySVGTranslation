@@ -8,8 +8,8 @@ from typing import Any
 
 from lxml import etree
 
-from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
+from ..config import TranslationConfig
 from ..core.switch_node import SwitchNode
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
@@ -46,6 +46,7 @@ class SVGTranslationExtractor:
         if default is None:
             return
 
+        # Find all text elements within this switch
         default_texts = default.texts(
             normalize=True,
             case_insensitive=self.config.case_insensitive,
@@ -60,8 +61,8 @@ class SVGTranslationExtractor:
                 mapping.tspans_by_id[tid] = tspan.text.strip()
 
         # Ensure keys exist in mapping.new
-        for text in default_texts:
-            key = normalize_text(text, self.config.case_insensitive)
+        for x in default_texts:
+            key = normalize_text(x, self.config.case_insensitive)
             mapping.new.setdefault(key, {})
 
         # Match every language node
@@ -88,6 +89,7 @@ class SVGTranslationExtractor:
 
     def extract_from_root(self, root: etree._Element) -> TranslationMapping:
         mapping = TranslationMapping()
+        # Find all switch elements
         switches = root.xpath("//svg:switch", namespaces=SVG_NS)
         logger.debug("Found %d switch elements", len(switches))
 

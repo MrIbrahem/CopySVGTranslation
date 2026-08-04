@@ -1,10 +1,10 @@
 """Extraction phase helpers for CopySVGTranslation."""
 
-from .extractor import ExtractorData, SVGTranslationExtractor
+from .extractor import TranslationMapping, SVGTranslationExtractor
 from .worker import extract
 
 __all__ = [
-    "ExtractorData",
+    "TranslationMapping",
     "SVGTranslationExtractor",
     "extract",
 ]
