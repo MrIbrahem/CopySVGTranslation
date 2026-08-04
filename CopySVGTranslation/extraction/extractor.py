@@ -11,6 +11,7 @@ from lxml import etree
 from ..config import TranslationConfig
 from ..core import SwitchNode, TextNode
 from ..core.mapping import TranslationMapping
+from ..exceptions import SvgIOError, SvgParseError
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
 from ..utils.text import normalize_text
@@ -89,19 +90,16 @@ class SVGTranslationExtractor:
         """
         Extract translation strings from an SVG file into a structured dictionary.
         """
-        mapping = TranslationMapping()
         logger.debug(f"Extracting translations from {path}")
 
         try:
             doc = SvgDocument.load(path, config=self.config)
-        except FileNotFoundError:
+        except FileNotFoundError as exc:
             logger.error(f"SVG file not found: {path}")
-            mapping.error = "File not found"
-            return mapping
+            raise SvgIOError(f"SVG file not found: {path}") from exc
         except (etree.XMLSyntaxError, OSError) as exc:
             logger.error(f"Failed to parse SVG file {path}: {exc}")
-            mapping.error = "Failed to parse SVG file"
-            return mapping
+            raise SvgParseError(f"Failed to parse SVG file: {exc}") from exc
 
         return self.extract_from_root(doc.root)
 
