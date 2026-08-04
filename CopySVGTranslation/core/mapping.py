@@ -116,3 +116,9 @@ class TranslationMapping:
             "error": error,
             # "meta": self.meta,
         }
+
+
+__all__ = [
+    "TranslationEntry",
+    "TranslationMapping",
+]

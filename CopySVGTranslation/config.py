@@ -73,3 +73,8 @@ class TranslationConfig:
         from dataclasses import replace
 
         return replace(self, **kwargs)
+
+
+__all__ = [
+    "TranslationConfig",
+]

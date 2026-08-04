@@ -40,3 +40,8 @@ class AssignIds(PreparationStep):
                     if not tspan.get("id"):
                         new_id = ctx.id_manager.allocate_trsvg()
                         tspan.set("id", new_id)
+
+
+__all__ = [
+    "AssignIds",
+]

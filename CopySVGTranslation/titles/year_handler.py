@@ -198,3 +198,8 @@ class YearTitleHandler:
             key = source.lower() if case_insensitive else source
             working.new.setdefault(key, {}).update(trans)
         return working
+
+
+__all__ = [
+    "YearTitleHandler",
+]

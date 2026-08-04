@@ -73,3 +73,9 @@ class WrapTextElements(PreparationStep):
             for child in text:
                 if isinstance(child.tag, str) and child.tag not in ({f"{{{SVG_NS}}}tspan", "tspan"}):
                     raise SvgNonTspanInsideTextError(code="structure-error-non-tspan-inside-text", element=child)
+
+
+__all__ = [
+    "WrapTextElements",
+    "get_text_content",
+]

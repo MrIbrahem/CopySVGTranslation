@@ -11,3 +11,8 @@ class LoadDocument(PreparationStep):
         doc = SvgDocument.load(ctx.path, config=ctx.config)
         ctx.tree = doc.tree
         ctx.root = doc.root
+
+
+__all__ = [
+    "LoadDocument",
+]

@@ -132,3 +132,9 @@ class WrapTspans(PreparationStep):
         ctx.translatable_nodes = []
         ctx.translatable_nodes.extend(ctx.root.findall(f".//{{{SVG_NS}}}tspan"))
         ctx.translatable_nodes.extend(ctx.root.findall(f".//{{{SVG_NS}}}text"))
+
+
+__all__ = [
+    "NormalizeTspans",
+    "WrapTspans",
+]

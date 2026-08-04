@@ -249,3 +249,8 @@ class SwitchProcessor:
             result = get_key(key.lower())
 
         return result
+
+
+__all__ = [
+    "SwitchProcessor",
+]

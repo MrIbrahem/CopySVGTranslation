@@ -155,3 +155,12 @@ class CompositeMatchingStrategy(MatchingStrategy):
             if result:
                 return result
         return []
+
+
+__all__ = [
+    "SegmentMatch",
+    "MatchingStrategy",
+    "ByTspanIdStrategy",
+    "ByPositionStrategy",
+    "CompositeMatchingStrategy",
+]

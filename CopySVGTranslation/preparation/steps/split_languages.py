@@ -152,3 +152,8 @@ class SplitLanguages(PreparationStep):
             new_id = ctx.id_manager.allocate_trsvg()
 
         element.set("id", new_id)
+
+
+__all__ = [
+    "SplitLanguages",
+]
