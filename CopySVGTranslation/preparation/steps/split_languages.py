@@ -113,6 +113,7 @@ class SplitLanguages(PreparationStep):
             parent_list = list(switch)
             index = parent_list.index(text_el)
 
+            # Keep the first language in the original node
             original_lang = real_langs[0]
             if original_lang == "fallback":
                 text_el.attrib.pop("systemLanguage", None)
