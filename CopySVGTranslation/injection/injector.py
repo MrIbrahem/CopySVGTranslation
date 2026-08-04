@@ -22,6 +22,7 @@ from ..utils import (
 from .switch_processor import SwitchProcessor
 
 logger = logging.getLogger(__name__)
+SVG_NS = "http://www.w3.org/2000/svg"
 
 
 class SVGTranslationInjector:
@@ -61,7 +62,6 @@ class SVGTranslationInjector:
         stats: InjectorStats | None = None,
     ) -> None:
         """Process ``<switch>`` elements and insert or update translations."""
-        svg_ns = {"svg": "http://www.w3.org/2000/svg"}
         if not stats:
             stats = self.new_stats
 
@@ -71,7 +71,7 @@ class SVGTranslationInjector:
             existing_ids = set(root.xpath("//@id"))
 
         # 4. Process every switch
-        switches = root.xpath("//svg:switch", namespaces=svg_ns)
+        switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})
         logger.debug(f"Found {len(switches)} switch elements")
         for switch in switches:
             self.switch_processor.process(switch, mapping, self.new_stats, existing_ids)
@@ -99,7 +99,7 @@ class SVGTranslationInjector:
 
     def _finalize_switches(self, root) -> None:
         # Fix old <svg:switch> tags if present
-        for elem in root.findall(".//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"}):
+        for elem in root.findall(".//svg:switch", namespaces={"svg": SVG_NS}):
             elem.tag = "switch"
             sort_switch_texts(elem)
 

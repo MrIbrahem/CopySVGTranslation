@@ -10,7 +10,7 @@ from lxml import etree
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
 from ..preparation import SvgPreparationPipeline
-from ..result import InjectorStats
+from ..result import InjectorData, InjectorStats
 from ..titles import YearTitleHandler
 from ..utils.xml import tree_languages
 from .id_manager import IdManager
@@ -36,7 +36,7 @@ class SVGTranslationInjector:
         *,
         save_path: Path | None = None,
         save: bool = False,
-    ) -> tuple[etree._ElementTree | None, InjectorStats]:
+    ) -> InjectorData:
         svg_path = Path(svg_path)
         stats = InjectorStats()
 

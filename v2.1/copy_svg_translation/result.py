@@ -1,7 +1,10 @@
-# result.py
+"""
+TODO: write docs
+"""
+
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any, Generic, TypeVar
 
 from lxml import etree
@@ -13,16 +16,19 @@ T = TypeVar("T")
 class InjectorStats:
     all_languages: int = 0
     new_languages: int = 0
+
     processed_switches: int = 0
     inserted_translations: int = 0
     skipped_translations: int = 0
     updated_translations: int = 0
+
     languages_before: list[str] = field(default_factory=list)
     languages_after: list[str] = field(default_factory=list)
     error: str = ""
 
     def to_json(self) -> dict[str, Any]:
-        """Serialize stats to a JSON-compatible dictionary."""
+        """
+        Serialize stats to a JSON-compatible dictionary.
         return {
             "all_languages": self.all_languages,
             "new_languages": self.new_languages,
@@ -33,6 +39,28 @@ class InjectorStats:
             "languages_before": self.languages_before,
             "languages_after": self.languages_after,
             "error": self.error,
+        }
+        """
+        return asdict(self)
+
+    def _update(self, **kwargs) -> None:
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
+@dataclass
+class InjectorData:
+    """Container for SVG data."""
+
+    tree: etree._ElementTree | None = None
+    new_stats: InjectorStats = field(default_factory=InjectorStats)
+
+    def to_json(self) -> dict[str, Any]:
+        new_stats = self.new_stats.to_json()
+        return {
+            "tree": self.tree,
+            "new_stats": new_stats,
+            "error": new_stats["error"],
         }
 
 
@@ -78,4 +106,4 @@ class OperationResult(Generic[T]):
 
 # Convenience aliases
 ExtractResult = OperationResult["TranslationMapping"]  # type: ignore # forward ref
-InjectResult = OperationResult[etree._ElementTree]
+InjectResult = OperationResult["InjectorData"]
