@@ -6,8 +6,13 @@ from collections.abc import Mapping
 
 from lxml import etree
 
+from ..config import TranslationConfig
+
+# from ..core.mapping import TranslationMapping
+# from ..core.switch_node import SwitchNode
+# from ..core.text_node import TextNode
 from ..result import InjectorStats
-from ..titles import get_new_titles_translations
+from ..titles import YearTitleHandler, get_new_titles_translations
 from ..utils import (
     extract_text_from_node,
     normalize_text,
@@ -15,15 +20,25 @@ from ..utils import (
 from ..utils.injection_utils import (
     generate_unique_id,
 )
+from .id_manager import IdManager
+from .translation_applier import TranslationApplier
 
 logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"
 
 
 class SwitchProcessor:
-    def __init__(self, overwrite: bool, case_insensitive: bool) -> None:
-        self.overwrite = overwrite
-        self.case_insensitive = case_insensitive
+    def __init__(
+        self,
+        config: TranslationConfig,
+        id_manager: IdManager,
+        applier: TranslationApplier,
+        year_handler: YearTitleHandler | None = None,
+    ) -> None:
+        self.config = config
+        self.id_manager = id_manager
+        self.applier = applier
+        self.year_handler = year_handler or YearTitleHandler(config)
 
     def process(
         self,
@@ -62,7 +77,7 @@ class SwitchProcessor:
                 continue
 
             text_contents = extract_text_from_node(text_elem)
-            default_texts = [normalize_text(text, self.case_insensitive) for text in text_contents]
+            default_texts = [normalize_text(text, self.config.case_insensitive) for text in text_contents]
             default_node = text_elem
             break
 
@@ -80,7 +95,7 @@ class SwitchProcessor:
         # Determine translations for each text line
         available_translations = {}
         for text in default_texts:
-            key = text.lower() if self.case_insensitive else text
+            key = text.lower() if self.config.case_insensitive else text
             if key in all_mappings:
                 available_translations[key] = all_mappings[key]
             else:
@@ -97,12 +112,12 @@ class SwitchProcessor:
             all_langs.update(data.keys())
 
         for lang in all_langs:
-            if lang in existing_languages and not self.overwrite:
+            if lang in existing_languages and not self.config.overwrite:
                 stats.skipped_translations += 1
                 continue
 
             # Create or update node
-            if lang in existing_languages and self.overwrite:
+            if lang in existing_languages and self.config.overwrite:
                 for text_elem in text_elements:
                     if text_elem.get("systemLanguage") != lang:
                         continue
@@ -117,7 +132,7 @@ class SwitchProcessor:
                             )
                             break
                         english_text = default_texts[i]
-                        lookup_key = english_text.lower() if self.case_insensitive else english_text
+                        lookup_key = english_text.lower() if self.config.case_insensitive else english_text
                         if english_text in available_translations and lang in available_translations[english_text]:
                             tspan.text = available_translations[english_text][lang]
                         elif lookup_key in available_translations and lang in available_translations[lookup_key]:
@@ -142,7 +157,7 @@ class SwitchProcessor:
                 for tspan in tspans:
                     new_tspan = etree.Element(tspan.tag, attrib=tspan.attrib)
                     english_text = normalize_text(tspan.text or "")
-                    key = english_text.lower() if self.case_insensitive else english_text
+                    key = english_text.lower() if self.config.case_insensitive else english_text
                     translated = all_mappings.get(key, {}).get(lang, english_text)
                     new_tspan.text = translated
 
@@ -157,7 +172,7 @@ class SwitchProcessor:
 
             else:
                 english_text = normalize_text(default_node.text or "")
-                key = english_text.lower() if self.case_insensitive else english_text
+                key = english_text.lower() if self.config.case_insensitive else english_text
                 new_node.text = all_mappings.get(key, {}).get(lang, english_text)
 
             switch_element.append(new_node)

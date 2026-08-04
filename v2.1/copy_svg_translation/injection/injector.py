@@ -22,12 +22,21 @@ SVG_NS = "http://www.w3.org/2000/svg"
 
 
 class SVGTranslationInjector:
-    def __init__(self, config: TranslationConfig) -> None:
+    def __init__(
+        self,
+        config: TranslationConfig | None = None,
+    ) -> None:
         self.config = config
+        self.preparer = SvgPreparationPipeline(self.config)
+
         self.id_manager = IdManager()
-        self.applier = TranslationApplier(config, self.id_manager)
-        self.switch_processor = SwitchProcessor(config, self.id_manager, self.applier, YearTitleHandler(config))
-        self.preparer = SvgPreparationPipeline(config)
+        self.applier = TranslationApplier(self.config, self.id_manager)
+        self.switch_processor = SwitchProcessor(
+            self.config,
+            self.id_manager,
+            self.applier,
+            YearTitleHandler(self.config),
+        )
 
     def inject(
         self,
@@ -96,7 +105,6 @@ class SVGTranslationInjector:
         """Process ``<switch>`` elements and insert or update translations."""
         if not stats:
             stats = InjectorStats()
-
 
         # Process every switch
         switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})

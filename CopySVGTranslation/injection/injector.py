@@ -15,11 +15,12 @@ from ..exceptions import (
 )
 from ..preparation import SvgPreparationPipeline
 from ..result import InjectorData, InjectorStats
-from ..utils import (
-    sort_switch_texts,
-    tree_languages,
-)
+from ..titles import YearTitleHandler
+from ..utils import sort_switch_texts
+from ..utils.xml import tree_languages
+from .id_manager import IdManager
 from .switch_processor import SwitchProcessor
+from .translation_applier import TranslationApplier
 
 logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -32,11 +33,17 @@ class SVGTranslationInjector:
         self,
         config: TranslationConfig | None = None,
     ) -> None:
-        """ """
-
         self.config = config or TranslationConfig()
         self.preparer = SvgPreparationPipeline(self.config)
-        self.switch_processor = SwitchProcessor(self.config.overwrite, self.config.case_insensitive)
+
+        self.id_manager = IdManager()
+        self.applier = TranslationApplier(self.config, self.id_manager)
+        self.switch_processor = SwitchProcessor(
+            self.config,
+            self.id_manager,
+            self.applier,
+            YearTitleHandler(self.config),
+        )
 
     def _parse_svg(
         self, inject_path, stats: InjectorStats
