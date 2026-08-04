@@ -9,6 +9,7 @@ from pathlib import Path
 from lxml import etree
 
 from ..config import TranslationConfig
+from ..core.mapping import TranslationMapping
 from ..exceptions import (
     SvgNestedTspanError,
     SvgStructureError,
@@ -119,9 +120,10 @@ class SVGTranslationInjector:
         stats.languages_before = sorted(before_languages)
 
         # 4. Process every switch
+        mapping_obj = TranslationMapping.from_any(all_mappings)
         self.work_on_switches(
             root=root,
-            mapping=all_mappings,
+            mapping=mapping_obj,
             stats=stats,
         )
 
@@ -152,15 +154,18 @@ class SVGTranslationInjector:
     def work_on_switches(
         self,
         root: etree._Element,
-        mapping: Mapping,
+        mapping: TranslationMapping | dict,
         existing_ids: set[str] | None = None,
         stats: InjectorStats | None = None,
     ) -> InjectorStats:
         """Process ``<switch>`` elements and insert or update translations."""
+        mapping = TranslationMapping.from_any(mapping)
         if not stats:
             stats = InjectorStats()
 
-        if not existing_ids:
+        if existing_ids:
+            self.id_manager.register_many(existing_ids)
+        else:
             # Collect all existing IDs to ensure uniqueness
             # existing_ids = {elem.get('id') for elem in root.xpath('//*[@id]') if elem.get('id')}
             existing_ids = set(root.xpath("//@id"))
@@ -189,11 +194,15 @@ class SVGTranslationInjector:
         tree: etree._ElementTree,
         save_path: Path,
     ) -> None:
+        if self.config.create_parents:
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+
+        pretty = self.config.pretty_print if self.config.pretty_print is not None else True
         tree.write(
             str(save_path),
             encoding="utf-8",
             xml_declaration=True,
-            pretty_print=self.config.pretty_print,
+            pretty_print=pretty,
         )
         logger.debug(f"Saved modified SVG to {save_path}")
 
