@@ -188,10 +188,7 @@ class TestProcessTextElements(TestSetup):
 
         g = root.find(f".//{{{SVG_NS}}}g")
         children = list(g)
-        tags = [
-            "switch" if c.tag == f"{{{SVG_NS}}}switch" else c.get("id")
-            for c in children
-        ]
+        tags = ["switch" if c.tag == f"{{{SVG_NS}}}switch" else c.get("id") for c in children]
         assert tags == ["before", "switch", "after"]
 
     def test_no_parent_raises_structure_error(self, step_factory):
