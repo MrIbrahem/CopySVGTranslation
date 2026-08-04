@@ -59,10 +59,6 @@ class SwitchProcessor:
         mapping = TranslationMapping.from_any(mapping)
         svg_ns = {"svg": "http://www.w3.org/2000/svg"}
 
-        # all_mappings_title = mapping.get("title", {})
-        all_mappings_title_new = mapping.title_new
-        all_mappings = dict(mapping.new)
-
         text_elements = switch_element.xpath("./svg:text", namespaces=svg_ns)
         if not text_elements:
             return
@@ -83,11 +79,10 @@ class SwitchProcessor:
         if not default_texts or default_node is None:
             return
 
+        all_mappings_title_new = mapping.title_new
         new_titles_translations = get_new_titles_translations(all_mappings_title_new, default_texts)
 
-        # all_mappings.update(titles_translations)
-        # all_mappings.update(new_titles_translations)
-
+        all_mappings = dict(mapping.new)
         for key, translations in new_titles_translations.items():
             all_mappings.setdefault(key, {}).update(translations)
 
