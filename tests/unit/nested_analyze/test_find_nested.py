@@ -55,8 +55,9 @@ class TestFlattenText:
         root.text = "A"
         child = etree.SubElement(root, "tspan")
         child.text = "B"
+
         grandchild = etree.SubElement(child, "tspan")
-        grandchild.text = "C"
+        grandchild.text = "C"  # pyright: ignore[reportAttributeAccessIssue]
         grandchild.tail = "D"
         child.tail = "E"
         assert flatten_text(root) == "ABCDE"
@@ -84,7 +85,7 @@ class TestFixNestedTspans:
 
     def test_no_nested_tspans_unchanged(self):
         """Flat tspans should not be modified."""
-        svg = _svg('<text id="t1"><tspan id="s1">Hello</tspan><tspan id="s2">World</tspan>' "</text>")
+        svg = _svg("""<text id="t1"><tspan id="s1">Hello</tspan><tspan id="s2">World</tspan></text>""")
         root = _parse(svg)
         fix_nested_tspans(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
@@ -94,7 +95,7 @@ class TestFixNestedTspans:
 
     def test_nested_tspan_flattened(self):
         """Nested tspans should be flattened into the parent."""
-        svg = _svg('<text id="t1">' "<tspan>" '<tspan style="font-weight: 700;">Bold</tspan>' " normal</tspan></text>")
+        svg = _svg("""<text id="t1"><tspan><tspan style="font-weight: 700;">Bold</tspan> normal</tspan></text>""")
         root = _parse(svg)
         fix_nested_tspans(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
@@ -105,7 +106,7 @@ class TestFixNestedTspans:
 
     def test_children_removed_after_flatten(self):
         """After flattening, the nested children should be removed."""
-        svg = _svg('<text id="t1">' "<tspan>" '<tspan id="inner">Inner</tspan>' "</tspan></text>")
+        svg = _svg("""<text id="t1"><tspan><tspan id="inner">Inner</tspan></tspan></text>""")
         root = _parse(svg)
         fix_nested_tspans(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
@@ -115,7 +116,7 @@ class TestFixNestedTspans:
 
     def test_tail_cleared_after_flatten(self):
         """Tail of the outer tspan should be None after flattening."""
-        svg = _svg('<text id="t1">' "<tspan><tspan>Inner</tspan></tspan></text>")
+        svg = _svg("""<text id="t1"><tspan><tspan>Inner</tspan></tspan></text>""")
         root = _parse(svg)
         fix_nested_tspans(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
@@ -123,7 +124,7 @@ class TestFixNestedTspans:
 
     def test_custom_tag_parameter(self):
         """The tag parameter should target different element types."""
-        svg = _svg('<text id="t1">' "<tspan>" '<a href="url">Link text</a>' "</tspan></text>")
+        svg = _svg("""<text id="t1"><tspan><a href="url">Link text</a></tspan></text>""")
         root = _parse(svg)
         fix_nested_tspans(root, tag="a")
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
@@ -148,7 +149,7 @@ class TestMatchNestedTags:
         """Should detect tspans that contain nested tspans."""
         svg_path = tmp_path / "test.svg"
         svg_path.write_text(
-            _svg('<text id="t1">' "<tspan>" '<tspan style="font-weight: 700;">Bold</tspan>' "</tspan></text>"),
+            _svg("""<text id="t1"><tspan><tspan style="font-weight: 700;">Bold</tspan></tspan></text>"""),
             encoding="utf-8",
         )
         result = match_nested_tags(svg_path)
@@ -158,7 +159,7 @@ class TestMatchNestedTags:
         """Flat tspans should return an empty list."""
         svg_path = tmp_path / "test.svg"
         svg_path.write_text(
-            _svg('<text id="t1"><tspan id="s1">Hello</tspan>' "</text>"),
+            _svg("""<text id="t1"><tspan id="s1">Hello</tspan></text>"""),
             encoding="utf-8",
         )
         result = match_nested_tags(svg_path)
@@ -180,7 +181,7 @@ class TestMatchNestedTags:
         """Results should be string representations of tspan elements."""
         svg_path = tmp_path / "test.svg"
         svg_path.write_text(
-            _svg('<text id="t1">' "<tspan>" '<tspan style="font-weight: 700;">Bold</tspan>' " text</tspan></text>"),
+            _svg("""<text id="t1"><tspan><tspan style="font-weight: 700;">Bold</tspan> text</tspan></text>"""),
             encoding="utf-8",
         )
         result = match_nested_tags(svg_path)
@@ -199,7 +200,7 @@ class TestFixNestedFile:
         src = tmp_path / "input.svg"
         dst = tmp_path / "output.svg"
         src.write_text(
-            _svg('<text id="t1">' "<tspan>" '<tspan style="font-weight: 700;">Bold</tspan>' "</tspan></text>"),
+            _svg("""<text id="t1"><tspan><tspan style="font-weight: 700;">Bold</tspan></tspan></text>"""),
             encoding="utf-8",
         )
         result = fix_nested_file(src, dst)
@@ -250,7 +251,7 @@ class TestFixNestedFile:
         src = tmp_path / "input.svg"
         dst = tmp_path / "output.svg"
         src.write_text(
-            _svg('<text id="t1">' "<tspan>" '<a href="url">Link</a>' "</tspan></text>"),
+            _svg("""<text id="t1"><tspan><a href="url">Link</a></tspan></text>"""),
             encoding="utf-8",
         )
         result = fix_nested_file(src, dst)
