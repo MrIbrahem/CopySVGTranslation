@@ -43,7 +43,7 @@ class SwitchProcessor:
         switch_element: etree._Element,
         mapping: TranslationMapping | dict,
         stats: InjectorStats,
-        existing_ids: set[str],
+        existing_idsz: set[str],
     ) -> None:
         """
         1. Find fallback (default) <text> node
@@ -57,9 +57,8 @@ class SwitchProcessor:
         6. Optionally re-sort children of the switch
         """
         mapping = TranslationMapping.from_any(mapping)
-        svg_ns = {"svg": "http://www.w3.org/2000/svg"}
 
-        text_elements = switch_element.xpath("./svg:text", namespaces=svg_ns)
+        text_elements = switch_element.xpath("./svg:text", namespaces={"svg": SVG_NS})
         if not text_elements:
             return
 
@@ -86,6 +85,7 @@ class SwitchProcessor:
         for key, translations in new_titles_translations.items():
             all_mappings.setdefault(key, {}).update(translations)
 
+        # Enrich mapping with year-title logic
         # Determine translations for each text line
         available_translations = {}
         for text in default_texts:
@@ -98,8 +98,10 @@ class SwitchProcessor:
         if not available_translations:
             return
 
-        existing_languages = {t.get("systemLanguage") for t in text_elements if t.get("systemLanguage")}
+        # Gather existing translation nodes
+        existing_languages = self.existing_languages(text_elements)
 
+        # Collect translation mappings per-language for this fallback
         # We assume all texts share same set of languages
         all_langs = set()
         for data in available_translations.values():
@@ -116,7 +118,7 @@ class SwitchProcessor:
                     if text_elem.get("systemLanguage") != lang:
                         continue
 
-                    tspans = text_elem.xpath("./svg:tspan", namespaces=svg_ns)
+                    tspans = text_elem.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
                     for i, tspan in enumerate(tspans):
                         if i >= len(default_texts):
                             logger.warning(
@@ -141,11 +143,11 @@ class SwitchProcessor:
             original_id = default_node.get("id")
 
             if original_id:
-                new_id = generate_unique_id(original_id, lang, existing_ids)
+                new_id = generate_unique_id(original_id, lang, existing_idsz)
                 new_node.set("id", new_id)
-                existing_ids.add(new_id)
+                existing_idsz.add(new_id)
 
-            tspans = default_node.xpath("./svg:tspan", namespaces=svg_ns)
+            tspans = default_node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
 
             if tspans:
                 for tspan in tspans:
@@ -158,9 +160,9 @@ class SwitchProcessor:
                     # Generate unique ID for tspan if needed
                     original_tspan_id = tspan.get("id")
                     if original_tspan_id:
-                        new_tspan_id = generate_unique_id(original_tspan_id, lang, existing_ids)
+                        new_tspan_id = generate_unique_id(original_tspan_id, lang, existing_idsz)
                         new_tspan.set("id", new_tspan_id)
-                        existing_ids.add(new_tspan_id)
+                        existing_idsz.add(new_tspan_id)
 
                     new_node.append(new_tspan)
 
@@ -173,3 +175,7 @@ class SwitchProcessor:
             stats.inserted_translations += 1
 
         stats.processed_switches += 1
+
+    def existing_languages(self, text_elements):
+        existing_languages = {t.get("systemLanguage") for t in text_elements if t.get("systemLanguage")}
+        return existing_languages
