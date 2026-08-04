@@ -232,7 +232,6 @@ class SwitchProcessor:
         lang: str,
         data: dict[str, dict[str, str]],
         normalize: bool = False,
-        case_insensitive: bool = False,
     ) -> str | None:
 
         def get_key(_key) -> str | None:
