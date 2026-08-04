@@ -56,6 +56,7 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation import TranslationConfig
+from CopySVGTranslation.injection.id_manager import IdManager
 from CopySVGTranslation.injection.switch_processor import (
     SVG_NS,
     SwitchProcessor,
@@ -89,17 +90,6 @@ class FakeTranslationMapping:
         if isinstance(mapping, dict):
             return cls(new=mapping.get("new", {}), title_new=mapping.get("title_new", {}))
         raise TypeError(f"Cannot build FakeTranslationMapping from {mapping!r}")
-
-
-class FakeIdManager:
-    """Minimal stand-in for IdManager; only allocate_clone is used here."""
-
-    def __init__(self) -> None:
-        self.calls: list[tuple[str, str]] = []
-
-    def allocate_clone(self, base_id: str, lang: str) -> str:
-        self.calls.append((base_id, lang))
-        return f"{base_id}-{lang}"
 
 
 class FakeStats:
@@ -164,7 +154,7 @@ def patch_collaborators(monkeypatch):
 
 @pytest.fixture
 def id_manager():
-    return FakeIdManager()
+    return IdManager()
 
 
 @pytest.fixture
@@ -179,7 +169,7 @@ def make_config(overwrite: bool = False, case_insensitive: bool = False) -> Tran
 def make_processor(config=None, id_manager=None, applier=None) -> SwitchProcessor:
     return SwitchProcessor(
         config=config or make_config(),
-        id_manager=id_manager or FakeIdManager(),
+        id_manager=id_manager or IdManager(),
         applier=applier or SimpleNamespace(),
     )
 
@@ -284,7 +274,7 @@ class TestProcessInsertion:
 
         processor.process(switch, {"new": {"hello": {"ar": "مرحبا"}}}, stats)
 
-        assert id_manager.calls == [("t1", "ar")]
+        assert id_manager.existing_ids == {"t1-ar"}
         new_node = find_texts(switch)[-1]
         assert new_node.get("id") == "t1-ar"
 
@@ -296,7 +286,7 @@ class TestProcessInsertion:
 
         new_node = find_texts(switch)[-1]
         assert new_node.get("id") is None
-        assert id_manager.calls == []
+        assert id_manager.existing_ids == set()
 
     def test_multiple_target_languages_each_create_a_node(self, id_manager, stats):
         switch = make_switch('<text id="t1">hello</text>')
@@ -343,8 +333,8 @@ class TestProcessInsertion:
 
         processor.process(switch, {"new": {"hello": {"ar": "مرحبا"}}}, stats)
 
-        assert ("t1", "ar") in id_manager.calls
-        assert ("s1", "ar") in id_manager.calls
+        assert id_manager.existing_ids == {'s1-ar', 't1-ar'}
+
         new_tspan = find_texts(switch)[-1].xpath("./svg:tspan", namespaces=NSMAP)[0]
         assert new_tspan.get("id") == "s1-ar"
 
@@ -409,6 +399,7 @@ class TestProcessExistingLanguage:
         ar_tspan = switch.xpath(
             './svg:text[@systemLanguage="ar"]/svg:tspan', namespaces=NSMAP
         )[0]
+
         assert ar_tspan.text == "مرحبا جديد"
         assert stats.updated_translations == 1
         assert stats.skipped_translations == 0
