@@ -20,9 +20,9 @@ class ExtractorData:
     """Container for extracted SVG translation data."""
 
     new: dict[str, dict[str, str]] = field(default_factory=dict)
+    title: dict[str, dict[str, str]] = field(default_factory=dict)
+    title_new: dict[str, dict[str, str]] = field(default_factory=dict)
     tspans_by_id: dict[str, str] = field(default_factory=dict)
-    title: dict[str, Any] = field(default_factory=dict)
-    title_new: dict[str, Any] = field(default_factory=dict)
     error: str = ""
 
     def to_json(self) -> dict[str, Any]:
@@ -43,7 +43,6 @@ class SVGTranslationExtractor:
         """
         self.source_file = Path(str(source_file))
         self.case_insensitive = case_insensitive
-        self.translations = ExtractorData()
 
     def get_english_default_texts(self, text_elements):
         """
@@ -87,6 +86,7 @@ class SVGTranslationExtractor:
         self,
         text_elements,
         default_tspans_by_id: dict[str, str],
+        translations: ExtractorData,
     ) -> dict[str, list[str]]:
         """
         Process the text elements that carry a systemLanguage attribute
@@ -142,12 +142,12 @@ class SVGTranslationExtractor:
 
                 # store_key = english_text if english_text in new_translations else english_text.lower()
                 store_key = normalize_text(english_text, self.case_insensitive)
-                if store_key in self.translations.new:
-                    self.translations.new[store_key][system_lang] = normalized_translation
+                if store_key in translations.new:
+                    translations.new[store_key][system_lang] = normalized_translation
 
         return switch_translations
 
-    def process_switches(self, root: etree.Element) -> None:
+    def process_switches(self, root: etree.Element, translations) -> None:
         # Find all switch elements
         switches = root.xpath("//svg:switch", namespaces={"svg": "http://www.w3.org/2000/svg"})
         logger.debug(f"Found {len(switches)} switch elements")
@@ -161,17 +161,17 @@ class SVGTranslationExtractor:
 
             new_keys, default_tspans_by_id = self.get_english_default_texts(text_elements)
 
-            self.translations.tspans_by_id.update(default_tspans_by_id)
+            translations.tspans_by_id.update(default_tspans_by_id)
             for x in new_keys:
                 store_key = normalize_text(x, self.case_insensitive)
-                if store_key not in self.translations.new:
-                    self.translations.new[store_key] = {}
+                if store_key not in translations.new:
+                    translations.new[store_key] = {}
 
-            self.process_switch_translations(text_elements, default_tspans_by_id)
+            self.process_switch_translations(text_elements, default_tspans_by_id, translations)
 
-        if self.translations.new:
-            self.translations.title = make_title_translations(self.translations.new)
-            self.translations.title_new = make_new_title_translations(self.translations.new)
+        if translations.new:
+            translations.title = make_title_translations(translations.new)
+            translations.title_new = make_new_title_translations(translations.new)
 
     def extract(self) -> ExtractorData:
         """
@@ -190,12 +190,12 @@ class SVGTranslationExtractor:
             not exist or could not be parsed.
         """
         # Reset state to prevent accumulation across calls
-        self.translations = ExtractorData()
+        translations = ExtractorData()
 
         if not self.source_file.exists():
             logger.error(f"SVG file not found: {self.source_file}")
-            self.translations.error = "File not found"
-            return self.translations
+            translations.error = "File not found"
+            return translations
 
         logger.debug(f"Extracting translations from {self.source_file}")
 
@@ -206,13 +206,13 @@ class SVGTranslationExtractor:
             tree = etree.parse(str(self.source_file), parser)
         except (etree.XMLSyntaxError, OSError) as exc:
             logger.error(f"Failed to parse SVG file {self.source_file}: {exc}")
-            self.translations.error = "Failed to parse SVG file"
-            return self.translations
+            translations.error = "Failed to parse SVG file"
+            return translations
 
         root = tree.getroot()
 
-        self.process_switches(root)
-        return self.translations
+        self.process_switches(root, translations)
+        return translations
 
 
 __all__ = [
