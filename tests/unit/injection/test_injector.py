@@ -1,6 +1,6 @@
 # ruff: noqa: F401
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/injection/injector.py module.
+Unit tests for CopySVGTranslation/injection/injector.py module.
 
 Classes to test: SVGTranslationInjector
 

@@ -1,5 +1,5 @@
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/preparation/steps/validate.py module.
+Unit tests for CopySVGTranslation/preparation/steps/validate.py module.
 
 Classes to test: ValidateStructure
 

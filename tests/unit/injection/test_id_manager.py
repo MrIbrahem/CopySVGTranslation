@@ -1,6 +1,6 @@
 # ruff: noqa: F401
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/injection/id_manager.py module.
+Unit tests for CopySVGTranslation/injection/id_manager.py module.
 
 Classes to test: IdManager
 

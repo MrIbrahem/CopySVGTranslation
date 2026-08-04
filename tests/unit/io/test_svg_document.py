@@ -1,6 +1,6 @@
 # ruff: noqa: F401
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/io/svg_document.py module.
+Unit tests for CopySVGTranslation/io/svg_document.py module.
 
 Classes to test: SvgDocument
 

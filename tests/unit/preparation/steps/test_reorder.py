@@ -1,5 +1,5 @@
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/preparation/steps/reorder.py module.
+Unit tests for CopySVGTranslation/preparation/steps/reorder.py module.
 
 Classes to test: ReorderTexts
 

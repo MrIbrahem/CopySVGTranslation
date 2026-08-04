@@ -1,6 +1,6 @@
 # ruff: noqa: F401
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/exceptions.py module.
+Unit tests for CopySVGTranslation/exceptions.py module.
 
 Classes to test: CopySVGTranslationError, SvgStructureError, SvgNestedTspanError, SvgInvalidIdError, SvgContainsTrefError, SvgCssTooComplexError, SvgCssHasIdsError, SvgTextContainsDollarError, SvgSwitchStructureError, SvgNoParentForTextError, SvgNonTspanInsideTextError, SvgParseError, SvgIOError, MappingError, ConfigurationError
 

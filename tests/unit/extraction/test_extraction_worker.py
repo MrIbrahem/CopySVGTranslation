@@ -1,6 +1,6 @@
 # ruff: noqa: F401
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/extraction/worker.py module.
+Unit tests for CopySVGTranslation/extraction/worker.py module.
 
 Functions to test: extract
 
