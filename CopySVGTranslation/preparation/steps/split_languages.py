@@ -104,7 +104,7 @@ class SplitLanguages(PreparationStep):
             if len(real_langs) == 1:
                 lang_value = real_langs[0]
                 if lang_value == "fallback":
-                        text_el.attrib.pop("systemLanguage", None)
+                    text_el.attrib.pop("systemLanguage", None)
                 else:
                     text_el.set("systemLanguage", lang_value)
                 continue
@@ -133,9 +133,7 @@ class SplitLanguages(PreparationStep):
                 switch.insert(index + 1, cloned)
                 index += 1
 
-    def _validate_switch_languages(
-        self, children: list[etree._Element]
-    ) -> list[tuple[etree._Element, list[str]]]:
+    def _validate_switch_languages(self, children: list[etree._Element]) -> list[tuple[etree._Element, list[str]]]:
         """
         Validate every child of a <switch> element and, for each valid
         <text> element, compute the normalized list of languages it

@@ -65,6 +65,7 @@ class TestSetup:
     def tostring(self, el: etree._Element, pretty_print=True) -> str:
         return etree.tostring(el, pretty_print=pretty_print).decode("utf-8").strip()
 
+
 class TestSplitLanguagesInSwitch(TestSetup):
 
     def test_single_text_without_systemlanguage_is_left_as_fallback(self, step, ctx):
@@ -75,7 +76,10 @@ class TestSplitLanguagesInSwitch(TestSetup):
         children = list(switch)
         assert len(children) == 1
         assert children[0].get("systemLanguage") is None
-        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1">hello</text></switch>"""
+        assert (
+            self.tostring(switch, False)
+            == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1">hello</text></switch>"""
+        )
 
     def test_single_text_with_one_language_keeps_systemlanguage(self, step, ctx):
         switch = make_switch('<text id="t1" systemLanguage="ar">hello</text>')
@@ -85,7 +89,10 @@ class TestSplitLanguagesInSwitch(TestSetup):
         children = list(switch)
         assert len(children) == 1
         assert children[0].get("systemLanguage") == "ar"
-        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text></switch>"""
+        assert (
+            self.tostring(switch, False)
+            == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text></switch>"""
+        )
 
     def test_explicit_fallback_value_is_normalized_to_no_attribute(self, step, ctx):
         # systemLanguage="fallback" written explicitly should behave the
@@ -97,7 +104,10 @@ class TestSplitLanguagesInSwitch(TestSetup):
         children = list(switch)
         assert len(children) == 1
         assert children[0].get("systemLanguage") is None
-        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1">hello</text></switch>"""
+        assert (
+            self.tostring(switch, False)
+            == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1">hello</text></switch>"""
+        )
 
     def test_comma_separated_languages_are_split_into_clones(self, step, ctx):
         switch = make_switch('<text id="t1" systemLanguage="ar,fr,pt-br">hello</text>')
@@ -111,7 +121,10 @@ class TestSplitLanguagesInSwitch(TestSetup):
         assert children[0].get("id") == "t1"
         assert children[1].get("id") == "t1-fr"
         assert children[2].get("id") == "t1-pt-BR"
-        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text><text id="t1-fr" systemLanguage="fr">hello</text><text id="t1-pt-BR" systemLanguage="pt-BR">hello</text></switch>"""
+        assert (
+            self.tostring(switch, False)
+            == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text><text id="t1-fr" systemLanguage="fr">hello</text><text id="t1-pt-BR" systemLanguage="pt-BR">hello</text></switch>"""
+        )
 
     def test_clone_without_original_id_uses_allocate_trsvg(self, step, ctx):
         switch = make_switch('<text systemLanguage="ar,fr">hello</text>')
@@ -122,7 +135,10 @@ class TestSplitLanguagesInSwitch(TestSetup):
         assert len(children) == 2
         # no original id present, so the clone must get a fresh trsvg id
         assert children[1].get("id") == "trsvg1"
-        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text systemLanguage="ar">hello</text><text systemLanguage="fr" id="trsvg1">hello</text></switch>"""
+        assert (
+            self.tostring(switch, False)
+            == """<switch xmlns="http://www.w3.org/2000/svg"><text systemLanguage="ar">hello</text><text systemLanguage="fr" id="trsvg1">hello</text></switch>"""
+        )
 
     def test_clone_with_trsvg_like_id_is_reallocated(self, step, ctx):
         # An id already matching the internal trsvgN pattern must be treated
@@ -133,7 +149,10 @@ class TestSplitLanguagesInSwitch(TestSetup):
 
         children = list(switch)
         assert children[1].get("id") == "trsvg1"
-        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="trsvg5" systemLanguage="ar">hello</text><text id="trsvg1" systemLanguage="fr">hello</text></switch>"""
+        assert (
+            self.tostring(switch, False)
+            == """<switch xmlns="http://www.w3.org/2000/svg"><text id="trsvg5" systemLanguage="ar">hello</text><text id="trsvg1" systemLanguage="fr">hello</text></switch>"""
+        )
 
     def test_fallback_inside_comma_list_removes_attribute_on_that_node(self, step, ctx):
         switch = make_switch('<text id="t1" systemLanguage="ar,fallback">hello</text>')
@@ -144,9 +163,12 @@ class TestSplitLanguagesInSwitch(TestSetup):
         assert len(children) == 2
         assert children[0].get("systemLanguage") == "ar"
 
-        expeced = '''<text xmlns="http://www.w3.org/2000/svg" id="t1-">hello</text>'''
+        expeced = """<text xmlns="http://www.w3.org/2000/svg" id="t1-">hello</text>"""
 
-        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text><text id="t1-">hello</text></switch>"""
+        assert (
+            self.tostring(switch, False)
+            == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text><text id="t1-">hello</text></switch>"""
+        )
         assert self.tostring(children[1]) == expeced
 
         assert children[1].get("systemLanguage") is None
@@ -195,7 +217,10 @@ class TestSplitLanguagesInSwitch(TestSetup):
         text_children = [c for c in switch if isinstance(c.tag, str)]
         assert len(text_children) == 1
 
-        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><!-- a comment --><text id="t1">hello</text></switch>"""
+        assert (
+            self.tostring(switch, False)
+            == """<switch xmlns="http://www.w3.org/2000/svg"><!-- a comment --><text id="t1">hello</text></switch>"""
+        )
 
     def test_multiple_independent_single_language_texts(self, step, ctx):
         switch = make_switch('<text id="t1" systemLanguage="ar">a</text><text id="t2" systemLanguage="fr">b</text>')
@@ -207,7 +232,10 @@ class TestSplitLanguagesInSwitch(TestSetup):
         assert children[0].get("systemLanguage") == "ar"
         assert children[1].get("systemLanguage") == "fr"
 
-        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">a</text><text id="t2" systemLanguage="fr">b</text></switch>"""
+        assert (
+            self.tostring(switch, False)
+            == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">a</text><text id="t2" systemLanguage="fr">b</text></switch>"""
+        )
 
     def test_clones_are_inserted_immediately_after_original_in_order(self, step, ctx):
         switch = make_switch('<text id="t1" systemLanguage="ar,fr">a</text><text id="t2" systemLanguage="en">b</text>')
@@ -218,7 +246,10 @@ class TestSplitLanguagesInSwitch(TestSetup):
         # expected order: t1(ar), clone(fr), t2(en)
         assert len(children) == 3
         assert [c.get("systemLanguage") for c in children] == ["ar", "fr", "en"]
-        assert self.tostring(switch, False) == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">a</text><text id="t1-fr" systemLanguage="fr">a</text><text id="t2" systemLanguage="en">b</text></switch>"""
+        assert (
+            self.tostring(switch, False)
+            == """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">a</text><text id="t1-fr" systemLanguage="fr">a</text><text id="t2" systemLanguage="en">b</text></switch>"""
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -242,7 +273,10 @@ class TestSplitSwitchLanguages(TestSetup):
         second_switch_texts = list(switches[1])
         assert [t.get("systemLanguage") for t in second_switch_texts] == ["en"]
 
-        assert self.tostring(ctx.root, False) == """<svg xmlns="http://www.w3.org/2000/svg"><switch><text id="a1" systemLanguage="ar">a</text><text id="a1-fr" systemLanguage="fr">a</text></switch><g><switch><text id="b1" systemLanguage="en">b</text></switch></g></svg>"""
+        assert (
+            self.tostring(ctx.root, False)
+            == """<svg xmlns="http://www.w3.org/2000/svg"><switch><text id="a1" systemLanguage="ar">a</text><text id="a1-fr" systemLanguage="fr">a</text></switch><g><switch><text id="b1" systemLanguage="en">b</text></switch></g></svg>"""
+        )
 
     def test_no_switches_is_a_no_op(self, step, ctx):
         svg = f'<svg xmlns="{SVG_NS}"><text id="a1">a</text></svg>'
