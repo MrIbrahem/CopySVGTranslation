@@ -9,6 +9,10 @@ from lxml import etree
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
+from ..exceptions import (
+    SvgNestedTspanError,
+    SvgStructureError,
+)
 from ..preparation import SvgPreparationPipeline
 from ..result import InjectorData, InjectorStats
 from ..titles import YearTitleHandler
@@ -22,11 +26,13 @@ SVG_NS = "http://www.w3.org/2000/svg"
 
 
 class SVGTranslationInjector:
+    """Injects translations into SVG files."""
+
     def __init__(
         self,
         config: TranslationConfig | None = None,
     ) -> None:
-        self.config = config
+        self.config = config or TranslationConfig()
         self.preparer = SvgPreparationPipeline(self.config)
 
         self.id_manager = IdManager()
@@ -41,24 +47,47 @@ class SVGTranslationInjector:
     def inject(
         self,
         svg_path: Path | str,
-        mapping: TranslationMapping,
+        mapping: TranslationMapping | dict,
         *,
         save_path: Path | None = None,
         save: bool = False,
-    ) -> tuple[etree._ElementTree | None, InjectorStats]:
-        svg_path = Path(svg_path)
-        stats = InjectorStats()
+    ) -> InjectorData:
+        """
+        Inject translations into the provided SVG file.
+        """
+        result = InjectorData()
+        stats = result.new_stats
 
+        svg_path = Path(svg_path)
+
+
+        logger.debug(f"Injecting translations into {svg_path}")
         # 1. Prepare (pipeline)
         try:
             tree, root = self.preparer.run(svg_path)
+        except SvgNestedTspanError as exc:
+            stats.error = "nested_tspan_error"
+            return result
+
+        except SvgStructureError as exc:
+            stats.error = str(exc)
+            return result
+
+        except etree.XMLSyntaxError as exc:
+            logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
+            stats.error = str(exc)
+            return result
+
         except Exception as exc:
+            logger.error("Failed to parse SVG file: %s", exc)
             stats.error = f"preparation_failed: {exc}"
-            return None, stats
+            return result
 
         if tree is None or root is None:
             stats.error = "preparation_returned_none_tree"
-            return None, stats
+            return result
+
+        result.tree = tree
 
         # 2. Snapshot languages before
         before_languages = tree_languages(tree)
@@ -83,19 +112,21 @@ class SVGTranslationInjector:
         self._update_data(stats, before_languages, after_languages)
 
         if not save:
-            return tree, stats
+            return result
 
         # 7. Save if requested
         if save_path is None:
-            logger.error("save_result is True but no save_path was provided")
-            return tree, stats
+            logger.error("save is True but no save_path was provided")
+            stats.error = "No target path provided"
+            return result
 
         try:
             self._save(tree, save_path)
         except OSError as e:
             logger.error(f"Failed writing {str(save_path)}: {e}")
+            stats.error = f"Failed writing {str(save_path)}: {e}"
 
-        return tree, stats
+        return result
 
     def work_on_switches(
         self,

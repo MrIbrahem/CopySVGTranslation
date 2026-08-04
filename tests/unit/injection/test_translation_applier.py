@@ -111,6 +111,8 @@ class TestApplyLanguageInsert:
             translations=translations,
             existing_lang_node=None,
         )
+        assert result.node is not None
+
         # The cloned node should have a new ID (not "t0")
         assert result.node.get("id") != "t0"
 
@@ -126,8 +128,11 @@ class TestApplyLanguageInsert:
             existing_lang_node=None,
         )
         assert result.action == "inserted"
+        assert result.node is not None
+
         # tspan text should remain the original (cloned) text
         tspans = result.node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
+        assert tspans is not None
         assert tspans[0].text == "Hello"
 
     def test_insert_empty_default_texts(self):
@@ -177,6 +182,8 @@ class TestApplyLanguageSkip:
             translations={"Hello": "Nueva"},
             existing_lang_node=existing,
         )
+        assert result.node is not None
+
         tspans = result.node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
         assert tspans[0].text == "Hola"  # unchanged
 
@@ -200,6 +207,8 @@ class TestApplyLanguageUpdate:
             existing_lang_node=existing,
         )
         assert result.action == "updated"
+        assert result.node is not None
+
         tspans = result.node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
         assert tspans[0].text == "Hola nueva"
 
@@ -217,6 +226,8 @@ class TestApplyLanguageUpdate:
             existing_lang_node=existing,
         )
         assert result.action == "updated"
+        assert result.node is not None
+
         assert result.node.text == "Bonjour new"
 
     def test_update_no_matching_translation(self):
@@ -232,6 +243,8 @@ class TestApplyLanguageUpdate:
             existing_lang_node=existing,
         )
         assert result.action == "updated"
+        assert result.node is not None
+
         # Text should remain unchanged
         tspans = result.node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
         assert tspans[0].text == "Hola"

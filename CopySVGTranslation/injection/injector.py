@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping
 from pathlib import Path
 
 from lxml import etree
@@ -77,21 +76,22 @@ class SVGTranslationInjector:
 
     def inject(
         self,
-        inject_file: Path | str,
+        svg_path: Path | str,
         mapping: TranslationMapping | dict,
         *,
         save_path: Path | None = None,
-        save_result: bool = False,
+        save: bool = False,
     ) -> InjectorData:
-        """Inject translations into the provided SVG file."""
-
-        # Reset state to prevent accumulation across calls
+        """
+        Inject translations into the provided SVG file.
+        """
         result = InjectorData()
+        stats = result.new_stats
 
-        inject_path = Path(str(inject_file))
+        svg_path = Path(str(svg_path))
 
-        if not inject_path.exists():
-            logger.error(f"SVG file not found: {inject_path}")
+        if not svg_path.exists():
+            logger.error(f"SVG file not found: {svg_path}")
             result.new_stats.error = "File does not exist"
             return result
 
@@ -100,12 +100,25 @@ class SVGTranslationInjector:
             result.new_stats.error = "No valid mappings found"
             return result
 
-        logger.debug(f"Injecting translations into {inject_path}")
-        stats = result.new_stats
+        logger.debug(f"Injecting translations into {svg_path}")
         # 1. Prepare (pipeline)
         try:
-            tree, root = self._parse_svg(inject_path, result.new_stats)
+            tree, root = self.preparer.run(svg_path)
+        except SvgNestedTspanError as exc:
+            stats.error = "nested_tspan_error"
+            return result
+
+        except SvgStructureError as exc:
+            stats.error = str(exc)
+            return result
+
+        except etree.XMLSyntaxError as exc:
+            logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
+            stats.error = str(exc)
+            return result
+
         except Exception as exc:
+            logger.error("Failed to parse SVG file: %s", exc)
             stats.error = f"preparation_failed: {exc}"
             return result
 
@@ -137,20 +150,20 @@ class SVGTranslationInjector:
         after_languages = tree_languages(tree)
         self._update_data(stats, before_languages, after_languages)
 
-        if not save_result:
+        if not save:
             return result
 
         # 7. Save if requested
         if save_path is None:
-            logger.error("save_result is True but no save_path was provided")
-            result.new_stats.error = "No target path provided"
+            logger.error("save is True but no save_path was provided")
+            stats.error = "No target path provided"
             return result
 
         try:
             self._save(tree, save_path)
         except OSError as e:
             logger.error(f"Failed writing {str(save_path)}: {e}")
-            result.new_stats.error = f"Failed writing {str(save_path)}: {e}"
+            stats.error = f"Failed writing {str(save_path)}: {e}"
 
         return result
 

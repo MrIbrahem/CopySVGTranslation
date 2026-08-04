@@ -5,7 +5,7 @@ from .core.mapping import TranslationEntry, TranslationMapping
 from .extraction import SVGTranslationExtractor, extract
 from .injection import InjectorData, SVGTranslationInjector, inject_file_tree
 from .io.mapping_store import MappingStore
-from .nested_analyze import fix_nested_file, match_nested_tags
+from .nested_analyze import fix_nested_file, match_nested_tags, NestedTspanDetector
 from .result import InjectorStats, InjectResult, OperationResult
 from .service import SVGTranslationService
 
@@ -18,6 +18,7 @@ __all__ = [
     "MappingStore",
     "inject_file_tree",  # to be deprecated
     "extract",  # to be deprecated
+    "NestedTspanDetector",
     # dataclasses
     "TranslationMapping",
     "TranslationEntry",

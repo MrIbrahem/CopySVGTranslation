@@ -42,9 +42,9 @@ def inject_file_tree(
     injector = SVGTranslationInjector(config)
 
     result: InjectorData = injector.inject(
-        inject_file=inject_file,
+        svg_path=inject_file,
         mapping=mapping,
-        save_result=save_result,
+        save=save_result,
         save_path=save_path,
     )
 

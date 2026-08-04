@@ -13,7 +13,7 @@ from .core.mapping import TranslationMapping
 from .extraction.extractor import SVGTranslationExtractor
 from .injection.injector import SVGTranslationInjector
 from .io.mapping_store import MappingStore
-from .result import InjectResult, OperationResult
+from .result import InjectorData, OperationResult
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ class SVGTranslationService:
         *,
         output: Path | str | None = None,
         save: bool | None = None,
-    ) -> InjectResult:
+    ) -> OperationResult:
         """
         Inject translations into an SVG file.
 
@@ -125,11 +125,11 @@ class SVGTranslationService:
         try:
             normalized = TranslationMapping.from_any(mapping)
             resolved_output = self._resolve_output_path(output) if output else None
-            injector_data = self._injector.inject(
+            injector_data: InjectorData = self._injector.inject(
                 svg_path,
                 normalized,
                 save_path=resolved_output,
-                save_result=should_save,
+                save=should_save,
             )
         except Exception as exc:
             logger.exception("Injection failed for %s", svg_path)
@@ -155,7 +155,7 @@ class SVGTranslationService:
         output: Path | str | None = None,
         save_mapping: bool | Path | None = None,
         save: bool | None = None,
-    ) -> InjectResult:
+    ) -> OperationResult:
         """
         Extract translations from `source` and inject them into `target`.
 
