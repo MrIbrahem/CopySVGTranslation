@@ -13,10 +13,10 @@ from pathlib import Path
 import pytest
 
 from CopySVGTranslation.exceptions import SvgStructureError
-from CopySVGTranslation.preparation import (
-    # SvgPreparationPipeline,
+from CopySVGTranslation.preparation import (  # SvgPreparationPipeline,
     make_translation_ready,
 )
+
 
 class TestMakeTranslationReadyEdgeCases:
     """Test suite for make_translation_ready edge cases."""

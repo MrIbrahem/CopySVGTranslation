@@ -65,6 +65,7 @@ class TestSetup:
     def tostring(self, el: etree._Element, pretty_print=False) -> str:
         return etree.tostring(el, pretty_print=pretty_print).decode("utf-8").strip()
 
+
 class TestSplitLanguagesInSwitch(TestSetup):
 
     def test_single_text_without_systemlanguage_is_left_as_fallback(self, step, ctx):
@@ -86,7 +87,9 @@ class TestSplitLanguagesInSwitch(TestSetup):
         children = list(switch)
         assert len(children) == 1
         assert children[0].get("systemLanguage") == "ar"
-        expected_output = """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text></switch>"""
+        expected_output = (
+            """<switch xmlns="http://www.w3.org/2000/svg"><text id="t1" systemLanguage="ar">hello</text></switch>"""
+        )
         assert self.tostring(switch) == expected_output
 
     def test_explicit_fallback_value_is_normalized_to_no_attribute(self, step, ctx):
@@ -184,7 +187,6 @@ class TestSplitLanguagesInSwitch(TestSetup):
         assert self.tostring(switch) == expected_output
 
 
-
 class TestSplitLanguagesInSwitchErrors(TestSetup):
 
     def test_duplicate_language_within_same_text_raises(self, step, ctx):
@@ -231,9 +233,10 @@ class TestSplitLanguagesInSwitchErrors(TestSetup):
         text_children = [c for c in switch if isinstance(c.tag, str)]
         assert len(text_children) == 1
 
-        expected_output = """<switch xmlns="http://www.w3.org/2000/svg"><!-- a comment --><text id="t1">hello</text></switch>"""
+        expected_output = (
+            """<switch xmlns="http://www.w3.org/2000/svg"><!-- a comment --><text id="t1">hello</text></switch>"""
+        )
         assert self.tostring(switch) == expected_output
-
 
     def test_error_in_one_switch_propagates(self, step, ctx):
         svg = f"""
@@ -247,6 +250,7 @@ class TestSplitLanguagesInSwitchErrors(TestSetup):
 
         with pytest.raises(SvgStructureError):
             step._split_switch_languages(ctx)
+
 
 # ---------------------------------------------------------------------------
 # _split_switch_languages (drives every <switch> found under ctx.root)

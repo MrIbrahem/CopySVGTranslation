@@ -14,6 +14,7 @@ from CopySVGTranslation.utils.injection_utils import (
     load_all_mappings,
 )
 
+
 class TestSetup:
     @pytest.fixture(autouse=True)
     def setUp(self):

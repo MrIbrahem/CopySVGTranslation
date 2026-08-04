@@ -11,6 +11,7 @@ from CopySVGTranslation.injection import (
     inject_file_tree,
 )
 
+
 class TestInjector:
     """Test cases for injection functions."""
 
