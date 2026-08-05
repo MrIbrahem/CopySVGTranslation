@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import warnings
+import logging
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,8 @@ from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
 from ..io.mapping_store import MappingStore
 from ..service import SVGTranslationService
+
+logger = logging.getLogger(__name__)
 
 
 def inject_file_tree(
@@ -59,9 +62,11 @@ def inject_file_tree(
     )
     service = SVGTranslationService(config)
 
+    mapping_obj = TranslationMapping.from_any(mapping)
+
     result = service.inject(
-        inject_path,
-        TranslationMapping.from_any(mapping),
+        svg_path=inject_path,
+        mapping=mapping_obj,
         output=save_path,
         save=save_result,
     )

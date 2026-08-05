@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
+import warnings
 import logging
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
 from ..config import TranslationConfig
-from ..utils.injection_utils import load_all_mappings
-from .injector import InjectorData, SVGTranslationInjector
+from ..core.mapping import TranslationMapping
+from ..io.mapping_store import MappingStore
+from ..injection.injector import InjectorData, SVGTranslationInjector
 
 logger = logging.getLogger(__name__)
 
@@ -27,25 +29,46 @@ def inject_file_tree(
     pretty_print: bool | None = None,
 ) -> tuple[Any, Any] | Any:
     """
-    Legacy function-style wrapper around SVGTranslationInjector, kept for
-    backward compatibility with existing callers.
+    Deprecated. Use SVGTranslationService.inject() instead.
     """
-    if not mapping and mapping_files:
-        mapping_files = list(mapping_files)
-        mapping = load_all_mappings(mapping_files)
+    warnings.warn(
+        "copy_svg_translation.inject() is deprecated. Use SVGTranslationService.inject() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
 
+    # ---- normalize legacy argument aliases ----
+
+    if inject_file is None:
+        return (None, {"error": "No inject file provided"}) if return_stats else None
+
+    # ---- resolve mapping ----
+    if mapping is None and mapping_files:
+        store = MappingStore()
+        mapping = store.load_many(mapping_files).to_json()
+
+    if not mapping:
+        return (None, {"error": "No valid mappings found"}) if return_stats else None
+
+    # ---- resolve output path ----
+    inject_path = Path(str(inject_file))
+
+    # ---- call new service ----
     config = TranslationConfig(
         case_insensitive=case_insensitive,
         overwrite=overwrite,
         pretty_print=pretty_print,
+        auto_save=False,
     )
-    injector = SVGTranslationInjector(config)
+    service = SVGTranslationInjector(config)
 
-    result: InjectorData = injector.inject(
-        svg_path=inject_file,
-        mapping=mapping,
-        save=save_result,
+    mapping_obj = TranslationMapping.from_any(mapping)
+
+    result: InjectorData = service.inject(
+        svg_path=inject_path,
+        mapping=mapping_obj,
         save_path=save_path,
+        save=save_result,
     )
 
     if return_stats:

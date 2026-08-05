@@ -10,7 +10,6 @@ from pathlib import Path
 import pytest
 
 from CopySVGTranslation.utils.injection_utils import (
-    generate_unique_id,
     load_all_mappings,
 )
 
@@ -102,113 +101,6 @@ class TestLoadAllMappingsEdgeCases(TestSetup):
         assert "key" in result
 
         assert result == {"key": {"value": "test"}}
-
-
-class TestGenerateUniqueIdFunction:
-    """Comprehensive tests for the generate_unique_id function."""
-
-    def test_generate_unique_id_no_collision(self):
-        """generate_unique_id should append language code when no collision."""
-        existing_ids = {"id1", "id2"}
-        result = generate_unique_id("base", "fr", existing_ids)
-        assert result == "base-fr"
-
-    def test_generate_unique_id_with_collision(self):
-        """generate_unique_id should handle ID collisions."""
-        existing_ids = {"base-ar"}
-        result = generate_unique_id("base", "ar", existing_ids)
-        assert result == "base-ar-1"
-
-    def test_generate_unique_id_multiple_collisions(self):
-        """generate_unique_id should handle multiple collisions."""
-        existing_ids = {"base-ar", "base-ar-1", "base-ar-2"}
-        result = generate_unique_id("base", "ar", existing_ids)
-        assert result == "base-ar-3"
-
-    def test_generate_unique_id_empty_existing_set(self):
-        """generate_unique_id should work with empty existing ID set."""
-        result = generate_unique_id("base", "de", set())
-        assert result == "base-de"
-
-    def test_generate_unique_id_preserves_base_id(self):
-        """generate_unique_id should preserve the base ID structure."""
-        existing_ids = {"other-id"}
-        result = generate_unique_id("my-element", "es", existing_ids)
-        assert result == "my-element-es"
-        assert result.startswith("my-element")
-
-    def test_generate_unique_id_different_languages(self):
-        """generate_unique_id should handle different language codes."""
-        existing_ids = set()
-
-        ar_id = generate_unique_id("base", "ar", existing_ids)
-        existing_ids.add(ar_id)
-
-        fr_id = generate_unique_id("base", "fr", existing_ids)
-        existing_ids.add(fr_id)
-
-        assert ar_id == "base-ar"
-        assert fr_id == "base-fr"
-        assert ar_id != fr_id
-
-    def test_generate_unique_id_complex_base_id(self):
-        """generate_unique_id should handle complex base IDs."""
-        existing_ids = set()
-        result = generate_unique_id("text-2205-tspan", "ar", existing_ids)
-        assert result == "text-2205-tspan-ar"
-
-    def test_generate_unique_id_idempotency(self):
-        """generate_unique_id should generate consistent IDs."""
-        existing_ids = {"base-ar"}
-        result1 = generate_unique_id("base", "ar", existing_ids)
-        result2 = generate_unique_id("base", "ar", existing_ids)
-        assert result1 == result2 == "base-ar-1"
-
-    def test_generate_unique_id_with_large_collision_set(self):
-        """generate_unique_id should handle large sets of existing IDs."""
-        existing_ids = {f"base-ar-{i}" for i in range(100)}
-        existing_ids.add("base-ar")
-
-        result = generate_unique_id("base", "ar", existing_ids)
-        assert result == "base-ar-100"
-
-    def test_generate_unique_id_is_importable(self):
-        """The generate_unique_id function should be importable from top-level module."""
-        assert callable(generate_unique_id)
-        assert generate_unique_id.__name__ == "generate_unique_id"
-
-
-class TestGenerateUniqueId:
-    """Tests for injection-related functions."""
-
-    def test_generate_unique_id_no_collision(self):
-        """Test unique ID generation without collision."""
-        result = generate_unique_id("text", "ar", {"other"})
-        assert result == "text-ar"
-
-    def test_generate_unique_id_with_collision(self):
-        """Test unique ID generation handles collisions."""
-        existing = {"text-ar", "text-ar-1"}
-        result = generate_unique_id("text", "ar", existing)
-        assert result == "text-ar-2"
-
-    def test_generate_unique_id_with_many_collisions(self):
-        """Test unique ID generation with many existing IDs."""
-        existing = {f"id-ar-{i}" for i in range(100)}
-        existing.add("id-ar")
-        result = generate_unique_id("id", "ar", existing)
-        assert result == "id-ar-100"
-
-    def test_generate_unique_id_empty_base(self):
-        """Test unique ID generation with empty base ID."""
-        result = generate_unique_id("", "ar", set())
-        assert result == "-ar"
-
-    def test_generate_unique_id_with_special_characters(self):
-        """Test unique ID generation with special characters in base."""
-        result = generate_unique_id("text-123", "fr", set())
-        assert result == "text-123-fr"
-
 
 class TestLoadAllMappings:
     """Tests for injection-related functions."""

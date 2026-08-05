@@ -96,10 +96,13 @@ class TranslationMapping:
 
     def merge(self, other: TranslationMapping | Mapping[str, Any]) -> None:
         other = self.from_any(other)
+
         for source, trans in other.new.items():
             self.new.setdefault(source, {}).update(trans)
+
         for source, trans in other.title_new.items():
             self.title_new.setdefault(source, {}).update(trans)
+
         self.tspans_by_id.update(other.tspans_by_id)
 
     def to_json(self) -> dict[str, Any]:
