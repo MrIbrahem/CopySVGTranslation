@@ -104,11 +104,12 @@ class TestIntegrationWorkflows:
         translations = extract(fixtures_dir / "source.svg")
 
         # Inject using the dict
-        result, stats = inject_file_and_save(
+        result, stats = inject_file_tree(
             inject_file=target_svg,
             mapping=translations,
             save_path=tmp_path / "target2.svg",
             return_stats=True,
+            save_result=True,
         )
 
         assert result is not None
