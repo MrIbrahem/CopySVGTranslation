@@ -39,6 +39,7 @@ class TranslationMapping:
     title_new: dict[str, dict[str, str]] = field(default_factory=dict)
     tspans_by_id: dict[str, str] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
+    error: str = ""
 
     # ------------------------------------------------------------------
     # Factory helpers
@@ -105,11 +106,13 @@ class TranslationMapping:
         self.tspans_by_id.update(other.tspans_by_id)
 
     def to_json(self) -> dict[str, Any]:
+        error = self.error or self.meta.get("error") or ""
         return {
             "new": self.new,
             "title_new": self.title_new,
             "tspans_by_id": self.tspans_by_id,
             "meta": self.meta,
+            "error": error,
         }
 
 

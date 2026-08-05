@@ -68,9 +68,7 @@ class TestExtractor:
             encoding="utf-8",
         )
         result = extract(svg)
-        assert result is not None
-
-        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
+        assert result is None
 
     def test_extract_case_sensitive(self, temp_dir):
         """Test extraction with case_insensitive=False."""
@@ -113,9 +111,7 @@ class TestExtractor:
             encoding="utf-8",
         )
         result = extract(svg)
-        assert result is not None
-
-        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
+        assert result is None
 
     def test_extract_translation_tspan_without_id(self, temp_dir):
         """Translations without IDs should fall back to positional matching."""

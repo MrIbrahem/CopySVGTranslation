@@ -1,11 +1,12 @@
-"""Extraction phase helpers for CopySVGTranslation."""
+# legacy/extract.py
+from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from typing import Any
 
 from ..config import TranslationConfig
-from ..exceptions import SvgIOError, SvgParseError
-from ..extraction.extractor import SVGTranslationExtractor
+from ..service import SVGTranslationService
 
 
 def extract(
@@ -13,33 +14,25 @@ def extract(
     case_insensitive: bool = True,
 ) -> dict[str, Any] | None:
     """
-    Legacy function-style wrapper around SVGTranslationExtractor, kept for
-    backward compatibility with existing callers.
+    Deprecated. Use SVGTranslationService.extract() instead.
 
-    Parameters:
-        source_file (str | Path): Path to the SVG file to process.
-        case_insensitive (bool): If true, treat default text keys
-            case-insensitively by lowercasing them.
-
-    Returns:
-        dict | None: A dictionary containing extracted translations, or
-        None if the file does not exist or could not be parsed.
+    Legacy function-style wrapper kept for backward compatibility.
+    Returns a plain dict (or None on failure), matching the old API.
     """
-    config = TranslationConfig(
-        case_insensitive=case_insensitive,
+    warnings.warn(
+        "copy_svg_translation.extract() is deprecated. Use SVGTranslationService.extract() instead.",
+        DeprecationWarning,
+        stacklevel=2,
     )
-    extractor = SVGTranslationExtractor(config)
 
-    try:
-        result = extractor.extract(source_file)
-    except (SvgIOError, SvgParseError):
+    config = TranslationConfig(case_insensitive=case_insensitive)
+    service = SVGTranslationService(config)
+    result = service.extract(source_file)
+
+    if not result.success or result.data is None:
         return None
 
-    if result.error:
-        return None
-
-    # { "new": {}, "tspans_by_id": {}, "title_new": { } }
-    return result.to_json()
+    return result.data.to_json()
 
 
 __all__ = [

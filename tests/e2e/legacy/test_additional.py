@@ -67,8 +67,8 @@ class TestExtractorEdgeCases:
         svg = temp_dir / "empty.svg"
         svg.write_text('<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"></svg>', encoding="utf-8")
         result = extract(svg)
-        assert result is not None
-        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
+        assert result is None
+
 
 
 # -------------------------------

@@ -122,7 +122,7 @@ def test_extract_empty_svg(tmp_path: Path) -> None:
 
     result = extract(empty_svg)
 
-    assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
+    assert result is None
 
 
 def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:

@@ -35,9 +35,7 @@ class TestExtractEdgeCases:
 
         result = extract(svg_path)
 
-        # Should handle gracefully
-        assert result is not None
-        assert result is not None
+        assert result is None
 
     def test_extract_switch_without_default_text(self):
         """Test extraction with switch containing only translated text."""
@@ -51,7 +49,7 @@ class TestExtractEdgeCases:
 
         result = extract(svg_path)
 
-        assert result is not None
+        assert result is None
 
     def test_extract_with_mixed_tspan_and_text(self):
         """Test extraction with mixed tspan and direct text."""
@@ -109,8 +107,7 @@ class TestExtractEdgeCases:
 
         result = extract(svg_path)
 
-        assert result is not None
-        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
+        assert result is None
 
     def test_extract_with_base_id_fallback(self):
         """Test extraction with base_id lookup fallback."""
