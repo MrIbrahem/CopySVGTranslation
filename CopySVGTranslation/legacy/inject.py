@@ -26,6 +26,7 @@ def _inject_file_tree(
     overwrite: bool = False,
     save_result: bool = False,
     pretty_print: bool | None = None,
+    sort_switches: bool | None = None,
 ) -> tuple[Any, Any] | Any:
     """
     Deprecated. Use SVGTranslationService.inject() instead.
@@ -62,6 +63,7 @@ def _inject_file_tree(
         case_insensitive=case_insensitive,
         overwrite=overwrite,
         pretty_print=pretty_print,
+        sort_switches=sort_switches,
         auto_save=False,
     )
     service = SVGTranslationInjector(config)
@@ -89,6 +91,7 @@ def inject_file_tree(
     save_result: bool = False,
     return_stats: bool = False,
     pretty_print: bool | None = None,
+    sort_switches: bool | None = None,
 ) -> tuple[Any, Any] | Any:
     """
     Deprecated. Use SVGTranslationService.inject() instead.
@@ -102,6 +105,7 @@ def inject_file_tree(
         overwrite=overwrite,
         save_result=save_result or bool(save_path),
         pretty_print=pretty_print,
+        sort_switches=sort_switches,
     )
 
     if return_stats:

@@ -16,6 +16,7 @@ from ..exceptions import (
 from ..preparation import SvgPreparationPipeline
 from ..result import InjectorData, InjectorStats
 from ..titles import YearTitleHandler
+from ..utils import sort_switch_texts
 from ..utils.xml import tree_languages
 from .id_manager import IdManager
 from .switch_processor import SwitchProcessor
@@ -43,6 +44,16 @@ class SVGTranslationInjector:
             self.applier,
             YearTitleHandler(self.config),
         )
+
+    def _finalize_switches(self, root) -> None:
+        # Fix old <svg:switch> tags if present
+
+        if not self.config.sort_switches:
+            return
+
+        for elem in root.findall(".//svg:switch", namespaces={"svg": SVG_NS}):
+            elem.tag = "switch"
+            sort_switch_texts(elem)
 
     def inject(
         self,
@@ -113,7 +124,7 @@ class SVGTranslationInjector:
         )
 
         # 5. Final housekeeping
-        # self._finalize_switches(root)
+        self._finalize_switches(root)
 
         # 6. Languages after + stats
         after_languages = tree_languages(tree)

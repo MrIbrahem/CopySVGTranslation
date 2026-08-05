@@ -60,6 +60,8 @@ class TranslationConfig:
     assign_missing_ids: bool = True
     """Automatically assign trsvgN IDs to translatable nodes that lack an id."""
 
+    sort_switches: bool = False
+
     # --- Logging / diagnostics ---
     collect_warnings: bool = True
     """Collect non-fatal warnings into OperationResult.warnings."""
