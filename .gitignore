@@ -10,3 +10,7 @@ tests/example/برمت.txt
 CopySVGTranslation/injection/preparation_backup.py
 tests/**/*.json
 **/tests/**/*.json
+poetry.lock
+*.7z
+*.zip
+*.rar
