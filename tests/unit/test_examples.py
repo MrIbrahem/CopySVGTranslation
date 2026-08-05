@@ -5,6 +5,7 @@ import pytest
 from CopySVGTranslation.extraction.worker import extract
 from CopySVGTranslation.legacy.inject import inject_file_and_save
 
+
 class TestIntegrationWorkflows:
 
     @pytest.fixture(autouse=True)

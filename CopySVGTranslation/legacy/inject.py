@@ -2,16 +2,16 @@
 
 from __future__ import annotations
 
-import warnings
 import logging
+import warnings
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
-from ..io.mapping_store import MappingStore
 from ..injection.injector import InjectorData, SVGTranslationInjector
+from ..io.mapping_store import MappingStore
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +71,7 @@ def _inject_file_tree(
     )
 
     return result.tree, result.inject_stats.to_json()
+
 
 def inject_file_tree(
     *,

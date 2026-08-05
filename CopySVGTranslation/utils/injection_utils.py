@@ -9,6 +9,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+
 def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
     """Load and merge translation mapping JSON files into a single dictionary."""
     mapping: dict = {}

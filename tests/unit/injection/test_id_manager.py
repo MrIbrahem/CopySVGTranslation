@@ -4,14 +4,15 @@ Unit tests for CopySVGTranslation/injection/id_manager.py module.
 Classes to test: IdManager
 """
 
-
 from CopySVGTranslation.injection.id_manager import (
     IdManager,
 )
 
+
 def allocate_clone(base_id: str | None, lang: str, existing_ids) -> str:
     id_manager = IdManager(existing_ids)
     return id_manager.allocate_clone(base_id, lang)
+
 
 class TestGenerateUniqueIdFunction:
     """Comprehensive tests for the allocate_clone function."""
@@ -116,4 +117,3 @@ class TestGenerateUniqueId:
         """Test unique ID generation with special characters in base."""
         result = allocate_clone("text-123", "fr", set())
         assert result == "text-fr"
-

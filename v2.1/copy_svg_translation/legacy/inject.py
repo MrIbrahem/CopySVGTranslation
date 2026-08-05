@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import warnings
 import logging
+import warnings
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any

@@ -74,6 +74,7 @@ class TranslationConfig:
 
         return replace(self, **kwargs)
 
+
 __all__ = [
     "TranslationConfig",
 ]

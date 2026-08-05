@@ -3,9 +3,11 @@
 pytest tests/preparation/test_preparation.py
 
 """
+
 import pytest
 
 from CopySVGTranslation.preparation import make_translation_ready
+
 
 class TestIntegrationWorkflows:
 

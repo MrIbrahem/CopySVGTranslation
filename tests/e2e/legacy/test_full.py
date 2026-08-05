@@ -9,6 +9,7 @@ import pytest
 from CopySVGTranslation.extraction.worker import extract
 from CopySVGTranslation.legacy import inject_file_and_save, inject_file_tree
 
+
 @pytest.fixture()
 def target_svg(tmp_path: Path, fixtures_dir) -> Path:
     """Return a writable copy of the target SVG fixture."""

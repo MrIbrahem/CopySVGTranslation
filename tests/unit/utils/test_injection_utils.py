@@ -102,6 +102,7 @@ class TestLoadAllMappingsEdgeCases(TestSetup):
 
         assert result == {"key": {"value": "test"}}
 
+
 class TestLoadAllMappings:
     """Tests for injection-related functions."""
 

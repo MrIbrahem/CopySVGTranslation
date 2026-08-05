@@ -1,19 +1,18 @@
-
 from .text import normalize_lang, normalize_text, split_lang_list
 from .xml import (
     SVG_NS,
     SVG_NSMAP,
     collect_ids,
+    extract_root_languages,
+    extract_text_from_node,
     extract_text_segments,
+    file_langs,
     findall_svg,
     is_svg_element,
     local_name,
-    extract_root_languages,
-    extract_text_from_node,
-    file_langs,
     sort_switch_children,
-    svg_tag,
     sort_switch_texts,
+    svg_tag,
     tree_languages,
     xpath_svg,
 )
