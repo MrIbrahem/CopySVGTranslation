@@ -10,8 +10,8 @@ from typing import Any
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
-from ..injection.injector import InjectorData, SVGTranslationInjector
 from ..io.mapping_store import MappingStore
+from ..service import SVGTranslationService
 
 logger = logging.getLogger(__name__)
 
@@ -66,18 +66,21 @@ def _inject_file_tree(
         sort_switches=sort_switches,
         auto_save=False,
     )
-    service = SVGTranslationInjector(config)
+    service = SVGTranslationService(config)
 
     mapping_obj = TranslationMapping.from_any(mapping)
 
-    result: InjectorData = service.inject(
+    result = service.inject(
         svg_path=inject_path,
         mapping=mapping_obj,
-        save_path=save_path,
+        output=save_path,
         save=save_result,
     )
 
-    return result.tree, result.inject_stats.to_json()
+    if not result.success or result.data is None:
+        return (None, {"error": "error"})
+
+    return result.data.tree, result.stats.to_json()
 
 
 def inject_file_tree(

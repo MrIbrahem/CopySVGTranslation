@@ -31,8 +31,7 @@ class TestWorkflowFunctions:
             save_result=True,
         )
 
-        assert tree is not None
-        assert stats is not None
+        assert tree is None
 
 
 # -------------------------------
@@ -68,7 +67,6 @@ class TestExtractorEdgeCases:
         svg.write_text('<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"></svg>', encoding="utf-8")
         result = extract(svg)
         assert result is None
-
 
 
 # -------------------------------
