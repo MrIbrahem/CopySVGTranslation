@@ -44,7 +44,12 @@ def _inject_file_tree(
     # ---- resolve mapping ----
     if not mapping and mapping_files:
         store = MappingStore()
-        mapping = store.load_many(mapping_files).to_json()
+
+        mapping_obj = store.load_many(mapping_files)
+        if mapping_obj.is_empty():
+            return (None, {"error": "No valid mappings found"})
+
+        mapping = mapping_obj.to_json()
 
     if not mapping:
         return (None, {"error": "No valid mappings found"})

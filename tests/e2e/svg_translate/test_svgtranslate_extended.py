@@ -353,9 +353,8 @@ class TestSVGTranslate(TestSetup):
             return_stats=True,
         )
 
-        # Should complete without error, but with no translations
-        assert tree is not None
-        assert stats["inserted_translations"] == 0
+        assert tree is None
+        assert stats == {"error": "No valid mappings found"}
 
     def test_inject_invalid_json_mapping(self):
         """Test injection with invalid JSON mapping file."""
