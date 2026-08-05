@@ -1,4 +1,4 @@
-from CopySVGTranslation import extract
+from CopySVGTranslation.extraction.worker import extract
 
 
 class TestExtractor:

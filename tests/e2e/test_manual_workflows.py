@@ -11,12 +11,13 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from CopySVGTranslation import TranslationConfig, extract
+from CopySVGTranslation import TranslationConfig
+from CopySVGTranslation.extraction.worker import extract
 from CopySVGTranslation.exceptions import (
     SvgNestedTspanError,
     SvgStructureError,
 )
-from CopySVGTranslation.injection import (
+from CopySVGTranslation.legacy import (
     inject_file_and_save,
 )
 from CopySVGTranslation.preparation import SvgPreparationPipeline

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation import extract
+from CopySVGTranslation.extraction.worker import extract
 
 
 class TestExtractYearHandling:

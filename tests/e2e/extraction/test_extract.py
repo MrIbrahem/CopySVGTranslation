@@ -2,7 +2,8 @@
 Comprehensive pytest tests for CopySVGTranslation covering edge cases and additional functionality.
 """
 
-from CopySVGTranslation import extract, inject_file_tree
+from CopySVGTranslation.extraction.worker import extract
+from CopySVGTranslation.legacy.inject import inject_file_tree
 
 # -------------------------------
 # Workflows tests

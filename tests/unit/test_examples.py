@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation import extract
-from CopySVGTranslation.injection import inject_file_and_save
+from CopySVGTranslation.extraction.worker import extract
+from CopySVGTranslation.legacy.inject import inject_file_and_save
 
 FIXTURES_DIR = Path(__file__).parent.parent / "tests_files/example"
 

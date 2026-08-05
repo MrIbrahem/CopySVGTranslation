@@ -10,8 +10,8 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
+from CopySVGTranslation.extraction.worker import extract
+from CopySVGTranslation.legacy.inject import inject_file_and_save, inject_file_tree
 
 
 class TestSetup:

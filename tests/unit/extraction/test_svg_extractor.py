@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.extraction import extract
+from CopySVGTranslation.extraction.worker import extract
 from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor  # noqa: F401
 
 FIXTURES_DIR = Path(__file__).parent.parent.parent

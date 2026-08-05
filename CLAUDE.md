@@ -53,7 +53,7 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 
 -   **`CopySVGTranslation/injection/injector.py`**: Contains `SVGTranslationInjector` class, `InjectorData`, and `InjectorStats` dataclasses. The main injection engine that processes `<switch>` elements, matches default text against mappings, and inserts/updates translation nodes with `systemLanguage` attributes.
 
--   **`CopySVGTranslation/injection/worker.py`**: Contains the deprecated `inject()` function — a thin wrapper around `SVGTranslationInjector` for backward compatibility.
+-   **`CopySVGTranslation/legacy/worker.py`**: Contains the deprecated `inject()` function — a thin wrapper around `SVGTranslationInjector` for backward compatibility.
 
 -   **`CopySVGTranslation/injection/preparation.py`**: SVG normalization and preparation before injection. Wraps loose text nodes in `<tspan>` elements, creates `<switch>` wrappers, normalizes language tags, assigns unique IDs (`trsvg*`), and detects unsupported structures (nested tspans, tref elements).
 

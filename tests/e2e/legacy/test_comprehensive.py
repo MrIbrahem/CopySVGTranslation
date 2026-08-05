@@ -6,7 +6,7 @@ Comprehensive pytest tests for CopySVGTranslation covering edge cases and additi
 
 from lxml import etree
 
-from CopySVGTranslation.injection import (
+from CopySVGTranslation.legacy import (
     inject_file_and_save,
     inject_file_tree,
 )

@@ -10,9 +10,7 @@ import pytest
 from CopySVGTranslation.exceptions import (
     SvgStructureError,
 )
-from CopySVGTranslation.injection import (
-    inject_file_and_save,
-)
+from CopySVGTranslation.legacy.inject import inject_file_and_save
 from CopySVGTranslation.preparation import make_translation_ready
 
 

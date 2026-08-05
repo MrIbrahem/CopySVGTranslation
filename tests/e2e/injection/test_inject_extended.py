@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
+from CopySVGTranslation.legacy.inject import inject_file_and_save, inject_file_tree
 
 
 class TestSetup:
