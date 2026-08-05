@@ -79,33 +79,6 @@ def inject_file_tree(
 
     return result.data
 
-
-def inject_file_and_save(
-    *,
-    inject_file: Path | str | None = None,
-    mapping_files: Iterable[Path | str] | None = None,
-    mapping: Mapping | None = None,
-    case_insensitive: bool = True,
-    save_path: Path,
-    overwrite: bool = False,
-    return_stats: bool = False,
-    pretty_print: bool | None = None,
-) -> tuple[Any, Any] | Any:
-
-    return inject_file_tree(
-        inject_file=inject_file,
-        mapping_files=mapping_files,
-        mapping=mapping,
-        case_insensitive=case_insensitive,
-        overwrite=overwrite,
-        pretty_print=pretty_print,
-        save_path=save_path,
-        save_result=True,
-        return_stats=return_stats,
-    )
-
-
 __all__ = [
-    "inject_file_and_save",
     "inject_file_tree",
 ]
