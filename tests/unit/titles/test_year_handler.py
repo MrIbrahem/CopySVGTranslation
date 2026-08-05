@@ -126,32 +126,32 @@ class TestBuildTemplates:
 
 
 class TestBuildTemplatesNew:
-    """Tests for YearTitleHandler.build_templates_new."""
+    """Tests for YearTitleHandler.build_templates."""
 
     def test_disabled_does_nothing(self):
         config = TranslationConfig(enable_year_titles=False)
         handler = YearTitleHandler(config)
         mapping = TranslationMapping(new={"COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020"}})
-        handler.build_templates_new(mapping)
+        handler.build_templates(mapping)
         assert mapping.title_new == {}
 
     def test_builds_title_new(self):
         handler = YearTitleHandler()
         mapping = TranslationMapping(new={"COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020"}})
-        handler.build_templates_new(mapping)
+        handler.build_templates(mapping)
         assert "COVID-19 pandemic {year}" in mapping.title_new
         assert mapping.title_new["COVID-19 pandemic {year}"]["ar"] == "جائحة كوفيد {year}"
 
     def test_skips_entries_without_year(self):
         handler = YearTitleHandler()
         mapping = TranslationMapping(new={"No year text": {"ar": "ترجمة"}})
-        handler.build_templates_new(mapping)
+        handler.build_templates(mapping)
         assert mapping.title_new == {}
 
     def test_skips_translation_without_year(self):
         handler = YearTitleHandler()
         mapping = TranslationMapping(new={"Text 2020": {"ar": "بدون سنة"}})
-        handler.build_templates_new(mapping)
+        handler.build_templates(mapping)
         # Translation doesn't end with 2020, so it should be skipped
         assert mapping.title_new == {}
 

@@ -68,7 +68,7 @@ class TestTitlesNew:
     def test_year_multiple_occurrences(self):
         """Test titles with multiple year occurrences are handled correctly."""
         input_data = {"2020 Highlights of 2020": {"fr": "Faits saillants de 2020 en 2020"}}
-        # This test will fail with the current implementation of `replace_year`,
+        # This test will fail with the current implementation of `replace_year_with_placeholder`,
         # but will pass with the suggested improvement.
         result = make_new_title_translations(input_data)
         expected = {"2020 Highlights of {year}": {"fr": "Faits saillants de 2020 en {year}"}}

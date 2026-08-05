@@ -48,8 +48,10 @@ class YearTitleHandler:
         Returns empty string if the year is not in the expected position.
         """
         text = text.strip()
+
         if text.endswith(year):
             return re.sub(r"\d{4}$", "{year}", text)
+
         if text.startswith(year):
             return re.sub(r"^\d{4}", "{year}", text)
         return ""
@@ -62,6 +64,7 @@ class YearTitleHandler:
     # ------------------------------------------------------------------
     # Extraction side
     # ------------------------------------------------------------------
+
     def build_templates(self, mapping: TranslationMapping) -> None:
         """
         Populate mapping.title_new (and optionally mapping.title) from
@@ -78,9 +81,36 @@ class YearTitleHandler:
         if not self.enabled:
             return
 
+        # mapping.title = make_title_translations(mapping.new)
+
+        self.build_title_new_templates(mapping)
+
+    def build_title_new_templates(self, mapping: TranslationMapping) -> None:
+        """
+        Extract valid title translations by verifying that all translations in a mapping
+        end with the same 4-digit year as the key.
+
+        Example:
+            Input:
+                {
+                    "COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020", "es": "Pandemia de COVID-19 2020"}
+                }
+            Output:
+                {
+                    "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}", "es": "Pandemia de COVID-19 {year}"}
+                }
+
+        Args:
+            new: A dictionary mapping full titles (ending with a year) to their translations.
+
+        Returns:
+            A dictionary mapping base title -> { language -> title with `{year}` }.
+        """
         for source, translations in list(mapping.new.items()):
             year = self.match_year(source)
-            if not year:
+
+            # if not year:
+            if not source or source == year or not year.isdigit():
                 continue
 
             source_template = self.replace_year_with_placeholder(source, year)
