@@ -16,7 +16,7 @@ from ..service import SVGTranslationService
 logger = logging.getLogger(__name__)
 
 
-def inject_file_tree(
+def _inject_file_tree(
     *,
     inject_file: Path | str | None = None,
     mapping_files: Iterable[Path | str] | None = None,
@@ -25,8 +25,8 @@ def inject_file_tree(
     save_path: Path | None = None,
     overwrite: bool = False,
     save_result: bool = False,
-    return_stats: bool = False,
     pretty_print: bool | None = None,
+    sort_switches: bool | None = None,
 ) -> tuple[Any, Any] | Any:
     """
     Deprecated. Use SVGTranslationService.inject() instead.
@@ -40,15 +40,20 @@ def inject_file_tree(
     # ---- normalize legacy argument aliases ----
 
     if inject_file is None:
-        return (None, {"error": "No inject file provided"}) if return_stats else None
+        return (None, {"error": "No inject file provided"})
 
     # ---- resolve mapping ----
-    if mapping is None and mapping_files:
+    if not mapping and mapping_files:
         store = MappingStore()
-        mapping = store.load_many(mapping_files).to_json()
+
+        mapping_obj = store.load_many(mapping_files)
+        if mapping_obj.is_empty():
+            return (None, {"error": "No valid mappings found"})
+
+        mapping = mapping_obj.to_json()
 
     if not mapping:
-        return (None, {"error": "No valid mappings found"}) if return_stats else None
+        return (None, {"error": "No valid mappings found"})
 
     # ---- resolve output path ----
     inject_path = Path(str(inject_file))
@@ -58,6 +63,7 @@ def inject_file_tree(
         case_insensitive=case_insensitive,
         overwrite=overwrite,
         pretty_print=pretty_print,
+        sort_switches=sort_switches,
         auto_save=False,
     )
     service = SVGTranslationService(config)
@@ -71,13 +77,41 @@ def inject_file_tree(
         save=save_result,
     )
 
-    if return_stats:
-        stats = result.stats.to_json() if result.stats else {}
-        if not result.success:
-            stats["error"] = result.error or "injection_failed"
-        return result.data, stats
+    return result.data, result.stats.to_json()
 
-    return result.data
+
+def inject_file_tree(
+    *,
+    inject_file: Path | str | None = None,
+    mapping_files: Iterable[Path | str] | None = None,
+    mapping: Mapping | None = None,
+    case_insensitive: bool = True,
+    save_path: Path | None = None,
+    overwrite: bool = False,
+    save_result: bool = False,
+    return_stats: bool = False,
+    pretty_print: bool | None = None,
+    sort_switches: bool | None = None,
+) -> tuple[Any, Any] | Any:
+    """
+    Deprecated. Use SVGTranslationService.inject() instead.
+    """
+    tree, stats = _inject_file_tree(
+        inject_file=inject_file,
+        mapping_files=mapping_files,
+        mapping=mapping,
+        case_insensitive=case_insensitive,
+        save_path=save_path,
+        overwrite=overwrite,
+        save_result=save_result or bool(save_path),
+        pretty_print=pretty_print,
+        sort_switches=sort_switches,
+    )
+
+    if return_stats:
+        return tree, stats
+
+    return tree
 
 
 __all__ = [

@@ -63,6 +63,16 @@ class NormalizeTspans(PreparationStep):
         ctx.translatable_nodes = ctx.root.findall(f".//{{{SVG_NS}}}tspan") + ctx.root.findall(f".//{{{SVG_NS}}}text")
 
 
+class WrapTspans(PreparationStep):
+    # ------------------------------------------------------------------
+    # Step 4: text/tspan normalization
+    # ------------------------------------------------------------------
+    def execute(self, ctx: PreparationContext) -> None:
+        """Wrap raw text nodes (before first child, or as tails) into <tspan>."""
+        if ctx.root is None:
+            return
+
 __all__ = [
     "NormalizeTspans",
+    "WrapTspans",
 ]

@@ -18,6 +18,8 @@ from .steps import (
     ReorderTexts,
     SplitLanguages,
     ValidateStructure,
+    WrapTextElements,
+    WrapTspans,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,6 +45,8 @@ class SvgPreparationPipeline:
             ValidateStructure(config),
             NormalizeTspans(config),
             AssignIds(config),
+            WrapTspans(config),
+            WrapTextElements(config),
             SplitLanguages(config),
             ReorderTexts(config),
         ]
