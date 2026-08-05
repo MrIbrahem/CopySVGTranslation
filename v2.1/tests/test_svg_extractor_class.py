@@ -8,11 +8,11 @@ import json
 from pathlib import Path
 
 import pytest
-from copy_svg_translation.config import TranslationConfig
 from copy_svg_translation import (
     SVGTranslationExtractor,
     TranslationMapping,
 )
+from copy_svg_translation.config import TranslationConfig
 from lxml import etree
 
 SVG_NS = "http://www.w3.org/2000/svg"
