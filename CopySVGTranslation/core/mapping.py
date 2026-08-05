@@ -111,8 +111,8 @@ class TranslationMapping:
             "new": self.new,
             "title_new": self.title_new,
             "tspans_by_id": self.tspans_by_id,
+            "meta": self.meta,
             "error": error,
-            # "meta": self.meta,
         }
 
 
