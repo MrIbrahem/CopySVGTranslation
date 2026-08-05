@@ -77,7 +77,7 @@ class TestFlattenText:
 class TestSplitNestedTspansStrategy:
     """Tests for the preserve_style/split_nested_tspans strategy."""
 
-    def preserve_style(self, root, tag=None):
+    def preserve_style_process(self, root, tag=None):
         """
         Flatten nested <tspan> elements while preserving text order and spacing.
         """
@@ -89,7 +89,7 @@ class TestSplitNestedTspansStrategy:
         """Flat tspans should not be modified."""
         svg = _svg("""<text id="t1"><tspan id="s1">Hello</tspan><tspan id="s2">World</tspan></text>""")
         root = _parse(svg)
-        result = self.preserve_style(root)
+        result = self.preserve_style_process(root)
         tspans = result.findall(f".//{{{SVG_NS}}}tspan")
         assert len(tspans) == 2
         assert tspans[0].text == "Hello"
@@ -99,7 +99,7 @@ class TestSplitNestedTspansStrategy:
         """Parent tspan text before nested child should become its own tspan."""
         svg = _svg("""<text id="t1"><tspan>Prefix <tspan style="font-weight: 700;">Bold</tspan></tspan></text>""")
         root = _parse(svg)
-        self.preserve_style(root)
+        self.preserve_style_process(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         # "Prefix " becomes its own tspan, then "Bold" becomes its own tspan
         texts = [t.text for t in tspans]
@@ -110,7 +110,7 @@ class TestSplitNestedTspansStrategy:
         """Tail text after a nested child should become its own tspan."""
         svg = _svg("""<text id="t1"><tspan><tspan style="font-weight: 700;">Bold</tspan> tail text</tspan></text>""")
         root = _parse(svg)
-        self.preserve_style(root)
+        self.preserve_style_process(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         texts = [t.text for t in tspans]
         assert "Bold" in texts
@@ -127,7 +127,7 @@ class TestSplitNestedTspansStrategy:
             "</text>"
         )
         root = _parse(svg)
-        self.preserve_style(root)
+        self.preserve_style_process(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         styled = [t for t in tspans if t.text == "Styled"]
         assert len(styled) == 1
@@ -138,7 +138,7 @@ class TestSplitNestedTspansStrategy:
         """Whitespace-only parent text should not produce an empty tspan."""
         svg = _svg("""<text id="t1"><tspan>   <tspan style="font-weight: 700;">Bold</tspan></tspan></text>""")
         root = _parse(svg)
-        self.preserve_style(root)
+        self.preserve_style_process(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         texts = [t.text for t in tspans]
         # whitespace-only text should be skipped
@@ -148,7 +148,7 @@ class TestSplitNestedTspansStrategy:
         """Whitespace-only tail should not produce an empty tspan."""
         svg = _svg("""<text id="t1"><tspan><tspan style="font-weight: 700;">Bold</tspan>   </tspan></text>""")
         root = _parse(svg)
-        self.preserve_style(root)
+        self.preserve_style_process(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         texts = [t.text for t in tspans]
         assert "Bold" in texts
@@ -157,7 +157,7 @@ class TestSplitNestedTspansStrategy:
         """The tag parameter should target different element types."""
         svg = _svg("""<text id="t1"><tspan><a href="url">Link text</a></tspan></text>""")
         root = _parse(svg)
-        self.preserve_style(root, tag="a")
+        self.preserve_style_process(root, tag="a")
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         # The <a> should be replaced with a tspan carrying the text
         texts = [t.text for t in tspans]
@@ -175,7 +175,7 @@ class TestSplitNestedTspansStrategy:
             "</text>"
         )
         root = _parse(svg)
-        self.preserve_style(root)
+        self.preserve_style_process(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         texts = [t.text for t in tspans]
         assert "A" in texts
@@ -186,7 +186,7 @@ class TestSplitNestedTspansStrategy:
         """Empty text elements should not crash."""
         svg = _svg("<text></text>")
         root = _parse(svg)
-        result = self.preserve_style(root)
+        result = self.preserve_style_process(root)
         assert result is not None
 
 # ---------------------------------------------------------------------------
@@ -195,10 +195,7 @@ class TestSplitNestedTspansStrategy:
 class TestFlattenStrategy:
     """Tests for the flatten strategy."""
 
-    def flatten(self, root, tag=None):
-        """
-        Flatten nested <tspan> elements while preserving text order and spacing.
-        """
+    def flatten_process(self, root, tag=None):
         flattener = NestedTspanFlattener(strategy="flatten", also_fix_a=True)
         flattener.process(root)
         return root
@@ -207,7 +204,7 @@ class TestFlattenStrategy:
         """Flat tspans should not be modified."""
         svg = _svg("""<text id="t1"><tspan id="s1">Hello</tspan><tspan id="s2">World</tspan></text>""")
         root = _parse(svg)
-        self.flatten(root)
+        self.flatten_process(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         assert len(tspans) == 2
         assert tspans[0].text == "Hello"
@@ -217,7 +214,7 @@ class TestFlattenStrategy:
         """Nested tspans should be flattened into the parent."""
         svg = _svg("""<text id="t1"><tspan><tspan style="font-weight: 700;">Bold</tspan> normal</tspan></text>""")
         root = _parse(svg)
-        self.flatten(root)
+        self.flatten_process(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         # After flattening, there should be only one tspan with all text
         assert len(tspans) == 1
@@ -228,7 +225,7 @@ class TestFlattenStrategy:
         """After flattening, the nested children should be removed."""
         svg = _svg("""<text id="t1"><tspan><tspan id="inner">Inner</tspan></tspan></text>""")
         root = _parse(svg)
-        self.flatten(root)
+        self.flatten_process(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         assert len(tspans) == 1
         # No child elements left
@@ -238,7 +235,7 @@ class TestFlattenStrategy:
         """Tail of the outer tspan should be None after flattening."""
         svg = _svg("""<text id="t1"><tspan><tspan>Inner</tspan></tspan></text>""")
         root = _parse(svg)
-        self.flatten(root)
+        self.flatten_process(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         assert tspans[0].tail is None
 
@@ -246,7 +243,7 @@ class TestFlattenStrategy:
         """The tag parameter should target different element types."""
         svg = _svg("""<text id="t1"><tspan><a href="url">Link text</a></tspan></text>""")
         root = _parse(svg)
-        self.flatten(root, tag="a")
+        self.flatten_process(root, tag="a")
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         assert len(tspans) == 1
         assert "Link text" in tspans[0].text
@@ -255,6 +252,16 @@ class TestFlattenStrategy:
         """Empty text elements should not crash."""
         svg = _svg("<text></text>")
         root = _parse(svg)
-        result = self.flatten(root)
+        result = self.flatten_process(root)
         assert result is not None
 
+# ---------------------------------------------------------------------------
+# raise strategy
+# ---------------------------------------------------------------------------
+class TestRaiseStrategy:
+    """Tests for the flatten strategy."""
+
+    def raise_process(self, root, tag=None):
+        flattener = NestedTspanFlattener(strategy="raise", also_fix_a=True)
+        flattener.process(root)
+        return root

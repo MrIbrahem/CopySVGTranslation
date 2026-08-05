@@ -72,6 +72,9 @@ class NestedTspanFlattener:
     # Strategy: raise
     # ------------------------------------------------------------------
     def _raise_if_nested(self, root: etree._Element) -> None:
+        """
+        raise when match nested <tspan> elements
+        """
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         for tspan in tspans:
             # nested content check: tspan should not have element children
