@@ -67,8 +67,7 @@ class YearTitleHandler:
 
     def build_templates(self, mapping: TranslationMapping) -> None:
         """
-        Populate mapping.title_new (and optionally mapping.title) from
-        mapping.new.
+        Populate mapping.title_new from mapping.new.
 
         Example
             -------
