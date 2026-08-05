@@ -474,7 +474,7 @@ class TestEnrichAllMappings:
 
         result = processor.enrich_all_mappings(mapping, ["hello 2020"])
 
-        assert result["hello 2020"] == {"ar": "مرحبا 2020", "de": "hallo 2020"}
+        assert result.new["hello 2020"] == {"ar": "مرحبا 2020", "de": "hallo 2020"}
 
     def test_title_translations_can_introduce_new_keys(self, id_manager):
         processor = make_processor(id_manager=id_manager)
@@ -485,7 +485,7 @@ class TestEnrichAllMappings:
 
         result = processor.enrich_all_mappings(mapping, ["brand new key 2020"])
 
-        assert result["brand new key 2020"] == {"ar": "جديد 2020"}
+        assert result.new["brand new key 2020"] == {"ar": "جديد 2020"}
         # original mapping.new must be unaffected (a copy is used)
         assert "brand new key 2020" not in mapping.new
 
@@ -501,7 +501,7 @@ class TestEnrichAllMappings:
 
         result = processor.enrich_all_mappings(mapping, ["hello 2020"])
 
-        assert result["hello 2020"] == {"ar": "مرحبا 2020", "fr": "bonjour 2020"}
+        assert result.new["hello 2020"] == {"ar": "مرحبا 2020", "fr": "bonjour 2020"}
 
 
 # ---------------------------------------------------------------------------

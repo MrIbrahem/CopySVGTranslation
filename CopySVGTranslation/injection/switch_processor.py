@@ -69,11 +69,11 @@ class SwitchProcessor:
         if not default_texts or default_node is None:
             return
 
-        mapping = self.enrich_all_mappings(mapping, default_texts)
-
         # Enrich mapping with year-title logic
+        working_mapping = self.enrich_all_mappings(mapping, default_texts)
+
         # Determine translations for each text line
-        available_translations = self.get_available_translations(default_texts, mapping)
+        available_translations = self.get_available_translations(default_texts, working_mapping.new)
 
         if not available_translations:
             return
@@ -103,7 +103,7 @@ class SwitchProcessor:
                 continue
 
             # Create node
-            new_node = self.create_node(default_node, mapping, lang)
+            new_node = self.create_node(default_node, working_mapping.new, lang)
             stats.inserted_translations += 1
             switch_element.append(new_node)
 
@@ -137,14 +137,12 @@ class SwitchProcessor:
     # -------------
     #  enrich mappings
     # -------------
-    def enrich_all_mappings(self, mapping, default_texts):
-        all_mappings_title_new = mapping.title_new
-        new_titles_translations = get_new_titles_translations(all_mappings_title_new, default_texts)
-
-        mapping = dict(mapping.new)
-        for key, translations in new_titles_translations.items():
-            mapping.setdefault(key, {}).update(translations)
-        return mapping
+    def enrich_all_mappings(self, mapping, default_texts) -> TranslationMapping:
+        return self.year_handler.enrich_mapping_for_switch(
+            mapping,
+            default_texts,
+            case_insensitive=self.config.case_insensitive,
+        )
 
     # -------------
     #
