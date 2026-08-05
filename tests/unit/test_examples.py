@@ -3,7 +3,7 @@ import json
 import pytest
 
 from CopySVGTranslation.extraction.worker import extract
-from CopySVGTranslation.legacy.inject import inject_file_and_save
+from CopySVGTranslation.legacy.inject import inject_file_tree
 
 
 class TestIntegrationWorkflows:
@@ -33,11 +33,12 @@ class TestIntegrationWorkflows:
 
     def test_inject_with_dict(self):
         translations = extract(self.source_svg)
-        result, stats = inject_file_and_save(
+        result, stats = inject_file_tree(
             inject_file=self.target_svg,
             save_path=self.test_dir / "t.svg",
             mapping=translations,
             return_stats=True,
+            save_result=True,
         )
         assert result is not None
         assert isinstance(stats, dict)
