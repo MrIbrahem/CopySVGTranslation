@@ -35,18 +35,7 @@ def fix_nested_file_new(
         new_path=new_path,
     )
 
-
-def fix_nested_tspans(root):
-    """
-    Flatten nested <tspan> elements while preserving text order and spacing.
-    """
-    flattener = NestedTspanFlattener(strategy="preserve_style", also_fix_a=True)
-    flattener.process(root)
-    return root
-
-
 __all__ = [
     "FixNestedTagsNew",
-    "fix_nested_tspans",
     "fix_nested_file_new",
 ]
