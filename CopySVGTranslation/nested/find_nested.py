@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
+from .flattener import NestedTspanFlattener
+
 from .nested_base import FixNestedTagsBase
 
 logger = logging.getLogger(__name__)
@@ -25,23 +27,11 @@ def flatten_text(elem):
 class FixNestedTags(FixNestedTagsBase):
 
     def _flatten_all(self, root, tag=None):
-        """
-        Flatten nested <tspan> elements while preserving text order and spacing.
-        """
-        tag = tag or "tspan"
-        # Process all tspans that contain nested tspans
-        for tspan in root.findall(f".//{{{SVG_NS}}}tspan"):
-            nested = tspan.findall(f".//{{{SVG_NS}}}{tag}")
-            if not nested:
-                continue
-            flattened = flatten_text(tspan)
-            for child in list(tspan):
-                tspan.remove(child)
-            tspan.text = flattened
-            tspan.tail = None
 
+        # 1. Process nested tspans using Flattener
+        flattener = NestedTspanFlattener(strategy="flatten", also_fix_a=True)
+        flattener.process(root)
         return root
-
 
 def fix_nested_file(
     source_file: Path,
