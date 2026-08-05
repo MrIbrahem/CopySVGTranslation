@@ -32,7 +32,6 @@ if not result.error:
     print(result.to_json())
     # {
     #     "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}, ...},
-    #     "title": {...},
     #     "tspans_by_id": {...},
     #     "title_new": {...},
     # }
@@ -59,16 +58,16 @@ translations = {
 
 result = injector.inject(
     inject_file=Path("examples/target_missing_translations.svg"),
-    all_mappings=translations,
+    mapping=translations,
     save_path=Path("translated/target.svg"),
     save_result=True,
 )
 
-if not result.new_stats.error:
-    print(f"Inserted: {result.new_stats.inserted_translations}")
-    print(f"Updated:  {result.new_stats.updated_translations}")
-    print(f"Skipped:  {result.new_stats.skipped_translations}")
-    print(f"Languages: {result.new_stats.all_languages}")
+if not result.inject_stats.error:
+    print(f"Inserted: {result.inject_stats.inserted_translations}")
+    print(f"Updated:  {result.inject_stats.updated_translations}")
+    print(f"Skipped:  {result.inject_stats.skipped_translations}")
+    print(f"Languages: {result.inject_stats.all_languages}")
 ```
 
 ## API Reference
@@ -126,7 +125,7 @@ injector = SVGTranslationInjector(config)
 
 result: InjectorData = injector.inject(
     inject_file: Path | str,
-    all_mappings: Mapping | None = None,
+    mapping: Mapping | None = None,
     save_path: Path | None = None,
     save_result: bool = False,
 )
@@ -142,19 +141,19 @@ result: InjectorData = injector.inject(
 
 **`inject()` Parameters:**
 
-| Parameter      | Type              | Default | Description                                                     |
-| -------------- | ----------------- | ------- | --------------------------------------------------------------- |
-| `inject_file`  | `Path \| str`     | —       | Path to the SVG file to inject translations into.               |
-| `all_mappings` | `Mapping \| None` | `None`  | Translation mapping dictionary (see [Data Model](#data-model)). |
-| `save_path`    | `Path \| None`    | `None`  | Output file path when `save_result=True`.                       |
-| `save_result`  | `bool`            | `False` | If `True`, writes the modified SVG to `save_path`.              |
+| Parameter     | Type              | Default | Description                                                     |
+| ------------- | ----------------- | ------- | --------------------------------------------------------------- |
+| `inject_file` | `Path \| str`     | —       | Path to the SVG file to inject translations into.               |
+| `mapping`     | `Mapping \| None` | `None`  | Translation mapping dictionary (see [Data Model](#data-model)). |
+| `save_path`   | `Path \| None`    | `None`  | Output file path when `save_result=True`.                       |
+| `save_result` | `bool`            | `False` | If `True`, writes the modified SVG to `save_path`.              |
 
 **Returns:** `InjectorData` — a dataclass with the following fields:
 
 | Field       | Type                         | Description                                  |
 | ----------- | ---------------------------- | -------------------------------------------- |
 | `tree`      | `etree._ElementTree \| None` | The parsed (and possibly modified) SVG tree. |
-| `new_stats` | `InjectorStats`              | Statistics about the injection run.          |
+| `inject_stats` | `InjectorStats`              | Statistics about the injection run.          |
 
 **`InjectorStats` fields:**
 
@@ -170,7 +169,7 @@ result: InjectorData = injector.inject(
 | `languages_after`       | `list[str]` | Sorted list of newly added language codes.                  |
 | `error`                 | `str`       | Error message if injection failed, empty string on success. |
 
-Use `result.new_stats.to_json()` to get a plain dictionary of the stats.
+Use `result.inject_stats.to_json()` to get a plain dictionary of the stats.
 
 ---
 
@@ -222,7 +221,7 @@ from CopySVGTranslation import inject_file_tree
 # Deprecated — use SVGTranslationInjector instead
 tree, stats = inject_file_tree(
     inject_file=Path("target.svg"),
-    all_mappings=translations,
+    mapping=translations,
     output_dir=Path("./translated"),
     save_result=True,
     return_stats=True,
@@ -233,12 +232,13 @@ tree, stats = inject_file_tree(
 
 ```python
 # Before (deprecated)
-from CopySVGTranslation import inject_file_and_save
-tree, stats = inject_file_and_save(
+from CopySVGTranslation import inject_file_tree
+tree, stats = inject_file_tree(
     inject_file=Path("target.svg"),
-    all_mappings=translations,
+    mapping=translations,
     save_path=Path("translated/target.svg"),
     return_stats=True,
+    save_result=True,
 )
 
 # After (recommended)
@@ -247,12 +247,12 @@ config = TranslationConfig(case_insensitive=True, overwrite=False)
 injector = SVGTranslationInjector(config)
 result = injector.inject(
     inject_file=Path("target.svg"),
-    all_mappings=translations,
+    mapping=translations,
     save_path=Path("translated/target.svg"),
     save_result=True,
 )
 tree = result.tree
-stats = result.new_stats.to_json()
+stats = result.inject_stats.to_json()
 ```
 
 ## Data Model
@@ -265,12 +265,6 @@ The extractor produces a JSON document with these top-level keys:
         "normalized english text": {
             "ar": "Arabic translation",
             "fr": "French translation"
-        }
-    },
-    "title": {
-        "text without year": {
-            "ar": "...",
-            "fr": "..."
         }
     },
     "tspans_by_id": {
@@ -354,12 +348,6 @@ print(result.to_json())
             "fr": "Bonjour"
         }
     },
-    "title": {
-        "music in": {
-            "ar": "الموسيقى في عام",
-            "fr": "La musique en"
-        }
-    },
     "tspans_by_id": {
         "t0": "Music in 2020",
         "t1": "Hello"
@@ -411,13 +399,13 @@ translations = {
 
 result = injector.inject(
     inject_file=Path("target.svg"),
-    all_mappings=translations,
+    mapping=translations,
     save_path=Path("translated/target.svg"),
     save_result=True,
 )
 
-print(f"Inserted: {result.new_stats.inserted_translations}")
-print(f"Languages: {result.new_stats.all_languages}")
+print(f"Inserted: {result.inject_stats.inserted_translations}")
+print(f"Languages: {result.inject_stats.all_languages}")
 ```
 
 ### Output SVG (translated/target.svg)

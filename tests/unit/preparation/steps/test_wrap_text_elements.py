@@ -270,7 +270,7 @@ class TestProcessTextElementsErrors(TestSetup):
         assert exc_info.value.args[0] == "structure-error-text-contains-dollar"
 
     def test_dollar_placeholder_detected_inside_nested_tspan(self, step_factory):
-        # get_text_content uses itertext(), so the check must see text
+        # get text content uses itertext(), so the check must see text
         # nested inside child <tspan> elements too, not just direct text.
         step = step_factory(normalize_languages=False)
         root = make_root('<text id="t1"><tspan>Hello $2</tspan></text>')

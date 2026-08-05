@@ -18,6 +18,8 @@ from .steps import (
     ReorderTexts,
     SplitLanguages,
     ValidateStructure,
+    WrapTextElements,
+    WrapTspans,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,6 +45,8 @@ class SvgPreparationPipeline:
             ValidateStructure(config),
             NormalizeTspans(config),
             AssignIds(config),
+            WrapTspans(config),
+            WrapTextElements(config),
             SplitLanguages(config),
             ReorderTexts(config),
         ]
@@ -51,6 +55,10 @@ class SvgPreparationPipeline:
     # Public API
     # ------------------------------------------------------------------
     def run(self, path: Path) -> tuple[etree._ElementTree[etree._Element], etree._Element]:
+        """Run all preparation steps and return the resulting tree and root."""
+        # Reset per-run state to ensure idempotent behavior
+        path = Path(str(path))
+
         self.ctx = PreparationContext(
             path=path,
             config=self.config,

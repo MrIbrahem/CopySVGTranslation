@@ -7,7 +7,6 @@ from .strategies import (
     CompositeMatchingStrategy,
     MatchingStrategy,
 )
-from .worker import extract
 
 __all__ = [
     "ByPositionStrategy",
@@ -15,5 +14,4 @@ __all__ = [
     "CompositeMatchingStrategy",
     "MatchingStrategy",
     "SVGTranslationExtractor",
-    "extract",
 ]

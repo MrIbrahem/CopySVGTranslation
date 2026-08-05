@@ -86,3 +86,8 @@ class TextNode:
         import copy
 
         return TextNode(copy.deepcopy(self.element))
+
+
+__all__ = [
+    "TextNode",
+]

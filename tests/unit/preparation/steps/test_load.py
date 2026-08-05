@@ -1,5 +1,5 @@
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/preparation/steps/load.py module.
+Unit tests for CopySVGTranslation/preparation/steps/load.py module.
 
 Classes to test: LoadDocument
 

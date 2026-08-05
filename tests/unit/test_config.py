@@ -1,6 +1,6 @@
 # ruff: noqa: F401
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/config.py module.
+Unit tests for CopySVGTranslation/config.py module.
 
 Classes to test: TranslationConfig
 

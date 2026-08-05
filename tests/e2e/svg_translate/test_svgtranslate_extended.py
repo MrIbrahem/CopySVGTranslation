@@ -10,8 +10,8 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from CopySVGTranslation.extraction import extract
-from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
+from CopySVGTranslation.legacy.extract import extract
+from CopySVGTranslation.legacy.inject import inject_file_tree
 
 
 class TestSetup:
@@ -48,7 +48,6 @@ class TestSetup:
                     "ar": "لكنها موصولة بمرحلتين متعاكستين.",
                 },
             },
-            "title": {},
         }
 
         yield
@@ -107,13 +106,13 @@ class TestSVGTranslate(TestSetup):
         """Test injection with multiple mapping files."""
         # Create first mapping file
         mapping1_path = self.test_dir / "mapping1.json"
-        mapping1 = {"new": {"text 1": {"ar": "نص 1"}}, "title": {}}
+        mapping1 = {"new": {"text 1": {"ar": "نص 1"}}}
         with open(mapping1_path, "w", encoding="utf-8") as f:
             json.dump(mapping1, f, ensure_ascii=False)
 
         # Create second mapping file
         mapping2_path = self.test_dir / "mapping2.json"
-        mapping2 = {"new": {"text 2": {"ar": "نص 2"}}, "title": {}}
+        mapping2 = {"new": {"text 2": {"ar": "نص 2"}}}
         with open(mapping2_path, "w", encoding="utf-8") as f:
             json.dump(mapping2, f, ensure_ascii=False)
 
@@ -157,10 +156,11 @@ class TestSVGTranslate(TestSetup):
         _output_dir = self.test_dir / "output"
         _output_dir.mkdir()
 
-        tree = inject_file_and_save(
+        tree = inject_file_tree(
             inject_file=_path,
             mapping_files=[mapping_path],
             save_path=_output_dir / _path.name,
+            save_result=True,
         )
 
         assert tree is not None
@@ -216,12 +216,13 @@ class TestSVGTranslate(TestSetup):
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         # Inject without overwrite
-        tree, stats = inject_file_and_save(
+        tree, stats = inject_file_tree(
             inject_file=svg_path,
             mapping_files=[mapping_path],
             overwrite=False,
             return_stats=True,
             save_path=svg_path,
+            save_result=True,
         )
 
         assert tree is not None
@@ -339,7 +340,7 @@ class TestSVGTranslate(TestSetup):
 
     def test_inject_empty_mapping_file(self):
         """Test injection with empty mapping file."""
-        empty_mapping = {"new": {}, "title": {}}
+        empty_mapping = {"new": {}}
         mapping_path = self.test_dir / "empty_mapping.json"
         with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(empty_mapping, f)
@@ -354,9 +355,8 @@ class TestSVGTranslate(TestSetup):
             return_stats=True,
         )
 
-        # Should complete without error, but with no translations
-        assert tree is not None
-        assert stats["inserted_translations"] == 0
+        assert tree is None
+        assert stats == {"error": "No valid mappings found"}
 
     def test_inject_invalid_json_mapping(self):
         """Test injection with invalid JSON mapping file."""

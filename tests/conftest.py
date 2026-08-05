@@ -22,3 +22,13 @@ def temp_dir():
     d = Path(tempfile.mkdtemp())
     yield d
     shutil.rmtree(d)
+
+
+@pytest.fixture
+def fixtures_dir():
+    return Path(__file__).parent / "fixtures"
+
+
+@pytest.fixture
+def tests_files_dir():
+    return Path(__file__).parent / "tests_files"

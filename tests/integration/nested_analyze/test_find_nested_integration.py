@@ -1,6 +1,7 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
-from CopySVGTranslation.nested_analyze.find_nested import fix_nested_file, match_nested_tags
+from CopySVGTranslation.nested.find_nested import fix_nested_file
+from CopySVGTranslation.nested.match_tags import match_nested_tags
 
 
 class TestNestedFiles:

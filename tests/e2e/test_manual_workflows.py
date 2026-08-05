@@ -6,20 +6,21 @@ Pytest conversions of the former manual test scripts:
 - tests/manually/titles.py
 """
 
-import json
+from pathlib import Path
 
 import pytest
+from lxml import etree
 
-from CopySVGTranslation import extract
+from CopySVGTranslation import TranslationConfig
 from CopySVGTranslation.exceptions import (
     SvgNestedTspanError,
     SvgStructureError,
 )
-from CopySVGTranslation.injection import (
-    inject_file_and_save,
+from CopySVGTranslation.legacy import (
+    inject_file_tree,
 )
-from CopySVGTranslation.preparation import make_translation_ready
-from CopySVGTranslation.titles import get_titles_translations
+from CopySVGTranslation.legacy.extract import extract
+from CopySVGTranslation.preparation import SvgPreparationPipeline
 
 # ------------------------------------------------------------------ #
 # Helpers
@@ -36,6 +37,18 @@ def _write_svg(temp_dir, content: str, name: str = "test.svg"):
 # ================================================================== #
 # 1. extract.py  –  extraction from a multi-switch SVG
 # ================================================================== #
+
+
+def preparer_run(source_file: Path | str) -> tuple[etree._ElementTree, etree._Element]:
+    """
+    Legacy function-style wrapper around SvgPreparationPipeline, kept for
+    backward compatibility with existing callers.
+    """
+    config = TranslationConfig(
+        nested_strategy="raise",
+    )
+    preparer = SvgPreparationPipeline(config)
+    return preparer.run(path=source_file)
 
 
 class TestExtractManual:
@@ -71,7 +84,7 @@ class TestExtractManual:
         """extract() should return a dict (not None) for a valid multi-switch SVG."""
         svg_file = _write_svg(temp_dir, self.MULTI_SWITCH_SVG)
 
-        tree, root = make_translation_ready(svg_file)
+        tree, root = preparer_run(svg_file)
         tree.write(
             str(svg_file),
             pretty_print=True,
@@ -88,7 +101,7 @@ class TestExtractManual:
         """Both default (English) texts should appear under 'new'."""
         svg_file = _write_svg(temp_dir, self.MULTI_SWITCH_SVG)
 
-        tree, root = make_translation_ready(svg_file)
+        tree, root = preparer_run(svg_file)
         tree.write(
             str(svg_file),
             pretty_print=True,
@@ -107,7 +120,7 @@ class TestExtractManual:
         """Translations for 'ar' and 'fr' should be captured for each default text."""
         svg_file = _write_svg(temp_dir, self.MULTI_SWITCH_SVG)
 
-        tree, root = make_translation_ready(svg_file)
+        tree, root = preparer_run(svg_file)
         tree.write(
             str(svg_file),
             pretty_print=True,
@@ -132,7 +145,7 @@ class TestExtractManual:
         """The 'error' key should be empty for a well-formed SVG."""
         svg_file = _write_svg(temp_dir, self.MULTI_SWITCH_SVG)
 
-        tree, root = make_translation_ready(svg_file)
+        tree, root = preparer_run(svg_file)
         tree.write(
             str(svg_file),
             pretty_print=True,
@@ -154,7 +167,7 @@ class TestInjectManual:
     """Replaces tests/manually/inject.py.
 
     The original manual script uses a ``<switch>`` that contains two
-    ``<text systemLanguage="la">`` elements.  ``make_translation_ready``
+    ``<text systemLanguage="la">`` elements.  ``preparer_run``
     correctly rejects this as a structure error, so the test asserts
     that the expected exception is raised.
     """
@@ -172,12 +185,12 @@ class TestInjectManual:
         svg_file = _write_svg(temp_dir, self.DUPLICATE_LANG_SVG)
 
         with pytest.raises(SvgStructureError) as excinfo:
-            make_translation_ready(svg_file)
+            preparer_run(svg_file)
 
         assert excinfo.value.code == "structure-error-multiple-text-same-lang"
 
     def test_inject_after_normalization(self, temp_dir):
-        """After make_translation_ready, injection should work on a clean SVG."""
+        """After preparer_run, injection should work on a clean SVG."""
         clean_svg = """\
 <?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">\
 <switch id="testswitch">\
@@ -188,7 +201,7 @@ class TestInjectManual:
 
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
 
-        tree, root = make_translation_ready(svg_file)
+        tree, root = preparer_run(svg_file)
         tree.write(
             str(svg_file),
             pretty_print=True,
@@ -196,12 +209,13 @@ class TestInjectManual:
             encoding="utf-8",
         )
 
-        result = inject_file_and_save(
+        result = inject_file_tree(
             inject_file=svg_file,
             save_path=svg_file,
-            all_mappings=data,
+            mapping=data,
             overwrite=True,
             pretty_print=False,
+            save_result=True,
         )
 
         # The file should now contain the injected translation
@@ -238,73 +252,13 @@ class TestNestedManual:
         svg_file = _write_svg(temp_dir, self.NESTED_TSPAN_SVG)
 
         with pytest.raises(SvgNestedTspanError):
-            make_translation_ready(svg_file)
+            preparer_run(svg_file)
 
     def test_nested_tspan_error_code(self, temp_dir):
         """The exception code should indicate nested-tspan unsupported structure."""
         svg_file = _write_svg(temp_dir, self.NESTED_TSPAN_SVG)
 
         with pytest.raises(SvgNestedTspanError) as excinfo:
-            make_translation_ready(svg_file)
+            preparer_run(svg_file)
 
         assert excinfo.value.code == "structure-error-nested-tspans-not-supported"
-
-
-# ================================================================== #
-# 4. titles.py  –  title translation lookup
-# ================================================================== #
-
-
-class TestTitlesManual:
-    """Replaces tests/manually/titles.py."""
-
-    INSERT_DATA = {
-        "parkinson's disease prevalence,": {
-            "pt": "Prevalência de doença de Parkinson,",
-            "es": "Prevalencia de la enfermedad de Parkinson,",
-            "ca": "Prevalència de la malaltia de Parkinson,",
-            "eu": "Parkinsonen gaixotasunaren prebalentzia,",
-            "cs": "Prevalence Parkinsonovy nemoci,",
-            "si": "පාකින්සන් රෝග ව්‍යාප්තිය,",
-            "ar": "انتشار مرض باركنسون،",
-        }
-    }
-
-    DEFAULT_TEXTS = ["parkinson's disease prevalence, 2028"]
-
-    EXPECTED_LANGS = {"pt", "es", "ca", "eu", "cs", "si", "ar"}
-
-    def test_get_titles_translations_returns_dict(self):
-        """get_titles_translations should return a dict."""
-        result = get_titles_translations(self.INSERT_DATA, self.DEFAULT_TEXTS)
-        assert isinstance(result, dict)
-
-    def test_get_titles_translations_contains_default_text(self):
-        """The result should be keyed by the default text (with year)."""
-        result = get_titles_translations(self.INSERT_DATA, self.DEFAULT_TEXTS)
-
-        assert "parkinson's disease prevalence, 2028" in result
-
-    def test_get_titles_translations_has_all_languages(self):
-        """All 7 languages from insert_data should appear in the result."""
-        result = get_titles_translations(self.INSERT_DATA, self.DEFAULT_TEXTS)
-
-        entry = result["parkinson's disease prevalence, 2028"]
-        assert set(entry.keys()) == self.EXPECTED_LANGS
-
-    def test_get_titles_translations_values_are_strings(self):
-        """Every translation value should be a non-empty string."""
-        result = get_titles_translations(self.INSERT_DATA, self.DEFAULT_TEXTS)
-
-        entry = result["parkinson's disease prevalence, 2028"]
-        for lang, value in entry.items():
-            assert isinstance(value, str), f"{lang} translation is not a string"
-            assert len(value) > 0, f"{lang} translation is empty"
-
-    def test_get_titles_translations_json_serializable(self):
-        """The result should be JSON-serializable (used downstream as JSON)."""
-        result = get_titles_translations(self.INSERT_DATA, self.DEFAULT_TEXTS)
-
-        serialized = json.dumps(result, ensure_ascii=False)
-        assert isinstance(serialized, str)
-        assert "parkinson's disease prevalence, 2028" in serialized

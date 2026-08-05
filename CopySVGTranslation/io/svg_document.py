@@ -95,6 +95,7 @@ class SvgDocument:
 
         cfg = self.config
         pretty = cfg.pretty_print if pretty_print is None else pretty_print
+        pretty = pretty if pretty is not None else True
         create = cfg.create_parents if create_parents is None else create_parents
 
         if create:
@@ -119,3 +120,8 @@ class SvgDocument:
     def findall(self, tag: str):
         """Find all elements with the given local tag name in the SVG namespace."""
         return self.root.findall(f".//{{{SVG_NS}}}{tag}")
+
+
+__all__ = [
+    "SvgDocument",
+]

@@ -9,9 +9,14 @@ from lxml import etree
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
+from ..exceptions import (
+    SvgNestedTspanError,
+    SvgStructureError,
+)
 from ..preparation import SvgPreparationPipeline
-from ..result import InjectorStats
+from ..result import InjectorData, InjectorStats
 from ..titles import YearTitleHandler
+from ..utils import sort_switch_texts
 from ..utils.xml import tree_languages
 from .id_manager import IdManager
 from .switch_processor import SwitchProcessor
@@ -22,11 +27,13 @@ SVG_NS = "http://www.w3.org/2000/svg"
 
 
 class SVGTranslationInjector:
+    """Injects translations into SVG files."""
+
     def __init__(
         self,
         config: TranslationConfig | None = None,
     ) -> None:
-        self.config = config
+        self.config = config or TranslationConfig()
         self.preparer = SvgPreparationPipeline(self.config)
 
         self.id_manager = IdManager()
@@ -38,73 +45,122 @@ class SVGTranslationInjector:
             YearTitleHandler(self.config),
         )
 
+    def _finalize_switches(self, root) -> None:
+        # Fix old <svg:switch> tags if present
+
+        if not self.config.sort_switches:
+            return
+
+        for elem in root.findall(".//svg:switch", namespaces={"svg": SVG_NS}):
+            elem.tag = "switch"
+            sort_switch_texts(elem)
+
     def inject(
         self,
         svg_path: Path | str,
-        mapping: TranslationMapping,
+        mapping: TranslationMapping | dict,
         *,
         save_path: Path | None = None,
         save: bool = False,
-    ) -> tuple[etree._ElementTree | None, InjectorStats]:
-        svg_path = Path(svg_path)
-        stats = InjectorStats()
+    ) -> InjectorData:
+        """
+        Inject translations into the provided SVG file.
+        """
+        result = InjectorData()
 
+        svg_path = Path(str(svg_path))
+
+        if not svg_path.exists():
+            logger.error(f"SVG file not found: {svg_path}")
+            result.inject_stats.error = "File does not exist"
+            return result
+
+        if not mapping:
+            logger.error("No valid mappings found")
+            result.inject_stats.error = "No valid mappings found"
+            return result
+
+        logger.debug(f"Injecting translations into {svg_path}")
         # 1. Prepare (pipeline)
         try:
             tree, root = self.preparer.run(svg_path)
+        except SvgNestedTspanError as exc:
+            result.inject_stats.error = "nested_tspan_error"
+            return result
+
+        except SvgStructureError as exc:
+            result.inject_stats.error = str(exc)
+            return result
+
+        except etree.XMLSyntaxError as exc:
+            logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
+            result.inject_stats.error = str(exc)
+            return result
+
         except Exception as exc:
-            stats.error = f"preparation_failed: {exc}"
-            return None, stats
+            logger.error("Failed to parse SVG file: %s", exc)
+            result.inject_stats.error = f"preparation_failed: {exc}"
+            return result
 
         if tree is None or root is None:
-            stats.error = "preparation_returned_none_tree"
-            return None, stats
+            result.inject_stats.error = "preparation_returned_none_tree"
+            return result
+
+        result.tree = tree
 
         # 2. Snapshot languages before
         before_languages = tree_languages(tree)
-        stats.languages_before = sorted(before_languages)
+        result.inject_stats.languages_before = sorted(before_languages)
 
         # 3. Seed IdManager with existing IDs
         self.id_manager.register_many(root.xpath("//@id"))
 
         # 4. Process every switch
+        mapping_obj = TranslationMapping.from_any(mapping)
         self.work_on_switches(
             root=root,
-            mapping=mapping,
-            stats=stats,
+            mapping=mapping_obj,
+            stats=result.inject_stats,
         )
 
         # 5. Final housekeeping
-        # self._finalize_switches(root)
+        self._finalize_switches(root)
 
         # 6. Languages after + stats
         after_languages = tree_languages(tree)
-        self._update_data(stats, before_languages, after_languages)
+        self._update_data(result.inject_stats, before_languages, after_languages)
 
         if not save:
-            return tree, stats
+            return result
 
         # 7. Save if requested
         if save_path is None:
-            logger.error("save_result is True but no save_path was provided")
-            return tree, stats
+            logger.error("save is True but no save_path was provided")
+            result.inject_stats.error = "No target path provided"
+            return result
 
         try:
             self._save(tree, save_path)
         except OSError as e:
             logger.error(f"Failed writing {str(save_path)}: {e}")
+            result.inject_stats.error = f"Failed writing {str(save_path)}: {e}"
 
-        return tree, stats
+        return result
 
     def work_on_switches(
         self,
         root: etree._Element,
-        mapping: TranslationMapping,
+        mapping: TranslationMapping | dict,
+        existing_ids: set[str] | None = None,
         stats: InjectorStats | None = None,
     ) -> InjectorStats:
         """Process ``<switch>`` elements and insert or update translations."""
+        mapping = TranslationMapping.from_any(mapping)
         if not stats:
             stats = InjectorStats()
+
+        if existing_ids:
+            self.id_manager.register_many(existing_ids)
 
         # Process every switch
         switches = root.xpath("//svg:switch", namespaces={"svg": SVG_NS})
@@ -131,17 +187,22 @@ class SVGTranslationInjector:
     ) -> None:
         if self.config.create_parents:
             save_path.parent.mkdir(parents=True, exist_ok=True)
-        str_save_path = str(save_path)
 
+        pretty = self.config.pretty_print if self.config.pretty_print is not None else True
         tree.write(
-            str_save_path,
+            str(save_path),
             encoding="utf-8",
             xml_declaration=True,
-            pretty_print=self.config.pretty_print,
+            pretty_print=pretty,
         )
         logger.debug(f"Saved modified SVG to {save_path}")
 
-    def _update_data(self, stats, before_languages: set[str], after_languages: set[str]) -> None:
+    def _update_data(
+        self,
+        stats: InjectorStats,
+        before_languages: set[str],
+        after_languages: set[str],
+    ) -> None:
         new_languages = after_languages - before_languages
 
         stats.all_languages = len(after_languages)

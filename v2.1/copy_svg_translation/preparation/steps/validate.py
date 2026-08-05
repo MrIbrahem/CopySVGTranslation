@@ -24,6 +24,11 @@ class ValidateStructure(PreparationStep):
         if len(trefs) != 0:
             raise SvgContainsTrefError(element=trefs[0])
 
+        # Check for any <text> elements
+        texts = ctx.root.findall(f".//{{{SVG_NS}}}text")
+        if len(texts) == 0:
+            return
+
         # 2. Check CSS styling
         styles = ctx.root.findall(f".//{{{SVG_NS}}}style")
         css_simple_re = re.compile(r"^([^{]+\{[^}]*\})*[^{]+$")
@@ -53,3 +58,8 @@ class ValidateStructure(PreparationStep):
             text_content = "".join(text_el.itertext())
             if "$" in text_content:
                 raise SvgTextContainsDollarError(code="structure-error-text-contains-dollar", element=text_el)
+
+
+__all__ = [
+    "ValidateStructure",
+]

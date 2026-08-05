@@ -1,14 +1,15 @@
 """Injection phase helpers for CopySVGTranslation."""
 
-from ..exceptions import SvgNestedTspanError, SvgStructureError
+from .id_manager import IdManager
 from .injector import InjectorData, SVGTranslationInjector
-from .worker import inject_file_and_save, inject_file_tree
+from .switch_processor import SwitchProcessor
+from .translation_applier import ApplyResult, TranslationApplier
 
 __all__ = [
+    "IdManager",
     "InjectorData",
-    "inject_file_tree",
-    "inject_file_and_save",
     "SVGTranslationInjector",
-    "SvgStructureError",
-    "SvgNestedTspanError",
+    "SwitchProcessor",
+    "ApplyResult",
+    "TranslationApplier",
 ]

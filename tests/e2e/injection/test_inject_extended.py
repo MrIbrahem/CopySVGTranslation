@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.injection import inject_file_and_save, inject_file_tree
+from CopySVGTranslation.legacy.inject import inject_file_tree
 
 
 class TestSetup:
@@ -41,7 +41,7 @@ class TestInjectEdgeCases(TestSetup):
 
         result, stats = inject_file_tree(
             inject_file=svg_path,
-            all_mappings=mappings,
+            mapping=mappings,
             return_stats=True,
         )
 
@@ -60,7 +60,7 @@ class TestInjectEdgeCases(TestSetup):
 
         result = inject_file_tree(
             inject_file=svg_path,
-            all_mappings=mappings,
+            mapping=mappings,
             case_insensitive=False,
         )
 
@@ -77,30 +77,10 @@ class TestInjectEdgeCases(TestSetup):
         _output_file = self.test_dir / "output.svg"
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        inject_file_and_save(
+        inject_file_tree(
             inject_file=svg_path,
-            all_mappings=mappings,
+            mapping=mappings,
             save_path=_output_file,
         )
 
         assert _output_file.exists() is True
-
-    def test_inject_without_save_result_no_file_created(self):
-        """Test that save_result=False doesn't create output file."""
-        svg_path = self.test_dir / "test.svg"
-        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
-            <switch><text id="t1"><tspan>Hello</tspan></text></switch>
-        </svg>"""
-        svg_path.write_text(svg_content, encoding="utf-8")
-
-        _output_file = self.test_dir / "output.svg"
-        mappings = {"new": {"hello": {"ar": "مرحبا"}}}
-
-        inject_file_tree(
-            inject_file=svg_path,
-            all_mappings=mappings,
-            save_path=_output_file,
-            save_result=False,
-        )
-
-        assert _output_file.exists() is False

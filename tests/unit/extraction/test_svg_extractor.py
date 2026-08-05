@@ -8,10 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.extraction import extract
 from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor  # noqa: F401
-
-FIXTURES_DIR = Path(__file__).parent.parent.parent
+from CopySVGTranslation.legacy.extract import extract
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -64,9 +62,9 @@ def test_match_header_tags(temp_dir: Path):
     assert file is not None
 
 
-def test_extract_with_string_path_zz() -> None:
+def test_extract_with_string_path_zz(fixtures_dir) -> None:
     """extract should work with string paths."""
-    source_path = str(FIXTURES_DIR / "Parkinsons disease prevalence ihme, World, 1990.svg")
+    source_path = str(fixtures_dir / "Parkinsons disease prevalence ihme, World, 1990.svg")
 
     result = extract(source_path)
 

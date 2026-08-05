@@ -6,6 +6,7 @@ from .normalize_tspans import NormalizeTspans
 from .reorder import ReorderTexts
 from .split_languages import SplitLanguages
 from .validate import ValidateStructure
+from .wrap_text_elements import WrapTextElements
 
 __all__ = [
     "AssignIds",
@@ -16,4 +17,5 @@ __all__ = [
     "ReorderTexts",
     "SplitLanguages",
     "ValidateStructure",
+    "WrapTextElements",
 ]

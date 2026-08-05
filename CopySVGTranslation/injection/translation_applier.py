@@ -91,3 +91,9 @@ class TranslationApplier:
         # Recursively update children
         for child in element:
             self._reassign_ids(child, lang)
+
+
+__all__ = [
+    "ApplyResult",
+    "TranslationApplier",
+]

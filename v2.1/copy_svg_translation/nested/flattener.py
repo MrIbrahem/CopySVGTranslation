@@ -11,7 +11,7 @@ from ..exceptions import SvgNestedTspanError
 logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"
 
-NestedStrategy = Literal["preserve_style", "flatten", "raise"]
+NestedStrategy = Literal["split_nested_tspans", "preserve_style", "flatten", "raise"]
 
 
 def _flatten_text(elem: etree._Element) -> str:
@@ -58,11 +58,14 @@ class NestedTspanFlattener:
             return root
 
         # preserve_style (default)
-        self._preserve_style(root, tag="tspan")
-        if self.also_fix_a:
-            # <a> inside tspan is also invalid for many tools
-            self._preserve_style(root, tag="a")
-        return root
+        if self.strategy == "preserve_style":
+            self._preserve_style(root, tag="tspan")
+            if self.also_fix_a:
+                # <a> inside tspan is also invalid for many tools
+                self._preserve_style(root, tag="a")
+            return root
+
+        raise ValueError(f"Unknown strategy: {self.strategy}")
 
     # ------------------------------------------------------------------
     # Strategy: raise
@@ -148,3 +151,8 @@ class NestedTspanFlattener:
                 parent.remove(tspan)
                 for i, sibling in enumerate(new_siblings):
                     parent.insert(index + i, sibling)
+
+
+__all__ = [
+    "NestedTspanFlattener",
+]

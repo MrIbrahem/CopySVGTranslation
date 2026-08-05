@@ -74,7 +74,7 @@ from ..utils.xml import tree_languages  # only if needed for stats shape
 
 def inject_file_tree(
     inject_file: Path | str | None = None,
-    all_mappings: Mapping | None = None,
+    mapping: Mapping | None = None,
     case_insensitive: bool = True,
     save_path: Path | None = None,
     overwrite: bool = False,
@@ -100,11 +100,11 @@ def inject_file_tree(
         return (None, {"error": "No inject file provided"}) if return_stats else None
 
     # ---- resolve mapping ----
-    if all_mappings is None and mapping_files:
+    if mapping is None and mapping_files:
         store = MappingStore()
-        all_mappings = store.load_many(mapping_files).to_json()
+        mapping = store.load_many(mapping_files).to_json()
 
-    if not all_mappings:
+    if not mapping:
         return (None, {"error": "No valid mappings found"}) if return_stats else None
 
     # ---- resolve output path ----
@@ -129,7 +129,7 @@ def inject_file_tree(
 
     result = service.inject(
         inject_path,
-        TranslationMapping.from_any(all_mappings),
+        TranslationMapping.from_any(mapping),
         output=target,
         save=save_result,
     )

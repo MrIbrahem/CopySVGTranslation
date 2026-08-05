@@ -34,7 +34,7 @@ class SwitchProcessor:
     def process(
         self,
         switch_element: etree._Element,
-        mapping: TranslationMapping,
+        mapping: TranslationMapping | dict,
         stats: InjectorStats,
     ) -> None:
         """
@@ -48,6 +48,7 @@ class SwitchProcessor:
               - update stats
         6. Optionally re-sort children of the switch
         """
+        mapping = TranslationMapping.from_any(mapping)
         switch = SwitchNode(switch_element)
         default: TextNode | None = switch.default_text_node()
         if default is None:
@@ -64,11 +65,7 @@ class SwitchProcessor:
         stats.processed_switches += 1
 
         # Enrich mapping with year-title logic
-        working_mapping = self.year_handler.enrich_mapping_for_switch(
-            mapping,
-            default_texts,
-            case_insensitive=self.config.case_insensitive,
-        )
+        working_mapping = self.enrich_all_mappings(mapping, default_texts)
 
         # Collect translation mappings per-language for this fallback
         langs_to_process = working_mapping.all_languages()
@@ -111,3 +108,18 @@ class SwitchProcessor:
 
         # Sort the switch elements deterministically
         switch.reorder(put_fallback_last=True)
+
+    # -------------
+    #  enrich mappings
+    # -------------
+    def enrich_all_mappings(self, mapping, default_texts) -> TranslationMapping:
+        return self.year_handler.enrich_mapping_for_switch(
+            mapping,
+            default_texts,
+            case_insensitive=self.config.case_insensitive,
+        )
+
+
+__all__ = [
+    "SwitchProcessor",
+]

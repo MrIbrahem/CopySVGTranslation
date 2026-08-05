@@ -7,6 +7,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.core.mapping import TranslationMapping
 from CopySVGTranslation.extraction.extractor import (
@@ -43,7 +45,6 @@ class TestExtractorData:
         data = TranslationMapping()
         assert data.new == {}
         assert data.tspans_by_id == {}
-        assert data.title == {}
         assert data.title_new == {}
         assert data.error == ""
 
@@ -53,24 +54,22 @@ class TestExtractorData:
         assert isinstance(result, dict)
         assert "new" in result
         assert "tspans_by_id" in result
-        assert "title" in result
         assert "title_new" in result
         assert "error" in result
 
-        assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "error": ""}
+        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
 
     def test_to_json_reflects_data(self):
         data = TranslationMapping(
             new={"hello": {"ar": "مرحبا"}},
             tspans_by_id={"t0": "Hello"},
-            title={"greeting": {"fr": "Salut"}},
             title_new={},
             error="",
         )
         result = data.to_json()
         assert result["new"] == {"hello": {"ar": "مرحبا"}}
         assert result["tspans_by_id"] == {"t0": "Hello"}
-        assert result["title"] == {"greeting": {"fr": "Salut"}}
+        assert result["title_new"] == {}
 
     def test_to_json_error_field(self):
         data = TranslationMapping(error="File not found")
@@ -217,7 +216,7 @@ class TestSVGTranslationExtractorExtract:
         # The full text should be in "new"
         assert "population 2020" in result.new
         # Title section should have the year-stripped version
-        assert isinstance(result.title, dict)
+        assert isinstance(result.title_new, dict)
 
     def test_no_switches_returns_empty(self, tmp_path: Path):
         inner = '<text id="t0"><tspan>Just text</tspan></text>'
@@ -277,28 +276,29 @@ class TestSVGTranslationExtractorErrors:
     """Tests for error handling in SVGTranslationExtractor."""
 
     def test_nonexistent_file(self, tmp_path: Path):
-        ext = SVGTranslationExtractor()
-        result = ext.extract(tmp_path / "missing.svg")
+        from CopySVGTranslation.exceptions import SvgIOError
 
-        assert result.error == "File not found"
-        assert result.new == {}
+        ext = SVGTranslationExtractor()
+        with pytest.raises(SvgIOError):
+            ext.extract(tmp_path / "missing.svg")
 
     def test_invalid_xml(self, tmp_path: Path):
+        from CopySVGTranslation.exceptions import SvgParseError
+
         svg = tmp_path / "bad.svg"
         svg.write_text("<svg><unclosed>", encoding="utf-8")
         ext = SVGTranslationExtractor()
-        result = ext.extract(svg)
-
-        assert result.error == "Failed to parse SVG file"
-        assert result.new == {}
+        with pytest.raises(SvgParseError):
+            ext.extract(svg)
 
     def test_empty_file(self, tmp_path: Path):
+        from CopySVGTranslation.exceptions import SvgParseError
+
         svg = tmp_path / "empty.svg"
         svg.write_text("", encoding="utf-8")
         ext = SVGTranslationExtractor()
-        result = ext.extract(svg)
-
-        assert result.error != ""
+        with pytest.raises(SvgParseError):
+            ext.extract(svg)
 
     def test_error_cleared_between_calls(self, tmp_path: Path):
         """Each call to extract() should use the same translations instance,
@@ -330,7 +330,7 @@ class TestExtractorDataToJson:
         data = result.to_json()
 
         assert isinstance(data, dict)
-        assert set(data.keys()) == {"new", "tspans_by_id", "title", "title_new", "error"}
+        assert set(data.keys()) == {"new", "tspans_by_id", "title_new", "error", "meta"}
         assert isinstance(data["new"], dict)
         assert isinstance(data["tspans_by_id"], dict)
         assert isinstance(data["error"], str)

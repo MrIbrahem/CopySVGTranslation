@@ -30,3 +30,9 @@ class PreparationStep(ABC):
     def execute(self, ctx: PreparationContext) -> None:
         """Modify ctx in-place. Raise on fatal errors."""
         ...
+
+
+__all__ = [
+    "PreparationContext",
+    "PreparationStep",
+]

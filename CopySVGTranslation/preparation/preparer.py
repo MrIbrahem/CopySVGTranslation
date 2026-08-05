@@ -70,17 +70,6 @@ class SvgPreparationPipeline:
         return self.ctx.tree, self.ctx.root
 
 
-def make_translation_ready(source_file: Path | str) -> tuple[etree._ElementTree, etree._Element]:
-    """
-    Legacy function-style wrapper around SvgPreparationPipeline, kept for
-    backward compatibility with existing callers.
-    """
-    config = TranslationConfig()
-    preparer = SvgPreparationPipeline(config)
-    return preparer.run(path=source_file)
-
-
 __all__ = [
     "SvgPreparationPipeline",
-    "make_translation_ready",
 ]

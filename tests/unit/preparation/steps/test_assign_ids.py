@@ -1,5 +1,5 @@
 """
-Unit tests for CopySVGTranslation/CopySVGTranslation/preparation/steps/assign_ids.py module.
+Unit tests for CopySVGTranslation/preparation/steps/assign_ids.py module.
 
 Classes to test: AssignIds
 

@@ -12,6 +12,7 @@ from copy_svg_translation import (
     SVGTranslationExtractor,
     TranslationMapping,
 )
+from copy_svg_translation.config import TranslationConfig
 from lxml import etree
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -44,7 +45,6 @@ class TestExtractorData:
         data = TranslationMapping()
         assert data.new == {}
         assert data.tspans_by_id == {}
-        assert data.title == {}
         assert data.title_new == {}
         # assert data.error == ""
 
@@ -54,22 +54,20 @@ class TestExtractorData:
         assert isinstance(result, dict)
         assert "new" in result
         assert "tspans_by_id" in result
-        assert "title" in result
         assert "title_new" in result
 
-        assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "meta": {}}
+        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}}
 
     def test_to_json_reflects_data(self):
         data = TranslationMapping(
             new={"hello": {"ar": "مرحبا"}},
             tspans_by_id={"t0": "Hello"},
-            title={"greeting": {"fr": "Salut"}},
             title_new={},
         )
         result = data.to_json()
         assert result["new"] == {"hello": {"ar": "مرحبا"}}
         assert result["tspans_by_id"] == {"t0": "Hello"}
-        assert result["title"] == {"greeting": {"fr": "Salut"}}
+        assert result["title_new"] == {"greeting": {"fr": "Salut"}}
 
     def test_fields_are_independent(self):
         """Each instance should have independent mutable defaults."""
@@ -145,7 +143,10 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor()
+        config = TranslationConfig(
+            case_insensitive=True,
+        )
+        ext = SVGTranslationExtractor(config)
         result = ext.extract(svg)
 
         assert "hello world" in result.new
@@ -159,7 +160,10 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor()
+        config = TranslationConfig(
+            case_insensitive=False,
+        )
+        ext = SVGTranslationExtractor(config)
         result = ext.extract(svg)
 
         assert result.new == {"hello world": {"es": "Hola"}}
@@ -194,7 +198,7 @@ class TestSVGTranslationExtractorExtract:
         # The full text should be in "new"
         assert "population 2020" in result.new
         # Title section should have the year-stripped version
-        assert isinstance(result.title, dict)
+        assert isinstance(result.title_new, dict)
 
     def test_no_switches_returns_empty(self, tmp_path: Path):
         inner = '<text id="t0"><tspan>Just text</tspan></text>'
@@ -298,7 +302,7 @@ class TestExtractorDataToJson:
         data = result.to_json()
 
         assert isinstance(data, dict)
-        assert set(data.keys()) == {"new", "tspans_by_id", "title", "title_new", "meta"}
+        assert set(data.keys()) == {"new", "tspans_by_id", "title_new", "error", "meta"}
         assert isinstance(data["new"], dict)
         assert isinstance(data["tspans_by_id"], dict)
 

@@ -153,3 +153,22 @@ class ConfigurationError(CopySVGTranslationError):
     @classmethod
     def default_code(cls) -> str:
         return "config-error"
+
+
+__all__ = [
+    "CopySVGTranslationError",
+    "SvgStructureError",
+    "SvgNestedTspanError",
+    "SvgInvalidIdError",
+    "SvgContainsTrefError",
+    "SvgCssTooComplexError",
+    "SvgCssHasIdsError",
+    "SvgTextContainsDollarError",
+    "SvgSwitchStructureError",
+    "SvgNoParentForTextError",
+    "SvgNonTspanInsideTextError",
+    "SvgParseError",
+    "SvgIOError",
+    "MappingError",
+    "ConfigurationError",
+]

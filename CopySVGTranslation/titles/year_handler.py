@@ -6,8 +6,6 @@ import re
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
-from .titles import make_title_translations
-from .titles_new import make_new_title_translations
 
 logger = logging.getLogger(__name__)
 
@@ -50,8 +48,10 @@ class YearTitleHandler:
         Returns empty string if the year is not in the expected position.
         """
         text = text.strip()
+
         if text.endswith(year):
             return re.sub(r"\d{4}$", "{year}", text)
+
         if text.startswith(year):
             return re.sub(r"^\d{4}", "{year}", text)
         return ""
@@ -64,10 +64,10 @@ class YearTitleHandler:
     # ------------------------------------------------------------------
     # Extraction side
     # ------------------------------------------------------------------
+
     def build_templates(self, mapping: TranslationMapping) -> None:
         """
-        Populate mapping.title_new (and optionally mapping.title) from
-        mapping.new.
+        Populate mapping.title_new from mapping.new.
 
         Example
             -------
@@ -80,31 +80,34 @@ class YearTitleHandler:
         if not self.enabled:
             return
 
-        mapping.title = make_title_translations(mapping.new)
-        mapping.title_new = make_new_title_translations(mapping.new)
+        self.build_title_new_templates(mapping)
 
-    # ------------------------------------------------------------------
-    # Extraction side
-    # ------------------------------------------------------------------
-    def build_templates_new(self, mapping: TranslationMapping) -> None:
+    def build_title_new_templates(self, mapping: TranslationMapping) -> None:
         """
-        Populate mapping.title_new (and optionally mapping.title) from
-        mapping.new.
+        Extract valid title translations by verifying that all translations in a mapping
+        end with the same 4-digit year as the key.
 
-        Example
-            -------
-            Input (mapping.new):
-            "COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020", ...}
+        Example:
+            Input:
+                {
+                    "COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020", "es": "Pandemia de COVID-19 2020"}
+                }
+            Output:
+                {
+                    "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}", "es": "Pandemia de COVID-19 {year}"}
+                }
 
-            Output (mapping.title_new):
-            "COVID-19 pandemic {year}": {"ar": "جائحة كوفيد {year}", ...}
+        Args:
+            new: A dictionary mapping full titles (ending with a year) to their translations.
+
+        Returns:
+            A dictionary mapping base title -> { language -> title with `{year}` }.
         """
-        if not self.enabled:
-            return
-
         for source, translations in list(mapping.new.items()):
             year = self.match_year(source)
-            if not year:
+
+            # if not year:
+            if not source or source == year or not year.isdigit():
                 continue
 
             source_template = self.replace_year_with_placeholder(source, year)
@@ -151,7 +154,7 @@ class YearTitleHandler:
             return {}
 
         # Normalize keys for lookup
-        templates = {(k.lower() if case_insensitive else k): v for k, v in mapping.title_new.items()}
+        templates = {(k.strip().lower() if case_insensitive else k): v for k, v in mapping.title_new.items()}
 
         expanded: dict[str, dict[str, str]] = {}
 
@@ -198,3 +201,8 @@ class YearTitleHandler:
             key = source.lower() if case_insensitive else source
             working.new.setdefault(key, {}).update(trans)
         return working
+
+
+__all__ = [
+    "YearTitleHandler",
+]

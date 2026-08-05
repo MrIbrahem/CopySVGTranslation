@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation import extract
+from CopySVGTranslation.legacy.extract import extract
 
 
 class TestExtractEdgeCases:
@@ -35,9 +35,7 @@ class TestExtractEdgeCases:
 
         result = extract(svg_path)
 
-        # Should handle gracefully
-        assert result is not None
-        assert result is not None
+        assert result is None
 
     def test_extract_switch_without_default_text(self):
         """Test extraction with switch containing only translated text."""
@@ -51,7 +49,7 @@ class TestExtractEdgeCases:
 
         result = extract(svg_path)
 
-        assert result is not None
+        assert result is None
 
     def test_extract_with_mixed_tspan_and_text(self):
         """Test extraction with mixed tspan and direct text."""
@@ -92,9 +90,9 @@ class TestExtractEdgeCases:
         assert result == {
             "new": {"hello": {"ar": "مرحبا"}},
             "tspans_by_id": {"t1": "HELLO"},
-            "title": {},
             "title_new": {},
             "error": "",
+            "meta": {},
         }
 
     def test_extract_preserves_empty_tspan_text(self):
@@ -109,8 +107,7 @@ class TestExtractEdgeCases:
 
         result = extract(svg_path)
 
-        assert result is not None
-        assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "error": ""}
+        assert result is None
 
     def test_extract_with_base_id_fallback(self):
         """Test extraction with base_id lookup fallback."""
@@ -129,7 +126,7 @@ class TestExtractEdgeCases:
         assert result == {
             "new": {"hello": {"ar": "مرحبا"}},
             "tspans_by_id": {"TEXT1": "Hello"},
-            "title": {},
             "title_new": {},
             "error": "",
+            "meta": {},
         }

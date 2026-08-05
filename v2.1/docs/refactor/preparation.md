@@ -104,14 +104,14 @@ class SvgPreparationPipeline:
 
 ### Step Details
 
-| Step                  | File                  | Responsibility                                                                                                               | Old code it replaces                                                      |
-| --------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| **LoadDocument**      | `load.py`             | Parse the file, ensure a root element and a sane default namespace                                                           | `_load_document`                                                          |
-| **ValidateStructure** | `validate.py`         | Reject `<tref>`, overly complex CSS with `#`, texts containing `$N`, and nested tspans according to `config.nested_strategy` | `_check_style_elements`, `_check_no_trefs`, part of nested checks         |
-| **NormalizeTspans**   | `normalize_tspans.py` | Wrap loose text into `<tspan>`, handle nested elements (`preserve_style` / `flatten` / `raise`), remove empty nodes          | `_wrap_loose_text_into_tspans` + nested flattener                         |
-| **AssignIds**         | `assign_ids.py`       | Collect existing IDs, assign `trsvgN` to nodes that lack an id, clean invalid IDs                                            | `_collect_existing_ids` + `_assign_missing_ids` + part of `_clean_ids...` |
-| **SplitLanguages**    | `split_languages.py`  | Expand `systemLanguage="ar,fr"` into separate `<text>` nodes with new IDs                                                    | `_split_switch_languages`                                                 |
-| **ReorderTexts**      | `reorder.py`          | Deterministically order children of every `<switch>` (languages first, fallback last)                                        | `_reorder_texts`                                                          |
+| Step                  | File                  | Responsibility                                                                                                                             | Old code it replaces                                                      |
+| --------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| **LoadDocument**      | `load.py`             | Parse the file, ensure a root element and a sane default namespace                                                                         | `_load_document`                                                          |
+| **ValidateStructure** | `validate.py`         | Reject `<tref>`, overly complex CSS with `#`, texts containing `$N`, and nested tspans according to `config.nested_strategy`               | `_check_style_elements`, `_check_no_trefs`, part of nested checks         |
+| **NormalizeTspans**   | `normalize_tspans.py` | Wrap loose text into `<tspan>`, handle nested elements (`split_nested_tspans`, `preserve_style` / `flatten` / `raise`), remove empty nodes | `_wrap_loose_text_into_tspans` + nested flattener                         |
+| **AssignIds**         | `assign_ids.py`       | Collect existing IDs, assign `trsvgN` to nodes that lack an id, clean invalid IDs                                                          | `_collect_existing_ids` + `_assign_missing_ids` + part of `_clean_ids...` |
+| **SplitLanguages**    | `split_languages.py`  | Expand `systemLanguage="ar,fr"` into separate `<text>` nodes with new IDs                                                                  | `_split_switch_languages`                                                 |
+| **ReorderTexts**      | `reorder.py`          | Deterministically order children of every `<switch>` (languages first, fallback last)                                                      | `_reorder_texts`                                                          |
 
 ---
 

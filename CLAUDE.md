@@ -53,7 +53,7 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 
 -   **`CopySVGTranslation/injection/injector.py`**: Contains `SVGTranslationInjector` class, `InjectorData`, and `InjectorStats` dataclasses. The main injection engine that processes `<switch>` elements, matches default text against mappings, and inserts/updates translation nodes with `systemLanguage` attributes.
 
--   **`CopySVGTranslation/injection/worker.py`**: Contains the deprecated `inject()` function — a thin wrapper around `SVGTranslationInjector` for backward compatibility.
+-   **`CopySVGTranslation/legacy/worker.py`**: Contains the deprecated `inject()` function — a thin wrapper around `SVGTranslationInjector` for backward compatibility.
 
 -   **`CopySVGTranslation/injection/preparation.py`**: SVG normalization and preparation before injection. Wraps loose text nodes in `<tspan>` elements, creates `<switch>` wrappers, normalizes language tags, assigns unique IDs (`trsvg*`), and detects unsupported structures (nested tspans, tref elements).
 
@@ -61,13 +61,13 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 
 -   **`CopySVGTranslation/titles_workers/`**: Handles title-like text (entries ending with 4-digit years) with special handling.
 
--   **`CopySVGTranslation/nested_analyze/`**: Utilities for detecting and fixing nested `<tspan>` structures that would otherwise cause `SvgNestedTspanError`.
+-   **`CopySVGTranslation/nested/`**: Utilities for detecting and fixing nested `<tspan>` structures that would otherwise cause `SvgNestedTspanError`.
 
 ### Data Flow
 
 1. **Extraction**: SVG file → `SVGTranslationExtractor.extract()` → `ExtractorData` (with `.to_json()` for dict)
 
-2. **Injection**: SVG file + mapping dict → `SVGTranslationInjector.inject()` → `InjectorData` (with `.new_stats` for stats)
+2. **Injection**: SVG file + mapping dict → `SVGTranslationInjector.inject()` → `InjectorData` (with `.inject_stats` for stats)
 
 ### Key Data Structures
 
@@ -89,7 +89,7 @@ class ExtractorData:
 @dataclass
 class InjectorData:
     tree: etree._ElementTree | None    # parsed/modified SVG tree
-    new_stats: InjectorStats           # injection statistics
+    inject_stats: InjectorStats           # injection statistics
 ```
 
 **InjectorStats**:
@@ -117,7 +117,6 @@ The extractor produces JSON in this format:
   "new": {
     "normalized english text": {"ar": "translation", "fr": "translation"}
   },
-  "title": {...},
   "tspans_by_id": {"id": "text content"},
   "title_new": {...}
 }
@@ -135,4 +134,4 @@ The extractor produces JSON in this format:
 
 ## Testing
 
-Tests are organized in `tests/` with subdirectories for extraction, injection, and nested_analyze modules. The `conftest.py` adds the project root to `sys.path`.
+Tests are organized in `tests/` with subdirectories for extraction, injection, and nested modules. The `conftest.py` adds the project root to `sys.path`.

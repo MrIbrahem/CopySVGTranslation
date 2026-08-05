@@ -1,22 +1,36 @@
 """Public API for the CopySVGTranslation package."""
 
+__version__ = "2.0.1"
+
 from .config import TranslationConfig
-from .core.mapping import TranslationMapping
-from .extraction import SVGTranslationExtractor, extract
-from .injection import InjectorData, SVGTranslationInjector, inject_file_tree
-from .nested_analyze import fix_nested_file, match_nested_tags
+from .core.mapping import TranslationEntry, TranslationMapping
+from .extraction import SVGTranslationExtractor
+from .injection import InjectorData, SVGTranslationInjector
+from .io.mapping_store import MappingStore
+from .legacy import extract, inject_file_tree
+from .nested import NestedTspanDetector, fix_nested_file, match_nested_tags
+from .result import InjectorStats, InjectResult, OperationResult
+from .service import SVGTranslationService
 
 __all__ = [
     # main API
     "TranslationConfig",
     "SVGTranslationInjector",
     "SVGTranslationExtractor",
+    "SVGTranslationService",
+    "MappingStore",
     "inject_file_tree",  # to be deprecated
     "extract",  # to be deprecated
+    "NestedTspanDetector",
     # dataclasses
     "TranslationMapping",
+    "TranslationEntry",
     "InjectorData",
+    "InjectorStats",
+    "OperationResult",
+    "InjectResult",
     # others
     "match_nested_tags",
     "fix_nested_file",
+    "__version__",
 ]
