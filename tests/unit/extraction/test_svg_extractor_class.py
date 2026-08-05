@@ -57,7 +57,7 @@ class TestExtractorData:
         assert "title_new" in result
         assert "error" in result
 
-        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "error": ""}
+        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
 
     def test_to_json_reflects_data(self):
         data = TranslationMapping(
@@ -330,7 +330,7 @@ class TestExtractorDataToJson:
         data = result.to_json()
 
         assert isinstance(data, dict)
-        assert set(data.keys()) == {"new", "tspans_by_id", "title_new", "error"}
+        assert set(data.keys()) == {"new", "tspans_by_id", "title_new", "error", "meta"}
         assert isinstance(data["new"], dict)
         assert isinstance(data["tspans_by_id"], dict)
         assert isinstance(data["error"], str)

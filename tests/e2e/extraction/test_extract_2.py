@@ -59,4 +59,5 @@ class TestExtractor:
             "tspans_by_id": {"t0": "Hello"},
             "title_new": {},
             "error": "",
+            "meta": {},
         }

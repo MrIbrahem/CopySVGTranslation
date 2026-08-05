@@ -86,6 +86,7 @@ class TestExtractYearHandling:
         assert result == {
             "new": {"value 42": {}},
             "title_new": {},
+            "meta": {},
             "tspans_by_id": {"t1": "Value 42"},
             "error": "",
         }

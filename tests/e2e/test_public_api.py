@@ -55,6 +55,7 @@ class TestExtractFunction:
         assert "new" in result
         assert result == {
             "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
+            "meta": {},
             "tspans_by_id": {"label": "Population 2020"},
             "title_new": {"population {year}": {"ar": "السكان {year}"}},
             "error": "",
@@ -73,6 +74,7 @@ class TestExtractFunction:
         assert "population 2020" in result["new"]
         assert result == {
             "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
+            "meta": {},
             "tspans_by_id": {"label": "Population 2020"},
             "title_new": {"population {year}": {"ar": "السكان {year}"}},
             "error": "",
@@ -86,6 +88,7 @@ class TestExtractFunction:
         assert result["new"]["population 2020"]["ar"] == "السكان 2020"
         assert result == {
             "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
+            "meta": {},
             "tspans_by_id": {"label": "Population 2020"},
             "title_new": {"population {year}": {"ar": "السكان {year}"}},
             "error": "",

@@ -94,6 +94,7 @@ class TestExtractEdgeCases:
             "tspans_by_id": {"t1": "HELLO"},
             "title_new": {},
             "error": "",
+            "meta": {},
         }
 
     def test_extract_preserves_empty_tspan_text(self):
@@ -130,4 +131,5 @@ class TestExtractEdgeCases:
             "tspans_by_id": {"TEXT1": "Hello"},
             "title_new": {},
             "error": "",
+            "meta": {},
         }

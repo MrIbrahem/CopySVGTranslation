@@ -59,6 +59,7 @@ class TestExtractorEdgeCases:
             "tspans_by_id": {"s": "Hello"},
             "title_new": {},
             "error": "",
+            "meta": {},
         }
 
     def test_extract_empty_svg_gracefully(self, temp_dir):

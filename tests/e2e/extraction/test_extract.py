@@ -137,6 +137,7 @@ class TestExtractor:
             "tspans_by_id": {"greeting": "Hello"},
             "title_new": {},
             "error": "",
+            "meta": {},
         }
 
 

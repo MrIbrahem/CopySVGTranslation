@@ -302,7 +302,7 @@ class TestExtractorDataToJson:
         data = result.to_json()
 
         assert isinstance(data, dict)
-        assert set(data.keys()) == {"new", "tspans_by_id", "title_new", "meta"}
+        assert set(data.keys()) == {"new", "tspans_by_id", "title_new", "error", "meta"}
         assert isinstance(data["new"], dict)
         assert isinstance(data["tspans_by_id"], dict)
 

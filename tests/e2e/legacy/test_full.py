@@ -157,6 +157,7 @@ def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
         "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour", "es": "Hola"}},
         "tspans_by_id": {"label": "Hello"},
         "title_new": {},
+        "meta": {},
         "error": "",
     }
 
@@ -229,6 +230,7 @@ def test_extract_with_case_insensitive_false(tmp_path: Path) -> None:
         "new": {"HELLO WORLD": {"ar": "مرحبا"}},
         "tspans_by_id": {"label": "HELLO WORLD"},
         "title_new": {},
+        "meta": {},
         "error": "",
     }
 
