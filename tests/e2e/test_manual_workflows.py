@@ -7,10 +7,12 @@ Pytest conversions of the former manual test scripts:
 """
 
 import json
+from pathlib import Path
 
 import pytest
+from lxml import etree
 
-from CopySVGTranslation import extract
+from CopySVGTranslation import TranslationConfig, extract
 from CopySVGTranslation.exceptions import (
     SvgNestedTspanError,
     SvgStructureError,
@@ -18,7 +20,7 @@ from CopySVGTranslation.exceptions import (
 from CopySVGTranslation.injection import (
     inject_file_and_save,
 )
-from CopySVGTranslation.preparation import make_translation_ready
+from CopySVGTranslation.preparation import SvgPreparationPipeline
 from CopySVGTranslation.titles import get_titles_translations
 
 # ------------------------------------------------------------------ #
@@ -36,6 +38,18 @@ def _write_svg(temp_dir, content: str, name: str = "test.svg"):
 # ================================================================== #
 # 1. extract.py  –  extraction from a multi-switch SVG
 # ================================================================== #
+
+
+def make_translation_ready(source_file: Path | str) -> tuple[etree._ElementTree, etree._Element]:
+    """
+    Legacy function-style wrapper around SvgPreparationPipeline, kept for
+    backward compatibility with existing callers.
+    """
+    config = TranslationConfig(
+        nested_strategy="raise",
+    )
+    preparer = SvgPreparationPipeline(config)
+    return preparer.run(path=source_file)
 
 
 class TestExtractManual:
