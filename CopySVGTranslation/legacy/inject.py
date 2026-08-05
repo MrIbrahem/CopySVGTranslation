@@ -16,7 +16,7 @@ from ..injection.injector import InjectorData, SVGTranslationInjector
 logger = logging.getLogger(__name__)
 
 
-def inject_file_tree(
+def _inject_file_tree(
     *,
     inject_file: Path | str | None = None,
     mapping_files: Iterable[Path | str] | None = None,
@@ -25,7 +25,6 @@ def inject_file_tree(
     save_path: Path | None = None,
     overwrite: bool = False,
     save_result: bool = False,
-    return_stats: bool = False,
     pretty_print: bool | None = None,
 ) -> tuple[Any, Any] | Any:
     """
@@ -40,15 +39,15 @@ def inject_file_tree(
     # ---- normalize legacy argument aliases ----
 
     if inject_file is None:
-        return (None, {"error": "No inject file provided"}) if return_stats else None
+        return (None, {"error": "No inject file provided"})
 
     # ---- resolve mapping ----
-    if mapping is None and mapping_files:
+    if not mapping and mapping_files:
         store = MappingStore()
         mapping = store.load_many(mapping_files).to_json()
 
     if not mapping:
-        return (None, {"error": "No valid mappings found"}) if return_stats else None
+        return (None, {"error": "No valid mappings found"})
 
     # ---- resolve output path ----
     inject_path = Path(str(inject_file))
@@ -71,10 +70,38 @@ def inject_file_tree(
         save=save_result,
     )
 
-    if return_stats:
-        return result.tree, result.new_stats.to_json()
+    return result.tree, result.new_stats.to_json()
 
-    return result.tree
+def inject_file_tree(
+    *,
+    inject_file: Path | str | None = None,
+    mapping_files: Iterable[Path | str] | None = None,
+    mapping: Mapping | None = None,
+    case_insensitive: bool = True,
+    save_path: Path | None = None,
+    overwrite: bool = False,
+    save_result: bool = False,
+    return_stats: bool = False,
+    pretty_print: bool | None = None,
+) -> tuple[Any, Any] | Any:
+    """
+    Deprecated. Use SVGTranslationService.inject() instead.
+    """
+    tree, stats = _inject_file_tree(
+        inject_file=inject_file,
+        mapping_files=mapping_files,
+        mapping=mapping,
+        case_insensitive=case_insensitive,
+        save_path=save_path,
+        overwrite=overwrite,
+        save_result=save_result,
+        pretty_print=pretty_print,
+    )
+
+    if return_stats:
+        return tree, stats
+
+    return tree
 
 
 def inject_file_and_save(

@@ -270,6 +270,8 @@ class TestSVGTranslate(TestSetup):
         with open(svg_path, "w", encoding="utf-8") as f:
             f.write(self.no_translations_svg_content)
 
+        assert svg_path.exists()
+
         result = inject_file_tree(
             inject_file=svg_path,
             mapping_files=[nonexistent_mapping],

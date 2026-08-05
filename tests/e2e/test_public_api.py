@@ -9,8 +9,6 @@ import CopySVGTranslation
 from CopySVGTranslation.extraction.worker import extract
 from CopySVGTranslation.legacy.inject import inject_file_and_save, inject_file_tree
 
-FIXTURES_DIR = Path(__file__).parent / "fixtures"
-
 
 class TestPublicAPIExports:
     """Test that the public API exports all expected functions."""
@@ -51,14 +49,14 @@ class TestPublicAPIExports:
 class TestExtractFunction:
     """Integration tests for the extract function."""
 
-    def test_extract_returns_dict(self):
+    def test_extract_returns_dict(self, fixtures_dir):
         """extract should return a dictionary of translations."""
-        result = extract(FIXTURES_DIR / "source.svg")
+        result = extract(fixtures_dir / "source.svg")
         assert isinstance(result, dict)
 
-    def test_extract_has_expected_keys(self):
+    def test_extract_has_expected_keys(self, fixtures_dir):
         """extract should return a dict with expected top-level keys."""
-        result = extract(FIXTURES_DIR / "source.svg")
+        result = extract(fixtures_dir / "source.svg")
         assert "new" in result
         assert result == {
             "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
@@ -72,9 +70,9 @@ class TestExtractFunction:
         result = extract(Path("/nonexistent/file.svg"))
         assert result is None
 
-    def test_extract_case_insensitive_default(self):
+    def test_extract_case_insensitive_default(self, fixtures_dir):
         """extract should be case insensitive by default."""
-        result = extract(FIXTURES_DIR / "source.svg")
+        result = extract(fixtures_dir / "source.svg")
         assert result is not None
         # Should have lowercase keys
         assert "population 2020" in result["new"]
@@ -85,9 +83,9 @@ class TestExtractFunction:
             "error": "",
         }
 
-    def test_extract_with_arabic_translations(self):
+    def test_extract_with_arabic_translations(self, fixtures_dir):
         """extract should properly extract Arabic translations."""
-        result = extract(FIXTURES_DIR / "source.svg")
+        result = extract(fixtures_dir / "source.svg")
         assert result is not None
         assert "ar" in result["new"]["population 2020"]
         assert result["new"]["population 2020"]["ar"] == "السكان 2020"
@@ -102,13 +100,13 @@ class TestExtractFunction:
 class TestIntegrationWorkflows:
     """Integration tests for high-level workflow functions."""
 
-    def test_inject_with_dict(self, tmp_path: Path):
+    def test_inject_with_dict(self, tmp_path: Path, fixtures_dir):
         """Test inject with pre-extracted translations dict."""
         target_svg = tmp_path / "target.svg"
-        target_svg.write_text((FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
+        target_svg.write_text((fixtures_dir / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
 
         # Extract translations first
-        translations = extract(FIXTURES_DIR / "source.svg")
+        translations = extract(fixtures_dir / "source.svg")
 
         # Inject using the dict
         result, stats = inject_file_and_save(
@@ -143,10 +141,10 @@ class TestEdgeCasesAndErrorHandling:
         result = extract(invalid_svg)
         assert result is None
 
-    def test_inject_with_empty_mapping_list(self, tmp_path: Path):
+    def test_inject_with_empty_mapping_list(self, tmp_path: Path, fixtures_dir):
         """inject should handle empty mapping file list."""
         target_svg = tmp_path / "target.svg"
-        target_svg.write_text((FIXTURES_DIR / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
+        target_svg.write_text((fixtures_dir / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
 
         result = inject_file_tree(inject_file=target_svg, mapping_files=[])
         # Should return None or handle gracefully

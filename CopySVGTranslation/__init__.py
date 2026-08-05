@@ -1,5 +1,7 @@
 """Public API for the CopySVGTranslation package."""
 
+__version__ = "2.0.1"
+
 from .config import TranslationConfig
 from .core.mapping import TranslationEntry, TranslationMapping
 from .extraction import SVGTranslationExtractor
@@ -31,4 +33,6 @@ __all__ = [
     # others
     "match_nested_tags",
     "fix_nested_file",
+
+    "__version__",
 ]
