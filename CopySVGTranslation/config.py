@@ -74,12 +74,6 @@ class TranslationConfig:
 
         return replace(self, **kwargs)
 
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            if not hasattr(self, key):
-                raise ValueError(f"Unknown config field: {key}")
-            setattr(self, key, value)
-
 __all__ = [
     "TranslationConfig",
 ]
