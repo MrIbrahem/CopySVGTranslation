@@ -60,10 +60,7 @@ class NormalizeTspans(PreparationStep):
         if ctx.root is None:
             return
 
-        ctx.translatable_nodes = (
-            ctx.root.findall(f".//{{{SVG_NS}}}tspan")
-            + ctx.root.findall(f".//{{{SVG_NS}}}text")
-        )
+        ctx.translatable_nodes = ctx.root.findall(f".//{{{SVG_NS}}}tspan") + ctx.root.findall(f".//{{{SVG_NS}}}text")
 
 
 __all__ = [

@@ -127,14 +127,15 @@ class Testinject:
             <?xml version='1.0' encoding='UTF-8'?>
             <svg xmlns="http://www.w3.org/2000/svg">
                 <switch>
-                    <text systemLanguage="la" id="trsvg2">
-                        <tspan id="trsvg3">lang la (new)</tspan>
+                    <text systemLanguage="la" id="trsvg3">
+                        <tspan id="trsvg4">lang la (new)</tspan>
                     </text>
                     <text id="trsvg1">
-                        <tspan id="trsvg4">lang none</tspan>
+                        <tspan id="trsvg2">lang none</tspan>
                     </text>
                 </switch>
             </svg>
+
         """
         file = self.getsvgfilefromstring(temp_dir, source_xml)
 
