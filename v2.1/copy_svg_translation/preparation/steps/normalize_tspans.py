@@ -23,6 +23,9 @@ class NormalizeTspans(PreparationStep):
         for text_el in ctx.root.findall(f".//{{{SVG_NS}}}text"):
             self._wrap_loose_text(text_el)
 
+        # 3. Rebuild the list of translatable nodes
+        self._rebuild_translatable_nodes(ctx)
+
     def _wrap_loose_text(self, text_el: etree._Element) -> None:
         # If there are no children, we wrap the entire text
         children = list(text_el)
@@ -51,6 +54,16 @@ class NormalizeTspans(PreparationStep):
                 # insert after child
                 idx = text_el.index(child)
                 text_el.insert(idx + 1, new_tspan)
+
+    def _rebuild_translatable_nodes(self, ctx: PreparationContext) -> None:
+        """Rebuild translatable_nodes after removals (tspans then texts)."""
+        if ctx.root is None:
+            return
+
+        ctx.translatable_nodes = (
+            ctx.root.findall(f".//{{{SVG_NS}}}tspan")
+            + ctx.root.findall(f".//{{{SVG_NS}}}text")
+        )
 
 
 __all__ = [
