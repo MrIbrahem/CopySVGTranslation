@@ -18,7 +18,7 @@ from CopySVGTranslation.exceptions import (
 )
 from CopySVGTranslation.extraction.worker import extract
 from CopySVGTranslation.legacy import (
-    inject_file_and_save,
+    inject_file_tree,
 )
 from CopySVGTranslation.preparation import SvgPreparationPipeline
 
@@ -209,12 +209,13 @@ class TestInjectManual:
             encoding="utf-8",
         )
 
-        result = inject_file_and_save(
+        result = inject_file_tree(
             inject_file=svg_file,
             save_path=svg_file,
             mapping=data,
             overwrite=True,
             pretty_print=False,
+            save_result=True,
         )
 
         # The file should now contain the injected translation
