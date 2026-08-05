@@ -7,7 +7,7 @@ from pathlib import Path
 # Test that the public API is importable
 import CopySVGTranslation
 from CopySVGTranslation.extraction.worker import extract
-from CopySVGTranslation.legacy.inject import inject_file_and_save, inject_file_tree
+from CopySVGTranslation.legacy.inject import inject_file_tree
 
 
 class TestPublicAPIExports:

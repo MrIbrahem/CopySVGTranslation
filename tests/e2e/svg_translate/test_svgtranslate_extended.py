@@ -11,7 +11,7 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation.extraction.worker import extract
-from CopySVGTranslation.legacy.inject import inject_file_tree, inject_file_tree
+from CopySVGTranslation.legacy.inject import inject_file_tree
 
 
 class TestSetup:

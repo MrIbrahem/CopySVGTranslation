@@ -1,17 +1,28 @@
 """
-Unit tests for CopySVGTranslation/injection/utils.py module.
+Unit tests for CopySVGTranslation/io/mapping_store.py module.
 """
 
 import json
 import shutil
 import tempfile
+from collections.abc import Iterable
 from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.utils.injection_utils import (
-    load_all_mappings,
-)
+from CopySVGTranslation.io.mapping_store import MappingStore
+
+
+def load_all_mappings(mapping_files: Iterable[Path | str]) -> dict:
+    """Load and merge translation mapping JSON files into a single dictionary."""
+
+    store = MappingStore()
+
+    mapping_obj = store.load_many(mapping_files)
+
+    mapping = mapping_obj.to_json()
+
+    return mapping_obj.new
 
 
 class TestSetup:
@@ -66,11 +77,7 @@ class TestLoadAllMappingsEdgeCases(TestSetup):
 
         result = load_all_mappings([mapping_file])
 
-        assert "new" in result
-
-        assert result == {
-            "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}},
-        }
+        assert result == {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}
 
     def test_load_all_mappings_merge_overlapping_keys(self):
         """Test merging mappings with overlapping keys."""
@@ -112,9 +119,8 @@ class TestLoadAllMappings:
         test_mapping = {"new": {"hello": {"ar": "مرحبا"}}}
         mapping_file.write_text(json.dumps(test_mapping, ensure_ascii=False), encoding="utf-8")
         result = load_all_mappings([mapping_file])
-        assert "new" in result
 
-        assert result == {"new": {"hello": {"ar": "مرحبا"}}}
+        assert result == {"hello": {"ar": "مرحبا"}}
 
     def test_load_all_mappings_multiple_files_merge(self, temp_dir):
         """Test loading and merging multiple mapping files."""
@@ -137,10 +143,10 @@ class TestLoadAllMappings:
         test_mapping = {"new": {"hello": {"ar": "مرحبا"}}}
         mapping_file.write_text(json.dumps(test_mapping, ensure_ascii=False), encoding="utf-8")
         result = load_all_mappings([mapping_file])
-        assert "new" in result
-        assert result["new"]["hello"]["ar"] == "مرحبا"
 
-        assert result == {"new": {"hello": {"ar": "مرحبا"}}}
+        assert result["hello"]["ar"] == "مرحبا"
+
+        assert result == {"hello": {"ar": "مرحبا"}}
 
     def test_load_all_mappings_multiple_files(self, temp_dir):
         """Test loading multiple mapping files."""

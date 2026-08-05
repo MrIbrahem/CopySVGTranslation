@@ -232,12 +232,13 @@ tree, stats = inject_file_tree(
 
 ```python
 # Before (deprecated)
-from CopySVGTranslation import inject_file_and_save
-tree, stats = inject_file_and_save(
+from CopySVGTranslation import inject_file_tree
+tree, stats = inject_file_tree(
     inject_file=Path("target.svg"),
     mapping=translations,
     save_path=Path("translated/target.svg"),
     return_stats=True,
+    save_result=True,
 )
 
 # After (recommended)

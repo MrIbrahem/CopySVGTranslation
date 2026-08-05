@@ -154,7 +154,7 @@ class YearTitleHandler:
             return {}
 
         # Normalize keys for lookup
-        templates = {(k.lower() if case_insensitive else k): v for k, v in mapping.title_new.items()}
+        templates = {(k.strip().lower() if case_insensitive else k): v for k, v in mapping.title_new.items()}
 
         expanded: dict[str, dict[str, str]] = {}
 

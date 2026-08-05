@@ -5,13 +5,29 @@ I:/svgtranslate_php/svgtranslate_php/tests/Model/Svg/SvgFileTest.php
 
 """
 
-import pytest
+from pathlib import Path
 
+import pytest
+from lxml import etree
+
+from CopySVGTranslation import TranslationConfig
 from CopySVGTranslation.exceptions import (
     SvgStructureError,
 )
-from CopySVGTranslation.legacy.inject import inject_file_and_save
-from CopySVGTranslation.preparation import make_translation_ready
+from CopySVGTranslation.legacy.inject import inject_file_tree
+from CopySVGTranslation.preparation import SvgPreparationPipeline
+
+
+def preparer_run(source_file: Path | str) -> tuple[etree._ElementTree, etree._Element]:
+    """
+    Legacy function-style wrapper around SvgPreparationPipeline, kept for
+    backward compatibility with existing callers.
+    """
+    config = TranslationConfig(
+        nested_strategy="raise",
+    )
+    preparer = SvgPreparationPipeline(config)
+    return preparer.run(path=source_file)
 
 
 class Testinject:
@@ -40,12 +56,12 @@ class Testinject:
 
         data = {"new": {"lang none": {"la": "lang la"}}}
 
-        tree, root = make_translation_ready(file)
+        tree, root = preparer_run(file)
 
         # write to file
         tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
-        _result = inject_file_and_save(
+        _result = inject_file_tree(
             inject_file=file,
             save_path=file,
             mapping=data,
@@ -124,12 +140,12 @@ class Testinject:
 
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
 
-        tree, root = make_translation_ready(file)
+        tree, root = preparer_run(file)
 
         # write to file
         tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
-        _result = inject_file_and_save(
+        _result = inject_file_tree(
             inject_file=file,
             save_path=file,
             mapping=data,
@@ -158,6 +174,6 @@ class Testinject:
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
 
         with pytest.raises(SvgStructureError) as excinfo:
-            make_translation_ready(file)
+            preparer_run(file)
 
         assert str(excinfo.value) == "structure-error-multiple-text-same-lang: ['la']"

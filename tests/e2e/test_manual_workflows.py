@@ -39,7 +39,7 @@ def _write_svg(temp_dir, content: str, name: str = "test.svg"):
 # ================================================================== #
 
 
-def make_translation_ready(source_file: Path | str) -> tuple[etree._ElementTree, etree._Element]:
+def preparer_run(source_file: Path | str) -> tuple[etree._ElementTree, etree._Element]:
     """
     Legacy function-style wrapper around SvgPreparationPipeline, kept for
     backward compatibility with existing callers.
@@ -84,7 +84,7 @@ class TestExtractManual:
         """extract() should return a dict (not None) for a valid multi-switch SVG."""
         svg_file = _write_svg(temp_dir, self.MULTI_SWITCH_SVG)
 
-        tree, root = make_translation_ready(svg_file)
+        tree, root = preparer_run(svg_file)
         tree.write(
             str(svg_file),
             pretty_print=True,
@@ -101,7 +101,7 @@ class TestExtractManual:
         """Both default (English) texts should appear under 'new'."""
         svg_file = _write_svg(temp_dir, self.MULTI_SWITCH_SVG)
 
-        tree, root = make_translation_ready(svg_file)
+        tree, root = preparer_run(svg_file)
         tree.write(
             str(svg_file),
             pretty_print=True,
@@ -120,7 +120,7 @@ class TestExtractManual:
         """Translations for 'ar' and 'fr' should be captured for each default text."""
         svg_file = _write_svg(temp_dir, self.MULTI_SWITCH_SVG)
 
-        tree, root = make_translation_ready(svg_file)
+        tree, root = preparer_run(svg_file)
         tree.write(
             str(svg_file),
             pretty_print=True,
@@ -145,7 +145,7 @@ class TestExtractManual:
         """The 'error' key should be empty for a well-formed SVG."""
         svg_file = _write_svg(temp_dir, self.MULTI_SWITCH_SVG)
 
-        tree, root = make_translation_ready(svg_file)
+        tree, root = preparer_run(svg_file)
         tree.write(
             str(svg_file),
             pretty_print=True,
@@ -167,7 +167,7 @@ class TestInjectManual:
     """Replaces tests/manually/inject.py.
 
     The original manual script uses a ``<switch>`` that contains two
-    ``<text systemLanguage="la">`` elements.  ``make_translation_ready``
+    ``<text systemLanguage="la">`` elements.  ``preparer_run``
     correctly rejects this as a structure error, so the test asserts
     that the expected exception is raised.
     """
@@ -185,12 +185,12 @@ class TestInjectManual:
         svg_file = _write_svg(temp_dir, self.DUPLICATE_LANG_SVG)
 
         with pytest.raises(SvgStructureError) as excinfo:
-            make_translation_ready(svg_file)
+            preparer_run(svg_file)
 
         assert excinfo.value.code == "structure-error-multiple-text-same-lang"
 
     def test_inject_after_normalization(self, temp_dir):
-        """After make_translation_ready, injection should work on a clean SVG."""
+        """After preparer_run, injection should work on a clean SVG."""
         clean_svg = """\
 <?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">\
 <switch id="testswitch">\
@@ -201,7 +201,7 @@ class TestInjectManual:
 
         data = {"new": {"lang none": {"la": "lang la (new)"}}}
 
-        tree, root = make_translation_ready(svg_file)
+        tree, root = preparer_run(svg_file)
         tree.write(
             str(svg_file),
             pretty_print=True,
@@ -252,13 +252,13 @@ class TestNestedManual:
         svg_file = _write_svg(temp_dir, self.NESTED_TSPAN_SVG)
 
         with pytest.raises(SvgNestedTspanError):
-            make_translation_ready(svg_file)
+            preparer_run(svg_file)
 
     def test_nested_tspan_error_code(self, temp_dir):
         """The exception code should indicate nested-tspan unsupported structure."""
         svg_file = _write_svg(temp_dir, self.NESTED_TSPAN_SVG)
 
         with pytest.raises(SvgNestedTspanError) as excinfo:
-            make_translation_ready(svg_file)
+            preparer_run(svg_file)
 
         assert excinfo.value.code == "structure-error-nested-tspans-not-supported"

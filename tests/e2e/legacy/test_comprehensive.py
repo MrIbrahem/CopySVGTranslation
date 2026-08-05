@@ -7,7 +7,6 @@ Comprehensive pytest tests for CopySVGTranslation covering edge cases and additi
 from lxml import etree
 
 from CopySVGTranslation.legacy import (
-    inject_file_and_save,
     inject_file_tree,
 )
 
@@ -37,7 +36,7 @@ class TestInjector:
         svg_content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
-        tree = inject_file_and_save(
+        tree = inject_file_tree(
             inject_file=svg_path,
             mapping=mappings,
             save_path=out_dir / "test.svg",

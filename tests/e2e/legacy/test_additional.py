@@ -1,7 +1,7 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
 from CopySVGTranslation.extraction.worker import extract
-from CopySVGTranslation.legacy import inject_file_and_save, inject_file_tree
+from CopySVGTranslation.legacy import inject_file_tree
 
 # -------------------------------
 # Preparation function tests
@@ -28,6 +28,7 @@ class TestWorkflowFunctions:
             mapping=translations,
             inject_file=target,
             return_stats=True,
+            save_result=True,
         )
 
         assert tree is not None
@@ -85,7 +86,7 @@ class TestInjectionEdgeCases:
         content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hi</tspan></text></switch></svg>"""
         svg.write_text(content, encoding="utf-8")
         mappings = {"new": {"hi": {"ar": "مرحبا"}}}
-        tree = inject_file_and_save(
+        tree = inject_file_tree(
             inject_file=svg,
             mapping=mappings,
             save_path=out_dir / "test.svg",
