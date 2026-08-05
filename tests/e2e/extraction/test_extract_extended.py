@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.extraction.worker import extract
+from CopySVGTranslation.legacy.extract import extract
 
 
 class TestExtractEdgeCases:
@@ -110,7 +110,7 @@ class TestExtractEdgeCases:
         result = extract(svg_path)
 
         assert result is not None
-        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "error": ""}
+        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
 
     def test_extract_with_base_id_fallback(self):
         """Test extraction with base_id lookup fallback."""

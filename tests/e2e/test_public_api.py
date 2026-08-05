@@ -6,7 +6,7 @@ from pathlib import Path
 
 # Test that the public API is importable
 import CopySVGTranslation
-from CopySVGTranslation.extraction.worker import extract
+from CopySVGTranslation.legacy.extract import extract
 from CopySVGTranslation.legacy.inject import inject_file_tree
 
 
@@ -156,8 +156,8 @@ class TestAPIConsistency:
     def test_import_paths_consistency(self):
         """Verify that functions are accessible from both paths."""
         # These should all refer to the same function objects
-        from CopySVGTranslation.extraction.worker import extract as extract1
-        from CopySVGTranslation.extraction.worker import extract as extract2
+        from CopySVGTranslation.legacy.extract import extract as extract1
+        from CopySVGTranslation.legacy.extract import extract as extract2
 
         # The functions should be the same object
         assert extract1 is extract2

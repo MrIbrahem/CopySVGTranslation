@@ -5,7 +5,7 @@ from typing import Any
 
 from ..config import TranslationConfig
 from ..exceptions import SvgIOError, SvgParseError
-from .extractor import SVGTranslationExtractor
+from ..extraction.extractor import SVGTranslationExtractor
 
 
 def extract(

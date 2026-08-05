@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.extraction.worker import extract
+from CopySVGTranslation.legacy.extract import extract
 from CopySVGTranslation.legacy import inject_file_tree
 
 
@@ -122,7 +122,7 @@ def test_extract_empty_svg(tmp_path: Path) -> None:
 
     result = extract(empty_svg)
 
-    assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "error": ""}
+    assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
 
 
 def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
@@ -199,6 +199,7 @@ def test_extract_with_case_insensitive_true(fixtures_dir) -> None:
         "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
         "tspans_by_id": {"label": "Population 2020"},
         "title_new": {"population {year}": {"ar": "السكان {year}"}},
+        "meta": {},
         "error": "",
     }
 

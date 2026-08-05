@@ -2,7 +2,7 @@
 Comprehensive pytest tests for CopySVGTranslation covering edge cases and additional functionality.
 """
 
-from CopySVGTranslation.extraction.worker import extract
+from CopySVGTranslation.legacy.extract import extract
 from CopySVGTranslation.legacy.inject import inject_file_tree
 
 # -------------------------------
@@ -70,7 +70,7 @@ class TestExtractor:
         result = extract(svg)
         assert result is not None
 
-        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "error": ""}
+        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
 
     def test_extract_case_sensitive(self, temp_dir):
         """Test extraction with case_insensitive=False."""
@@ -88,7 +88,7 @@ class TestExtractor:
         assert result is not None
         assert "new" in result
 
-        assert result == {"new": {"Hello World": {}}, "tspans_by_id": {}, "title_new": {}, "error": ""}
+        assert result == {"new": {"Hello World": {}}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
 
     def test_extract_with_year_suffix(self, temp_dir):
         """Test extraction with year suffixes in text."""
@@ -102,7 +102,7 @@ class TestExtractor:
         result = extract(svg)
         assert result is not None
 
-        assert result == {"new": {"population 2020": {}}, "tspans_by_id": {}, "title_new": {}, "error": ""}
+        assert result == {"new": {"population 2020": {}}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
 
     def test_extract_empty_tspans(self, temp_dir):
         """Test extraction with empty tspan elements."""
@@ -115,7 +115,7 @@ class TestExtractor:
         result = extract(svg)
         assert result is not None
 
-        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "error": ""}
+        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
 
     def test_extract_translation_tspan_without_id(self, temp_dir):
         """Translations without IDs should fall back to positional matching."""

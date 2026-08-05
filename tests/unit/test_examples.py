@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from CopySVGTranslation.extraction.worker import extract
+from CopySVGTranslation.legacy.extract import extract
 from CopySVGTranslation.legacy.inject import inject_file_tree
 
 

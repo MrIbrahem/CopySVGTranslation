@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor  # noqa: F401
-from CopySVGTranslation.extraction.worker import extract
+from CopySVGTranslation.legacy.extract import extract
 
 SVG_NS = "http://www.w3.org/2000/svg"
 

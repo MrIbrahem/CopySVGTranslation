@@ -8,6 +8,6 @@ TODO: write tests
 """
 
 
-from CopySVGTranslation.extraction.worker import (
+from CopySVGTranslation.legacy.extract import (
     extract,
 )

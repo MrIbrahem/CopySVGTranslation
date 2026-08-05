@@ -16,7 +16,7 @@ from CopySVGTranslation.exceptions import (
     SvgNestedTspanError,
     SvgStructureError,
 )
-from CopySVGTranslation.extraction.worker import extract
+from CopySVGTranslation.legacy.extract import extract
 from CopySVGTranslation.legacy import (
     inject_file_tree,
 )
