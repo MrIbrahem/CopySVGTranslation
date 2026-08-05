@@ -8,3 +8,5 @@ tests/example/برمت.txt
 .coverage
 /_works_files
 CopySVGTranslation/injection/preparation_backup.py
+tests/**/*.json
+**/tests/**/*.json
