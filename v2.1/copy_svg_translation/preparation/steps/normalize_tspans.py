@@ -72,6 +72,7 @@ class WrapTspans(PreparationStep):
         if ctx.root is None:
             return
 
+
 __all__ = [
     "NormalizeTspans",
     "WrapTspans",

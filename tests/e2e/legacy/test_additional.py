@@ -1,7 +1,7 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
-from CopySVGTranslation.legacy.extract import extract
 from CopySVGTranslation.legacy import inject_file_tree
+from CopySVGTranslation.legacy.extract import extract
 
 # -------------------------------
 # Preparation function tests

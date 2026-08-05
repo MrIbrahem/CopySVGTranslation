@@ -170,6 +170,7 @@ class TestWrapTspans:
 # NormalizeTspans
 # ---------------------------------------------------------------------------
 
+
 class TestNormalizeTspans:
     def test_root_none_is_a_noop(self, normalize_tspans_step):
         ctx = make_ctx(root=None)

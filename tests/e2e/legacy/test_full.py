@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.legacy.extract import extract
 from CopySVGTranslation.legacy import inject_file_tree
+from CopySVGTranslation.legacy.extract import extract
 
 
 @pytest.fixture()

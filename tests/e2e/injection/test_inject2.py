@@ -179,6 +179,8 @@ class Testinject:
         normalized_text = self.normalize(file_text)
 
         assert '<text id="trsvg1"><tspan id="trsvg2">lang none</tspan></text>' in normalized_text
-        assert '<text id="trsvg1-la" systemLanguage="la"><tspan id="trsvg2-la">lang la</tspan></text>' in normalized_text
+        assert (
+            '<text id="trsvg1-la" systemLanguage="la"><tspan id="trsvg2-la">lang la</tspan></text>' in normalized_text
+        )
 
         assert normalized_text == self.normalize(expected)
