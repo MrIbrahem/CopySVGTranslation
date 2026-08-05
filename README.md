@@ -63,11 +63,11 @@ result = injector.inject(
     save_result=True,
 )
 
-if not result.new_stats.error:
-    print(f"Inserted: {result.new_stats.inserted_translations}")
-    print(f"Updated:  {result.new_stats.updated_translations}")
-    print(f"Skipped:  {result.new_stats.skipped_translations}")
-    print(f"Languages: {result.new_stats.all_languages}")
+if not result.inject_stats.error:
+    print(f"Inserted: {result.inject_stats.inserted_translations}")
+    print(f"Updated:  {result.inject_stats.updated_translations}")
+    print(f"Skipped:  {result.inject_stats.skipped_translations}")
+    print(f"Languages: {result.inject_stats.all_languages}")
 ```
 
 ## API Reference
@@ -153,7 +153,7 @@ result: InjectorData = injector.inject(
 | Field       | Type                         | Description                                  |
 | ----------- | ---------------------------- | -------------------------------------------- |
 | `tree`      | `etree._ElementTree \| None` | The parsed (and possibly modified) SVG tree. |
-| `new_stats` | `InjectorStats`              | Statistics about the injection run.          |
+| `inject_stats` | `InjectorStats`              | Statistics about the injection run.          |
 
 **`InjectorStats` fields:**
 
@@ -169,7 +169,7 @@ result: InjectorData = injector.inject(
 | `languages_after`       | `list[str]` | Sorted list of newly added language codes.                  |
 | `error`                 | `str`       | Error message if injection failed, empty string on success. |
 
-Use `result.new_stats.to_json()` to get a plain dictionary of the stats.
+Use `result.inject_stats.to_json()` to get a plain dictionary of the stats.
 
 ---
 
@@ -251,7 +251,7 @@ result = injector.inject(
     save_result=True,
 )
 tree = result.tree
-stats = result.new_stats.to_json()
+stats = result.inject_stats.to_json()
 ```
 
 ## Data Model
@@ -403,8 +403,8 @@ result = injector.inject(
     save_result=True,
 )
 
-print(f"Inserted: {result.new_stats.inserted_translations}")
-print(f"Languages: {result.new_stats.all_languages}")
+print(f"Inserted: {result.inject_stats.inserted_translations}")
+print(f"Languages: {result.inject_stats.all_languages}")
 ```
 
 ### Output SVG (translated/target.svg)

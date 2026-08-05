@@ -67,7 +67,7 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 
 1. **Extraction**: SVG file → `SVGTranslationExtractor.extract()` → `ExtractorData` (with `.to_json()` for dict)
 
-2. **Injection**: SVG file + mapping dict → `SVGTranslationInjector.inject()` → `InjectorData` (with `.new_stats` for stats)
+2. **Injection**: SVG file + mapping dict → `SVGTranslationInjector.inject()` → `InjectorData` (with `.inject_stats` for stats)
 
 ### Key Data Structures
 
@@ -89,7 +89,7 @@ class ExtractorData:
 @dataclass
 class InjectorData:
     tree: etree._ElementTree | None    # parsed/modified SVG tree
-    new_stats: InjectorStats           # injection statistics
+    inject_stats: InjectorStats           # injection statistics
 ```
 
 **InjectorStats**:

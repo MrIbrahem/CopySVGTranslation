@@ -140,12 +140,12 @@ class SVGTranslationService:
 
         if injector_data.tree is None:
             return OperationResult.fail(
-                error=injector_data.new_stats.error or "Injection returned no tree",
+                error=injector_data.inject_stats.error or "Injection returned no tree",
                 error_code="injection_failed",
-                stats=injector_data.new_stats,
+                stats=injector_data.inject_stats,
             )
 
-        return OperationResult.ok(data=injector_data, stats=injector_data.new_stats)
+        return OperationResult.ok(data=injector_data, stats=injector_data.inject_stats)
 
     def extract_and_inject(
         self,

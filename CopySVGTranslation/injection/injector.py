@@ -63,18 +63,17 @@ class SVGTranslationInjector:
         Inject translations into the provided SVG file.
         """
         result = InjectorData()
-        stats = result.new_stats
 
         svg_path = Path(str(svg_path))
 
         if not svg_path.exists():
             logger.error(f"SVG file not found: {svg_path}")
-            result.new_stats.error = "File does not exist"
+            result.inject_stats.error = "File does not exist"
             return result
 
         if not mapping:
             logger.error("No valid mappings found")
-            result.new_stats.error = "No valid mappings found"
+            result.inject_stats.error = "No valid mappings found"
             return result
 
         logger.debug(f"Injecting translations into {svg_path}")
@@ -82,32 +81,32 @@ class SVGTranslationInjector:
         try:
             tree, root = self.preparer.run(svg_path)
         except SvgNestedTspanError as exc:
-            stats.error = "nested_tspan_error"
+            result.inject_stats.error = "nested_tspan_error"
             return result
 
         except SvgStructureError as exc:
-            stats.error = str(exc)
+            result.inject_stats.error = str(exc)
             return result
 
         except etree.XMLSyntaxError as exc:
             logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
-            stats.error = str(exc)
+            result.inject_stats.error = str(exc)
             return result
 
         except Exception as exc:
             logger.error("Failed to parse SVG file: %s", exc)
-            stats.error = f"preparation_failed: {exc}"
+            result.inject_stats.error = f"preparation_failed: {exc}"
             return result
 
         if tree is None or root is None:
-            stats.error = "preparation_returned_none_tree"
+            result.inject_stats.error = "preparation_returned_none_tree"
             return result
 
         result.tree = tree
 
         # 2. Snapshot languages before
         before_languages = tree_languages(tree)
-        stats.languages_before = sorted(before_languages)
+        result.inject_stats.languages_before = sorted(before_languages)
 
         # 3. Seed IdManager with existing IDs
         self.id_manager.register_many(root.xpath("//@id"))
@@ -117,7 +116,7 @@ class SVGTranslationInjector:
         self.work_on_switches(
             root=root,
             mapping=mapping_obj,
-            stats=stats,
+            stats=result.inject_stats,
         )
 
         # 5. Final housekeeping
@@ -125,7 +124,7 @@ class SVGTranslationInjector:
 
         # 6. Languages after + stats
         after_languages = tree_languages(tree)
-        self._update_data(stats, before_languages, after_languages)
+        self._update_data(result.inject_stats, before_languages, after_languages)
 
         if not save:
             return result
@@ -133,14 +132,14 @@ class SVGTranslationInjector:
         # 7. Save if requested
         if save_path is None:
             logger.error("save is True but no save_path was provided")
-            stats.error = "No target path provided"
+            result.inject_stats.error = "No target path provided"
             return result
 
         try:
             self._save(tree, save_path)
         except OSError as e:
             logger.error(f"Failed writing {str(save_path)}: {e}")
-            stats.error = f"Failed writing {str(save_path)}: {e}"
+            result.inject_stats.error = f"Failed writing {str(save_path)}: {e}"
 
         return result
 

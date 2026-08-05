@@ -82,6 +82,8 @@ class TestSVGTranslationService:
         assert result.success is True
         assert isinstance(result.data, InjectorData)
         assert result.data.tree is not None
+        assert result.stats is not None
+
         assert result.stats.inserted_translations == 1
 
     def test_extract_and_inject(self, tmp_path: Path):
@@ -103,6 +105,7 @@ class TestSVGTranslationService:
         result = service.extract_and_inject(src, tgt)
 
         assert result.success is True
+        assert result.stats is not None
         assert result.stats.inserted_translations == 1
 
     def test_prepare_only(self, tmp_path: Path):
@@ -251,7 +254,7 @@ class TestServiceInjectExtended:
             "inject",
             return_value=InjectorData(
                 tree=None,
-                new_stats=InjectorStats(error="mock error"),
+                inject_stats=InjectorStats(error="mock error"),
             ),
         ):
             result = service.inject(svg, {"new": {"hello": {"ar": "مرحبا"}}})

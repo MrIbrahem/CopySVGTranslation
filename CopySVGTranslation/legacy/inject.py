@@ -70,7 +70,7 @@ def _inject_file_tree(
         save=save_result,
     )
 
-    return result.tree, result.new_stats.to_json()
+    return result.tree, result.inject_stats.to_json()
 
 def inject_file_tree(
     *,

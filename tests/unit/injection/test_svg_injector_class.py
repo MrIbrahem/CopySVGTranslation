@@ -116,19 +116,19 @@ class TestInjectorData:
     def test_default_values(self):
         data = InjectorData()
         assert data.tree is None
-        assert isinstance(data.new_stats, InjectorStats)
+        assert isinstance(data.inject_stats, InjectorStats)
 
     def test_to_json_structure(self):
         data = InjectorData()
         result = data.to_json()
         assert isinstance(result, dict)
         assert "tree" in result
-        assert "new_stats" in result
+        assert "inject_stats" in result
         assert "error" in result
 
     def test_to_json_error_from_stats(self):
         data = InjectorData()
-        data.new_stats.error = "Something broke"
+        data.inject_stats.error = "Something broke"
         result = data.to_json()
         assert result["error"] == "Something broke"
 
@@ -182,8 +182,8 @@ class TestSVGTranslationInjectorBasic:
 
         assert isinstance(result, InjectorData)
         assert result.tree is not None
-        assert result.new_stats.error == ""
-        assert result.new_stats.inserted_translations == 1
+        assert result.inject_stats.error == ""
+        assert result.inject_stats.inserted_translations == 1
 
     def test_inject_multiple_languages(self, tmp_path: Path):
         inner = """
@@ -197,8 +197,8 @@ class TestSVGTranslationInjectorBasic:
 
         result = inj.inject(svg_path=svg, mapping=mappings)
 
-        assert result.new_stats.inserted_translations == 2
-        assert result.new_stats.all_languages == 2
+        assert result.inject_stats.inserted_translations == 2
+        assert result.inject_stats.all_languages == 2
 
     def test_inject_multiple_switches(self, tmp_path: Path):
         inner = """
@@ -215,8 +215,8 @@ class TestSVGTranslationInjectorBasic:
 
         result = inj.inject(svg_path=svg, mapping=mappings)
 
-        assert result.new_stats.processed_switches == 2
-        assert result.new_stats.inserted_translations == 2
+        assert result.inject_stats.processed_switches == 2
+        assert result.inject_stats.inserted_translations == 2
 
     def test_inject_preserves_existing_text(self, tmp_path: Path):
         inner = """
@@ -258,7 +258,7 @@ class TestSVGTranslationInjectorCaseSensitivity:
         mappings = {"new": {"hello world": {"ar": "مرحبا بالعالم"}}}
 
         result = inj.inject(svg_path=svg, mapping=mappings)
-        assert result.new_stats.inserted_translations == 1
+        assert result.inject_stats.inserted_translations == 1
 
     def test_case_sensitive_no_match(self, tmp_path: Path):
         inner = """
@@ -273,7 +273,7 @@ class TestSVGTranslationInjectorCaseSensitivity:
         mappings = {"new": {"hello world": {"ar": "مرحبا بالعالم"}}}
 
         result = inj.inject(svg_path=svg, mapping=mappings)
-        assert result.new_stats.inserted_translations == 0
+        assert result.inject_stats.inserted_translations == 0
 
     def test_case_sensitive_exact_match(self, tmp_path: Path):
         inner = """
@@ -287,7 +287,7 @@ class TestSVGTranslationInjectorCaseSensitivity:
         mappings = {"new": {"Hello World": {"ar": "مرحبا بالعالم"}}}
 
         result = inj.inject(svg_path=svg, mapping=mappings)
-        assert result.new_stats.inserted_translations == 1
+        assert result.inject_stats.inserted_translations == 1
 
 
 # ===========================================================================
@@ -312,8 +312,8 @@ class TestSVGTranslationInjectorOverwrite:
 
         result = inj.inject(svg_path=svg, mapping=mappings)
 
-        assert result.new_stats.skipped_translations == 1
-        assert result.new_stats.updated_translations == 0
+        assert result.inject_stats.skipped_translations == 1
+        assert result.inject_stats.updated_translations == 0
 
     def test_overwrite_existing_language(self, tmp_path: Path):
         inner = """
@@ -329,8 +329,8 @@ class TestSVGTranslationInjectorOverwrite:
 
         result = inj.inject(svg_path=svg, mapping=mappings)
 
-        assert result.new_stats.updated_translations == 1
-        assert result.new_stats.skipped_translations == 0
+        assert result.inject_stats.updated_translations == 1
+        assert result.inject_stats.skipped_translations == 0
 
     def test_overwrite_updates_text_content(self, tmp_path: Path):
         inner = """
@@ -367,8 +367,8 @@ class TestSVGTranslationInjectorOverwrite:
 
         result = inj.inject(svg_path=svg, mapping=mappings)
 
-        assert result.new_stats.skipped_translations == 1
-        assert result.new_stats.inserted_translations == 1
+        assert result.inject_stats.skipped_translations == 1
+        assert result.inject_stats.inserted_translations == 1
 
 
 # ===========================================================================
@@ -437,7 +437,7 @@ class TestSVGTranslationInjectorSave:
             save_path=None,
         )
 
-        assert result.new_stats.error != ""
+        assert result.inject_stats.error != ""
 
     def test_saved_file_is_valid_xml(self, tmp_path: Path):
         inner = """
@@ -483,7 +483,7 @@ class TestSVGTranslationInjectorLanguageTracking:
 
         result = inj.inject(svg_path=svg, mapping=mappings)
 
-        assert result.new_stats.languages_before == []
+        assert result.inject_stats.languages_before == []
 
     def test_new_languages_counted(self, tmp_path: Path):
         inner = """
@@ -497,8 +497,8 @@ class TestSVGTranslationInjectorLanguageTracking:
 
         result = inj.inject(svg_path=svg, mapping=mappings)
 
-        assert result.new_stats.new_languages == 2
-        assert sorted(result.new_stats.languages_after) == ["ar", "fr"]
+        assert result.inject_stats.new_languages == 2
+        assert sorted(result.inject_stats.languages_after) == ["ar", "fr"]
 
     def test_existing_languages_tracked(self, tmp_path: Path):
         inner = """
@@ -513,8 +513,8 @@ class TestSVGTranslationInjectorLanguageTracking:
 
         result = inj.inject(svg_path=svg, mapping=mappings)
 
-        assert "es" in result.new_stats.languages_before
-        assert result.new_stats.all_languages == 2  # es + ar
+        assert "es" in result.inject_stats.languages_before
+        assert result.inject_stats.all_languages == 2  # es + ar
 
 
 # ===========================================================================
@@ -531,7 +531,7 @@ class TestSVGTranslationInjectorErrors:
 
         result = inj.inject(svg_path=tmp_path / "missing.svg", mapping=mappings)
 
-        assert result.new_stats.error == "File does not exist"
+        assert result.inject_stats.error == "File does not exist"
         assert result.tree is None
 
     def test_no_mappings(self, tmp_path: Path):
@@ -540,7 +540,7 @@ class TestSVGTranslationInjectorErrors:
 
         result = inj.inject(svg_path=svg, mapping=None)
 
-        assert result.new_stats.error == "No valid mappings found"
+        assert result.inject_stats.error == "No valid mappings found"
         assert result.tree is None
 
     def test_empty_mappings(self, tmp_path: Path):
@@ -549,7 +549,7 @@ class TestSVGTranslationInjectorErrors:
 
         result = inj.inject(svg_path=svg, mapping={})
 
-        assert result.new_stats.error == "No valid mappings found"
+        assert result.inject_stats.error == "No valid mappings found"
 
     def test_invalid_xml(self, tmp_path: Path):
         svg = tmp_path / "bad.svg"
@@ -559,7 +559,7 @@ class TestSVGTranslationInjectorErrors:
 
         result = inj.inject(svg_path=svg, mapping=mappings)
 
-        assert result.new_stats.error != ""
+        assert result.inject_stats.error != ""
         assert result.tree is None
 
 
@@ -712,8 +712,8 @@ class TestExtractorInjectorE2E:
         )
 
         assert inject_result.tree is not None
-        assert inject_result.new_stats.error == ""
-        assert inject_result.new_stats.inserted_translations == 3  # ar + fr for Hello, ar for Goodbye
+        assert inject_result.inject_stats.error == ""
+        assert inject_result.inject_stats.inserted_translations == 3  # ar + fr for Hello, ar for Goodbye
         assert output_svg.exists()
 
         # Verify output (text/tspan elements stay in SVG namespace)
