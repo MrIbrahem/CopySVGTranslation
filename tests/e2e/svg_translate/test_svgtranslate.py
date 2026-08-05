@@ -11,7 +11,7 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation.extraction.worker import extract
-from CopySVGTranslation.legacy.inject import inject_file_and_save, inject_file_tree
+from CopySVGTranslation.legacy.inject import inject_file_tree, inject_file_tree
 
 
 class TestSetup:
@@ -124,11 +124,12 @@ class TestSVGTranslate(TestSetup):
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         # Inject translations
-        tree, stats = inject_file_and_save(
+        tree, stats = inject_file_tree(
             inject_file=no_translations_path,
             mapping_files=[mapping_path],
             return_stats=True,
             save_path=no_translations_path,
+            save_result=True,
         )
 
         # Verify stats
@@ -225,12 +226,13 @@ class TestSVGTranslate(TestSetup):
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
         # Inject translations with overwrite
-        tree, stats = inject_file_and_save(
+        tree, stats = inject_file_tree(
             inject_file=svg_path,
             mapping_files=[mapping_path],
             overwrite=True,
             return_stats=True,
             save_path=svg_path,
+            save_result=True,
         )
 
         # Verify stats
