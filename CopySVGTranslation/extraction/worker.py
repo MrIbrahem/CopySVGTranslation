@@ -38,7 +38,7 @@ def extract(
     if result.error:
         return None
 
-    # { "new": {}, "tspans_by_id": {}, "title": { }, "title_new": { } }
+    # { "new": {}, "tspans_by_id": {}, "title_new": { } }
     return result.to_json()
 
 

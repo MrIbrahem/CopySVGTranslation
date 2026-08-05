@@ -54,10 +54,9 @@ class TestExtractorData:
         assert isinstance(result, dict)
         assert "new" in result
         assert "tspans_by_id" in result
-        assert "title" in result
         assert "title_new" in result
 
-        assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "meta": {}}
+        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}}
 
     def test_to_json_reflects_data(self):
         data = TranslationMapping(
@@ -69,7 +68,7 @@ class TestExtractorData:
         result = data.to_json()
         assert result["new"] == {"hello": {"ar": "مرحبا"}}
         assert result["tspans_by_id"] == {"t0": "Hello"}
-        assert result["title"] == {"greeting": {"fr": "Salut"}}
+        assert result["title_new"] == {"greeting": {"fr": "Salut"}}
 
     def test_fields_are_independent(self):
         """Each instance should have independent mutable defaults."""
@@ -298,7 +297,7 @@ class TestExtractorDataToJson:
         data = result.to_json()
 
         assert isinstance(data, dict)
-        assert set(data.keys()) == {"new", "tspans_by_id", "title", "title_new", "meta"}
+        assert set(data.keys()) == {"new", "tspans_by_id", "title_new", "meta"}
         assert isinstance(data["new"], dict)
         assert isinstance(data["tspans_by_id"], dict)
 

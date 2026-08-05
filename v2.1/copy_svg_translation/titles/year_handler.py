@@ -81,8 +81,6 @@ class YearTitleHandler:
         if not self.enabled:
             return
 
-        # mapping.title = make_title_translations(mapping.new)
-
         self.build_title_new_templates(mapping)
 
     def build_title_new_templates(self, mapping: TranslationMapping) -> None:

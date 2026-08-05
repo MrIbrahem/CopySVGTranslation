@@ -48,7 +48,7 @@ class TestSetup:
                     "ar": "لكنها موصولة بمرحلتين متعاكستين.",
                 },
             },
-            "title": {},
+            "title_new": {},
         }
 
         yield
@@ -81,9 +81,9 @@ class TestSVGTranslate(TestSetup):
         # Verify translations
         assert translations is not None
         assert "new" in translations
-        assert "title" in translations
+        assert "title_new" in translations
         assert translations["new"] == self.expected_translations["new"]
-        assert translations["title"] == self.expected_translations["title"]
+        assert translations["title_new"] == self.expected_translations["title_new"]
 
     def test_extract_case_insensitive(self):
         """Test extraction with case insensitive matching."""
@@ -99,7 +99,7 @@ class TestSVGTranslate(TestSetup):
         assert translations is not None
         assert "new" in translations
         assert translations["new"] == self.expected_translations["new"]
-        assert translations["title"] == self.expected_translations["title"]
+        assert translations["title_new"] == self.expected_translations["title_new"]
 
     def test_extract_nonexistent_file(self):
         """Test extraction with non-existent file."""

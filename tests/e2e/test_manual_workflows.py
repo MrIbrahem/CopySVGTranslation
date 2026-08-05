@@ -6,7 +6,6 @@ Pytest conversions of the former manual test scripts:
 - tests/manually/titles.py
 """
 
-import json
 from pathlib import Path
 
 import pytest
@@ -21,7 +20,6 @@ from CopySVGTranslation.injection import (
     inject_file_and_save,
 )
 from CopySVGTranslation.preparation import SvgPreparationPipeline
-from CopySVGTranslation.titles import get_titles_translations
 
 # ------------------------------------------------------------------ #
 # Helpers
@@ -262,63 +260,3 @@ class TestNestedManual:
             make_translation_ready(svg_file)
 
         assert excinfo.value.code == "structure-error-nested-tspans-not-supported"
-
-
-# ================================================================== #
-# 4. titles.py  –  title translation lookup
-# ================================================================== #
-
-
-class TestTitlesManual:
-    """Replaces tests/manually/titles.py."""
-
-    INSERT_DATA = {
-        "parkinson's disease prevalence,": {
-            "pt": "Prevalência de doença de Parkinson,",
-            "es": "Prevalencia de la enfermedad de Parkinson,",
-            "ca": "Prevalència de la malaltia de Parkinson,",
-            "eu": "Parkinsonen gaixotasunaren prebalentzia,",
-            "cs": "Prevalence Parkinsonovy nemoci,",
-            "si": "පාකින්සන් රෝග ව්‍යාප්තිය,",
-            "ar": "انتشار مرض باركنسون،",
-        }
-    }
-
-    DEFAULT_TEXTS = ["parkinson's disease prevalence, 2028"]
-
-    EXPECTED_LANGS = {"pt", "es", "ca", "eu", "cs", "si", "ar"}
-
-    def test_get_titles_translations_returns_dict(self):
-        """get_titles_translations should return a dict."""
-        result = get_titles_translations(self.INSERT_DATA, self.DEFAULT_TEXTS)
-        assert isinstance(result, dict)
-
-    def test_get_titles_translations_contains_default_text(self):
-        """The result should be keyed by the default text (with year)."""
-        result = get_titles_translations(self.INSERT_DATA, self.DEFAULT_TEXTS)
-
-        assert "parkinson's disease prevalence, 2028" in result
-
-    def test_get_titles_translations_has_all_languages(self):
-        """All 7 languages from insert_data should appear in the result."""
-        result = get_titles_translations(self.INSERT_DATA, self.DEFAULT_TEXTS)
-
-        entry = result["parkinson's disease prevalence, 2028"]
-        assert set(entry.keys()) == self.EXPECTED_LANGS
-
-    def test_get_titles_translations_values_are_strings(self):
-        """Every translation value should be a non-empty string."""
-        result = get_titles_translations(self.INSERT_DATA, self.DEFAULT_TEXTS)
-
-        entry = result["parkinson's disease prevalence, 2028"]
-        for lang, value in entry.items():
-            assert isinstance(value, str), f"{lang} translation is not a string"
-            assert len(value) > 0, f"{lang} translation is empty"
-
-    def test_get_titles_translations_json_serializable(self):
-        """The result should be JSON-serializable (used downstream as JSON)."""
-        result = get_titles_translations(self.INSERT_DATA, self.DEFAULT_TEXTS)
-
-        serialized = json.dumps(result, ensure_ascii=False)
-        assert isinstance(serialized, str)
-        assert "parkinson's disease prevalence, 2028" in serialized

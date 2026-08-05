@@ -40,10 +40,10 @@ class TestExtractYearHandling:
         assert result is not None
 
         # Should create title mapping for year-suffixed text
-        assert isinstance(result["title"], dict)
+        assert isinstance(result["title_new"], dict)
 
-        assert "title" in result
-        assert result["title"] == {"population": {"ar": "السكان"}}
+        assert "title_new" in result
+        assert result["title_new"] == {"population": {"ar": "السكان"}}
 
     def test_extract_year_with_multiple_languages(self):
         """Test year suffix handling with multiple languages."""
@@ -61,9 +61,9 @@ class TestExtractYearHandling:
 
         assert result is not None
         assert "new" in result
-        assert "title" in result
+        assert "title_new" in result
 
-        assert result["title"] == {"population": {"ar": "السكان", "fr": "Population"}}
+        assert result["title_new"] == {"population": {"ar": "السكان", "fr": "Population"}}
 
         assert "title_new" in result
         assert result["title_new"] == {
@@ -88,13 +88,12 @@ class TestExtractYearHandling:
         assert result is not None
         assert result == {
             "new": {"value 42": {}},
-            "title": {},
             "title_new": {},
             "tspans_by_id": {"t1": "Value 42"},
             "error": "",
         }
 
-    def test_extract_title(self):
+    def test_extract_title_new(self):
         """Test year suffix handling with multiple languages."""
         svg_path = self.test_dir / "test.svg"
         svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
@@ -110,9 +109,7 @@ class TestExtractYearHandling:
 
         assert result is not None
         assert "new" in result
-        assert "title" in result
 
-        assert result["title"] == {"death rate from malaria,": {"ar": "معدل الوفيات الناجمة عن الملاريا،"}}
         assert "title_new" in result
         assert result["title_new"] == {
             "death rate from malaria, {year}": {

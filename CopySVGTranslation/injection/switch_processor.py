@@ -10,7 +10,7 @@ from ..core.mapping import TranslationMapping
 from ..core.switch_node import SwitchNode
 from ..core.text_node import TextNode
 from ..result import InjectorStats
-from ..titles import YearTitleHandler, get_new_titles_translations
+from ..titles import YearTitleHandler
 from ..utils import (
     extract_text_from_node,
     normalize_text,

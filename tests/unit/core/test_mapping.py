@@ -80,7 +80,7 @@ class TestTranslationMappingFactory:
     """Tests for from_any and from_extractor_data."""
 
     def test_from_any_with_dict(self):
-        data = {"new": {"hello": {"ar": "مرحبا"}}, "title": {}, "title_new": {}}
+        data = {"new": {"hello": {"ar": "مرحبا"}}, "title_new": {}}
         m = TranslationMapping.from_any(data)
         assert "hello" in m.new
 
@@ -206,7 +206,7 @@ class TestTranslationMappingMutation:
 
     def test_merge_dict(self):
         m = TranslationMapping()
-        m.merge({"new": {"x": {"ar": "y"}}, "title": {}, "title_new": {}})
+        m.merge({"new": {"x": {"ar": "y"}}, "title_new": {}})
         assert "x" in m.new
 
     def test_merge_updates_tspans_by_id(self):
@@ -218,14 +218,12 @@ class TestTranslationMappingMutation:
     def test_to_json(self):
         m = TranslationMapping(
             new={"a": {"ar": "1"}},
-            title={"t": {"ar": "2"}},
             title_new={"t {year}": {"ar": "2 {year}"}},
             tspans_by_id={"t0": "a"},
             meta={"source": "test"},
         )
         data = m.to_json()
         assert data["new"] == {"a": {"ar": "1"}}
-        assert data["title"] == {"t": {"ar": "2"}}
         assert data["title_new"] == {"t {year}": {"ar": "2 {year}"}}
         assert data["tspans_by_id"] == {"t0": "a"}
         # assert data["meta"] == {"source": "test"}

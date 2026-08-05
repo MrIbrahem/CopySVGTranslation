@@ -235,6 +235,7 @@ class TestEnrichMappingForSwitch:
         handler.enrich_mapping_for_switch(mapping, ["pandemic 2020"])
         assert mapping.new == original_new
 
+
 def make_new_title_translations(new: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
     """
     Extract valid title translations by verifying that all translations in a mapping
@@ -317,7 +318,6 @@ class TestTitlesNew:
         result = make_new_title_translations(input_data)
         expected = {"2020 Highlights of {year}": {"fr": "Faits saillants de 2020 en {year}"}}
         assert result == expected
-
 
 
 def get_new_titles_translations(

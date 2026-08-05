@@ -6,7 +6,6 @@ import re
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
-from .titles import make_title_translations
 
 logger = logging.getLogger(__name__)
 
@@ -81,8 +80,6 @@ class YearTitleHandler:
         """
         if not self.enabled:
             return
-
-        mapping.title = make_title_translations(mapping.new)
 
         self.build_title_new_templates(mapping)
 
