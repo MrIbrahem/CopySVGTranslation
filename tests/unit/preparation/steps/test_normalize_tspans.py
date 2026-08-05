@@ -184,7 +184,7 @@ class TestWrapTspans:
 
 @pytest.fixture
 def normalize_tspans_step():
-    return NormalizeTspans(config=SimpleNamespace())
+    return NormalizeTspans(config=SimpleNamespace(nested_strategy="raise"))
 
 
 class TestNormalizeTspans:

@@ -58,7 +58,17 @@ class SVGTranslationInjector:
         result = InjectorData()
         stats = result.new_stats
 
-        svg_path = Path(svg_path)
+        svg_path = Path(str(svg_path))
+
+        if not svg_path.exists():
+            logger.error(f"SVG file not found: {svg_path}")
+            result.new_stats.error = "File does not exist"
+            return result
+
+        if not mapping:
+            logger.error("No valid mappings found")
+            result.new_stats.error = "No valid mappings found"
+            return result
 
         logger.debug(f"Injecting translations into {svg_path}")
         # 1. Prepare (pipeline)

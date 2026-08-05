@@ -5,8 +5,8 @@ import re
 
 from lxml import etree
 
-from ...exceptions import SvgNestedTspanError
-from ...injection import SvgStructureError
+from ...exceptions import SvgStructureError
+from ...nested_analyze import NestedTspanFlattener
 from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -17,18 +17,15 @@ class NormalizeTspans(PreparationStep):
         """Collect leaf <tspan> elements as translatable nodes; reject nested ones."""
         if ctx.root is None:
             return
-        # 1. Process nested tspans
-        tspans = ctx.root.findall(f".//{{{SVG_NS}}}tspan")
-        for tspan in tspans:
-            # nested content check: tspan should not have element children
+
+        # 1. Process nested tspans using Flattener
+        flattener = NestedTspanFlattener(self.config.nested_strategy)
+        flattener.process(ctx.root)
+
+        for tspan in ctx.root.findall(f".//{{{SVG_NS}}}tspan"):
             element_children = [c for c in tspan if isinstance(c.tag, str)]
             if len(element_children) == 0:
                 ctx.translatable_nodes.append(tspan)
-            else:
-                # Nested tspans or children not supported
-                # raise SvgStructureError('structure-error-nested-tspans-not-supported', tspan, element_children)
-                node_text = etree.tostring(tspan, pretty_print=True).decode("utf-8")
-                raise SvgNestedTspanError(extra=[tspan.get("id", "")])
 
         # self._wrap_loose_text_into_tspans(ctx)
 

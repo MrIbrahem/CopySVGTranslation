@@ -45,29 +45,6 @@ class SVGTranslationInjector:
             YearTitleHandler(self.config),
         )
 
-    def _parse_svg(
-        self, inject_path, stats: InjectorStats
-    ) -> tuple[etree._ElementTree, etree._Element] | tuple[None, None]:
-        try:
-            tree, root = self.preparer.run(inject_path)
-            return tree, root
-
-        except SvgNestedTspanError as exc:
-            stats.error = "nested_tspan_error"
-
-        except SvgStructureError as exc:
-            stats.error = str(exc)
-
-        except etree.XMLSyntaxError as exc:
-            logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
-            stats.error = str(exc)
-
-        except Exception as exc:
-            logger.error("Failed to parse SVG file: %s", exc)
-            stats.error = str(exc)
-
-        return None, None
-
     def _finalize_switches(self, root) -> None:
         # Fix old <svg:switch> tags if present
         for elem in root.findall(".//svg:switch", namespaces={"svg": SVG_NS}):
