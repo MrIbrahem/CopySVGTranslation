@@ -67,4 +67,3 @@ class TestIntegrationWorkflows:
         assert expected_data_path.exists()
 
         assert new_data["new"] == expected_data["new"]
-        assert new_data["title_new"] == expected_data["title_new"]

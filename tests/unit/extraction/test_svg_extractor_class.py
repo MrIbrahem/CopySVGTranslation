@@ -45,7 +45,6 @@ class TestExtractorData:
         data = TranslationMapping()
         assert data.new == {}
         assert data.tspans_by_id == {}
-        assert data.title == {}
         assert data.title_new == {}
         assert data.error == ""
 
@@ -64,14 +63,13 @@ class TestExtractorData:
         data = TranslationMapping(
             new={"hello": {"ar": "مرحبا"}},
             tspans_by_id={"t0": "Hello"},
-            title={"greeting": {"fr": "Salut"}},
             title_new={},
             error="",
         )
         result = data.to_json()
         assert result["new"] == {"hello": {"ar": "مرحبا"}}
         assert result["tspans_by_id"] == {"t0": "Hello"}
-        assert result["title_new"] == {"greeting": {"fr": "Salut"}}
+        assert result["title_new"] == {}
 
     def test_to_json_error_field(self):
         data = TranslationMapping(error="File not found")
@@ -218,7 +216,7 @@ class TestSVGTranslationExtractorExtract:
         # The full text should be in "new"
         assert "population 2020" in result.new
         # Title section should have the year-stripped version
-        assert isinstance(result.title, dict)
+        assert isinstance(result.title_new, dict)
 
     def test_no_switches_returns_empty(self, tmp_path: Path):
         inner = '<text id="t0"><tspan>Just text</tspan></text>'

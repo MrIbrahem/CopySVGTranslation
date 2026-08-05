@@ -32,7 +32,6 @@ if not result.error:
     print(result.to_json())
     # {
     #     "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}, ...},
-    #     "title": {...},
     #     "tspans_by_id": {...},
     #     "title_new": {...},
     # }
@@ -267,12 +266,6 @@ The extractor produces a JSON document with these top-level keys:
             "fr": "French translation"
         }
     },
-    "title": {
-        "text without year": {
-            "ar": "...",
-            "fr": "..."
-        }
-    },
     "tspans_by_id": {
         "tspan-id": "Text content"
     },
@@ -352,12 +345,6 @@ print(result.to_json())
         "hello": {
             "ar": "مرحبا",
             "fr": "Bonjour"
-        }
-    },
-    "title": {
-        "music in": {
-            "ar": "الموسيقى في عام",
-            "fr": "La musique en"
         }
     },
     "tspans_by_id": {

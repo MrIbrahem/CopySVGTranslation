@@ -124,7 +124,7 @@ def test_extract_empty_svg(tmp_path: Path) -> None:
 
     result = extract(empty_svg)
 
-    assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "error": ""}
+    assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "error": ""}
 
 
 def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
@@ -158,7 +158,6 @@ def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
     assert result == {
         "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour", "es": "Hola"}},
         "tspans_by_id": {"label": "Hello"},
-        "title": {},
         "title_new": {},
         "error": "",
     }
@@ -166,7 +165,7 @@ def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
 
 def test_inject_with_empty_translations(tmp_path: Path, target_svg: Path) -> None:
     """inject should handle empty translation dictionaries gracefully."""
-    empty_translations = {"new": {}, "title": {}}
+    empty_translations = {"new": {}}
 
     tree, stats = inject_file_tree(
         inject_file=target_svg,
@@ -200,7 +199,6 @@ def test_extract_with_case_insensitive_true() -> None:
     assert result == {
         "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
         "tspans_by_id": {"label": "Population 2020"},
-        "title": {"population": {"ar": "السكان"}},
         "title_new": {"population {year}": {"ar": "السكان {year}"}},
         "error": "",
     }
@@ -232,7 +230,6 @@ def test_extract_with_case_insensitive_false(tmp_path: Path) -> None:
     assert result == {
         "new": {"HELLO WORLD": {"ar": "مرحبا"}},
         "tspans_by_id": {"label": "HELLO WORLD"},
-        "title": {},
         "title_new": {},
         "error": "",
     }

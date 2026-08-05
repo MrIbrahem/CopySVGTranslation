@@ -61,7 +61,6 @@ class TestLoadAllMappingsEdgeCases(TestSetup):
         mapping_file = self.test_dir / "nested.json"
         test_mapping = {
             "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}},
-            "title": {"Population ": {"ar": "السكان ", "fr": "Population "}},
         }
         with open(mapping_file, "w", encoding="utf-8") as f:
             json.dump(test_mapping, f, ensure_ascii=False)
@@ -69,11 +68,9 @@ class TestLoadAllMappingsEdgeCases(TestSetup):
         result = load_all_mappings([mapping_file])
 
         assert "new" in result
-        assert "title" in result
 
         assert result == {
             "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}},
-            "title": {"Population ": {"ar": "السكان ", "fr": "Population "}},
         }
 
     def test_load_all_mappings_merge_overlapping_keys(self):

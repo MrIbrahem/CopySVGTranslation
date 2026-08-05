@@ -28,7 +28,6 @@ def sample_mapping() -> TranslationMapping:
             "hello": {"ar": "مرحبا", "fr": "bonjour"},
             "world": {"ar": "عالم", "fr": "monde"},
         },
-        title={"Some title": {"ar": "عنوان"}},
         title_new={"Some title {year}": {"ar": "عنوان {year}"}},
         tspans_by_id={"t0": "hello"},
     )
@@ -41,7 +40,7 @@ class TestMappingStoreLoad:
     """Tests for MappingStore.load."""
 
     def test_load_valid_file(self, tmp_path: Path, store: MappingStore):
-        data = {"new": {"hello": {"ar": "مرحبا"}}, "title": {}, "title_new": {}}
+        data = {"new": {"hello": {"ar": "مرحبا"}}, "title_new": {}}
         f = tmp_path / "mapping.json"
         f.write_text(json.dumps(data), encoding="utf-8")
 
@@ -57,7 +56,6 @@ class TestMappingStoreLoad:
     def test_load_preserves_all_sections(self, tmp_path: Path, store: MappingStore):
         data = {
             "new": {"text": {"ar": "نص"}},
-            "title": {"t": {"ar": "ع"}},
             "title_new": {"t {year}": {"ar": "ع {year}"}},
             "tspans_by_id": {"t1": "text"},
         }
@@ -66,7 +64,6 @@ class TestMappingStoreLoad:
 
         mapping = store.load(f)
         assert "text" in mapping.new
-        assert "t" in mapping.title
         assert "t {year}" in mapping.title_new
         assert mapping.tspans_by_id["t1"] == "text"
 
@@ -148,7 +145,6 @@ class TestMappingStoreSave:
         store.save(sample_mapping, out)
         loaded = store.load(out)
         assert loaded.new == sample_mapping.new
-        assert loaded.title == sample_mapping.title
         assert loaded.title_new == sample_mapping.title_new
         assert loaded.tspans_by_id == sample_mapping.tspans_by_id
 

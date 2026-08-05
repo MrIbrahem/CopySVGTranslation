@@ -117,7 +117,6 @@ The extractor produces JSON in this format:
   "new": {
     "normalized english text": {"ar": "translation", "fr": "translation"}
   },
-  "title": {...},
   "tspans_by_id": {"id": "text content"},
   "title_new": {...}
 }

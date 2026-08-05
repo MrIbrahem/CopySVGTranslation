@@ -43,7 +43,7 @@ class TestExtractYearHandling:
         assert isinstance(result["title_new"], dict)
 
         assert "title_new" in result
-        assert result["title_new"] == {"population": {"ar": "السكان"}}
+        assert result["title_new"] == {"population {year}": {"ar": "السكان {year}"}}
 
     def test_extract_year_with_multiple_languages(self):
         """Test year suffix handling with multiple languages."""
@@ -61,9 +61,6 @@ class TestExtractYearHandling:
 
         assert result is not None
         assert "new" in result
-        assert "title_new" in result
-
-        assert result["title_new"] == {"population": {"ar": "السكان", "fr": "Population"}}
 
         assert "title_new" in result
         assert result["title_new"] == {

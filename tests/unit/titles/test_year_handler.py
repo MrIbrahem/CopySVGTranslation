@@ -105,15 +105,12 @@ class TestBuildTemplates:
         handler = YearTitleHandler(config)
         mapping = TranslationMapping(new={"COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020"}})
         handler.build_templates(mapping)
-        assert mapping.title == {}
         assert mapping.title_new == {}
 
     def test_builds_title_and_title_new(self):
         handler = YearTitleHandler()
         mapping = TranslationMapping(new={"COVID-19 pandemic 2020": {"ar": "جائحة كوفيد 2020"}})
         handler.build_templates(mapping)
-        # title should have the year stripped
-        assert "COVID-19 pandemic" in mapping.title
         # title_new should have {year} placeholder
         assert "COVID-19 pandemic {year}" in mapping.title_new
 
@@ -121,7 +118,6 @@ class TestBuildTemplates:
         handler = YearTitleHandler()
         mapping = TranslationMapping(new={"No year here": {"ar": "ترجمة"}})
         handler.build_templates(mapping)
-        assert mapping.title == {}
         assert mapping.title_new == {}
 
 

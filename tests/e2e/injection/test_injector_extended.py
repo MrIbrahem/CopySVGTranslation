@@ -133,7 +133,7 @@ class TestWorkOnSwitches(TestSetup):
         </svg>"""
         root = etree.fromstring(svg_content)
         existing_ids = {"text1"}
-        mapping = {"title": {"Population ": {"ar": "السكان ", "fr": "Population "}}, "new": {}}
+        mapping = {"new": {}}
 
         stats = work_on_switches(root, existing_ids, mapping, case_insensitive=True)
 

@@ -56,7 +56,6 @@ class TestTranslationMappingCreation:
     def test_default_empty(self):
         m = TranslationMapping()
         assert m.new == {}
-        assert m.title == {}
         assert m.title_new == {}
         assert m.tspans_by_id == {}
         assert m.meta == {}
@@ -64,7 +63,6 @@ class TestTranslationMappingCreation:
     def test_with_data(self):
         m = TranslationMapping(
             new={"hello": {"ar": "مرحبا"}},
-            title={"t": {"ar": "ع"}},
             title_new={"t {year}": {"ar": "ع {year}"}},
             tspans_by_id={"t0": "hello"},
             meta={"source": "test"},
@@ -122,7 +120,7 @@ class TestTranslationMappingQuery:
         assert m.is_empty() is False
 
     def test_is_empty_false_title(self):
-        m = TranslationMapping(title={"x": {"ar": "y"}})
+        m = TranslationMapping(title_new={"x": {"ar": "y"}})
         assert m.is_empty() is False
 
     def test_is_empty_false_title_new(self):
@@ -132,10 +130,9 @@ class TestTranslationMappingQuery:
     def test_all_languages(self):
         m = TranslationMapping(
             new={"a": {"ar": "1", "fr": "2"}},
-            title={"b": {"de": "3"}},
             title_new={"c": {"es": "4"}},
         )
-        assert m.all_languages() == {"ar", "fr", "de", "es"}
+        assert m.all_languages() == {"ar", "fr", "es"}
 
     def test_all_languages_empty(self):
         m = TranslationMapping()
@@ -192,11 +189,11 @@ class TestTranslationMappingMutation:
 
     def test_merge_mappings(self):
         m1 = TranslationMapping(new={"a": {"ar": "1"}})
-        m2 = TranslationMapping(new={"b": {"fr": "2"}}, title={"t": {"ar": "3"}})
+        m2 = TranslationMapping(new={"b": {"fr": "2"}}, title_new={"t": {"ar": "3"}})
         m1.merge(m2)
         assert "a" in m1.new
         assert "b" in m1.new
-        assert "t" in m1.title
+        assert "t" in m1.title_new
 
     def test_merge_overlapping(self):
         m1 = TranslationMapping(new={"a": {"ar": "1"}})
@@ -229,9 +226,9 @@ class TestTranslationMappingMutation:
         # assert data["meta"] == {"source": "test"}
 
     def test_to_json_roundtrip(self):
-        m = TranslationMapping(new={"x": {"ar": "y"}}, title={"t": {"ar": "z"}})
+        m = TranslationMapping(new={"x": {"ar": "y"}})
         data = m.to_json()
         m2 = TranslationMapping.from_any(data)
         assert m2.new == m.new
-        assert m2.title == m.title
+        assert m2.title_new == m.title_new
         # Note: meta is not round-tripped through to_json (it's excluded)

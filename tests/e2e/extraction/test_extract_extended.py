@@ -92,7 +92,6 @@ class TestExtractEdgeCases:
         assert result == {
             "new": {"hello": {"ar": "مرحبا"}},
             "tspans_by_id": {"t1": "HELLO"},
-            "title": {},
             "title_new": {},
             "error": "",
         }
@@ -110,7 +109,7 @@ class TestExtractEdgeCases:
         result = extract(svg_path)
 
         assert result is not None
-        assert result == {"new": {}, "tspans_by_id": {}, "title": {}, "title_new": {}, "error": ""}
+        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "error": ""}
 
     def test_extract_with_base_id_fallback(self):
         """Test extraction with base_id lookup fallback."""
@@ -129,7 +128,6 @@ class TestExtractEdgeCases:
         assert result == {
             "new": {"hello": {"ar": "مرحبا"}},
             "tspans_by_id": {"TEXT1": "Hello"},
-            "title": {},
             "title_new": {},
             "error": "",
         }

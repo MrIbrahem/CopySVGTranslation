@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 import pytest
+from copy_svg_translation.config import TranslationConfig
 from copy_svg_translation import (
     SVGTranslationExtractor,
     TranslationMapping,
@@ -44,7 +45,6 @@ class TestExtractorData:
         data = TranslationMapping()
         assert data.new == {}
         assert data.tspans_by_id == {}
-        assert data.title == {}
         assert data.title_new == {}
         # assert data.error == ""
 
@@ -62,7 +62,6 @@ class TestExtractorData:
         data = TranslationMapping(
             new={"hello": {"ar": "مرحبا"}},
             tspans_by_id={"t0": "Hello"},
-            title={"greeting": {"fr": "Salut"}},
             title_new={},
         )
         result = data.to_json()
@@ -144,7 +143,10 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor()
+        config = TranslationConfig(
+            case_insensitive=True,
+        )
+        ext = SVGTranslationExtractor(config)
         result = ext.extract(svg)
 
         assert "hello world" in result.new
@@ -158,7 +160,10 @@ class TestSVGTranslationExtractorExtract:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        ext = SVGTranslationExtractor()
+        config = TranslationConfig(
+            case_insensitive=False,
+        )
+        ext = SVGTranslationExtractor(config)
         result = ext.extract(svg)
 
         assert result.new == {"hello world": {"es": "Hola"}}
@@ -193,7 +198,7 @@ class TestSVGTranslationExtractorExtract:
         # The full text should be in "new"
         assert "population 2020" in result.new
         # Title section should have the year-stripped version
-        assert isinstance(result.title, dict)
+        assert isinstance(result.title_new, dict)
 
     def test_no_switches_returns_empty(self, tmp_path: Path):
         inner = '<text id="t0"><tspan>Just text</tspan></text>'

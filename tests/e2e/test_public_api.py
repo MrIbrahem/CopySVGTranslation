@@ -60,11 +60,9 @@ class TestExtractFunction:
         """extract should return a dict with expected top-level keys."""
         result = extract(FIXTURES_DIR / "source.svg")
         assert "new" in result
-        assert "title" in result
         assert result == {
             "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
             "tspans_by_id": {"label": "Population 2020"},
-            "title": {"population": {"ar": "السكان"}},
             "title_new": {"population {year}": {"ar": "السكان {year}"}},
             "error": "",
         }
@@ -83,7 +81,6 @@ class TestExtractFunction:
         assert result == {
             "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
             "tspans_by_id": {"label": "Population 2020"},
-            "title": {"population": {"ar": "السكان"}},
             "title_new": {"population {year}": {"ar": "السكان {year}"}},
             "error": "",
         }
@@ -97,7 +94,6 @@ class TestExtractFunction:
         assert result == {
             "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
             "tspans_by_id": {"label": "Population 2020"},
-            "title": {"population": {"ar": "السكان"}},
             "title_new": {"population {year}": {"ar": "السكان {year}"}},
             "error": "",
         }

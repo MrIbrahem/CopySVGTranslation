@@ -29,14 +29,13 @@ class TranslationMapping:
     ----------
     new:
         Main map: normalized source text → {lang: translated text}
-    title / title_new:
-        Optional year-title variants (kept for compatibility / advanced use)
+    title_new:
+        Optional year-title variants advanced use
     tspans_by_id:
         Optional diagnostic map from extraction (id → default text)
     """
 
     new: dict[str, dict[str, str]] = field(default_factory=dict)
-    title: dict[str, dict[str, str]] = field(default_factory=dict)
     title_new: dict[str, dict[str, str]] = field(default_factory=dict)
     tspans_by_id: dict[str, str] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
@@ -50,7 +49,6 @@ class TranslationMapping:
             return data
         return cls(
             new=dict(data.get("new", data if "new" not in data else {})),
-            title=dict(data.get("title", {})),
             title_new=dict(data.get("title_new", {})),
             tspans_by_id=dict(data.get("tspans_by_id", {})),
             meta=dict(data.get("meta", {})),
@@ -65,11 +63,11 @@ class TranslationMapping:
     # Query helpers
     # ------------------------------------------------------------------
     def is_empty(self) -> bool:
-        return not self.new and not self.title and not self.title_new
+        return not self.new and not self.title_new
 
     def all_languages(self) -> set[str]:
         langs: set[str] = set()
-        for section in (self.new, self.title, self.title_new):
+        for section in (self.new, self.title_new):
             for trans in section.values():
                 langs.update(trans.keys())
         return langs
@@ -99,8 +97,6 @@ class TranslationMapping:
         other = self.from_any(other)
         for source, trans in other.new.items():
             self.new.setdefault(source, {}).update(trans)
-        for source, trans in other.title.items():
-            self.title.setdefault(source, {}).update(trans)
         for source, trans in other.title_new.items():
             self.title_new.setdefault(source, {}).update(trans)
         self.tspans_by_id.update(other.tspans_by_id)
@@ -108,7 +104,6 @@ class TranslationMapping:
     def to_json(self) -> dict[str, Any]:
         return {
             "new": self.new,
-            "title": self.title,
             "title_new": self.title_new,
             "tspans_by_id": self.tspans_by_id,
             "meta": self.meta,

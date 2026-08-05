@@ -67,7 +67,6 @@ class TranslationMapping:
             return data
         return cls(
             new=dict(data.get("new", data if "new" not in data else {})),
-            title=dict(data.get("title", {})),
             title_new=dict(data.get("title_new", {})),
             tspans_by_id=dict(data.get("tspans_by_id", {})),
             meta=dict(data.get("meta", {})),
@@ -125,7 +124,6 @@ class TranslationMapping:
     def to_json(self) -> dict[str, Any]:
         return {
             "new": self.new,
-            "title": self.title,
             "title_new": self.title_new,
             "tspans_by_id": self.tspans_by_id,
             "meta": self.meta,
