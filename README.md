@@ -83,7 +83,7 @@ extractor = SVGTranslationExtractor(
     case_insensitive: bool = True,
 )
 
-result: ExtractorData = extractor.extract(
+result: TranslationMapping = extractor.extract(
     source_file: str | Path,
 )
 ```
@@ -95,14 +95,14 @@ result: ExtractorData = extractor.extract(
 | `source_file`      | `str \| Path` | —       | Path to the SVG file to process.                                           |
 | `case_insensitive` | `bool`        | `True`  | If `True`, default text keys are lowercased for case-insensitive matching. |
 
-**Returns:** `ExtractorData` — a dataclass with the following fields:
+**Returns:** `TranslationMapping` — a dataclass with the following fields:
 
 | Field          | Type                        | Description                                                            |
 | -------------- | --------------------------- | ---------------------------------------------------------------------- |
 | `new`          | `dict[str, dict[str, str]]` | Mapping of normalized source text → language code → translation.       |
 | `tspans_by_id` | `dict[str, str]`            | Mapping of `<tspan>` ID → text content.                                |
-| `title`        | `dict[str, Any]`            | Title-like entries (ending with a 4-digit year) with the year removed. |
 | `title_new`    | `dict[str, Any]`            | New-format title translations.                                         |
+| `meta`         | `dict[str, Any]`            | Diagnostic metadata.                                                   |
 | `error`        | `str`                       | Error message if extraction failed, empty string on success.           |
 
 Use `result.to_json()` to get a plain dictionary suitable for JSON serialization.
@@ -173,7 +173,7 @@ Use `result.inject_stats.to_json()` to get a plain dictionary of the stats.
 
 ---
 
-### `ExtractorData`
+### `TranslationMapping`
 
 Dataclass returned by `SVGTranslationExtractor.extract()`. See the extractor documentation above for field details.
 
