@@ -1,12 +1,12 @@
 """
-Unit tests for CopySVGTranslation/nested_analyze/detector.py module.
+Unit tests for CopySVGTranslation/nested/detector.py module.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from CopySVGTranslation.nested_analyze.detector import NestedTspanDetector
+from CopySVGTranslation.nested.detector import NestedTspanDetector
 
 SVG_NS = "http://www.w3.org/2000/svg"
 

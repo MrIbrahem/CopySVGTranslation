@@ -77,7 +77,11 @@ def _inject_file_tree(
         save=save_result,
     )
 
-    return result.data, result.stats.to_json()
+    if not result.success or result.data is None:
+        return (None, {"error": "error"})
+
+    stats = result.stats.to_json() if result.stats else None
+    return result.data.tree, stats
 
 
 def inject_file_tree(

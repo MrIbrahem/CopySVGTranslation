@@ -8,7 +8,7 @@ from .extraction import SVGTranslationExtractor
 from .injection import InjectorData, SVGTranslationInjector
 from .io.mapping_store import MappingStore
 from .legacy import extract, inject_file_tree
-from .nested_analyze import NestedTspanDetector, fix_nested_file, match_nested_tags
+from .nested import NestedTspanDetector, fix_nested_file, match_nested_tags
 from .result import InjectorStats, InjectResult, OperationResult
 from .service import SVGTranslationService
 

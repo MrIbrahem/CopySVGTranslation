@@ -11,8 +11,8 @@ This package is responsible for **detecting and fixing nested `<tspan>` (and `<a
 
 It replaces both:
 
--   `nested_analyze/find_nested.py` (simple flatten)
--   `nested_analyze/find_nested_new.py` (style-preserving attempt)
+-   `nested/find_nested.py` (simple flatten)
+-   `nested/find_nested_new.py` (style-preserving attempt)
 
 ---
 

@@ -1,5 +1,5 @@
 """
-Unit tests for CopySVGTranslation/nested_analyze/find_nested_new.py module.
+Unit tests for CopySVGTranslation/nested/find_nested_new.py module.
 
 Functions to test: fix_nested_tspans, fix_nested_file_new
 """
@@ -11,7 +11,7 @@ from pathlib import Path
 
 from lxml import etree
 
-from CopySVGTranslation.nested_analyze.find_nested_new import (
+from CopySVGTranslation.nested.find_nested_new import (
     SVG_NS,
     fix_nested_file_new,
     fix_nested_tspans,

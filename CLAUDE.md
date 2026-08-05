@@ -61,7 +61,7 @@ The recommended API uses class-based interfaces. Legacy function-based wrappers 
 
 -   **`CopySVGTranslation/titles_workers/`**: Handles title-like text (entries ending with 4-digit years) with special handling.
 
--   **`CopySVGTranslation/nested_analyze/`**: Utilities for detecting and fixing nested `<tspan>` structures that would otherwise cause `SvgNestedTspanError`.
+-   **`CopySVGTranslation/nested/`**: Utilities for detecting and fixing nested `<tspan>` structures that would otherwise cause `SvgNestedTspanError`.
 
 ### Data Flow
 
@@ -134,4 +134,4 @@ The extractor produces JSON in this format:
 
 ## Testing
 
-Tests are organized in `tests/` with subdirectories for extraction, injection, and nested_analyze modules. The `conftest.py` adds the project root to `sys.path`.
+Tests are organized in `tests/` with subdirectories for extraction, injection, and nested modules. The `conftest.py` adds the project root to `sys.path`.

@@ -2,7 +2,7 @@
 
 from lxml import etree
 
-from CopySVGTranslation.nested_analyze.find_nested import fix_nested_tspans
+from CopySVGTranslation.nested.find_nested import fix_nested_tspans
 
 SVG_NS = "http://www.w3.org/2000/svg"
 

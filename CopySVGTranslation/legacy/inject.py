@@ -80,7 +80,8 @@ def _inject_file_tree(
     if not result.success or result.data is None:
         return (None, {"error": "error"})
 
-    return result.data.tree, result.stats.to_json()
+    stats = result.stats.to_json() if result.stats else None
+    return result.data.tree, stats
 
 
 def inject_file_tree(

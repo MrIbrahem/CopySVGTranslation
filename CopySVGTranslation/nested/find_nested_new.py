@@ -2,7 +2,7 @@
 TODO:
 - Implement a function to transform the SVG text as described in the comments.
 
-CopySVGTranslation/nested_analyze/find_nested_new.py
+CopySVGTranslation/nested/find_nested_new.py
 
 input:
 <text x="16.0" y="581.0" style="font-size: 13px; line-height: 1.2;">
@@ -25,7 +25,7 @@ but ideally it actually should be something like this:
     <tspan>United Nations Inter-agency Group for Child Mortality Estimation (2025)</tspan>
 </text>
 
-tests for the above functionality are in tests/nested_analyze/test_fix_nested_file_new.py
+tests for the above functionality are in tests/nested/test_fix_nested_file_new.py
 
 pytest -m todo
 

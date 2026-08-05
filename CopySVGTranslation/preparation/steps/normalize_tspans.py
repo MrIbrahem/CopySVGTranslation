@@ -6,7 +6,7 @@ import re
 from lxml import etree
 
 from ...exceptions import SvgStructureError
-from ...nested_analyze import NestedTspanFlattener
+from ...nested import NestedTspanFlattener
 from .base import PreparationContext, PreparationStep
 
 SVG_NS = "http://www.w3.org/2000/svg"
