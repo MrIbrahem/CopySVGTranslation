@@ -54,6 +54,10 @@ class NestedTspanFlattener:
 
         if self.strategy == "flatten":
             self._flatten_all(root, tag="tspan")
+
+            # NOTE: <a tags can also be nested inside <tspan>, so fix those too
+            # https://svgtranslate.toolforge.org/ result: This file has unexpected content within a text element.
+            # Only tspan elements should be used within text.
             if self.also_fix_a:
                 self._flatten_all(root, tag="a")
             return root
