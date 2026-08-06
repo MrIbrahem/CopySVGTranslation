@@ -123,17 +123,6 @@ def xpath_svg(root: etree._Element, expression: str):
     """Run an XPath expression with the standard svg prefix bound."""
     return root.xpath(expression, namespaces=SVG_NSMAP)
 
-
-def extract_text_segments(node: etree._Element) -> list[str]:
-    """
-    Extract text segments from a <text> (or similar) node.
-    Prefers direct child <tspan>s; falls back to the node's own text.
-    """
-    tspans = node.xpath("./svg:tspan", namespaces=SVG_NSMAP)
-    if tspans:
-        return [t.text.strip() if t.text else "" for t in tspans]
-    return [node.text.strip()] if node.text else [""]
-
 def collect_ids(root: etree._Element) -> set[str]:
     """Return the set of all id attribute values in the tree."""
     return {id_ for id_ in root.xpath("//@id") if id_}
@@ -192,9 +181,7 @@ from .xml import (
     svg_tag,
     local_name,
     is_svg_element,
-    findall_svg,
     xpath_svg,
-    extract_text_segments,
     collect_ids,
     sort_switch_children,
     tree_languages,
@@ -211,9 +198,7 @@ __all__ = [
     "svg_tag",
     "local_name",
     "is_svg_element",
-    "findall_svg",
     "xpath_svg",
-    "extract_text_segments",
     "collect_ids",
     "sort_switch_children",
     "tree_languages",
@@ -224,15 +209,14 @@ __all__ = [
 
 ### Who uses what
 
-| Helper                                  | Typical users                                                     |
-| --------------------------------------- | ----------------------------------------------------------------- |
-| `normalize_text`                        | Extractor, Injector, TextNode, YearTitleHandler, MatchingStrategy |
-| `normalize_lang` / `split_lang_list`    | Preparation (`SplitLanguages`), any language handling             |
-| `extract_text_segments`                 | TextNode, legacy paths                                            |
-| `collect_ids`                           | IdManager, AssignIds step                                         |
-| `sort_switch_children`                  | ReorderTexts step, final housekeeping in injector                 |
-| `tree_languages`                        | Injector stats (before/after)                                     |
-| `findall_svg` / `xpath_svg` / `svg_tag` | Everywhere that touches the tree                                  |
+| Helper                               | Typical users                                                     |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| `normalize_text`                     | Extractor, Injector, TextNode, YearTitleHandler, MatchingStrategy |
+| `normalize_lang` / `split_lang_list` | Preparation (`SplitLanguages`), any language handling             |
+| `collect_ids`                        | IdManager, AssignIds step                                         |
+| `sort_switch_children`               | ReorderTexts step, final housekeeping in injector                 |
+| `tree_languages`                     | Injector stats (before/after)                                     |
+| `findall_svg` / `svg_tag`            | Everywhere that touches the tree                                  |
 
 ---
 

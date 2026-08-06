@@ -184,10 +184,10 @@ def svg_path(svg_dir: Path):
 
 #### `unit/utils/`
 
-| File           | Focus                                                                            |
-| -------------- | -------------------------------------------------------------------------------- |
-| `test_text.py` | `normalize_text`, `normalize_lang`, `split_lang_list` edge cases                 |
-| `test_xml.py`  | `extract_text_segments`, `collect_ids`, `tree_languages`, `sort_switch_children` |
+| File           | Focus                                                            |
+| -------------- | ---------------------------------------------------------------- |
+| `test_text.py` | `normalize_text`, `normalize_lang`, `split_lang_list` edge cases |
+| `test_xml.py`  | `collect_ids`, `tree_languages`, `sort_switch_children`          |
 
 #### `unit/titles/`
 

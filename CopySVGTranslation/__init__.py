@@ -1,4 +1,12 @@
-"""Public API for the CopySVGTranslation package."""
+"""
+Public API for the CopySVGTranslation package.
+
+Used in copy-svg-langs project:
+from CopySVGTranslation import SVGTranslationExtractor, TranslationConfig
+from CopySVGTranslation import SVGTranslationInjector
+from CopySVGTranslation import NestedTspanDetector, NestedTspanFlattener
+
+"""
 
 __version__ = "2.0.1"
 
@@ -6,9 +14,9 @@ from .config import TranslationConfig
 from .core.mapping import TranslationEntry, TranslationMapping
 from .extraction import SVGTranslationExtractor
 from .injection import InjectorData, SVGTranslationInjector
-from .io.mapping_store import MappingStore
+from .io import MappingStore, SvgDocument
 from .legacy import extract, inject_file_tree
-from .nested import NestedTspanDetector, fix_nested_file, match_nested_tags
+from .nested import NestedTspanDetector, NestedTspanFlattener
 from .result import InjectorStats, InjectResult, OperationResult
 from .service import SVGTranslationService
 
@@ -19,9 +27,11 @@ __all__ = [
     "SVGTranslationExtractor",
     "SVGTranslationService",
     "MappingStore",
+    "SvgDocument",
     "inject_file_tree",  # to be deprecated
     "extract",  # to be deprecated
     "NestedTspanDetector",
+    "NestedTspanFlattener",
     # dataclasses
     "TranslationMapping",
     "TranslationEntry",
@@ -29,8 +39,5 @@ __all__ = [
     "InjectorStats",
     "OperationResult",
     "InjectResult",
-    # others
-    "match_nested_tags",
-    "fix_nested_file",
     "__version__",
 ]

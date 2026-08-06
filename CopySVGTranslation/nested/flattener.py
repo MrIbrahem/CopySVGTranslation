@@ -54,6 +54,10 @@ class NestedTspanFlattener:
 
         if self.strategy == "flatten":
             self._flatten_all(root, tag="tspan")
+
+            # NOTE: <a tags can also be nested inside <tspan>, so fix those too
+            # https://svgtranslate.toolforge.org/ result: This file has unexpected content within a text element.
+            # Only tspan elements should be used within text.
             if self.also_fix_a:
                 self._flatten_all(root, tag="a")
             return root
@@ -72,6 +76,9 @@ class NestedTspanFlattener:
     # Strategy: raise
     # ------------------------------------------------------------------
     def _raise_if_nested(self, root: etree._Element) -> None:
+        """
+        raise when match nested <tspan> elements
+        """
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         for tspan in tspans:
             # nested content check: tspan should not have element children

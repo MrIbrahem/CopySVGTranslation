@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.nested import fix_nested_file, match_nested_tags
+from CopySVGTranslation.nested.fixer import MatchFixNestedTags
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -28,7 +28,10 @@ def _write_full_svg(tmp_dir: Path, svg_text: str, name: str = "test.svg") -> Pat
 def test_tspan_with_a_link_is_counted_as_nested(temp_dir: Path):
     # NOTE: current implementation flags any element child, not just <tspan>
     p = _write_svg(temp_dir, '<text><tspan>See <a href="https://ex.com">link</a></tspan></text>')
-    res = match_nested_tags(p)
+
+    matcher = MatchFixNestedTags(p, p, strategy="flatten")
+
+    res = matcher.match_nested()
     assert len(res) == 1
     assert "<a" in res[0]
 
@@ -54,9 +57,11 @@ def test_match_and_fix_paragraph_with_bold_numbers_and_link(temp_dir: Path):
         </g>
         """,
     )
-    before = len(match_nested_tags(p))
-    fix_nested_file(p)
-    after = len(match_nested_tags(p))
+    matcher = MatchFixNestedTags(p, p, strategy="flatten")
+
+    before = len(matcher.match_nested())
+    matcher.fix_file()
+    after = len(matcher.match_nested())
     # Current matcher flags any element child, so the first and third tspans are hits pre-fix
     assert before == 2
     assert after == 0
@@ -73,9 +78,11 @@ def test_match_and_fix_multiple_links_in_different_tspans(temp_dir: Path):
         </text>
         """,
     )
-    assert len(match_nested_tags(p)) == 2
-    fix_nested_file(p)
-    assert len(match_nested_tags(p)) == 0
+    matcher = MatchFixNestedTags(p, p, strategy="flatten")
+
+    assert len(matcher.match_nested()) == 2
+    matcher.fix_file()
+    assert len(matcher.match_nested()) == 0
 
 
 @pytest.mark.parametrize(
@@ -86,10 +93,12 @@ def test_match_and_fix_multiple_links_in_different_tspans(temp_dir: Path):
 )
 def test_parametrized_various_patterns(temp_dir: Path, inner: str, expected_hits: int):
     p = _write_svg(temp_dir, inner)
-    assert len(match_nested_tags(p)) == expected_hits
-    fixed = fix_nested_file(p)
+    matcher = MatchFixNestedTags(p, p, strategy="flatten")
+
+    assert len(matcher.match_nested()) == expected_hits
+    fixed = matcher.fix_file()
     assert fixed is True
-    assert len(match_nested_tags(p)) == 0
+    assert len(matcher.match_nested()) == 0
 
 
 def test_match_and_fix(temp_dir: Path):
@@ -109,11 +118,13 @@ def test_match_and_fix(temp_dir: Path):
         </svg>
     """
     p = _write_full_svg(temp_dir, text, name="testx.svg")
-    before = len(match_nested_tags(p))
-    fixed = fix_nested_file(p)
+    matcher = MatchFixNestedTags(p, p, strategy="flatten")
+
+    before = len(matcher.match_nested())
+    fixed = matcher.fix_file()
     assert fixed is True
 
-    after = len(match_nested_tags(p))
+    after = len(matcher.match_nested())
     assert before == 1
     assert after == 0
 
@@ -167,11 +178,13 @@ def test_match_and_fix_2(temp_dir: Path):
 
     """
     p = _write_full_svg(temp_dir, text, name="testx.svg")
-    before = len(match_nested_tags(p))
-    fixed = fix_nested_file(p)
+    matcher = MatchFixNestedTags(p, p, strategy="flatten")
+
+    before = len(matcher.match_nested())
+    fixed = matcher.fix_file()
     assert fixed is True
 
-    after = len(match_nested_tags(p))
+    after = len(matcher.match_nested())
     assert before == 2
     assert after == 0
 
@@ -218,11 +231,13 @@ def test_match_and_fix_3(temp_dir: Path):
 
     """
     p = _write_svg(temp_dir, text, name="testx.svg")
-    before = len(match_nested_tags(p))
-    fixed = fix_nested_file(p)
+    matcher = MatchFixNestedTags(p, p, strategy="flatten")
+
+    before = len(matcher.match_nested())
+    fixed = matcher.fix_file()
     assert fixed is True
 
-    after = len(match_nested_tags(p))
+    after = len(matcher.match_nested())
     assert before == 1
     assert after == 0
 

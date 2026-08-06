@@ -41,7 +41,7 @@ from .io import MappingStore, SvgDocument
 # Legacy compatibility layer (deprecated)
 # ---------------------------------------------------------------------------
 from .legacy import extract, inject_file_tree
-from .nested import NestedTspanDetector, NestedTspanFlattener
+from .nested import MatchFixNestedTags, NestedTspanDetector, NestedTspanFlattener
 from .preparation import SvgPreparationPipeline
 from .result import InjectorStats, OperationResult
 from .service import SVGTranslationService
@@ -55,6 +55,7 @@ __all__ = [
     "InjectorStats",
     "MappingError",
     "MappingStore",
+    "MatchFixNestedTags",
     "NestedTspanDetector",
     "NestedTspanFlattener",
     "OperationResult",

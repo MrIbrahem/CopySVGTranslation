@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from lxml import etree
 
@@ -11,15 +12,24 @@ from ..core.switch_node import SwitchNode
 from ..core.text_node import TextNode
 from ..result import InjectorStats
 from ..titles import YearTitleHandler
-from ..utils import (
-    extract_text_from_node,
-    normalize_text,
-)
+from ..utils import normalize_text
 from .id_manager import IdManager
 from .translation_applier import TranslationApplier
 
 logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"
+
+
+def _extract_text_from_node(node: etree._Element | None) -> list[str]:
+    """Extract text content from an SVG ``<text>`` element, honouring ``<tspan>``."""
+    if node is None:
+        return []
+
+    tspans = node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
+    if tspans:
+        return [tspan.text.strip() if tspan.text else "" for tspan in tspans]
+
+    return [node.text.strip()] if node.text else [""]
 
 
 class SwitchProcessor:
@@ -64,8 +74,16 @@ class SwitchProcessor:
             return
 
         # Find all text elements within this switch
-        default_texts, default_node = self.get_default_texts(text_elements)
+        default_node = self.get_default_node(text_elements)
+        default_texts = self.get_default_texts(default_node)
+        # _default_texts = default.texts(
+        #     normalize=True,
+        #     case_insensitive=self.config.case_insensitive,
+        # )
 
+        # assert _default_texts != default_texts
+
+        # If there are no default texts, we can't do anything
         if not default_texts or default_node is None:
             return
 
@@ -112,20 +130,21 @@ class SwitchProcessor:
     # -------------
     # default_texts
     # -------------
-    def get_default_texts(self, text_elements):
-        default_texts = None
-        default_node = None
+    def get_default_node(self, text_elements: list[etree._Element]) -> Any | None:
 
-        for text_elem in text_elements:
-            system_lang = text_elem.get("systemLanguage")
+        for node in text_elements:
+            system_lang = node.get("systemLanguage")
             if system_lang:
                 continue
 
-            text_contents = extract_text_from_node(text_elem)
-            default_texts = [normalize_text(text, self.config.case_insensitive) for text in text_contents]
-            default_node = text_elem
-            break
-        return default_texts, default_node
+            return node
+
+        return None
+
+    def get_default_texts(self, node: etree._Element) -> list[str]:
+        text_contents = _extract_text_from_node(node)
+        default_texts = [normalize_text(text, self.config.case_insensitive) for text in text_contents]
+        return default_texts
 
     # -------------
     # existing_languages

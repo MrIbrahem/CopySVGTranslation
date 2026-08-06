@@ -1,8 +1,6 @@
 from pathlib import Path
 
-from CopySVGTranslation.nested.find_nested import fix_nested_file
-from CopySVGTranslation.nested.find_nested_new import fix_nested_file_new
-from CopySVGTranslation.nested.match_tags import match_nested_tags
+from CopySVGTranslation.nested import MatchFixNestedTags
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -39,12 +37,13 @@ class TestMatchAndFix(TestSetup):
             </g>
         """
         p = _write_svg(temp_dir, text, name="testx.svg")
-        before = len(match_nested_tags(p))
-        fixed = fix_nested_file_new(p)
+        matcher = MatchFixNestedTags(p, p, strategy="preserve_style")
+        before = len(matcher.match_nested())
+        fixed = matcher.fix_file()
 
         assert fixed is True
 
-        after = len(match_nested_tags(p))
+        after = len(matcher.match_nested())
         assert before == 1
         assert after == 0
 
@@ -93,11 +92,13 @@ class TestMatchAndFix(TestSetup):
             </g>
         """
         p = _write_svg(temp_dir, text, name="testx.svg")
-        before = len(match_nested_tags(p))
-        fixed = fix_nested_file_new(p)
+        matcher = MatchFixNestedTags(p, p, strategy="preserve_style")
+
+        before = len(matcher.match_nested())
+        fixed = matcher.fix_file()
         assert fixed is True
 
-        after = len(match_nested_tags(p))
+        after = len(matcher.match_nested())
         assert before == 2
         assert after == 0
 
@@ -144,13 +145,15 @@ class TestTodo(TestSetup):
             </g>
         """
         p = _write_svg(temp_dir, text, name="testx.svg")
-        before = len(match_nested_tags(p))
+        matcher = MatchFixNestedTags(p, p, strategy="preserve_style")
 
-        fixed = fix_nested_file_new(p)
+        before = len(matcher.match_nested())
+
+        fixed = matcher.fix_file()
 
         assert fixed is True
 
-        after = len(match_nested_tags(p))
+        after = len(matcher.match_nested())
         assert before == 1
         assert after == 0
 
@@ -180,13 +183,15 @@ class TestTodo(TestSetup):
             </g>
         """
         p = _write_svg(temp_dir, text, name="testx.svg")
-        before = len(match_nested_tags(p))
+        matcher = MatchFixNestedTags(p, p, strategy="flatten")
 
-        fixed = fix_nested_file(p)
+        before = len(matcher.match_nested())
+
+        fixed = matcher.fix_file()
 
         assert fixed is True
 
-        after = len(match_nested_tags(p))
+        after = len(matcher.match_nested())
         assert before == 1
         assert after == 0
 

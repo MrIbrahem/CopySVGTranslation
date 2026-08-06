@@ -1,7 +1,6 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
-from CopySVGTranslation.nested.find_nested import fix_nested_file
-from CopySVGTranslation.nested.match_tags import match_nested_tags
+from CopySVGTranslation.nested.fixer import MatchFixNestedTags
 
 
 class TestNestedFiles:
@@ -36,9 +35,11 @@ class TestNestedFiles:
             </svg>
         """,
         )
-        len_result_before = len(match_nested_tags(file))
-        _fix_file = fix_nested_file(file)
-        len_result_after = len(match_nested_tags(file))
+        matcher = MatchFixNestedTags(file, file, strategy="flatten")
+
+        len_result_before = len(matcher.match_nested())
+        _fix_file = matcher.fix_file()
+        len_result_after = len(matcher.match_nested())
 
         assert len_result_before == 2
         assert len_result_after == 0
@@ -59,9 +60,11 @@ class TestNestedFiles:
             </g>
         </svg>""",
         )
-        len_result_before = len(match_nested_tags(file))
-        _fix_file = fix_nested_file(file)
-        len_result_after = len(match_nested_tags(file))
+        matcher = MatchFixNestedTags(file, file, strategy="flatten")
+
+        len_result_before = len(matcher.match_nested())
+        _fix_file = matcher.fix_file()
+        len_result_after = len(matcher.match_nested())
 
         assert len_result_before == 1
         assert len_result_after == 0
@@ -84,9 +87,11 @@ class TestNestedFiles:
                 age standardization
                 make health metrics comparable?</a></tspan></text></g></g></svg>""",
         )
-        len_result_before = len(match_nested_tags(file))
-        _fix_file = fix_nested_file(file)
-        len_result_after = len(match_nested_tags(file))
+        matcher = MatchFixNestedTags(file, file, strategy="flatten")
+
+        len_result_before = len(matcher.match_nested())
+        _fix_file = matcher.fix_file()
+        len_result_after = len(matcher.match_nested())
 
         assert len_result_before == 1
         assert len_result_after == 0
@@ -107,9 +112,11 @@ class TestNestedFiles:
                 </g>
             </svg>""",
         )
-        len_result_before = len(match_nested_tags(file))
-        _fix_file = fix_nested_file(file)
-        len_result_after = len(match_nested_tags(file))
+        matcher = MatchFixNestedTags(file, file, strategy="flatten")
+
+        len_result_before = len(matcher.match_nested())
+        _fix_file = matcher.fix_file()
+        len_result_after = len(matcher.match_nested())
 
         assert len_result_before == 2
         assert len_result_after == 0
@@ -171,9 +178,11 @@ class TestNestedFiles:
                 </g>
             </svg>""",
         )
-        len_result_before = len(match_nested_tags(file))
-        _fix_file = fix_nested_file(file)
-        len_result_after = len(match_nested_tags(file))
+        matcher = MatchFixNestedTags(file, file, strategy="flatten")
+
+        len_result_before = len(matcher.match_nested())
+        _fix_file = matcher.fix_file()
+        len_result_after = len(matcher.match_nested())
 
         assert len_result_before == 7
         assert len_result_after == 0

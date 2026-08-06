@@ -50,6 +50,9 @@ class NestedTspanDetector:
             logger.error("Failed to parse %s: %s", path, exc)
             return []
 
+        return self.find_in_tree_return_list(root)
+
+    def find_in_tree_return_list(self, root) -> list[str]:
         nested = self.find_in_tree(root)
         return [
             etree.tostring(

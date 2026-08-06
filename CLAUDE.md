@@ -12,126 +12,86 @@ CopySVGTranslation is a Python library for extracting multilingual text pairs fr
 
 ```bash
 # Run all tests
-python -m pytest tests -v
+poetry run pytest
 
 # Run a specific test file
-python -m pytest tests/test_svgtranslate.py -v
-
-# Run a specific test
-python -m pytest tests/test_svgtranslate.py::test_extract -v
+poetry run pytest tests/unit/extraction/test_extractor.py -v
 ```
 
 ### Installation for Development
 
 ```bash
-pip install -r requirements.txt
-pip install pytest
+poetry install
+# or
+poetry run pip install -r requirements.txt -r dev-requirements.txt
 ```
 
 ## Architecture
 
-The codebase follows a two-phase pipeline: **Extraction** and **Injection**.
+The codebase follows a modular pipeline: **Preparation**, **Extraction**, **Injection**, and a unified **Service Facade**.
 
 ### Public API
 
-The recommended API uses class-based interfaces. Legacy function-based wrappers are available but deprecated.
+The primary, recommended API uses class-based interfaces. Legacy function-based wrappers are available but deprecated.
 
 | Class / Function          | Module                          | Status                  |
 | ------------------------- | ------------------------------- | ----------------------- |
+| `SVGTranslationService`   | `CopySVGTranslation.service`    | **Current** (Facade)    |
 | `SVGTranslationExtractor` | `CopySVGTranslation.extraction` | **Current**             |
 | `SVGTranslationInjector`  | `CopySVGTranslation.injection`  | **Current**             |
-| `ExtractorData`           | `CopySVGTranslation.extraction` | **Current** (dataclass) |
+| `TranslationMapping`      | `CopySVGTranslation.core`       | **Current** (dataclass) |
 | `InjectorData`            | `CopySVGTranslation.injection`  | **Current** (dataclass) |
-| `extract()`               | `CopySVGTranslation.extraction` | Deprecated (wrapper)    |
-| `inject()`                | `CopySVGTranslation.injection`  | Deprecated (wrapper)    |
+| `extract()`               | `CopySVGTranslation.legacy`     | Deprecated (wrapper)    |
+| `inject_file_tree()`      | `CopySVGTranslation.legacy`     | Deprecated (wrapper)    |
 
 ### Core Modules
 
--   **`CopySVGTranslation/extraction/extractor.py`**: Contains `SVGTranslationExtractor` class and `ExtractorData` dataclass. Parses SVG files and extracts translation pairs from `<switch>` elements. Collects default (English) text and corresponding translations from sibling `<text>` elements with `systemLanguage` attributes.
-
--   **`CopySVGTranslation/extraction/worker.py`**: Contains the deprecated `extract()` function — a thin wrapper around `SVGTranslationExtractor` for backward compatibility.
-
--   **`CopySVGTranslation/injection/injector.py`**: Contains `SVGTranslationInjector` class, `InjectorData`, and `InjectorStats` dataclasses. The main injection engine that processes `<switch>` elements, matches default text against mappings, and inserts/updates translation nodes with `systemLanguage` attributes.
-
--   **`CopySVGTranslation/legacy/worker.py`**: Contains the deprecated `inject()` function — a thin wrapper around `SVGTranslationInjector` for backward compatibility.
-
--   **`CopySVGTranslation/injection/preparation.py`**: SVG normalization and preparation before injection. Wraps loose text nodes in `<tspan>` elements, creates `<switch>` wrappers, normalizes language tags, assigns unique IDs (`trsvg*`), and detects unsupported structures (nested tspans, tref elements).
-
--   **`CopySVGTranslation/utils/text_utils.py`**: Shared text normalization (trim whitespace, collapse internal whitespace, optional case-insensitivity).
-
--   **`CopySVGTranslation/titles_workers/`**: Handles title-like text (entries ending with 4-digit years) with special handling.
-
--   **`CopySVGTranslation/nested/`**: Utilities for detecting and fixing nested `<tspan>` structures that would otherwise cause `SvgNestedTspanError`.
+-   **`CopySVGTranslation/service.py`**: The main high-level facade (`SVGTranslationService`). Orchestrates extraction, injection, file load/saves, and result mapping.
+-   **`CopySVGTranslation/extraction/extractor.py`**: Contains `SVGTranslationExtractor` class. Parses SVG files and extracts translation pairs from `<switch>` elements into a `TranslationMapping`.
+-   **`CopySVGTranslation/injection/injector.py`**: Contains `SVGTranslationInjector` class. The main injection engine that coordinates the preparation of SVGs and delegation to the switch processor.
+-   **`CopySVGTranslation/injection/switch_processor.py`**: Processes every `<switch>` element, matching source text and adding/updating translations.
+-   **`CopySVGTranslation/injection/translation_applier.py`**: Inserts or updates translation nodes with `systemLanguage` attributes.
+-   **`CopySVGTranslation/injection/id_manager.py`**: Tracks ID registration and allocations dynamically to prevent collision.
+-   **`CopySVGTranslation/preparation/preparer.py`**: Organizes sequential `PreparationStep` rules (such as wrapping texts inside `<switch>` nodes and normalizing language tags).
+-   **`CopySVGTranslation/nested/`**: Utilities for detecting and fixing nested `<tspan>` structures.
+-   **`CopySVGTranslation/titles/year_handler.py`**: Handles title-like text (entries containing a 4-digit year) with specialized expansion logic.
+-   **`CopySVGTranslation/utils/text.py`**: Shared text and language code normalization functions.
+-   **`CopySVGTranslation/utils/xml.py`**: XML manipulation helpers.
 
 ### Data Flow
 
-1. **Extraction**: SVG file → `SVGTranslationExtractor.extract()` → `ExtractorData` (with `.to_json()` for dict)
-
-2. **Injection**: SVG file + mapping dict → `SVGTranslationInjector.inject()` → `InjectorData` (with `.inject_stats` for stats)
+1. **Extraction**: SVG file → `SVGTranslationExtractor.extract()` → `TranslationMapping`
+2. **Injection**: SVG file + `TranslationMapping` → `SVGTranslationInjector.inject()` → `InjectorData` (containing stats)
 
 ### Key Data Structures
 
-**ExtractorData** (returned by `SVGTranslationExtractor.extract()`):
+**TranslationMapping** (returned by extractor):
 
 ```python
 @dataclass
-class ExtractorData:
+class TranslationMapping:
     new: dict[str, dict[str, str]]     # source text → lang → translation
     tspans_by_id: dict[str, str]       # tspan id → text content
-    title: dict[str, Any]              # title-like entries (year stripped)
     title_new: dict[str, Any]          # new-format title translations
-    error: str                         # error message or ""
+    meta: dict[str, Any]               # metadata and diagnostics
 ```
 
-**InjectorData** (returned by `SVGTranslationInjector.inject()`):
+**InjectorData** (returned by injector):
 
 ```python
 @dataclass
 class InjectorData:
     tree: etree._ElementTree | None    # parsed/modified SVG tree
-    inject_stats: InjectorStats           # injection statistics
-```
-
-**InjectorStats**:
-
-```python
-@dataclass
-class InjectorStats:
-    all_languages: int
-    new_languages: int
-    processed_switches: int
-    inserted_translations: int
-    skipped_translations: int
-    updated_translations: int
-    languages_before: list[str]
-    languages_after: list[str]
-    error: str
-```
-
-### Translation JSON Format
-
-The extractor produces JSON in this format:
-
-```json
-{
-  "new": {
-    "normalized english text": {"ar": "translation", "fr": "translation"}
-  },
-  "tspans_by_id": {"id": "text content"},
-  "title_new": {...}
-}
+    inject_stats: InjectorStats        # injection statistics
 ```
 
 ### Exception Types
 
--   **`SvgStructureError`**: Raised for invalid SVG structures (tref elements, CSS with IDs, non-tspan children in text, etc.)
--   **`SvgNestedTspanError`**: Raised when nested `<tspan>` elements are detected. Use `fix_nested_tspans()` or `fix_nested_file()` to resolve.
+-   **`CopySVGTranslationError`**: System base error.
+-   **`SvgStructureError`**: Raised for invalid SVG structures.
+-   **`SvgNestedTspanError`**: Raised when nested `<tspan>` elements are found.
 
 ## Dependencies
 
--   **lxml**: XML parsing and manipulation (required)
+-   **lxml**: XML parsing and manipulation
 -   Python 3.10+
-
-## Testing
-
-Tests are organized in `tests/` with subdirectories for extraction, injection, and nested modules. The `conftest.py` adds the project root to `sys.path`.

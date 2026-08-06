@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import re
-from pathlib import Path
 
 from lxml import etree
 
@@ -42,17 +41,6 @@ def xpath_svg(root: etree._Element, expression: str):
     return root.xpath(expression, namespaces=SVG_NSMAP)
 
 
-def extract_text_segments(node: etree._Element) -> list[str]:
-    """
-    Extract text segments from a <text> (or similar) node.
-    Prefers direct child <tspan>s; falls back to the node's own text.
-    """
-    tspans = node.xpath("./svg:tspan", namespaces=SVG_NSMAP)
-    if tspans:
-        return [t.text.strip() if t.text else "" for t in tspans]
-    return [node.text.strip()] if node.text else [""]
-
-
 def extract_root_languages(root: etree._Element) -> set[str]:
     languages: set[str] = set()
     try:
@@ -66,27 +54,6 @@ def extract_root_languages(root: etree._Element) -> set[str]:
                 languages.add(lang)
     except (etree.XMLSyntaxError, OSError):
         logger.exception("Error parsing svg languages")
-
-    return languages
-
-
-def file_langs(file: Path | str | None) -> set[str]:
-    """Return the list of languages declared in ``systemLanguage`` attributes."""
-    if not file:
-        return set()
-
-    root: etree._Element | None = None
-    svg_path = Path(str(file))
-
-    try:
-        parser = etree.XMLParser(remove_blank_text=True)
-        tree = etree.parse(str(svg_path), parser)
-        root = tree.getroot()
-    except (etree.XMLSyntaxError, OSError):
-        logger.exception("Error parsing svg languages")
-        return set()
-
-    languages = extract_root_languages(root)
 
     return languages
 
@@ -166,20 +133,9 @@ def sort_switch_texts(elem):
     return elem
 
 
-def extract_text_from_node(node) -> list[str]:
-    """Extract text content from an SVG ``<text>`` element, honouring ``<tspan>``."""
-    tspans = node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
-    if tspans:
-        return [tspan.text.strip() if tspan.text else "" for tspan in tspans]
-
-    return [node.text.strip()] if node.text else [""]
-
-
 __all__ = [
     "sort_switch_children",
     "extract_root_languages",
     "tree_languages",
-    "file_langs",
     "sort_switch_texts",
-    "extract_text_from_node",
 ]

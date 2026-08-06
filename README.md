@@ -20,11 +20,14 @@ The recommended API uses the **class-based** `SVGTranslationExtractor` and `SVGT
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import SVGTranslationExtractor
+from CopySVGTranslation import SVGTranslationExtractor, TranslationConfig
 
-extractor = SVGTranslationExtractor(
-    case_insensitive=True,
+config = TranslationConfig(
+    case_insensitive = True,
+    overwrite = False,
+    pretty_print = None,
 )
+extractor = SVGTranslationExtractor(config)
 
 result = extractor.extract(Path("examples/source_multilingual.svg"))
 
@@ -77,13 +80,15 @@ if not result.inject_stats.error:
 The primary class for extracting translation data from SVG files.
 
 ```python
-from CopySVGTranslation import SVGTranslationExtractor
-
-extractor = SVGTranslationExtractor(
-    case_insensitive: bool = True,
+from CopySVGTranslation import SVGTranslationExtractor, TranslationConfig
+config = TranslationConfig(
+    case_insensitive = True,
+    overwrite = False,
+    pretty_print = None,
 )
+extractor = SVGTranslationExtractor(config)
 
-result: ExtractorData = extractor.extract(
+result: TranslationMapping = extractor.extract(
     source_file: str | Path,
 )
 ```
@@ -95,15 +100,15 @@ result: ExtractorData = extractor.extract(
 | `source_file`      | `str \| Path` | —       | Path to the SVG file to process.                                           |
 | `case_insensitive` | `bool`        | `True`  | If `True`, default text keys are lowercased for case-insensitive matching. |
 
-**Returns:** `ExtractorData` — a dataclass with the following fields:
+**Returns:** `TranslationMapping` — a dataclass with the following fields:
 
-| Field          | Type                        | Description                                                            |
-| -------------- | --------------------------- | ---------------------------------------------------------------------- |
-| `new`          | `dict[str, dict[str, str]]` | Mapping of normalized source text → language code → translation.       |
-| `tspans_by_id` | `dict[str, str]`            | Mapping of `<tspan>` ID → text content.                                |
-| `title`        | `dict[str, Any]`            | Title-like entries (ending with a 4-digit year) with the year removed. |
-| `title_new`    | `dict[str, Any]`            | New-format title translations.                                         |
-| `error`        | `str`                       | Error message if extraction failed, empty string on success.           |
+| Field          | Type                        | Description                                                      |
+| -------------- | --------------------------- | ---------------------------------------------------------------- |
+| `new`          | `dict[str, dict[str, str]]` | Mapping of normalized source text → language code → translation. |
+| `tspans_by_id` | `dict[str, str]`            | Mapping of `<tspan>` ID → text content.                          |
+| `title_new`    | `dict[str, Any]`            | New-format title translations.                                   |
+| `meta`         | `dict[str, Any]`            | Diagnostic metadata.                                             |
+| `error`        | `str`                       | Error message if extraction failed, empty string on success.     |
 
 Use `result.to_json()` to get a plain dictionary suitable for JSON serialization.
 
@@ -150,9 +155,9 @@ result: InjectorData = injector.inject(
 
 **Returns:** `InjectorData` — a dataclass with the following fields:
 
-| Field       | Type                         | Description                                  |
-| ----------- | ---------------------------- | -------------------------------------------- |
-| `tree`      | `etree._ElementTree \| None` | The parsed (and possibly modified) SVG tree. |
+| Field          | Type                         | Description                                  |
+| -------------- | ---------------------------- | -------------------------------------------- |
+| `tree`         | `etree._ElementTree \| None` | The parsed (and possibly modified) SVG tree. |
 | `inject_stats` | `InjectorStats`              | Statistics about the injection run.          |
 
 **`InjectorStats` fields:**
@@ -173,7 +178,7 @@ Use `result.inject_stats.to_json()` to get a plain dictionary of the stats.
 
 ---
 
-### `ExtractorData`
+### `TranslationMapping`
 
 Dataclass returned by `SVGTranslationExtractor.extract()`. See the extractor documentation above for field details.
 
@@ -207,8 +212,13 @@ from CopySVGTranslation import extract
 translations = extract(source_file=Path("arabic.svg"), case_insensitive=True)
 
 # After (recommended)
-from CopySVGTranslation import SVGTranslationExtractor
-extractor = SVGTranslationExtractor( case_insensitive=True)
+from CopySVGTranslation import SVGTranslationExtractor, TranslationConfig
+config = TranslationConfig(
+    case_insensitive = True,
+    overwrite = False,
+    pretty_print = None,
+)
+extractor = SVGTranslationExtractor(config)
 result = extractor.extract(Path("arabic.svg"))
 translations = result.to_json() if not result.error else None
 ```
@@ -324,11 +334,15 @@ Older exports may omit the wrapper and look like `{"english": {"ar": "…"}}`. T
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import SVGTranslationExtractor
+from CopySVGTranslation import SVGTranslationExtractor, TranslationConfig
 
-extractor = SVGTranslationExtractor(
-    case_insensitive=True,
+config = TranslationConfig(
+    case_insensitive = True,
+    overwrite = False,
+    pretty_print = None,
 )
+
+extractor = SVGTranslationExtractor(config)
 
 result = extractor.extract(Path("arabic.svg"))
 print(result.to_json())
