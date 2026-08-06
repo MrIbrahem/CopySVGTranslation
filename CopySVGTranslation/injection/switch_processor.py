@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from lxml import etree
 
@@ -11,16 +12,20 @@ from ..core.switch_node import SwitchNode
 from ..core.text_node import TextNode
 from ..result import InjectorStats
 from ..titles import YearTitleHandler
-from ..utils import (
-    extract_text_from_node,
-    normalize_text,
-)
+from ..utils import normalize_text
 from .id_manager import IdManager
 from .translation_applier import TranslationApplier
 
 logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"
 
+def _extract_text_from_node(node) -> list[str]:
+    """Extract text content from an SVG ``<text>`` element, honouring ``<tspan>``."""
+    tspans = node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
+    if tspans:
+        return [tspan.text.strip() if tspan.text else "" for tspan in tspans]
+
+    return [node.text.strip()] if node.text else [""]
 
 class SwitchProcessor:
     def __init__(
@@ -112,6 +117,17 @@ class SwitchProcessor:
     # -------------
     # default_texts
     # -------------
+    def get_default_node(self, text_elements) -> Any | None:
+
+        for node in text_elements:
+            system_lang = node.get("systemLanguage")
+            if system_lang:
+                continue
+
+            return node
+
+        return None
+
     def get_default_texts(self, text_elements):
         default_texts = None
         default_node = None
@@ -121,7 +137,7 @@ class SwitchProcessor:
             if system_lang:
                 continue
 
-            text_contents = extract_text_from_node(text_elem)
+            text_contents = _extract_text_from_node(text_elem)
             default_texts = [normalize_text(text, self.config.case_insensitive) for text in text_contents]
             default_node = text_elem
             break
