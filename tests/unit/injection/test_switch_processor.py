@@ -596,7 +596,6 @@ class TestGetKeyLang:
         assert result == "مرحبا-exact"
 
 
-
 class TestTextUtils:
     """Test cases for text utility functions."""
 

@@ -4,8 +4,8 @@ Unit tests for CopySVGTranslation/nested/flattener.py module.
 
 from __future__ import annotations
 
-from lxml import etree
 import pytest
+from lxml import etree
 
 from CopySVGTranslation.exceptions import SvgNestedTspanError
 from CopySVGTranslation.nested.flattener import (
@@ -264,6 +264,7 @@ class TestFlattenStrategy:
 # ---------------------------------------------------------------------------
 class TestRaiseStrategy:
     """Tests for the raise strategy."""
+
     def raise_process(self, root, tag=None):
         flattener = NestedTspanFlattener(strategy="raise", also_fix_a=True)
         flattener.process(root)

@@ -124,4 +124,3 @@ class TestSortSwitchTexts(TestSetup):
 
         texts = switch.findall(".//{http://www.w3.org/2000/svg}text")
         assert len(texts) == 1
-

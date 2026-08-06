@@ -19,6 +19,7 @@ from .translation_applier import TranslationApplier
 logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"
 
+
 def _extract_text_from_node(node: etree._Element | None) -> list[str]:
     """Extract text content from an SVG ``<text>`` element, honouring ``<tspan>``."""
     if node is None:
@@ -29,6 +30,7 @@ def _extract_text_from_node(node: etree._Element | None) -> list[str]:
         return [tspan.text.strip() if tspan.text else "" for tspan in tspans]
 
     return [node.text.strip()] if node.text else [""]
+
 
 class SwitchProcessor:
     def __init__(

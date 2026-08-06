@@ -40,6 +40,7 @@ def xpath_svg(root: etree._Element, expression: str):
     """Run an XPath expression with the standard svg prefix bound."""
     return root.xpath(expression, namespaces=SVG_NSMAP)
 
+
 def extract_root_languages(root: etree._Element) -> set[str]:
     languages: set[str] = set()
     try:
@@ -55,6 +56,7 @@ def extract_root_languages(root: etree._Element) -> set[str]:
         logger.exception("Error parsing svg languages")
 
     return languages
+
 
 def collect_ids(root: etree._Element) -> set[str]:
     """Return the set of all id attribute values in the tree."""
@@ -129,6 +131,7 @@ def sort_switch_texts(elem):
         elem.append(t)
 
     return elem
+
 
 __all__ = [
     "sort_switch_children",
