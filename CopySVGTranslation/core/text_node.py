@@ -62,6 +62,7 @@ class TextNode:
             return raw
         return [normalize_text(t, case_insensitive) for t in raw]
 
+
     def set_texts(self, texts: list[str]) -> None:
         """Write texts back into child tspans (or the element itself)."""
         tspans = list(self.tspans())
