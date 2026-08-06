@@ -92,9 +92,18 @@ class TestExtractor:
         """Test extraction with year suffixes in text."""
         svg = temp_dir / "year.svg"
         svg.write_text(
-            """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
-            <switch><text id="t-ar" systemLanguage="ar"><tspan>السكان 2020</tspan></text>
-            <text id="t"><tspan>Population 2020</tspan></text></switch></svg>""",
+            """<?xml version="1.0"?>
+                <svg xmlns="http://www.w3.org/2000/svg">
+                    <switch>
+                        <text id="t-ar" systemLanguage="ar">
+                            <tspan>السكان 2020</tspan>
+                        </text>
+                        <text id="t">
+                            <tspan>Population 2020</tspan>
+                        </text>
+                    </switch>
+                </svg>
+                """,
             encoding="utf-8",
         )
         result = extract(svg)
