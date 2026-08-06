@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 class MatchFixNestedTags:
     def __init__(
         self,
-        source_file: Path | str,
-        new_path: Path | str,
+        source_file: Path | str | None,
+        new_path: Path | str | None,
         pretty_print: bool | None = None,
         strategy: str = "flatten",
         also_fix_a: bool = True,

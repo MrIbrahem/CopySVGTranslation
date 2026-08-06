@@ -20,11 +20,14 @@ The recommended API uses the **class-based** `SVGTranslationExtractor` and `SVGT
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import SVGTranslationExtractor
+from CopySVGTranslation import SVGTranslationExtractor, TranslationConfig
 
-extractor = SVGTranslationExtractor(
-    case_insensitive=True,
+config = TranslationConfig(
+    case_insensitive = True,
+    overwrite = False,
+    pretty_print = None,
 )
+extractor = SVGTranslationExtractor(config)
 
 result = extractor.extract(Path("examples/source_multilingual.svg"))
 
@@ -77,11 +80,13 @@ if not result.inject_stats.error:
 The primary class for extracting translation data from SVG files.
 
 ```python
-from CopySVGTranslation import SVGTranslationExtractor
-
-extractor = SVGTranslationExtractor(
-    case_insensitive: bool = True,
+from CopySVGTranslation import SVGTranslationExtractor, TranslationConfig
+config = TranslationConfig(
+    case_insensitive = True,
+    overwrite = False,
+    pretty_print = None,
 )
+extractor = SVGTranslationExtractor(config)
 
 result: TranslationMapping = extractor.extract(
     source_file: str | Path,
@@ -207,8 +212,13 @@ from CopySVGTranslation import extract
 translations = extract(source_file=Path("arabic.svg"), case_insensitive=True)
 
 # After (recommended)
-from CopySVGTranslation import SVGTranslationExtractor
-extractor = SVGTranslationExtractor( case_insensitive=True)
+from CopySVGTranslation import SVGTranslationExtractor, TranslationConfig
+config = TranslationConfig(
+    case_insensitive = True,
+    overwrite = False,
+    pretty_print = None,
+)
+extractor = SVGTranslationExtractor(config)
 result = extractor.extract(Path("arabic.svg"))
 translations = result.to_json() if not result.error else None
 ```
@@ -324,11 +334,15 @@ Older exports may omit the wrapper and look like `{"english": {"ar": "…"}}`. T
 
 ```python
 from pathlib import Path
-from CopySVGTranslation import SVGTranslationExtractor
+from CopySVGTranslation import SVGTranslationExtractor, TranslationConfig
 
-extractor = SVGTranslationExtractor(
-    case_insensitive=True,
+config = TranslationConfig(
+    case_insensitive = True,
+    overwrite = False,
+    pretty_print = None,
 )
+
+extractor = SVGTranslationExtractor(config)
 
 result = extractor.extract(Path("arabic.svg"))
 print(result.to_json())
