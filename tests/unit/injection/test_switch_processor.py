@@ -419,7 +419,7 @@ class TestGetDefaultTexts:
         default_node = processor.get_default_node(text_elements)
         default_texts = processor.get_default_texts(default_node)
 
-        assert default_texts is None
+        assert default_texts == []
         assert default_node is None
 
     def test_texts_are_normalized_with_case_insensitive_flag(self, id_manager):
