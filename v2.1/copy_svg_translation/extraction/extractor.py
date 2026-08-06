@@ -11,10 +11,11 @@ from lxml import etree
 from ..config import TranslationConfig
 from ..core import SwitchNode, TextNode
 from ..core.mapping import TranslationMapping
+from ..exceptions import SvgIOError, SvgParseError
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
 from ..utils.text import normalize_text
-from .strategies import CompositeMatchingStrategy, MatchingStrategy
+from .strategies import ByTspanIdStrategy, MatchingStrategy
 
 logger = logging.getLogger(__name__)
 SVG_NS = {"svg": "http://www.w3.org/2000/svg"}
@@ -32,7 +33,7 @@ class SVGTranslationExtractor:
     ) -> None:
         self.config = config or TranslationConfig()
         self.year_handler = YearTitleHandler(self.config)
-        self.strategy = matching_strategy or CompositeMatchingStrategy()
+        self.strategy = matching_strategy or ByTspanIdStrategy()
 
     # ------------------------------------------------------------------
     # Per-switch logic
@@ -110,19 +111,16 @@ class SVGTranslationExtractor:
         """
         Extract translation strings from an SVG file into a structured dictionary.
         """
-        mapping = TranslationMapping()
         logger.debug(f"Extracting translations from {path}")
 
         try:
             doc = SvgDocument.load(path, config=self.config)
-        except FileNotFoundError:
+        except FileNotFoundError as exc:
             logger.error(f"SVG file not found: {path}")
-            mapping.meta = {"error": "File not found"}
-            return mapping
+            raise SvgIOError(f"SVG file not found: {path}") from exc
         except (etree.XMLSyntaxError, OSError) as exc:
             logger.error(f"Failed to parse SVG file {path}: {exc}")
-            mapping.meta = {"error": "Failed to parse SVG file"}
-            return mapping
+            raise SvgParseError(f"Failed to parse SVG file: {exc}") from exc
 
         return self.extract_from_root(doc.root)
 

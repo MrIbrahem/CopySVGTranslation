@@ -87,10 +87,10 @@ class SwitchProcessor:
             for src in default_texts:
                 resolved = working_mapping.lookup(src, case_insensitive=self.config.case_insensitive)
                 trans = resolved.get(lang)
-                if trans is not None:
+                if trans is not None and trans.strip() != "":
                     translations_for_lang[src] = trans
                     has_any_translation = True
-                else:
+                elif self.config.fallback_to_default_text:
                     translations_for_lang[src] = src  # fallback to default text segment
 
             if not has_any_translation:

@@ -15,7 +15,7 @@ from ..exceptions import SvgIOError, SvgParseError
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
 from ..utils.text import normalize_text
-from .strategies import CompositeMatchingStrategy, MatchingStrategy
+from .strategies import ByTspanIdStrategy, MatchingStrategy
 
 logger = logging.getLogger(__name__)
 SVG_NS = {"svg": "http://www.w3.org/2000/svg"}
@@ -33,19 +33,18 @@ class SVGTranslationExtractor:
     ) -> None:
         self.config = config or TranslationConfig()
         self.year_handler = YearTitleHandler(self.config)
-        self.strategy = matching_strategy or CompositeMatchingStrategy()
+        self.strategy = matching_strategy or ByTspanIdStrategy()
 
     # ------------------------------------------------------------------
     # Per-switch logic
     # ------------------------------------------------------------------
-    def _process_switch_legacy(
+    def _process_switch(
         self,
-        switch: etree.Element,
+        switch: SwitchNode,
         mapping: TranslationMapping,
     ) -> None:
-        new_switch = SwitchNode(switch)
         # Return the default (no systemLanguage) text node, if any.
-        default: TextNode | None = new_switch.default_text_node()
+        default: TextNode | None = switch.default_text_node()
         if default is None:
             return
 
@@ -69,48 +68,24 @@ class SVGTranslationExtractor:
             mapping.new.setdefault(key, {})
 
         # Match every language node
-        for node in new_switch.text_nodes():
+        for node in switch.text_nodes():
             if node.is_fallback:
                 continue
             lang = node.language
             if not lang:
                 continue
 
-            text_elem = node.element
-
-            tspans = text_elem.xpath("./svg:tspan", namespaces=SVG_NS)
-            if tspans:
-                tspans_to_id = {
-                    tspan.text.strip(): tspan.get("id")
-                    for tspan in tspans
-                    if tspan.text and tspan.text.strip() and tspan.get("id")
-                }
-                text_contents = [tspan.text.strip() for tspan in tspans if tspan.text]
-            else:
-                tspans_to_id = {}
-                text_contents = [text_elem.text.strip()] if text_elem.text else [""]
-
-            for text in text_contents:
-                normalized_translation = normalize_text(text)
-                base_id = tspans_to_id.get(text.strip(), "")
-                if not base_id:
-                    continue
-
-                base_id = base_id.split("-")[0].strip()
-
-                english_text = mapping.tspans_by_id.get(base_id) or mapping.tspans_by_id.get(base_id.lower())
-
-                logger.debug(f"{base_id=}, {english_text=}")
-
-                if not english_text:
-                    continue
-
-                # store_key = english_text if english_text in new_translations else english_text.lower()
-                key = normalize_text(english_text, self.config.case_insensitive)
+            matches = self.strategy.match(
+                default,
+                node,
+                case_insensitive=self.config.case_insensitive,
+            )
+            for m in matches:
+                key = normalize_text(m.default_text, self.config.case_insensitive)
                 mapping.add(
                     key,
                     lang,
-                    normalized_translation,
+                    m.translated_text,
                     case_insensitive=False,  # key already normalized
                 )
 
@@ -121,8 +96,7 @@ class SVGTranslationExtractor:
         logger.debug("Found %d switch elements", len(switches))
 
         for switch_el in switches:
-            # self._process_switch(SwitchNode(switch_el), mapping)
-            self._process_switch_legacy(switch_el, mapping)
+            self._process_switch(SwitchNode(switch_el), mapping)
 
         if self.config.enable_year_titles and mapping.new:
             self.year_handler.build_templates(mapping)
