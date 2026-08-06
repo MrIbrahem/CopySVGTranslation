@@ -27,6 +27,7 @@ class MatchFixNestedTags:
         self.detector = NestedTspanDetector()
 
         self.len_tags_before_fix = 0
+        self.root: etree._Element | None = None
 
     def _flatten_all(self, root):
         # Process nested tspans using Flattener
@@ -42,8 +43,8 @@ class MatchFixNestedTags:
             logger.error(f"Failed to parse SVG file {self.source_file}: {exc}")
             return None
         # ---
-        root = tree.getroot()
-        return root
+        self.root = tree.getroot()
+        return self.root
 
     def _save_file(self, root: etree.Element) -> None:
         _str = etree.tostring(
@@ -52,10 +53,20 @@ class MatchFixNestedTags:
             pretty_print=self.pretty_print,
         )  # pyright: ignore[reportCallIssue]
 
+        if self.new_path is None:
+            raise Exception("new_path is None")
+
         self.new_path.write_text(_str, encoding="utf-8")
 
-    def match_nested(self) -> list:
-        return self.detector.find_in_file(self.source_file)
+    def match_nested(self) -> list[str]:
+        root = self.root
+        if root is None:
+            root = self._get_root()
+        # ---
+        if root is None:
+            return []
+        # ---
+        return self.detector.find_in_tree_return_list(root)
 
     def fix_file(self) -> bool:
         # ---
