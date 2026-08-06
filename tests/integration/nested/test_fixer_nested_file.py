@@ -93,7 +93,7 @@ class TestFixNestedFile:
         matcher = MatchFixNestedTags(p, p, strategy="flatten")
 
         res = matcher.match_nested()
-        # Only the outermost <tspan> with element children is captured
+        # Every <tspan> that has element children is captured, so the outer and middle tspans both match
         assert "a" in res[0] and "b" in res[0] and "c" in res[0] and "d" in res[0] and "e" in res[0]
         assert len(res) == 2
 

@@ -66,7 +66,7 @@ Default pipeline: **ID-based first, position-based fallback.**
     - Map `base` → normalized default text (also `base.lower()`)
 2. For each translated `<tspan>` with id + text:
     - Same `base` extraction
-    - Lookup default text; if found → `SegmentMatch`
+    - Look up default text; if found → `SegmentMatch`
 
 **Pros:** Correct when segment order differs or counts differ.
 **Cons:** Fails if ids missing, unrelated, or base-splitting is wrong (`a-b-c` → base `a`).

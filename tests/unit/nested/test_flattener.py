@@ -5,7 +5,9 @@ Unit tests for CopySVGTranslation/nested/flattener.py module.
 from __future__ import annotations
 
 from lxml import etree
+import pytest
 
+from CopySVGTranslation.exceptions import SvgNestedTspanError
 from CopySVGTranslation.nested.flattener import (
     NestedTspanFlattener,
     _flatten_text,
@@ -141,8 +143,8 @@ class TestSplitNestedTspansStrategy:
         self.preserve_style_process(root)
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         texts = [t.text for t in tspans]
-        # whitespace-only text should be skipped
-        assert None in texts or "   " not in [t for t in texts if t and t.strip()]
+        # whitespace-only parent text must not create an extra tspan
+        assert texts == ["Bold"]
 
     def test_whitespace_only_tail_skipped(self):
         """Whitespace-only tail should not produce an empty tspan."""
@@ -261,9 +263,19 @@ class TestFlattenStrategy:
 # raise strategy
 # ---------------------------------------------------------------------------
 class TestRaiseStrategy:
-    """Tests for the flatten strategy."""
-
+    """Tests for the raise strategy."""
     def raise_process(self, root, tag=None):
         flattener = NestedTspanFlattener(strategy="raise", also_fix_a=True)
         flattener.process(root)
         return root
+
+    def test_nested_tspan_raises(self):
+        """Nested tspans should raise SvgNestedTspanError."""
+        root = _parse(_svg("""<text id="t1"><tspan id="outer"><tspan>Inner</tspan></tspan></text>"""))
+        with pytest.raises(SvgNestedTspanError):
+            self.raise_process(root)
+
+    def test_flat_tspans_do_not_raise(self):
+        """Flat tspans should not raise."""
+        root = _parse(_svg("""<text id="t1"><tspan>Hello</tspan></text>"""))
+        assert self.raise_process(root) is root
