@@ -37,6 +37,9 @@ class TranslationConfig:
     enable_year_titles: bool = True
     """Enable special handling for titles that contain a 4-digit year."""
 
+    # --- Translations ---
+    fallback_to_default_text: bool = False
+
     # --- I/O behaviour ---
     auto_save: bool = False
     """If True, save results automatically when an output path is available."""

@@ -34,8 +34,9 @@ def _make_text(text: str, id_: str = "t0", tspans: bool = True) -> etree._Elemen
 def _make_applier(
     overwrite: bool = False,
     existing_ids: set[str] | None = None,
+    fallback_to_default_text: set[str] | None = None,
 ) -> TranslationApplier:
-    config = TranslationConfig(overwrite=overwrite)
+    config = TranslationConfig(overwrite=overwrite, fallback_to_default_text=fallback_to_default_text)
     id_mgr = IdManager(existing_ids)
     return TranslationApplier(config, id_mgr)
 
@@ -116,8 +117,8 @@ class TestApplyLanguageInsert:
         # The cloned node should have a new ID (not "t0")
         assert result.node.get("id") != "t0"
 
-    def test_insert_missing_translation_fills_nothing(self):
-        applier = _make_applier()
+    def test_insert_missing_translation_fills_nothing_keeps_the_cloned_text(self):
+        applier = _make_applier(fallback_to_default_text=True)
         default_node = _make_text("Hello", id_="t0")
         translations: dict[str, str] = {}  # no match for "Hello"
         result = applier.apply_language(
@@ -134,6 +135,24 @@ class TestApplyLanguageInsert:
         tspans = result.node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
         assert tspans is not None
         assert tspans[0].text == "Hello"
+
+    def test_insert_missing_translation_fills_nothing(self):
+        applier = _make_applier(fallback_to_default_text=False)
+        default_node = _make_text("Hello", id_="t0")
+        translations: dict[str, str] = {}  # no match for "Hello"
+        result = applier.apply_language(
+            default_node=default_node,
+            default_texts=["Hello"],
+            lang="fr",
+            translations=translations,
+            existing_lang_node=None,
+        )
+        assert result.action == "inserted"
+        assert result.node is not None
+
+        # tspan without a translation is removed from the cloned node
+        tspans = result.node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
+        assert tspans == []
 
     def test_insert_empty_default_texts(self):
         applier = _make_applier()
