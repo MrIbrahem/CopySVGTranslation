@@ -9,10 +9,24 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 
-from CopySVGTranslation.nested.find_nested import (
-    SVG_NS,
-    fix_nested_file,
-)
+from CopySVGTranslation.nested import MatchFixNestedTags
+
+SVG_NS = "http://www.w3.org/2000/svg"
+
+
+def fix_nested_file(
+    source_file: Path,
+    new_path: Path | None = None,
+    pretty_print: bool | None = None,
+) -> bool:
+    processer = MatchFixNestedTags(
+        source_file,
+        new_path,
+        pretty_print=pretty_print,
+        strategy="flatten",
+    )
+
+    return processer.fix_file()
 
 
 def _svg(inner: str) -> str:

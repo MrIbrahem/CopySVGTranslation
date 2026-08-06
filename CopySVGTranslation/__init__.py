@@ -39,6 +39,5 @@ __all__ = [
     "InjectorStats",
     "OperationResult",
     "InjectResult",
-
     "__version__",
 ]

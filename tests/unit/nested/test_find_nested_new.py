@@ -1,5 +1,5 @@
 """
-Unit tests for CopySVGTranslation/nested/find_nested_new.py module.
+Unit tests for CopySVGTranslation/nested/nested.py module.
 
 Functions to test: fix_nested_file_new
 """
@@ -9,14 +9,29 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 
-from CopySVGTranslation.nested.find_nested_new import (
-    SVG_NS,
-    fix_nested_file_new,
-)
+from CopySVGTranslation.nested import MatchFixNestedTags
+
+SVG_NS = "http://www.w3.org/2000/svg"
+
+
+def fix_nested_file_new(
+    source_file: Path,
+    new_path: Path | None = None,
+    pretty_print: bool | None = None,
+) -> bool:
+    processer = MatchFixNestedTags(
+        source_file,
+        new_path,
+        pretty_print=pretty_print,
+        strategy="preserve_style",
+    )
+
+    return processer.fix_file()
 
 
 def _svg(inner: str) -> str:
     return f'<svg xmlns="{SVG_NS}">{inner}</svg>'
+
 
 # ---------------------------------------------------------------------------
 # fix_nested_file_new

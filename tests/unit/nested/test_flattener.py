@@ -189,6 +189,7 @@ class TestSplitNestedTspansStrategy:
         result = self.preserve_style_process(root)
         assert result is not None
 
+
 # ---------------------------------------------------------------------------
 # flatten strategy
 # ---------------------------------------------------------------------------
@@ -254,6 +255,7 @@ class TestFlattenStrategy:
         root = _parse(svg)
         result = self.flatten_process(root)
         assert result is not None
+
 
 # ---------------------------------------------------------------------------
 # raise strategy
