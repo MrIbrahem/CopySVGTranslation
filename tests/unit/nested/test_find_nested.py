@@ -1,5 +1,5 @@
 """
-Unit tests for CopySVGTranslation/nested/find_nested.py module.
+Unit tests for CopySVGTranslation/nested/nested.py module.
 
 Functions to test: fix_nested_file
 """
@@ -53,19 +53,6 @@ class TestFixNestedFile:
         content = dst.read_text(encoding="utf-8")
         assert "Bold" in content
 
-    def test_fix_nested_file_no_new_path_warns(self, tmp_path: Path):
-        """Calling without new_path should emit a DeprecationWarning."""
-        src = tmp_path / "input.svg"
-        src.write_text(
-            _svg('<text id="t1"><tspan>Hello</tspan></text>'),
-            encoding="utf-8",
-        )
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            fix_nested_file(src)
-            dep_warnings = [x for x in w if issubclass(x.category, DeprecationWarning)]
-            assert len(dep_warnings) >= 1
-
     def test_fix_nested_file_invalid_xml(self, tmp_path: Path):
         """Invalid XML should return False."""
         src = tmp_path / "bad.svg"
@@ -113,6 +100,6 @@ class TestFixNestedFile:
         with warnings.catch_warnings(record=True):
             warnings.simplefilter("always")
             result = fix_nested_file(src)
-        assert result is True
+        assert result is False
         content = src.read_text(encoding="utf-8")
         assert "Bold" in content

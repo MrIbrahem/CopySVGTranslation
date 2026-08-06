@@ -20,8 +20,8 @@ class MatchFixNestedTags:
         strategy: str = "flatten",
         also_fix_a: bool = True,
     ) -> None:
-        self.source_file = Path(source_file)
-        self.new_path = Path(new_path)
+        self.source_file = Path(source_file) if source_file else None
+        self.new_path = Path(new_path) if new_path else None
         self.pretty_print = pretty_print
         self.flattener = NestedTspanFlattener(strategy=strategy, also_fix_a=also_fix_a)
         self.detector = NestedTspanDetector()

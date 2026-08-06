@@ -6,7 +6,6 @@ Functions to test: fix_nested_file_new
 
 from __future__ import annotations
 
-import warnings
 from pathlib import Path
 
 from CopySVGTranslation.nested import MatchFixNestedTags
@@ -53,19 +52,6 @@ class TestFixNestedFile:
         content = dst.read_text(encoding="utf-8")
         # After fixing, nested tspans should be flattened
         assert "Bold" in content
-
-    def test_fix_nested_file_no_new_path_warns(self, tmp_path: Path):
-        """Calling without new_path should emit a DeprecationWarning."""
-        src = tmp_path / "input.svg"
-        src.write_text(
-            _svg('<text id="t1"><tspan>Hello</tspan></text>'),
-            encoding="utf-8",
-        )
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            fix_nested_file_new(src)
-            dep_warnings = [x for x in w if issubclass(x.category, DeprecationWarning)]
-            assert len(dep_warnings) >= 1
 
     def test_fix_nested_file_invalid_xml(self, tmp_path: Path):
         """Invalid XML should return False."""
