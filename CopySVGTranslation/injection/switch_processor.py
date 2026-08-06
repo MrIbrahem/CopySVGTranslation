@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from lxml import etree
 
@@ -12,24 +11,11 @@ from ..core.switch_node import SwitchNode
 from ..core.text_node import TextNode
 from ..result import InjectorStats
 from ..titles import YearTitleHandler
-from ..utils import normalize_text
 from .id_manager import IdManager
 from .translation_applier import TranslationApplier
 
 logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"
-
-
-def _extract_text_from_node(node: etree._Element | None) -> list[str]:
-    """Extract text content from an SVG ``<text>`` element, honouring ``<tspan>``."""
-    if node is None:
-        return []
-
-    tspans = node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
-    if tspans:
-        return [tspan.text.strip() if tspan.text else "" for tspan in tspans]
-
-    return [node.text.strip()] if node.text else [""]
 
 
 class SwitchProcessor:
@@ -68,90 +54,67 @@ class SwitchProcessor:
         if default is None:
             return
 
-        text_elements = switch_element.xpath("./svg:text", namespaces={"svg": SVG_NS})
-
-        if not text_elements:
-            return
-
         # Find all text elements within this switch
-        default_node = self.get_default_node(text_elements)
-        default_texts = self.get_default_texts(default_node)
-        # _default_texts = default.texts(
-        #     normalize=True,
-        #     case_insensitive=self.config.case_insensitive,
-        # )
-
-        # assert _default_texts != default_texts
+        default_texts = default.texts(
+            normalize=True,
+            case_insensitive=self.config.case_insensitive,
+        )
 
         # If there are no default texts, we can't do anything
-        if not default_texts or default_node is None:
+        if not any(default_texts):
             return
 
         # Enrich mapping with year-title logic
         working_mapping = self.enrich_all_mappings(mapping, default_texts)
 
-        # Determine translations for each text line
-        available_translations = self.get_available_translations(default_texts, working_mapping.new)
-
-        if not available_translations:
-            return
-
         # Collect translation mappings per-language for this fallback
         # We assume all texts share same set of languages
-        langs_to_process = self.all_languages(available_translations)
+        langs_to_process = working_mapping.all_languages()
+        langs_to_process = sorted(langs_to_process)
+
         if not langs_to_process:
             return
 
         # Gather existing translation nodes
-        existing_languages = self.get_existing_languages(text_elements)
-
-        for lang in langs_to_process:
-            if lang in existing_languages:
-                if not self.config.overwrite:
-                    stats.skipped_translations += 1
-                    continue
-
-                # update node
-                for text_elem in text_elements:
-                    if text_elem.get("systemLanguage") == lang:
-                        self.update_node(text_elem, default_texts, available_translations, lang)
-                        break
-
-                stats.updated_translations += 1
-                continue
-
-            # Create node
-            new_node = self.create_node(default_node, working_mapping.new, lang)
-            stats.inserted_translations += 1
-            switch_element.append(new_node)
+        switch.existing_languages()
 
         stats.processed_switches += 1
 
-    # -------------
-    # default_texts
-    # -------------
-    def get_default_node(self, text_elements: list[etree._Element]) -> Any | None:
+        for lang in langs_to_process:
+            # Build target translation dict
+            translations_for_lang: dict[str, str] = {}
+            has_any_translation = False
+            for src in default_texts:
+                resolved = working_mapping.lookup(src, case_insensitive=self.config.case_insensitive)
+                trans = resolved.get(lang)
+                if trans is not None and trans.strip() != "":
+                    translations_for_lang[src] = trans
+                    has_any_translation = True
+                elif self.config.fallback_to_default_text:
+                    translations_for_lang[src] = src  # fallback to default text segment
 
-        for node in text_elements:
-            system_lang = node.get("systemLanguage")
-            if system_lang:
+            if not has_any_translation:
                 continue
 
-            return node
+            existing_node = switch.find_by_language(lang)
+            res = self.applier.apply_language(
+                default.element,
+                default_texts,
+                lang,
+                translations_for_lang,
+                existing_node.element if existing_node is not None else None,
+            )
 
-        return None
+            if res.action == "inserted" and res.node is not None:
+                switch.append(TextNode(res.node))
+                stats.inserted_translations += 1
+            elif res.action == "updated":
+                stats.updated_translations += 1
+            elif res.action == "skipped":
+                stats.skipped_translations += 1
 
-    def get_default_texts(self, node: etree._Element) -> list[str]:
-        text_contents = _extract_text_from_node(node)
-        default_texts = [normalize_text(text, self.config.case_insensitive) for text in text_contents]
-        return default_texts
-
-    # -------------
-    # existing_languages
-    # -------------
-    def get_existing_languages(self, text_elements):
-        existing_languages = {t.get("systemLanguage") for t in text_elements if t.get("systemLanguage")}
-        return existing_languages
+        # Sort the switch elements deterministically
+        switch.reorder(put_fallback_last=False)
 
     # -------------
     #  enrich mappings
@@ -162,110 +125,6 @@ class SwitchProcessor:
             default_texts,
             case_insensitive=self.config.case_insensitive,
         )
-
-    # -------------
-    #
-    # -------------
-    def get_available_translations(self, default_texts, mapping):
-        available_translations = {}
-        for text in default_texts:
-            key = text.lower() if self.config.case_insensitive else text
-            if key in mapping:
-                available_translations[key] = mapping[key]
-            else:
-                logger.debug(f"No mapping for '{key}'")
-        return available_translations
-
-    # -------------
-    #
-    # -------------
-    def all_languages(self, available_translations):
-        langs_to_process = set()
-        for data in available_translations.values():
-            langs_to_process.update(data.keys())
-        return langs_to_process
-
-    # -------------
-    # node functions
-    # -------------
-    def create_node(self, node, mapping, lang) -> etree.Element:
-        new_node = etree.Element(node.tag, attrib=node.attrib)
-        new_node.set("systemLanguage", lang)
-        original_id = node.get("id")
-
-        if original_id:
-            new_id = self.id_manager.allocate_clone(original_id, lang)
-            new_node.set("id", new_id)
-
-        tspans = node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
-
-        if tspans:
-            for tspan in tspans:
-                new_tspan = etree.Element(tspan.tag, attrib=tspan.attrib)
-
-                translated = self.get_key_lang(tspan.text, lang, mapping, normalize=True)
-                new_tspan.text = translated or ""
-
-                # Generate unique ID for tspan if needed
-                original_tspan_id = tspan.get("id")
-                if original_tspan_id:
-                    new_tspan_id = self.id_manager.allocate_clone(original_tspan_id, lang)
-                    new_tspan.set("id", new_tspan_id)
-
-                new_node.append(new_tspan)
-
-        else:
-            translated = self.get_key_lang(node.text, lang, mapping, normalize=True)
-            new_node.text = translated or ""
-
-        return new_node
-
-    def update_node(self, node, default_texts, available_translations, lang):
-        tspans = node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
-
-        if not tspans:
-            return
-
-        for i, tspan in enumerate(tspans):
-            if i >= len(default_texts):
-                logger.warning(
-                    "Language node '%s' has more tspans than the default node; stopping at %d",
-                    lang,
-                    i,
-                )
-                break
-            english_text = default_texts[i]
-
-            text = self.get_key_lang(english_text, lang, available_translations)
-
-            if text:
-                tspan.text = text
-
-    def get_key_lang(
-        self,
-        key: str | None,
-        lang: str,
-        data: dict[str, dict[str, str]],
-        normalize: bool = False,
-    ) -> str | None:
-
-        def get_key(_key) -> str | None:
-            if _key in data and lang in data[_key]:
-                return data[_key][lang]
-            return None
-
-        if key is None:
-            return None
-
-        if normalize:
-            key = normalize_text(key)
-
-        result = get_key(key)
-
-        if not result and self.config.case_insensitive:
-            result = get_key(key.lower())
-
-        return result
 
 
 __all__ = [

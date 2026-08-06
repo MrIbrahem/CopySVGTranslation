@@ -1,17 +1,28 @@
+**`pyproject.toml` for copy_svg_translation (v2 redesign)**
 
+```toml
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "copy-svg-translation"
-version = "2.0.1"
+version = "0.2.1"
 description = "Extract translations from SVG files and inject them into others"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Your Name", email = "you@example.com" }]
-keywords = ["svg", "translation", "i18n", "l10n", "switch", "systemLanguage"]
+authors = [
+    { name = "Your Name", email = "you@example.com" },
+]
+keywords = [
+    "svg",
+    "translation",
+    "i18n",
+    "l10n",
+    "switch",
+    "systemLanguage",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -27,7 +38,9 @@ classifiers = [
     "Topic :: Text Processing :: Markup :: XML",
     "Typing :: Typed",
 ]
-dependencies = ["lxml>=4.9"]
+dependencies = [
+    "lxml>=4.9",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -67,9 +80,12 @@ copy_svg_translation = ["py.typed"]
 # ---------------------------------------------------------------------------
 [tool.pytest.ini_options]
 minversion = "7.0"
-pythonpath = ["."]
 testpaths = ["tests"]
-addopts = ["-ra", "--strict-markers", "--strict-config"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
 markers = [
     "todo: tests not yet implemented / work in progress",
     "legacy: tests for the deprecated function API",
@@ -85,7 +101,9 @@ filterwarnings = [
 [tool.coverage.run]
 source = ["copy_svg_translation"]
 branch = true
-omit = ["copy_svg_translation/legacy/*"]
+omit = [
+    "copy_svg_translation/legacy/*",
+]
 
 [tool.coverage.report]
 show_missing = true
@@ -106,29 +124,17 @@ src = ["copy_svg_translation", "tests"]
 
 [tool.ruff.lint]
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "UP",  # pyupgrade
-    "SIM", # flake8-simplify
-    "RUF", # ruff-specific
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "UP",     # pyupgrade
+    "SIM",    # flake8-simplify
+    "RUF",    # ruff-specific
 ]
 ignore = [
-    "RUF022",
-    "E501", # Line too long
-    "F841", # Local variable is assigned to but never used
-    # "N802",  # Function name should be lowercase
-    "N806", # Variable in function should be lowercase
-    # "UP007", # Use `X | Y` for type annotations instead of `Optional[X]`
-    "UP031", # Use format specifiers instead of percent format
-    # "UP045", # Use `X | None` instead of `Optional[X]`
-    # "UP006",  # Use `list` instead of `List` for type annotations
-    # "UP035",  # Use `X | Y` for type unions instead of `Union[X, Y]`
-    "I001", # Import block is un-sorted or un-formatted
-    "N999",   # Invalid module name: 'CopySVGTranslation'
-    "UP015", # Unnecessary open mode parameters
+    "E501",   # line length handled by formatter
 ]
 
 [tool.ruff.lint.isort]
@@ -159,3 +165,59 @@ ignore_missing_imports = true
 module = ["copy_svg_translation.legacy.*"]
 # Legacy wrappers can be less strict while they exist
 disallow_untyped_defs = false
+```
+
+---
+
+### Companion files (minimal)
+
+**`copy_svg_translation/py.typed`** (empty file)
+Marks the package as typed for clients.
+
+**`MANIFEST.in`** (optional if using setuptools package-data only)
+
+```text
+recursive-include copy_svg_translation *.py
+include README.md
+include LICENSE
+include CHANGELOG.md
+include pyproject.toml
+```
+
+---
+
+### Common commands
+
+```bash
+# editable install with dev tools
+pip install -e ".[dev]"
+
+# build sdist + wheel
+python -m build
+
+# tests
+pytest
+
+# lint / format
+ruff check .
+ruff format .
+
+# types
+mypy copy_svg_translation
+```
+
+---
+
+### Notes
+
+| Setting                             | Why                                               |
+| ----------------------------------- | ------------------------------------------------- |
+| `name = "copy-svg-translation"`     | Conventional PyPI name (hyphens)                  |
+| Import package `copy_svg_translation` | Matches your existing code layout                 |
+| `requires-python = ">=3.10"`        | Fits modern typing (`X \| Y`, `slots=True`, etc.) |
+| `lxml>=4.9`                         | Only hard runtime dependency                      |
+| Legacy excluded from coverage       | Avoids treating temporary shims as core code      |
+| `py.typed`                          | Enables type checking for downstream users        |
+| Version `0.2.1`                     | Signals the class-based redesign + deprecations   |
+
+Adjust `authors`, URLs, and license to match the real project before publishing.

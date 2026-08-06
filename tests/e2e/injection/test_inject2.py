@@ -57,11 +57,11 @@ class Testinject:
             <?xml version='1.0' encoding='UTF-8'?>
             <svg xmlns="http://www.w3.org/2000/svg">
                 <switch>
-                    <text id="trsvg4">
-                        <tspan id="trsvg2">lang none</tspan>
-                    </text>
                     <text systemLanguage="la" id="trsvg3">
                         <tspan id="trsvg1">lang la (new)</tspan>
+                    </text>
+                    <text id="trsvg4">
+                        <tspan id="trsvg2">lang none</tspan>
                     </text>
                 </switch>
             </svg>
@@ -70,11 +70,11 @@ class Testinject:
             <?xml version='1.0' encoding='UTF-8'?>
             <svg xmlns="http://www.w3.org/2000/svg">
                 <switch>
-                    <text systemLanguage="la" id="trsvg3">
-                        <tspan id="trsvg4">lang la (new)</tspan>
-                    </text>
                     <text id="trsvg1">
                         <tspan id="trsvg2">lang none</tspan>
+                    </text>
+                    <text systemLanguage="la" id="trsvg3">
+                        <tspan id="trsvg4">lang la (new)</tspan>
                     </text>
                 </switch>
             </svg>

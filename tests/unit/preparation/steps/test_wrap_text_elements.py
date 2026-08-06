@@ -55,7 +55,6 @@ def make_ctx(root: etree._Element | None = None, **overrides) -> PreparationCont
     defaults = {
         "root": root,
         "tree": None,
-        "translatable_nodes": [],
         "warnings": [],
         "id_manager": IdManager(),
         "config": TranslationConfig(assign_missing_ids=True),

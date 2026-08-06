@@ -71,16 +71,19 @@ class TranslationMapping:
         for section in (self.new, self.title_new):
             for trans in section.values():
                 langs.update(trans.keys())
+
         return langs
 
     def lookup(self, source: str, *, case_insensitive: bool = True) -> dict[str, str]:
         """Return {lang: text} for a source string, or empty dict."""
         key = source.lower() if case_insensitive else source
+
         if case_insensitive:
             for k, v in self.new.items():
                 if k.lower() == key:
                     return dict(v)
             return {}
+
         return dict(self.new.get(key, {}))
 
     def entries(self) -> Iterator[TranslationEntry]:

@@ -53,7 +53,16 @@ def _get_default_texts(root: etree._Element) -> list[str]:
 # ===========================================================================
 
 
-class TestInjectorStats:
+class TestSetup:
+    def tostring(self, el: etree._Element, pretty_print=False) -> str:
+        return etree.tostring(el, pretty_print=pretty_print).decode("utf-8").strip()
+
+    def normalize(self, file_text):
+        # return file_text.strip()
+        return " ".join([x.strip() for x in file_text.strip().splitlines()])
+
+
+class TestInjectorStats(TestSetup):
     """Tests for the InjectorStats dataclass."""
 
     def test_default_values(self):
@@ -110,7 +119,7 @@ class TestInjectorStats:
 # ===========================================================================
 
 
-class TestInjectorData:
+class TestInjectorData(TestSetup):
     """Tests for the InjectorData dataclass."""
 
     def test_default_values(self):
@@ -138,7 +147,7 @@ class TestInjectorData:
 # ===========================================================================
 
 
-class TestSVGTranslationInjectorInit:
+class TestSVGTranslationInjectorInit(TestSetup):
     """Tests for SVGTranslationInjector initialization."""
 
     def test_default_parameters(self):
@@ -165,7 +174,7 @@ class TestSVGTranslationInjectorInit:
 # ===========================================================================
 
 
-class TestSVGTranslationInjectorBasic:
+class TestSVGTranslationInjectorBasic(TestSetup):
     """Tests for the inject() method — basic insertion scenarios."""
 
     def test_inject_single_language(self, tmp_path: Path):
@@ -242,7 +251,7 @@ class TestSVGTranslationInjectorBasic:
 # ===========================================================================
 
 
-class TestSVGTranslationInjectorCaseSensitivity:
+class TestSVGTranslationInjectorCaseSensitivity(TestSetup):
     """Tests for case-insensitive and case-sensitive matching."""
 
     def test_case_insensitive_match(self, tmp_path: Path):
@@ -295,7 +304,7 @@ class TestSVGTranslationInjectorCaseSensitivity:
 # ===========================================================================
 
 
-class TestSVGTranslationInjectorOverwrite:
+class TestSVGTranslationInjectorOverwrite(TestSetup):
     """Tests for overwrite behaviour."""
 
     def test_skip_existing_language_without_overwrite(self, tmp_path: Path):
@@ -376,7 +385,7 @@ class TestSVGTranslationInjectorOverwrite:
 # ===========================================================================
 
 
-class TestSVGTranslationInjectorSave:
+class TestSVGTranslationInjectorSave(TestSetup):
     """Tests for saving the injection result to disk."""
 
     def test_save_result_writes_file(self, tmp_path: Path):
@@ -468,7 +477,7 @@ class TestSVGTranslationInjectorSave:
 # ===========================================================================
 
 
-class TestSVGTranslationInjectorLanguageTracking:
+class TestSVGTranslationInjectorLanguageTracking(TestSetup):
     """Tests for before/after language statistics."""
 
     def test_languages_before_empty(self, tmp_path: Path):
@@ -522,7 +531,7 @@ class TestSVGTranslationInjectorLanguageTracking:
 # ===========================================================================
 
 
-class TestSVGTranslationInjectorErrors:
+class TestSVGTranslationInjectorErrors(TestSetup):
     """Tests for error handling in SVGTranslationInjector."""
 
     def test_nonexistent_file(self, tmp_path: Path):
@@ -568,7 +577,7 @@ class TestSVGTranslationInjectorErrors:
 # ===========================================================================
 
 
-class TestWorkOnSwitches:
+class TestWorkOnSwitches(TestSetup):
     """Direct unit tests for work_on_switches without file I/O."""
 
     def _make_root(self, inner: str) -> etree._Element:
@@ -657,7 +666,7 @@ class TestWorkOnSwitches:
         # No new nodes should be added
         ar_nodes = root.xpath('.//svg:text[@systemLanguage="ar"]', namespaces=SVG_NSMAP)
         assert len(ar_nodes) == 0
-        assert stats.processed_switches == 0
+        assert stats.processed_switches == 1
 
 
 # ===========================================================================
@@ -665,7 +674,7 @@ class TestWorkOnSwitches:
 # ===========================================================================
 
 
-class TestExtractorInjectorE2E:
+class TestExtractorInjectorE2E(TestSetup):
     """End-to-end tests using SVGTranslationExtractor and SVGTranslationInjector together."""
 
     def test_extract_then_inject(self, tmp_path: Path):
@@ -674,12 +683,12 @@ class TestExtractorInjectorE2E:
         # Source SVG with translations
         source_inner = """
             <switch>
-                <text id="t0-ar" systemLanguage="ar"><tspan id="t0-ar">مرحبا</tspan></text>
+                <text id="t0-ar" systemLanguage="ar"><tspan id="t0-ar">hi</tspan></text>
                 <text id="t0-fr" systemLanguage="fr"><tspan id="t0-fr">Bonjour</tspan></text>
                 <text id="t0"><tspan id="t0">Hello</tspan></text>
             </switch>
             <switch>
-                <text id="t1-ar" systemLanguage="ar"><tspan id="t1-ar">وداعا</tspan></text>
+                <text id="t1-ar" systemLanguage="ar"><tspan id="t1-ar">by</tspan></text>
                 <text id="t1"><tspan id="t1">Goodbye</tspan></text>
             </switch>
         """
@@ -713,14 +722,47 @@ class TestExtractorInjectorE2E:
 
         assert inject_result.tree is not None
         assert inject_result.inject_stats.error == ""
-        assert inject_result.inject_stats.inserted_translations == 3  # ar + fr for Hello, ar for Goodbye
+        assert inject_result.inject_stats.languages_before == []
+        assert inject_result.inject_stats.languages_after == ["ar", "fr"]
+
         assert output_svg.exists()
 
         # Verify output (text/tspan elements stay in SVG namespace)
         tree = etree.parse(str(output_svg))
         root = tree.getroot()
+
+        new_text = self.tostring(root)
+        assert "/>" not in new_text
+
+        new_text_expected = """
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+                <switch>
+                    <text id="t0">
+                        <tspan id="t0">Hello</tspan>
+                    </text>
+                    <text id="t0-ar" systemLanguage="ar">
+                        <tspan id="t0-ar_1">hi</tspan>
+                    </text>
+                    <text id="t0-fr" systemLanguage="fr">
+                        <tspan id="t0-fr_1">Bonjour</tspan>
+                    </text>
+                </switch>
+                <switch>
+                    <text id="t1">
+                        <tspan id="t1">Goodbye</tspan>
+                    </text>
+                    <text id="t1-ar" systemLanguage="ar">
+                        <tspan id="t1-ar_1">by</tspan>
+                    </text>
+                </switch>
+            </svg>
+        """
+        assert self.normalize(new_text) == self.normalize(new_text_expected)
+
         assert len(root.xpath('.//svg:text[@systemLanguage="ar"]', namespaces=SVG_NSMAP)) == 2
         assert len(root.xpath('.//svg:text[@systemLanguage="fr"]', namespaces=SVG_NSMAP)) == 1
+
+        assert inject_result.inject_stats.inserted_translations == 3  # ar + fr for Hello, ar for Goodbye
 
     def test_extract_inject_preserves_content(self, tmp_path: Path):
         from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor

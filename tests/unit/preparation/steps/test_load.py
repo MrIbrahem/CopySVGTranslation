@@ -38,7 +38,6 @@ def make_ctx(root: etree._Element | None = None, **overrides) -> PreparationCont
         "root": root,
         "tree": None,
         "id_manager": IdManager(),
-        "translatable_nodes": [],
         "warnings": [],
         "config": TranslationConfig(assign_missing_ids=True),
         "path": Path("dummy.svg"),
