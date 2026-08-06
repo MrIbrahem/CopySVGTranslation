@@ -86,10 +86,6 @@ def test_basic_results(temp_dir: Path):
 
 def test_header_result(temp_dir: Path):
 
-    # TODO: Add meta["header"] field
-    # match switch inside <g class="HeaderView" id="header"></g> but not <g class="markdown-text-wrap" id="subtitle"></g>
-    # add them to the meta["header"] field with same format as new field
-
     svg = _write_full_svg(temp_dir, FULL_TEXT_EXAMPLE, name="testx.svg")
 
     ext = SVGTranslationExtractor()
