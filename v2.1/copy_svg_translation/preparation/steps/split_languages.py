@@ -51,12 +51,12 @@ class SplitLanguages(PreparationStep):
         # happens from this point on — entries is already known to be valid.
         for text_el, real_langs in entries:
             if len(real_langs) == 1:
-                    lang_value = real_langs[0]
-                    if lang_value == "fallback":
-                        text_el.attrib.pop("systemLanguage", None)
-                    else:
-                        text_el.set("systemLanguage", lang_value)
-                    continue
+                lang_value = real_langs[0]
+                if lang_value == "fallback":
+                    text_el.attrib.pop("systemLanguage", None)
+                else:
+                    text_el.set("systemLanguage", lang_value)
+                continue
 
             # Split into multiple single-language <text> nodes
             parent_list = list(switch)

@@ -72,8 +72,12 @@ def stats():
     return InjectorStats()
 
 
-def make_config(overwrite: bool = False, case_insensitive: bool = False, fallback_to_default_text: bool = False) -> TranslationConfig:
-    return TranslationConfig(overwrite=overwrite, case_insensitive=case_insensitive, fallback_to_default_text=fallback_to_default_text)
+def make_config(
+    overwrite: bool = False, case_insensitive: bool = False, fallback_to_default_text: bool = False
+) -> TranslationConfig:
+    return TranslationConfig(
+        overwrite=overwrite, case_insensitive=case_insensitive, fallback_to_default_text=fallback_to_default_text
+    )
 
 
 def make_processor(config=None, id_manager=None, applier=None) -> SwitchProcessor:

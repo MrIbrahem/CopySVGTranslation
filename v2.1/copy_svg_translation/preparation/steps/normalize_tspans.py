@@ -55,6 +55,7 @@ class NormalizeTspans(PreparationStep):
                 idx = text_el.index(child)
                 text_el.insert(idx + 1, new_tspan)
 
+
 class WrapTspans(PreparationStep):
     # ------------------------------------------------------------------
     # Step 4: text/tspan normalization
@@ -108,6 +109,7 @@ class WrapTspans(PreparationStep):
                 parent = node.getparent()
                 if parent is not None:
                     parent.remove(node)
+
 
 __all__ = [
     "NormalizeTspans",
