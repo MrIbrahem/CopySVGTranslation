@@ -52,6 +52,7 @@ def _get_default_texts(root: etree._Element) -> list[str]:
 # InjectorStats dataclass tests
 # ===========================================================================
 
+
 class TestSetup:
     def tostring(self, el: etree._Element, pretty_print=False) -> str:
         return etree.tostring(el, pretty_print=pretty_print).decode("utf-8").strip()
@@ -731,7 +732,7 @@ class TestExtractorInjectorE2E(TestSetup):
         root = tree.getroot()
 
         new_text = self.tostring(root)
-        assert '/>' not in new_text
+        assert "/>" not in new_text
 
         new_text_expected = """
             <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
@@ -762,7 +763,6 @@ class TestExtractorInjectorE2E(TestSetup):
         assert len(root.xpath('.//svg:text[@systemLanguage="fr"]', namespaces=SVG_NSMAP)) == 1
 
         assert inject_result.inject_stats.inserted_translations == 3  # ar + fr for Hello, ar for Goodbye
-
 
     def test_extract_inject_preserves_content(self, tmp_path: Path):
         from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor

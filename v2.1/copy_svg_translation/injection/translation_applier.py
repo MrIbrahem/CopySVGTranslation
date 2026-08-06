@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import logging
 from dataclasses import dataclass
 from typing import Literal
 
@@ -9,6 +10,8 @@ from lxml import etree
 
 from ..config import TranslationConfig
 from .id_manager import IdManager
+
+logger = logging.getLogger(__name__)
 
 SVG_NS = "http://www.w3.org/2000/svg"
 

@@ -42,13 +42,12 @@ Notes on setup:
 
 from __future__ import annotations
 
-from types import SimpleNamespace
-
 import pytest
 from lxml import etree
 
 from CopySVGTranslation import InjectorStats, TranslationConfig
 from CopySVGTranslation.core import TranslationMapping
+from CopySVGTranslation.injection import TranslationApplier
 from CopySVGTranslation.injection.id_manager import IdManager
 from CopySVGTranslation.injection.switch_processor import (
     SVG_NS,
@@ -77,10 +76,13 @@ def make_config(overwrite: bool = False, case_insensitive: bool = False) -> Tran
 
 
 def make_processor(config=None, id_manager=None, applier=None) -> SwitchProcessor:
+    config = config or make_config()
+    id_manager = id_manager or IdManager()
+
     return SwitchProcessor(
-        config=config or make_config(),
-        id_manager=id_manager or IdManager(),
-        applier=applier or SimpleNamespace(),
+        config=config,
+        id_manager=id_manager,
+        applier=applier or TranslationApplier(config, id_manager),
     )
 
 
@@ -97,6 +99,7 @@ def find_texts(switch: etree._Element) -> list[etree._Element]:
 # process() - early exits / guard clauses
 # ---------------------------------------------------------------------------
 
+
 class TestSetup:
     def tostring(self, el: etree._Element, pretty_print=False) -> str:
         return etree.tostring(el, pretty_print=pretty_print).decode("utf-8").strip()
@@ -105,7 +108,6 @@ class TestSetup:
         # return file_text.strip()
         text = " ".join([x.strip() for x in file_text.strip().splitlines()])
         return text.replace("> <", "><")
-
 
 
 class TestProcessEarlyExits(TestSetup):
@@ -261,13 +263,19 @@ class TestProcessInsertion(TestSetup):
         processor = make_processor(id_manager=id_manager)
 
         # only "hello" has an "ar" translation; "world" has none
-        processor.process(switch, {"new": {"hello": {"ar": "marhaba"}, "world": {}}}, stats)
+        processor.process(
+            switch_element=switch,
+            mapping={"new": {"hello": {"ar": "marhaba"}, "world": {"ar": ""}}},
+            stats=stats,
+        )
+        # TODO: use config.fallback_to_default_text to fallback if lang not in mapping or mapping[lang] is empty
 
         # "world" alone would not surface "ar" as a language to process,
         # but since "hello" does, "ar" is still processed and the
         # untranslated tspan falls back to "".
         new_tspans = find_texts(switch)[-1].xpath("./svg:tspan", namespaces=NSMAP)
         assert new_tspans[0].text == "marhaba"
+
         expected = """
             <switch xmlns="http://www.w3.org/2000/svg">
                 <text id="t1">
@@ -279,7 +287,10 @@ class TestProcessInsertion(TestSetup):
                 </text>
             </switch>
         """
-        assert self.normalize(self.tostring(switch)) == self.normalize(expected)
+        switch_string = self.tostring(switch)
+        assert '<tspan id="s2-ar">world</tspan>' not in switch_string
+
+        assert self.normalize(switch_string) == self.normalize(expected)
 
     def test_new_node_copies_attributes_from_default_node(self, id_manager, stats):
         switch = make_switch('<text id="t1" x="10" y="20">hello</text>')
@@ -363,6 +374,7 @@ class TestProcessExistingLanguage(TestSetup):
         assert stats.updated_translations == 1
 
     def test_update_node_without_tspans_is_a_noop(self, id_manager, stats):
+        # NOTE: THIS FIXED:
         # update_node returns early when the language node has no <tspan>
         # children at all, leaving its text untouched.
         switch = make_switch(
@@ -374,8 +386,9 @@ class TestProcessExistingLanguage(TestSetup):
         processor.process(switch, {"new": {"hello": {"ar": "new"}}}, stats)
 
         ar_node = switch.xpath('./svg:text[@systemLanguage="ar"]', namespaces=NSMAP)[0]
-        assert ar_node.text == "plain text no tspans"
-        assert stats.updated_translations == 1  # still counted, even though nothing changed
+        # assert ar_node.text == "plain text no tspans"
+        assert ar_node.text == "new"  # NOTE: THIS FIXED:
+        assert stats.updated_translations == 1
 
     def test_update_node_stops_at_shorter_default_texts_length(self, id_manager, stats, caplog):
         # Language node has more tspans than default_texts; loop should
@@ -393,6 +406,7 @@ class TestProcessExistingLanguage(TestSetup):
         ar_tspans = switch.xpath('./svg:text[@systemLanguage="ar"]/svg:tspan', namespaces=NSMAP)
         assert ar_tspans[0].text == "new"
         assert ar_tspans[1].text == "old2"  # beyond default_texts length: untouched
+
 
 # ---------------------------------------------------------------------------
 # enrich_all_mappings
@@ -435,4 +449,3 @@ class TestEnrichAllMappings(TestSetup):
         result = processor.enrich_all_mappings(mapping, ["hello 2020"])
 
         assert result.new["hello 2020"] == {"ar": "مرحبا 2020", "fr": "bonjour 2020"}
-

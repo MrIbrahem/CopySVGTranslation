@@ -2,13 +2,17 @@
 from __future__ import annotations
 
 import copy
+import logging
 from dataclasses import dataclass
 from typing import Literal
 
 from lxml import etree
 
 from ..config import TranslationConfig
+from ..utils import normalize_text
 from .id_manager import IdManager
+
+logger = logging.getLogger(__name__)
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -48,12 +52,12 @@ class TranslationApplier:
                     if i < len(default_texts):
                         source = default_texts[i]
                         translated = translations.get(source)
-                        if translated is not None:
+                        if self.is_translation_valid(translated):
                             tspan.text = translated
             else:
                 source = default_texts[0] if default_texts else ""
                 translated = translations.get(source)
-                if translated is not None:
+                if self.is_translation_valid(translated):
                     existing_lang_node.text = translated
 
             return ApplyResult(action="updated", node=existing_lang_node)
@@ -72,15 +76,18 @@ class TranslationApplier:
                 if i < len(default_texts):
                     source = default_texts[i]
                     translated = translations.get(source)
-                    if translated is not None:
+                    if self.is_translation_valid(translated):
                         tspan.text = translated
         else:
             source = default_texts[0] if default_texts else ""
             translated = translations.get(source)
-            if translated is not None:
+            if self.is_translation_valid(translated):
                 cloned.text = translated
 
         return ApplyResult(action="inserted", node=cloned)
+
+    def is_translation_valid(self, translated: None | str) -> bool:
+        return translated is not None and translated.strip() != ""
 
     def _reassign_ids(self, element: etree._Element, lang: str) -> None:
         old_id = element.get("id")

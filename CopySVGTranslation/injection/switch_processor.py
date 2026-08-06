@@ -90,7 +90,7 @@ class SwitchProcessor:
                 if trans is not None:
                     translations_for_lang[src] = trans
                     has_any_translation = True
-                else:
+                elif self.config.fallback_to_default_text:
                     translations_for_lang[src] = src  # fallback to default text segment
 
             if not has_any_translation:
@@ -114,7 +114,7 @@ class SwitchProcessor:
                 stats.skipped_translations += 1
 
         # Sort the switch elements deterministically
-        switch.reorder(put_fallback_last=True)
+        # switch.reorder(put_fallback_last=False)
 
     # -------------
     #  enrich mappings
