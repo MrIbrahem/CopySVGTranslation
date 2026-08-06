@@ -45,7 +45,7 @@ from __future__ import annotations
 import pytest
 from lxml import etree
 
-from CopySVGTranslation import InjectorStats, TranslationConfig
+from CopySVGTranslation import TranslationConfig
 from CopySVGTranslation.core import TranslationMapping
 from CopySVGTranslation.injection import TranslationApplier
 from CopySVGTranslation.injection.id_manager import IdManager
@@ -53,6 +53,7 @@ from CopySVGTranslation.injection.switch_processor import (
     SVG_NS,
     SwitchProcessor,
 )
+from CopySVGTranslation.result import InjectorStats
 
 NSMAP = {"svg": SVG_NS}
 

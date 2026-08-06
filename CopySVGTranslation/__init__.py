@@ -1,5 +1,8 @@
 """
 Public API for the CopySVGTranslation package.
+------------------
+Extract translations from SVG files and inject them into others.
+
 
 Used in copy-svg-langs project:
 from CopySVGTranslation import SVGTranslationExtractor, TranslationConfig
@@ -8,36 +11,39 @@ from CopySVGTranslation import NestedTspanDetector, NestedTspanFlattener
 
 """
 
-__version__ = "2.0.1"
+from __future__ import annotations
 
+__version__ = "2.1.0"
+
+# ---------------------------------------------------------------------------
+# Primary public API
+# ---------------------------------------------------------------------------
 from .config import TranslationConfig
 from .core.mapping import TranslationEntry, TranslationMapping
+
+# ---------------------------------------------------------------------------
+# Optional advanced exports (still public, but less commonly needed)
+# ---------------------------------------------------------------------------
 from .extraction import SVGTranslationExtractor
-from .injection import InjectorData, SVGTranslationInjector
-from .io import MappingStore, SvgDocument
-from .legacy import extract, inject_file_tree
-from .nested import NestedTspanDetector, NestedTspanFlattener
-from .result import InjectorStats, InjectResult, OperationResult
+from .injection import SVGTranslationInjector
+
+# ---------------------------------------------------------------------------
+# Legacy compatibility layer (deprecated)
+# ---------------------------------------------------------------------------
+from .nested import MatchFixNestedTags, NestedTspanDetector, NestedTspanFlattener
 from .service import SVGTranslationService
 
 __all__ = [
-    # main API
-    "TranslationConfig",
-    "SVGTranslationInjector",
-    "SVGTranslationExtractor",
-    "SVGTranslationService",
-    "MappingStore",
-    "SvgDocument",
-    "inject_file_tree",  # to be deprecated
-    "extract",  # to be deprecated
+    # version
+    "__version__",
+    "MatchFixNestedTags",
     "NestedTspanDetector",
     "NestedTspanFlattener",
-    # dataclasses
-    "TranslationMapping",
+    "SVGTranslationExtractor",
+    "SVGTranslationInjector",
+    "SVGTranslationService",
+    "TranslationConfig",
     "TranslationEntry",
-    "InjectorData",
-    "InjectorStats",
-    "OperationResult",
-    "InjectResult",
+    "TranslationMapping",
     "__version__",
 ]

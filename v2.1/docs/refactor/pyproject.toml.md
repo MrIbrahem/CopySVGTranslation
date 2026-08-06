@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "copy-svg-translation"
-version = "2.0.1"
+version = "0.2.1"
 description = "Extract translations from SVG files and inject them into others"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -218,6 +218,6 @@ mypy copy_svg_translation
 | `lxml>=4.9`                         | Only hard runtime dependency                      |
 | Legacy excluded from coverage       | Avoids treating temporary shims as core code      |
 | `py.typed`                          | Enables type checking for downstream users        |
-| Version `2.0.1`                     | Signals the class-based redesign + deprecations   |
+| Version `0.2.1`                     | Signals the class-based redesign + deprecations   |
 
 Adjust `authors`, URLs, and license to match the real project before publishing.
