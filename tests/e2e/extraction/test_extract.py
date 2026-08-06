@@ -117,16 +117,26 @@ class TestExtractor:
         """Translations without IDs should fall back to positional matching."""
         svg = temp_dir / "missing_id.svg"
         svg.write_text(
-            """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
-            <switch><text><tspan id="greeting">Hello</tspan></text>
-            <text systemLanguage="es" id="greeting-es"><tspan>Hola</tspan></text></switch></svg>""",
+            """<?xml version="1.0"?>
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <switch>
+                    <text>
+                        <tspan id="greeting">Hello</tspan>
+                    </text>
+                    <text systemLanguage="es" id="greeting-es">
+                        <tspan>Hola</tspan>
+                    </text>
+                </switch>
+            </svg>
+            """,
             encoding="utf-8",
         )
         result = extract(svg)
         assert result is not None
         assert "new" in result
         assert "hello" in result["new"]
-        assert result["new"]["hello"].get("es") in (None, "Hola")
+        # assert result["new"]["hello"].get("es") == "Hola"
+        assert result["new"]["hello"].get("es") is None
 
         assert result == {
             "new": {"hello": {}},

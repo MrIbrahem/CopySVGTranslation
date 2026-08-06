@@ -38,6 +38,57 @@ class SVGTranslationExtractor:
     # ------------------------------------------------------------------
     # Per-switch logic
     # ------------------------------------------------------------------
+    def _process_switch(
+        self,
+        switch: SwitchNode,
+        mapping: TranslationMapping,
+    ) -> None:
+        # Return the default (no systemLanguage) text node, if any.
+        default: TextNode | None = switch.default_text_node()
+        if default is None:
+            return
+
+        # Find all text elements within this switch
+        default_texts = default.texts(
+            normalize=True,
+            case_insensitive=self.config.case_insensitive,
+        )
+        if not any(default_texts):
+            return
+
+        # Record diagnostic id → text (optional)
+        for tspan in default.tspans():
+            tid = tspan.get("id")
+            if tid and tspan.text and tspan.text.strip():
+                mapping.tspans_by_id[tid] = tspan.text.strip()
+
+        # Ensure keys exist in mapping.new
+        for x in default_texts:
+            key = normalize_text(x, self.config.case_insensitive)
+            mapping.new.setdefault(key, {})
+
+        # Match every language node
+        for node in switch.text_nodes():
+            if node.is_fallback:
+                continue
+            lang = node.language
+            if not lang:
+                continue
+
+            matches = self.strategy.match(
+                default,
+                node,
+                case_insensitive=self.config.case_insensitive,
+            )
+            for m in matches:
+                key = normalize_text(m.default_text, self.config.case_insensitive)
+                mapping.add(
+                    key,
+                    lang,
+                    m.translated_text,
+                    case_insensitive=False,  # key already normalized
+                )
+
     def _process_switch_legacy(
         self,
         switch: etree.Element,
