@@ -1,4 +1,4 @@
-# injection/steps/split_languages.py
+# steps/split_languages.py
 from __future__ import annotations
 
 import copy
