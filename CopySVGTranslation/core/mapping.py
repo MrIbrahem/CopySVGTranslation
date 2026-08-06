@@ -71,6 +71,7 @@ class TranslationMapping:
         for section in (self.new, self.title_new):
             for trans in section.values():
                 langs.update(trans.keys())
+
         return langs
 
     def lookup(self, source: str, *, case_insensitive: bool = True) -> dict[str, str]:

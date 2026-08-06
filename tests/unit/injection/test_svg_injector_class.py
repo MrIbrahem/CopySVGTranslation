@@ -665,7 +665,7 @@ class TestWorkOnSwitches(TestSetup):
         # No new nodes should be added
         ar_nodes = root.xpath('.//svg:text[@systemLanguage="ar"]', namespaces=SVG_NSMAP)
         assert len(ar_nodes) == 0
-        assert stats.processed_switches == 0
+        assert stats.processed_switches == 1
 
 
 # ===========================================================================

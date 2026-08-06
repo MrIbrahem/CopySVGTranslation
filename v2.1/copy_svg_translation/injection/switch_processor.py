@@ -68,7 +68,9 @@ class SwitchProcessor:
         working_mapping = self.enrich_all_mappings(mapping, default_texts)
 
         # Collect translation mappings per-language for this fallback
+        # We assume all texts share same set of languages
         langs_to_process = working_mapping.all_languages()
+        langs_to_process = sorted(langs_to_process)
 
         if not langs_to_process:
             return
