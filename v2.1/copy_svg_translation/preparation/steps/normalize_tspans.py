@@ -26,9 +26,6 @@ class NormalizeTspans(PreparationStep):
         for text_el in ctx.root.findall(f".//{{{SVG_NS}}}text"):
             self._wrap_loose_text(text_el)
 
-        # 3. Rebuild the list of translatable nodes before _clean_ids_and_remove_empty_nodes
-        self._rebuild_translatable_nodes(ctx)
-
     def _wrap_loose_text(self, text_el: etree._Element) -> None:
         # If there are no children, we wrap the entire text
         children = list(text_el)
@@ -58,14 +55,6 @@ class NormalizeTspans(PreparationStep):
                 idx = text_el.index(child)
                 text_el.insert(idx + 1, new_tspan)
 
-    def _rebuild_translatable_nodes(self, ctx: PreparationContext) -> None:
-        """Rebuild translatable_nodes after removals (tspans then texts)."""
-        if ctx.root is None:
-            return
-
-        ctx.translatable_nodes = ctx.root.findall(f".//{{{SVG_NS}}}tspan") + ctx.root.findall(f".//{{{SVG_NS}}}text")
-
-
 class WrapTspans(PreparationStep):
     # ------------------------------------------------------------------
     # Step 4: text/tspan normalization
@@ -74,14 +63,19 @@ class WrapTspans(PreparationStep):
         """Wrap raw text nodes (before first child, or as tails) into <tspan>."""
         if ctx.root is None:
             return
-        # self._clean_ids_and_remove_empty_nodes(ctx)
+        self._clean_ids_and_remove_empty_nodes(ctx)
 
     def _clean_ids_and_remove_empty_nodes(self, ctx: PreparationContext) -> None:
         """Normalize/validate ids on translatable nodes and drop empty nodes."""
         if ctx.id_manager is None:
             raise ValueError("id_manager is not set")
 
-        for node in list(ctx.translatable_nodes):
+        if ctx.root is None:
+            return
+
+        translatable_nodes = ctx.root.findall(f".//{{{SVG_NS}}}tspan") + ctx.root.findall(f".//{{{SVG_NS}}}text")
+
+        for node in list(translatable_nodes):
             node_id = node.get("id")
             if node_id is not None:
                 original_id = node_id
@@ -114,12 +108,6 @@ class WrapTspans(PreparationStep):
                 parent = node.getparent()
                 if parent is not None:
                     parent.remove(node)
-                # also remove from translatable_nodes list
-                try:
-                    ctx.translatable_nodes.remove(node)
-                except ValueError:
-                    pass
-
 
 __all__ = [
     "NormalizeTspans",

@@ -53,7 +53,6 @@ class PreparationContext:
     tree: etree._ElementTree | None = None
     root: etree._Element | None = None
     id_manager: IdManager | None = None
-    translatable_nodes: list[etree._Element] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
 ```
 
@@ -130,11 +129,6 @@ class NormalizeTspans(PreparationStep):
         for text in ctx.root.findall(f".//{{{SVG_NS}}}text"):
             self._wrap_loose_text(text)
 
-        # 3. Rebuild the list of translatable nodes
-        ctx.translatable_nodes = (
-            ctx.root.findall(f".//{{{SVG_NS}}}tspan")
-            + ctx.root.findall(f".//{{{SVG_NS}}}text")
-        )
 ```
 
 ---

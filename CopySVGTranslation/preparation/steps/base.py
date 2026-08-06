@@ -18,7 +18,6 @@ class PreparationContext:
     tree: etree._ElementTree | None = None
     root: etree._Element | None = None
     id_manager: IdManager | None = None
-    translatable_nodes: list[etree._Element] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
 
 

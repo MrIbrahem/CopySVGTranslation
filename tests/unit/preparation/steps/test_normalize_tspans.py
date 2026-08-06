@@ -38,7 +38,6 @@ def make_ctx(root: etree._Element | None = None, **overrides) -> PreparationCont
     defaults = {
         "root": root,
         "tree": None,
-        "translatable_nodes": [],
         "warnings": [],
         "id_manager": IdManager(),
         "config": TranslationConfig(assign_missing_ids=True),
@@ -157,14 +156,6 @@ class TestWrapTspans:
         with pytest.raises(ValueError, match="id_manager is not set"):
             wrap_tspans_step.execute(ctx)
 
-    def test_no_tspans_leaves_translatable_nodes_empty(self, wrap_tspans_step):
-        root = make_root('<text id="t1">hello</text>')
-        ctx = make_ctx(root=root)
-
-        wrap_tspans_step.execute(ctx)
-
-        assert ctx.translatable_nodes == []
-
 
 # ---------------------------------------------------------------------------
 # NormalizeTspans
@@ -172,30 +163,6 @@ class TestWrapTspans:
 
 
 class TestNormalizeTspans:
-    def test_root_none_is_a_noop(self, normalize_tspans_step):
-        ctx = make_ctx(root=None)
-
-        normalize_tspans_step.execute(ctx)
-
-        assert ctx.translatable_nodes == []
-
-    def test_leaf_tspans_are_collected_as_translatable(self, normalize_tspans_step):
-        root = make_root('<text id="t1"><tspan id="s1">hello</tspan></text>')
-        ctx = make_ctx(root=root)
-
-        normalize_tspans_step.execute(ctx)
-
-        assert len(ctx.translatable_nodes) == 2
-        assert ctx.translatable_nodes[0].get("id") == "s1"
-
-    def test_multiple_leaf_tspans_are_all_collected(self, normalize_tspans_step):
-        root = make_root('<text id="t1"><tspan id="s1">a</tspan><tspan id="s2">b</tspan></text>')
-        ctx = make_ctx(root=root)
-
-        normalize_tspans_step.execute(ctx)
-
-        ids = [n.get("id") for n in ctx.translatable_nodes]
-        assert ids == ["s1", "s2", "t1"]
 
     def test_nested_tspan_raises(self, normalize_tspans_step):
         from CopySVGTranslation.exceptions import SvgNestedTspanError
@@ -233,12 +200,3 @@ class TestNormalizeTspans:
         assert len(tspans) == 2
         assert tspans[0].get("id") == "s1"
         assert tspans[1].text == "trailing"
-
-    def test_translatable_nodes_rebuilt_with_tspans_before_texts(self, normalize_tspans_step):
-        root = make_root('<text id="t1">hello</text>')
-        ctx = make_ctx(root=root)
-
-        normalize_tspans_step.execute(ctx)
-
-        tags = [etree.QName(n).localname for n in ctx.translatable_nodes]
-        assert tags == ["tspan", "text"]
