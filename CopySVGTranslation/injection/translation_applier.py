@@ -78,11 +78,15 @@ class TranslationApplier:
                     translated = translations.get(source)
                     if self.is_translation_valid(translated):
                         tspan.text = translated
+                    else:
+                        tspan.text = None
         else:
             source = default_texts[0] if default_texts else ""
             translated = translations.get(source)
             if self.is_translation_valid(translated):
                 cloned.text = translated
+            else:
+                cloned.text = None
 
         return ApplyResult(action="inserted", node=cloned)
 

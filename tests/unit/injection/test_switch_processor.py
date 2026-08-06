@@ -71,8 +71,8 @@ def stats():
     return InjectorStats()
 
 
-def make_config(overwrite: bool = False, case_insensitive: bool = False) -> TranslationConfig:
-    return TranslationConfig(overwrite=overwrite, case_insensitive=case_insensitive)
+def make_config(overwrite: bool = False, case_insensitive: bool = False, fallback_to_default_text: bool = False) -> TranslationConfig:
+    return TranslationConfig(overwrite=overwrite, case_insensitive=case_insensitive, fallback_to_default_text=fallback_to_default_text)
 
 
 def make_processor(config=None, id_manager=None, applier=None) -> SwitchProcessor:
@@ -258,21 +258,22 @@ class TestProcessInsertion(TestSetup):
         new_tspan = find_texts(switch)[-1].xpath("./svg:tspan", namespaces=NSMAP)[0]
         assert new_tspan.get("id") == "s1-ar"
 
-    def test_missing_translation_for_a_tspan_falls_back_to_empty_string(self, id_manager, stats):
+    def test_missing_translation_for_a_tspan_falls_back_to_default_text(self, id_manager, stats):
         switch = make_switch('<text id="t1"><tspan id="s1">hello</tspan><tspan id="s2">world</tspan></text>')
-        processor = make_processor(id_manager=id_manager)
+        processor = make_processor(
+            config=make_config(fallback_to_default_text=False),
+            id_manager=id_manager,
+        )
 
-        # only "hello" has an "ar" translation; "world" has none
+        # only "hello" has an "ar" translation; "world" has an empty one
         processor.process(
             switch_element=switch,
-            mapping={"new": {"hello": {"ar": "marhaba"}, "world": {"ar": ""}}},
+            mapping={"new": {"hello": {"ar": "marhaba"}, "world": {}}},
             stats=stats,
         )
-        # TODO: use config.fallback_to_default_text to fallback if lang not in mapping or mapping[lang] is empty
 
-        # "world" alone would not surface "ar" as a language to process,
-        # but since "hello" does, "ar" is still processed and the
-        # untranslated tspan falls back to "".
+        # "hello" gets its real translation; "world" falls back to the
+        # default text because its mapping value is empty.
         new_tspans = find_texts(switch)[-1].xpath("./svg:tspan", namespaces=NSMAP)
         assert new_tspans[0].text == "marhaba"
 
