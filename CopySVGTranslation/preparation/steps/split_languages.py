@@ -120,7 +120,8 @@ class SplitLanguages(PreparationStep):
 
             # --- language validation ---
             sys_lang = text_el.get("systemLanguage")
-            real_langs = split_lang_list(sys_lang) if sys_lang else ["fallback"]
+            # real_langs = split_lang_list(sys_lang) if sys_lang else ["fallback"]
+            real_langs = split_lang_list(sys_lang) or ["fallback"]
 
             languages_present: set[str] = set()
             for extra_lang in real_langs:
