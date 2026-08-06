@@ -4,7 +4,7 @@ Tests for injection.switch_processor.SwitchProcessor.
 Notes on setup:
 - SwitchProcessor depends on several collaborator types/functions that
   live outside the shown module: TranslationConfig, TranslationMapping,
-  InjectorStats, get_new_titles_translations, extract_text_from_node,
+  InjectorStats, get_new_titles_translations, _extract_text_from_node,
   normalize_text, and IdManager. Rather than importing the real package
   (not available alongside this file), we provide small, behavior-accurate
   fakes/stubs for each, matching exactly how SwitchProcessor calls them:
@@ -12,11 +12,6 @@ Notes on setup:
     * TranslationMapping.from_any(mapping) -> object with `.title_new` and
       `.new` (a dict of {original_text: {lang: translated_text}}).
       like {"new": {...}, "title_new": {...}}.
-
-    * extract_text_from_node(node) -> list[str], one entry per <tspan>
-      child (in document order), or a single-item list of node.text when
-      there are no <tspan> children. This mirrors how get_default_texts
-      uses the result positionally against tspans in update_node/create_node.
 
     * normalize_text(text, case_insensitive=False) -> str. Our fake trims
       whitespace and optionally lowercases, which is enough to exercise
@@ -36,11 +31,11 @@ Notes on setup:
       updated_translations, inserted_translations, processed_switches).
 
   Adjust the import path below (`injection.switch_processor`) and the
-  monkeypatch targets for `extract_text_from_node`, `normalize_text`, and
+  monkeypatch targets for `_extract_text_from_node`, `normalize_text`, and
   `get_new_titles_translations` to match your actual package layout if it
   differs. These are patched onto the `injection.switch_processor` module
   object directly (since that module does `from ..utils import
-  extract_text_from_node, normalize_text` and `from ..titles import
+  _extract_text_from_node, normalize_text` and `from ..titles import
   get_new_titles_translations`, they become module-level names inside
   switch_processor.py that can be monkeypatched there).
 """
@@ -58,6 +53,7 @@ from CopySVGTranslation.injection.id_manager import IdManager
 from CopySVGTranslation.injection.switch_processor import (
     SVG_NS,
     SwitchProcessor,
+    _extract_text_from_node,
 )
 
 NSMAP = {"svg": SVG_NS}
@@ -408,7 +404,8 @@ class TestGetDefaultTexts:
         switch = make_switch('<text id="ar1" systemLanguage="ar">a</text><text id="t1">hello</text>')
         text_elements = find_texts(switch)
 
-        default_texts, default_node = processor.get_default_texts(text_elements)
+        default_node = processor.get_default_node(text_elements)
+        default_texts = processor.get_default_texts(default_node)
         assert default_node is not None
 
         assert default_node.get("id") == "t1"
@@ -419,7 +416,8 @@ class TestGetDefaultTexts:
         switch = make_switch('<text id="ar1" systemLanguage="ar">a</text>')
         text_elements = find_texts(switch)
 
-        default_texts, default_node = processor.get_default_texts(text_elements)
+        default_node = processor.get_default_node(text_elements)
+        default_texts = processor.get_default_texts(default_node)
 
         assert default_texts is None
         assert default_node is None
@@ -429,7 +427,8 @@ class TestGetDefaultTexts:
         switch = make_switch('<text id="t1">  Hello  </text>')
         text_elements = find_texts(switch)
 
-        default_texts, _ = processor.get_default_texts(text_elements)
+        default_node = processor.get_default_node(text_elements)
+        default_texts = processor.get_default_texts(default_node)
 
         assert default_texts == ["hello"]
 
@@ -595,3 +594,115 @@ class TestGetKeyLang:
         processor = make_processor(config=make_config(case_insensitive=True))
         result = processor.get_key_lang("Hello", "ar", data)
         assert result == "مرحبا-exact"
+
+
+
+class TestTextUtils:
+    """Test cases for text utility functions."""
+
+    def test_extract_text_from_node_with_tspans(self):
+        """Test extracting text from a node with tspans."""
+        svg_ns = "http://www.w3.org/2000/svg"
+        text_node = etree.fromstring(f"""<text xmlns="{svg_ns}"><tspan>Hello</tspan><tspan>World</tspan></text>""")
+        result = _extract_text_from_node(text_node)
+        assert result == ["Hello", "World"]
+
+    def test_extract_text_from_node_without_tspans(self):
+        """Test extracting text from a node without tspans."""
+        svg_ns = "http://www.w3.org/2000/svg"
+        text_node = etree.fromstring(f'<text xmlns="{svg_ns}">Plain text</text>')
+        result = _extract_text_from_node(text_node)
+        assert result == ["Plain text"]
+
+    def test_extract_text_from_node_empty(self):
+        """Test extracting text from an empty node."""
+        svg_ns = "http://www.w3.org/2000/svg"
+        text_node = etree.fromstring(f'<text xmlns="{svg_ns}"></text>')
+        result = _extract_text_from_node(text_node)
+        assert result == [""]
+
+    def test_extract_text_from_node_with_whitespace_tspans(self):
+        """Test extracting text from tspans with only whitespace."""
+        svg_ns = "http://www.w3.org/2000/svg"
+        text_node = etree.fromstring(f"""<text xmlns="{svg_ns}"><tspan>   </tspan><tspan>Text</tspan></text>""")
+        result = _extract_text_from_node(text_node)
+        assert result == ["", "Text"]
+
+
+class TestExtractTextFromNode:
+    """Test suite for _extract_text_from_node function."""
+
+    def test_extract_from_text_with_tspans(self):
+        """Test extraction from text element with tspan children."""
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
+            <tspan>First</tspan>
+            <tspan>Second</tspan>
+        </text>"""
+        node = etree.fromstring(xml)
+        result = _extract_text_from_node(node)
+
+        assert result == ["First", "Second"]
+
+    def test_extract_from_text_without_tspans(self):
+        """Test extraction from text element without tspans."""
+        xml = '<text xmlns="http://www.w3.org/2000/svg">Direct text</text>'
+        node = etree.fromstring(xml)
+        result = _extract_text_from_node(node)
+
+        assert result == ["Direct text"]
+
+    def test_extract_from_text_with_empty_tspans(self):
+        """Test extraction with empty tspan elements."""
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
+            <tspan></tspan>
+            <tspan>Content</tspan>
+        </text>"""
+        node = etree.fromstring(xml)
+        result = _extract_text_from_node(node)
+
+        assert result == ["", "Content"]
+
+    def test_extract_from_text_with_whitespace_tspans(self):
+        """Test extraction handles whitespace in tspans."""
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
+            <tspan>  Spaces  </tspan>
+            <tspan>	Tabs	</tspan>
+        </text>"""
+        node = etree.fromstring(xml)
+        result = _extract_text_from_node(node)
+
+        assert result == ["Spaces", "Tabs"]
+
+    def test_extract_from_empty_text_node(self):
+        """Test extraction from empty text node."""
+        xml = '<text xmlns="http://www.w3.org/2000/svg"></text>'
+        node = etree.fromstring(xml)
+        result = _extract_text_from_node(node)
+
+        assert result == [""]
+
+    def test_extract_with_unicode_content(self):
+        """Test extraction with Unicode content."""
+        xml = """<text xmlns="http://www.w3.org/2000/svg">
+            <tspan>مرحبا</tspan>
+            <tspan>你好</tspan>
+            <tspan>Привет</tspan>
+        </text>"""
+        node = etree.fromstring(xml)
+        result = _extract_text_from_node(node)
+
+        assert result == ["مرحبا", "你好", "Привет"]
+
+    def test_extract_text_from_node_with_multiple_tspans(self):
+        """Test extracting text from node with multiple tspans."""
+        svg_ns = "http://www.w3.org/2000/svg"
+        text_node = etree.fromstring(f'<text xmlns="{svg_ns}"><tspan>Hello</tspan><tspan>World</tspan></text>')
+        result = _extract_text_from_node(text_node)
+        assert result == ["Hello", "World"]
+
+    def test_extract_text_from_node_plain_text(self):
+        """Test extracting plain text from node without tspans."""
+        svg_ns = "http://www.w3.org/2000/svg"
+        text_node = etree.fromstring(f'<text xmlns="{svg_ns}">Plain text</text>')
+        result = _extract_text_from_node(text_node)
+        assert result == ["Plain text"]

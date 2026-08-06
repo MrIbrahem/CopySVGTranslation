@@ -1,6 +1,6 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
-from CopySVGTranslation.nested import MatchFixNestedTags
+from CopySVGTranslation.nested.fixer import MatchFixNestedTags
 
 
 class TestNestedFiles:
