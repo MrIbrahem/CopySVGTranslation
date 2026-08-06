@@ -59,10 +59,10 @@ class SwitchProcessor:
             normalize=True,
             case_insensitive=self.config.case_insensitive,
         )
+
+        # If there are no default texts, we can't do anything
         if not any(default_texts):
             return
-
-        stats.processed_switches += 1
 
         # Enrich mapping with year-title logic
         working_mapping = self.enrich_all_mappings(mapping, default_texts)
@@ -70,8 +70,13 @@ class SwitchProcessor:
         # Collect translation mappings per-language for this fallback
         langs_to_process = working_mapping.all_languages()
 
+        if not langs_to_process:
+            return
+
         # Gather existing translation nodes
         switch.existing_languages()
+
+        stats.processed_switches += 1
 
         for lang in langs_to_process:
             # Build target translation dict

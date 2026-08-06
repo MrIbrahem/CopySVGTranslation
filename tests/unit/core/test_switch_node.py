@@ -103,6 +103,8 @@ class TestSwitchNodeFallback:
         sn = _make_switch(
             [
                 {"text": "Hello", "id": "t0"},
+                {"text": "مرحبا", "id": "t0-ar", "lang": "ar"},
+                {"text": "Bonjour", "id": "t0-fr", "lang": "fr"},
             ]
         )
         dt = sn.default_text_node()

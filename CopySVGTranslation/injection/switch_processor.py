@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from lxml import etree
 
@@ -74,14 +73,12 @@ class SwitchProcessor:
             return
 
         # Find all text elements within this switch
-        default_node = self.get_default_node(text_elements)
-        default_texts = self.get_default_texts(default_node)
-        # _default_texts = default.texts(
-        #     normalize=True,
-        #     case_insensitive=self.config.case_insensitive,
-        # )
+        default_node = switch.default_text_node()
 
-        # assert _default_texts != default_texts
+        default_texts = default.texts(
+            normalize=True,
+            case_insensitive=self.config.case_insensitive,
+        )
 
         # If there are no default texts, we can't do anything
         if not default_texts or default_node is None:
@@ -99,59 +96,43 @@ class SwitchProcessor:
         # Collect translation mappings per-language for this fallback
         # We assume all texts share same set of languages
         langs_to_process = self.all_languages(available_translations)
+        # langs_to_process = working_mapping.all_languages()
+
         if not langs_to_process:
             return
 
         # Gather existing translation nodes
-        existing_languages = self.get_existing_languages(text_elements)
-
-        for lang in langs_to_process:
-            if lang in existing_languages:
-                if not self.config.overwrite:
-                    stats.skipped_translations += 1
-                    continue
-
-                # update node
-                for text_elem in text_elements:
-                    if text_elem.get("systemLanguage") == lang:
-                        self.update_node(text_elem, default_texts, available_translations, lang)
-                        break
-
-                stats.updated_translations += 1
-                continue
-
-            # Create node
-            new_node = self.create_node(default_node, working_mapping.new, lang)
-            stats.inserted_translations += 1
-            switch_element.append(new_node)
+        switch.existing_languages()
 
         stats.processed_switches += 1
 
-    # -------------
-    # default_texts
-    # -------------
-    def get_default_node(self, text_elements: list[etree._Element]) -> Any | None:
+        for lang in langs_to_process:
+            existing_node = switch.find_by_language(lang)
+            # if lang in existing_languages:
+            if existing_node:
+                if not self.config.overwrite:
+                    stats.skipped_translations += 1
+                else:
+                    # update node
+                    self.update_node(
+                        existing_node.element,
+                        default_texts,
+                        available_translations,
+                        lang,
+                    )
 
-        for node in text_elements:
-            system_lang = node.get("systemLanguage")
-            if system_lang:
-                continue
+                    stats.updated_translations += 1
+            else:
+                # Create node
+                new_node = self.create_node(
+                    default_node.element,
+                    working_mapping.new,
+                    lang,
+                )
+                if new_node is not None:
+                    stats.inserted_translations += 1
+                    switch_element.append(new_node)
 
-            return node
-
-        return None
-
-    def get_default_texts(self, node: etree._Element) -> list[str]:
-        text_contents = _extract_text_from_node(node)
-        default_texts = [normalize_text(text, self.config.case_insensitive) for text in text_contents]
-        return default_texts
-
-    # -------------
-    # existing_languages
-    # -------------
-    def get_existing_languages(self, text_elements):
-        existing_languages = {t.get("systemLanguage") for t in text_elements if t.get("systemLanguage")}
-        return existing_languages
 
     # -------------
     #  enrich mappings
@@ -201,10 +182,16 @@ class SwitchProcessor:
 
         if tspans:
             for tspan in tspans:
-                new_tspan = etree.Element(tspan.tag, attrib=tspan.attrib)
+                tspan_text = tspan.text or ""
+                if not tspan_text:
+                    continue
 
-                translated = self.get_key_lang(tspan.text, lang, mapping, normalize=True)
-                new_tspan.text = translated or ""
+                translated = self.get_key_lang(tspan_text, lang, mapping, normalize=True)
+                if not translated:
+                    continue
+
+                new_tspan = etree.Element(tspan.tag, attrib=tspan.attrib)
+                new_tspan.text = translated
 
                 # Generate unique ID for tspan if needed
                 original_tspan_id = tspan.get("id")
@@ -213,10 +200,15 @@ class SwitchProcessor:
                     new_tspan.set("id", new_tspan_id)
 
                 new_node.append(new_tspan)
+            return new_node
 
-        else:
-            translated = self.get_key_lang(node.text, lang, mapping, normalize=True)
-            new_node.text = translated or ""
+        node_text = node.text or ""
+
+        if not node_text:
+            return None
+
+        translated = self.get_key_lang(node_text, lang, mapping, normalize=True)
+        new_node.text = translated or ""
 
         return new_node
 
