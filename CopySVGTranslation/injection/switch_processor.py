@@ -114,7 +114,7 @@ class SwitchProcessor:
                 stats.skipped_translations += 1
 
         # Sort the switch elements deterministically
-        # switch.reorder(put_fallback_last=False)
+        switch.reorder(put_fallback_last=False)
 
     # -------------
     #  enrich mappings
