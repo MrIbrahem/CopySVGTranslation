@@ -47,7 +47,7 @@ class TranslationApplier:
                 if i < len(default_texts):
                     source = default_texts[i]
                     translated = translations.get(source)
-                    if self._is_translation_valid(translated, tspan.text):
+                    if self._is_translation_valid(translated):
                         tspan.text = translated
                         new_node.append(tspan)
                     elif self.config.fallback_to_default_text:
@@ -56,7 +56,7 @@ class TranslationApplier:
         else:
             source = default_texts[0] if default_texts else ""
             translated = translations.get(source)
-            if self._is_translation_valid(translated, new_node.text):
+            if self._is_translation_valid(translated):
                 new_node.text = translated
 
         # Reassign IDs for the cloned node hierarchy
@@ -64,8 +64,12 @@ class TranslationApplier:
 
         return TextNode(new_node)
 
-    def _is_translation_valid(self, translated: None | str, tspan_text: str) -> bool:
+    def _is_translation_valid(self, translated: None | str, tspan_text: str | None = None) -> bool:
         valid = translated is not None and translated.strip() != ""
+        if not tspan_text or not tspan_text.strip():
+            return valid
+
+        logger.debug(f"Comparing {tspan_text} and {translated}")
         return valid and tspan_text != translated
 
     def _reassign_ids(self, element: etree._Element, lang: str) -> None:
@@ -107,10 +111,9 @@ class TranslationApplier:
                     if i < len(default_texts):
                         source = default_texts[i]
                         translated = translations.get(source)
-                        if not self._is_translation_valid(translated, tspan.text):
-                            continue
-                        tspan.text = translated
-                        is_updated = True
+                        if self._is_translation_valid(translated, tspan.text):
+                            tspan.text = translated
+                            is_updated = True
             else:
                 source = default_texts[0] if default_texts else ""
                 translated = translations.get(source)
