@@ -97,18 +97,17 @@ class SwitchProcessor:
                 continue
 
             existing_node = switch.find_by_language(lang)
-            existing_node_element = existing_node.element if existing_node is not None else None
 
-            res: ApplyResult = self.applier.apply_language(
-                default_node=default.element,
+            res: ApplyResult = self.applier.apply_language_node(
+                default_node=default,
                 default_texts=default_texts,
                 lang=lang,
                 translations=translations_for_lang,
-                existing_lang_node=existing_node_element,
+                existing_lang_node=existing_node,
             )
 
-            if res.action == "inserted" and res.node is not None:
-                switch.append(TextNode(res.node))
+            if res.action == "inserted" and res.text_node is not None:
+                switch.append(res.text_node)
                 stats.inserted_translations += 1
             elif res.action == "updated":
                 stats.updated_translations += 1

@@ -214,6 +214,10 @@ class SVGTranslationInjector:
         logger.debug(f"Updated {stats.updated_translations} translations")
         logger.debug(f"Skipped {stats.skipped_translations} existing translations")
 
+        logger.debug(f"All langs: {stats.all_languages}")
+        logger.debug(f"New langs: {stats.new_languages}")
+
+
 
 __all__ = [
     "SVGTranslationInjector",

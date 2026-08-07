@@ -1,7 +1,6 @@
 # injection/translation_applier.py
 from __future__ import annotations
 
-import copy
 import logging
 from dataclasses import dataclass
 from typing import Literal
@@ -102,6 +101,7 @@ class TranslationApplier:
 
             # Update tspans in place
             tspans = existing_lang_node.tspans()
+            is_updated = False
             if tspans:
                 for i, tspan in enumerate(tspans):
                     if i < len(default_texts):
@@ -110,13 +110,17 @@ class TranslationApplier:
                         if not self._is_translation_valid(translated, tspan.text):
                             continue
                         tspan.text = translated
+                        is_updated = True
             else:
                 source = default_texts[0] if default_texts else ""
                 translated = translations.get(source)
                 if self._is_translation_valid(translated, existing_lang_node.text):
                     existing_lang_node.text = translated
+                    is_updated = True
 
-            return ApplyResult(action="updated", text_node=existing_lang_node)
+            result_action = "updated" if is_updated else "unchanged"
+
+            return ApplyResult(action=result_action, text_node=existing_lang_node)
 
         # Clone default node
         cloned = self._create_node(default_node, default_texts, lang, translations)
