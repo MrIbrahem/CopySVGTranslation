@@ -8,6 +8,7 @@ from typing import Literal
 
 from lxml import etree
 
+from ..core.text_node import TextNode
 from ..config import TranslationConfig
 from .id_manager import IdManager
 
@@ -18,8 +19,9 @@ SVG_NS = "http://www.w3.org/2000/svg"
 
 @dataclass
 class ApplyResult:
-    action: Literal["inserted", "updated", "skipped"]
+    action: Literal["inserted", "updated", "unchanged", "skipped"]
     node: etree._Element | None = None  # new or updated node
+    text_node: TextNode | None = None
 
 
 class TranslationApplier:
@@ -29,18 +31,18 @@ class TranslationApplier:
 
     def _create_node(
         self,
-        default_node: etree._Element,
+        default_node: TextNode,
         default_texts: list[str],
         lang: str,
         translations: dict[str, str],
-    ) -> etree._Element:
-        cloned = copy.deepcopy(default_node)
+    ) -> TextNode:
+        cloned = default_node.clone()
 
-        new_node = etree.Element(default_node.tag, attrib=default_node.attrib)
+        new_node = etree.Element(default_node.element.tag, attrib=default_node.element.attrib)
         new_node.set("systemLanguage", lang)
 
         # Fill translations
-        tspans = cloned.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
+        tspans = cloned.tspans()
         if tspans:
             for i, tspan in enumerate(tspans):
                 if i < len(default_texts):
@@ -61,7 +63,7 @@ class TranslationApplier:
         # Reassign IDs for the cloned node hierarchy
         self._reassign_ids(new_node, lang)
 
-        return new_node
+        return TextNode(new_node)
 
     def _is_translation_valid(self, translated: None | str, tspan_text: str) -> bool:
         valid = translated is not None and translated.strip() != ""
@@ -117,9 +119,9 @@ class TranslationApplier:
             return ApplyResult(action="updated", node=existing_lang_node)
 
         # Clone default node
-        cloned = self._create_node(default_node, default_texts, lang, translations)
+        cloned = self._create_node(TextNode(default_node), default_texts, lang, translations)
 
-        return ApplyResult(action="inserted", node=cloned)
+        return ApplyResult(action="inserted", node=cloned.element)
 
 
 __all__ = [
