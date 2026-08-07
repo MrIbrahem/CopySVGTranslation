@@ -34,6 +34,9 @@ class TranslationConfig:
     """
 
     # --- Title / year handling ---
+    create_lang_template: bool = False
+    """Create a template for the language name in process_new_header_titles if replace_year_with_placeholder return empty value."""
+
     enable_year_titles: bool = True
     """Enable special handling for titles that contain a 4-digit year."""
 

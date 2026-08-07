@@ -42,6 +42,20 @@ class YearTitleHandler:
             return text[:4]
         return ""
 
+    def bulid_lang_template(self, value: str, lang: str) -> str:
+        """
+        "dag": "Parkinson's doro yɔlibu biɛɣigu ni, yuuni 1990 puli ni",
+        "ca": "Prevalència de la malaltia de Parkinson",
+        """
+        if re.sub(r"\d{4}", "", value) == value:
+            return f"{value}, {{year}}"
+
+        if lang == "dag" and "," in value:
+            value = value.split(",", maxsplit=1)[0]
+            return self.bulid_lang_template(value, "")
+
+        return ""
+
     @staticmethod
     def replace_year_with_placeholder(text: str, year: str) -> str:
         """
@@ -55,6 +69,7 @@ class YearTitleHandler:
 
         if text.startswith(year):
             return re.sub(r"^\d{4}", "{year}", text)
+
         return ""
 
     @staticmethod
@@ -85,7 +100,9 @@ class YearTitleHandler:
         if data:
             mapping.title_new.update(data)
 
-    def build_title_new_templates(self, mapping_new: dict[str, Any]) -> dict[str, Any]:
+    def build_title_new_templates(
+        self, mapping_new: dict[str, Any], create_lang_template: bool = False
+    ) -> dict[str, Any]:
         """
         Extract valid title translations by verifying that all translations in a mapping
         end with the same 4-digit year as the key.
@@ -121,6 +138,9 @@ class YearTitleHandler:
             templated: dict[str, str] = {}
             for lang, value in translations.items():
                 value_template = self.replace_year_with_placeholder(value, year)
+                if create_lang_template and not value_template:
+                    value_template = self.bulid_lang_template(value, lang)
+
                 if value_template:
                     templated[lang] = value_template
 
