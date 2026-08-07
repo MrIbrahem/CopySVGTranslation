@@ -261,7 +261,7 @@ class TestApplyLanguageUpdate:
             translations={},  # no match
             existing_lang_node=existing,
         )
-        assert result.action == "updated"
+        assert result.action == "unchanged"
         assert result.node is not None
 
         # Text should remain unchanged
@@ -281,7 +281,7 @@ class TestApplyLanguageUpdate:
             translations={},
             existing_lang_node=existing,
         )
-        assert result.action == "updated"
+        assert result.action == "unchanged"
 
 
 # ---------------------------------------------------------------------------
