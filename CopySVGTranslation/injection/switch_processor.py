@@ -12,7 +12,7 @@ from ..core.text_node import TextNode
 from ..result import InjectorStats
 from ..titles import YearTitleHandler
 from .id_manager import IdManager
-from .translation_applier import TranslationApplier
+from .translation_applier import ApplyResult, TranslationApplier
 
 logger = logging.getLogger(__name__)
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -97,12 +97,14 @@ class SwitchProcessor:
                 continue
 
             existing_node = switch.find_by_language(lang)
-            res = self.applier.apply_language(
-                default.element,
-                default_texts,
-                lang,
-                translations_for_lang,
-                existing_node.element if existing_node is not None else None,
+            existing_node_element = existing_node.element if existing_node is not None else None
+
+            res: ApplyResult = self.applier.apply_language(
+                default_node=default.element,
+                default_texts=default_texts,
+                lang=lang,
+                translations=translations_for_lang,
+                existing_lang_node=existing_node_element,
             )
 
             if res.action == "inserted" and res.node is not None:
@@ -110,7 +112,7 @@ class SwitchProcessor:
                 stats.inserted_translations += 1
             elif res.action == "updated":
                 stats.updated_translations += 1
-            elif res.action == "skipped":
+            elif res.action in ("skipped", "unchanged"):
                 stats.skipped_translations += 1
 
         # Sort the switch elements deterministically
