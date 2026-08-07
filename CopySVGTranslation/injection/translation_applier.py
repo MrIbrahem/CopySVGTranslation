@@ -116,7 +116,7 @@ class TranslationApplier:
                 if self._is_translation_valid(translated, existing_lang_node.text):
                     existing_lang_node.text = translated
 
-            return ApplyResult(action="updated", node=existing_lang_node)
+            return ApplyResult(action="updated", text_node=existing_lang_node)
 
         # Clone default node
         cloned = self._create_node(default_node, default_texts, lang, translations)
