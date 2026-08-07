@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "copy-svg-translation"
-version = "0.2.1"
+version = "x.x.x"
 description = "Extract translations from SVG files and inject them into others"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -210,14 +210,14 @@ mypy copy_svg_translation
 
 ### Notes
 
-| Setting                             | Why                                               |
-| ----------------------------------- | ------------------------------------------------- |
-| `name = "copy-svg-translation"`     | Conventional PyPI name (hyphens)                  |
+| Setting                               | Why                                               |
+| ------------------------------------- | ------------------------------------------------- |
+| `name = "copy-svg-translation"`       | Conventional PyPI name (hyphens)                  |
 | Import package `copy_svg_translation` | Matches your existing code layout                 |
-| `requires-python = ">=3.10"`        | Fits modern typing (`X \| Y`, `slots=True`, etc.) |
-| `lxml>=4.9`                         | Only hard runtime dependency                      |
-| Legacy excluded from coverage       | Avoids treating temporary shims as core code      |
-| `py.typed`                          | Enables type checking for downstream users        |
-| Version `0.2.1`                     | Signals the class-based redesign + deprecations   |
+| `requires-python = ">=3.10"`          | Fits modern typing (`X \| Y`, `slots=True`, etc.) |
+| `lxml>=4.9`                           | Only hard runtime dependency                      |
+| Legacy excluded from coverage         | Avoids treating temporary shims as core code      |
+| `py.typed`                            | Enables type checking for downstream users        |
+| Version `x.x.x`                       | Signals the class-based redesign + deprecations   |
 
 Adjust `authors`, URLs, and license to match the real project before publishing.
