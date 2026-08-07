@@ -1,13 +1,13 @@
 # injection/translation_applier.py
 from __future__ import annotations
 
-import copy
 import logging
 from dataclasses import dataclass
 from typing import Literal
 
 from lxml import etree
 
+from ..core.text_node import TextNode
 from ..config import TranslationConfig
 from .id_manager import IdManager
 
@@ -18,8 +18,9 @@ SVG_NS = "http://www.w3.org/2000/svg"
 
 @dataclass
 class ApplyResult:
-    action: Literal["inserted", "updated", "skipped"]
+    action: Literal["inserted", "updated", "unchanged", "skipped"]
     node: etree._Element | None = None  # new or updated node
+    text_node: TextNode | None = None
 
 
 class TranslationApplier:
@@ -27,65 +28,26 @@ class TranslationApplier:
         self.config = config
         self.id_manager = id_manager
 
-    def apply_language(
+    def _create_node(
         self,
-        default_node: etree._Element,
-        default_texts: list[str],
-        lang: str,
-        translations: dict[str, str],  # source -> translated for each segment
-        existing_lang_node: etree._Element | None,
-    ) -> ApplyResult:
-        """
-        - If existing_lang_node and not overwrite -> skipped
-        - If existing_lang_node and overwrite -> update tspans in place
-        - Else -> clone default_node, set systemLanguage, fill translations, new IDs
-        """
-        if existing_lang_node is not None:
-            if not self.config.overwrite:
-                return ApplyResult(action="skipped", node=existing_lang_node)
-
-            # Update tspans in place
-            tspans = existing_lang_node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
-            if tspans:
-                for i, tspan in enumerate(tspans):
-                    if i < len(default_texts):
-                        source = default_texts[i]
-                        translated = translations.get(source)
-                        if self.is_translation_valid(translated):
-                            tspan.text = translated
-            else:
-                source = default_texts[0] if default_texts else ""
-                translated = translations.get(source)
-                if self.is_translation_valid(translated):
-                    existing_lang_node.text = translated
-
-            return ApplyResult(action="updated", node=existing_lang_node)
-
-        # Clone default node
-        cloned = self.create_node(default_node, default_texts, lang, translations)
-
-        return ApplyResult(action="inserted", node=cloned)
-
-    def create_node(
-        self,
-        default_node: etree._Element,
+        default_node: TextNode,
         default_texts: list[str],
         lang: str,
         translations: dict[str, str],
-    ) -> etree._Element:
-        cloned = copy.deepcopy(default_node)
+    ) -> TextNode:
+        cloned = default_node.clone()
 
-        new_node = etree.Element(default_node.tag, attrib=default_node.attrib)
+        new_node = etree.Element(default_node.element.tag, attrib=default_node.element.attrib)
         new_node.set("systemLanguage", lang)
 
         # Fill translations
-        tspans = cloned.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
+        tspans = cloned.tspans()
         if tspans:
             for i, tspan in enumerate(tspans):
                 if i < len(default_texts):
                     source = default_texts[i]
                     translated = translations.get(source)
-                    if self.is_translation_valid(translated):
+                    if self._is_translation_valid(translated):
                         tspan.text = translated
                         new_node.append(tspan)
                     elif self.config.fallback_to_default_text:
@@ -94,16 +56,21 @@ class TranslationApplier:
         else:
             source = default_texts[0] if default_texts else ""
             translated = translations.get(source)
-            if self.is_translation_valid(translated):
+            if self._is_translation_valid(translated):
                 new_node.text = translated
 
         # Reassign IDs for the cloned node hierarchy
         self._reassign_ids(new_node, lang)
 
-        return new_node
+        return TextNode(new_node)
 
-    def is_translation_valid(self, translated: None | str) -> bool:
-        return translated is not None and translated.strip() != ""
+    def _is_translation_valid(self, translated: None | str, tspan_text: str | None = None) -> bool:
+        valid = translated is not None and translated.strip() != ""
+        if not tspan_text or not tspan_text.strip():
+            return valid
+
+        logger.debug(f"Comparing {tspan_text} and {translated}")
+        return valid and tspan_text != translated
 
     def _reassign_ids(self, element: etree._Element, lang: str) -> None:
         old_id = element.get("id")
@@ -115,6 +82,78 @@ class TranslationApplier:
         for child in element:
             self._reassign_ids(child, lang)
 
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def apply_language_node(
+        self,
+        default_node: TextNode,
+        default_texts: list[str],
+        lang: str,
+        translations: dict[str, str],  # source -> translated for each segment
+        existing_lang_node: TextNode | None,
+    ) -> ApplyResult:
+        """
+        - If existing_lang_node and not overwrite -> skipped
+        - If existing_lang_node and overwrite -> update tspans in place
+        - Else -> clone default_node, set systemLanguage, fill translations, new IDs
+        """
+        if existing_lang_node is not None:
+            if not self.config.overwrite:
+                return ApplyResult(action="skipped", text_node=existing_lang_node)
+
+            # Update tspans in place
+            tspans = existing_lang_node.tspans()
+            is_updated = False
+            if tspans:
+                for i, tspan in enumerate(tspans):
+                    if i < len(default_texts):
+                        source = default_texts[i]
+                        translated = translations.get(source)
+                        if self._is_translation_valid(translated, tspan.text):
+                            tspan.text = translated
+                            is_updated = True
+            else:
+                source = default_texts[0] if default_texts else ""
+                translated = translations.get(source)
+                if self._is_translation_valid(translated, existing_lang_node.text):
+                    existing_lang_node.text = translated
+                    is_updated = True
+
+            result_action = "updated" if is_updated else "unchanged"
+
+            return ApplyResult(action=result_action, text_node=existing_lang_node)
+
+        # Clone default node
+        cloned = self._create_node(default_node, default_texts, lang, translations)
+
+        return ApplyResult(action="inserted", text_node=cloned)
+
+    def apply_language(
+        self,
+        default_node: etree._Element,
+        default_texts: list[str],
+        lang: str,
+        translations: dict[str, str],  # source -> translated for each segment
+        existing_lang_node: etree._Element | None,
+    ) -> ApplyResult:
+        """
+        Alias
+        """
+        default = TextNode.from_any(default_node)
+        existing_node = TextNode.from_any_or_none(existing_lang_node)
+
+        res = self.apply_language_node(
+            default_node=default,
+            default_texts=default_texts,
+            lang=lang,
+            translations=translations,
+            existing_lang_node=existing_node,
+        )
+
+        element = res.text_node.element if res.text_node else None
+        return ApplyResult(action=res.action, node=element)
 
 __all__ = [
     "ApplyResult",

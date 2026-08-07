@@ -53,6 +53,7 @@ class TranslationMapping:
             title_new=dict(data.get("title_new", {})),
             tspans_by_id=dict(data.get("tspans_by_id", {})),
             meta=dict(data.get("meta", {})),
+            error=data.get("error", ""),
         )
 
     @classmethod

@@ -79,6 +79,18 @@ class TextNode:
             yield TextNode(tspan)
 
     # ------------------------------------------------------------------
+    # Node text
+    # ------------------------------------------------------------------
+
+    @property
+    def text(self) -> str | None:
+        return self.element.text
+
+    @text.setter
+    def text(self, value: str | None) -> None:
+        self.element.text = value
+
+    # ------------------------------------------------------------------
     # Cloning
     # ------------------------------------------------------------------
     def clone(self) -> TextNode:
@@ -87,6 +99,32 @@ class TextNode:
 
         return TextNode(copy.deepcopy(self.element))
 
+    # ------------------------------------------------------------------
+    # Factory helpers
+    # ------------------------------------------------------------------
+    @classmethod
+    def from_any_or_none(cls, node: TextNode | etree._Element) -> TextNode | None:
+        """Wrap an element or another TextNode."""
+        if isinstance(node, TextNode):
+            return node
+
+        if isinstance(node, etree._Element):
+            return cls(node)
+        return None
+
+    # ------------------------------------------------------------------
+    # Factory helpers
+    # ------------------------------------------------------------------
+    @classmethod
+    def from_any(cls, node: TextNode | etree._Element) -> TextNode:
+        """Wrap an element or another TextNode."""
+        if isinstance(node, TextNode):
+            return node
+
+        if isinstance(node, etree._Element):
+            return cls(node)
+
+        raise TypeError(f"Cannot convert {node} to TextNode")
 
 __all__ = [
     "TextNode",

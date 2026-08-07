@@ -6,14 +6,13 @@ Extract translations from SVG files and inject them into others.
 
 Used in copy-svg-langs project:
 from CopySVGTranslation import SVGTranslationExtractor, TranslationConfig
-from CopySVGTranslation import SVGTranslationInjector
+from CopySVGTranslation import TranslationMapping, SVGTranslationInjector
 from CopySVGTranslation import NestedTspanDetector, NestedTspanFlattener
-
 """
 
 from __future__ import annotations
 
-__version__ = "2.1.0"
+__version__ = "0.2.2"
 
 # ---------------------------------------------------------------------------
 # Primary public API

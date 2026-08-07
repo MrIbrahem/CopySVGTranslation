@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "CopySVGTranslation"
-version = "0.2.1"
+version = "0.2.2"
 description = "Utilities for extracting and applying translations to multilingual SVG files."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -147,8 +147,8 @@ docstring-code-line-length = 120
 [tool.ruff.lint]
 ignore = [
     "RUF022",
-    "E501", # Line too long
-    "F841", # Local variable is assigned to but never used
+    "E501",   # Line too long
+    "F841",   # Local variable is assigned to but never used
     # "N802",  # Function name should be lowercase
     "N806", # Variable in function should be lowercase
     # "UP007", # Use `X | Y` for type annotations instead of `Optional[X]`
@@ -156,8 +156,8 @@ ignore = [
     # "UP045", # Use `X | None` instead of `Optional[X]`
     # "UP006",  # Use `list` instead of `List` for type annotations
     # "UP035",  # Use `X | Y` for type unions instead of `Union[X, Y]`
-    "I001", # Import block is un-sorted or un-formatted
-    "N999",   # Invalid module name: 'CopySVGTranslation'
+    "I001",  # Import block is un-sorted or un-formatted
+    "N999",  # Invalid module name: 'CopySVGTranslation'
     "UP015", # Unnecessary open mode parameters
 ]
 select = [
