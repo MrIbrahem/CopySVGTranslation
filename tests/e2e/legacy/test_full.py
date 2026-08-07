@@ -174,8 +174,8 @@ def test_inject_with_empty_translations(tmp_path: Path, target_svg: Path) -> Non
     )
 
     assert stats == {
-        "all_languages": 0,
-        "new_languages": 0,
+        "all_languages_count": 0,
+        "new_languages_count": 0,
         "processed_switches": 0,
         "inserted_translations": 0,
         "skipped_translations": 0,
@@ -270,8 +270,8 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path, fixtures_d
     assert stats1["inserted_translations"] == stats2["inserted_translations"]
 
     assert stats1 == {
-        "all_languages": 2,
-        "new_languages": 2,
+        "all_languages_count": 2,
+        "new_languages_count": 2,
         "processed_switches": 1,
         "inserted_translations": 2,
         "skipped_translations": 0,

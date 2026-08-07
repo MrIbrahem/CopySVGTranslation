@@ -203,20 +203,19 @@ class SVGTranslationInjector:
         before_languages: set[str],
         after_languages: set[str],
     ) -> None:
-        new_languages = after_languages - before_languages
+        new_languages_count = after_languages - before_languages
 
-        stats.all_languages = len(after_languages)
-        stats.new_languages = len(new_languages)
-        stats.languages_after = sorted(new_languages)
+        stats.all_languages_count = len(after_languages)
+        stats.new_languages_count = len(new_languages_count)
+        stats.languages_after = sorted(new_languages_count)
 
         logger.debug(f"Processed {stats.processed_switches} switches")
         logger.debug(f"Inserted {stats.inserted_translations} translations")
         logger.debug(f"Updated {stats.updated_translations} translations")
         logger.debug(f"Skipped {stats.skipped_translations} existing translations")
 
-        logger.debug(f"All langs: {stats.all_languages}")
-        logger.debug(f"New langs: {stats.new_languages}")
-
+        logger.debug(f"All langs: {stats.all_languages_count}")
+        logger.debug(f"New langs: {stats.new_languages_count}")
 
 
 __all__ = [

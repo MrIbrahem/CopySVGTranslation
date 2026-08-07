@@ -89,9 +89,7 @@ class SVGTranslationExtractor:
                     case_insensitive=False,  # key already normalized
                 )
 
-    def _extract_header_mapping(
-        self, root: etree._Element
-    ) -> dict[str, dict[str, str]]:
+    def _extract_header_mapping(self, root: etree._Element) -> dict[str, dict[str, str]]:
         """Extract translations from header switches only.
 
         Header switches are <switch> elements inside
@@ -99,9 +97,7 @@ class SVGTranslationExtractor:
         <g class="markdown-text-wrap" id="subtitle">.
         """
         header_switches = root.xpath(
-            "//svg:g[@id='header']"
-            "//svg:switch"
-            "[not(ancestor::svg:g[@id='subtitle'])]",
+            "//svg:g[@id='header']//svg:switch[not(ancestor::svg:g[@id='subtitle'])]",
             namespaces=SVG_NS,
         )
         if not header_switches:

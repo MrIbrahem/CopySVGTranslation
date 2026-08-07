@@ -67,8 +67,8 @@ class TestInjectorStats(TestSetup):
 
     def test_default_values(self):
         stats = InjectorStats()
-        assert stats.all_languages == 0
-        assert stats.new_languages == 0
+        assert stats.all_languages_count == 0
+        assert stats.new_languages_count == 0
         assert stats.processed_switches == 0
         assert stats.inserted_translations == 0
         assert stats.skipped_translations == 0
@@ -82,8 +82,8 @@ class TestInjectorStats(TestSetup):
         result = stats.to_json()
         assert isinstance(result, dict)
         expected_keys = {
-            "all_languages",
-            "new_languages",
+            "all_languages_count",
+            "new_languages_count",
             "processed_switches",
             "inserted_translations",
             "skipped_translations",
@@ -97,14 +97,14 @@ class TestInjectorStats(TestSetup):
     def test_to_json_reflects_values(self):
         stats = InjectorStats()
         stats._update(
-            all_languages=3,
-            new_languages=2,
+            all_languages_count=3,
+            new_languages_count=2,
             inserted_translations=5,
             error="",
         )
         result = stats.to_json()
-        assert result["all_languages"] == 3
-        assert result["new_languages"] == 2
+        assert result["all_languages_count"] == 3
+        assert result["new_languages_count"] == 2
         assert result["inserted_translations"] == 5
 
     def test_fields_are_independent(self):
@@ -207,7 +207,7 @@ class TestSVGTranslationInjectorBasic(TestSetup):
         result = inj.inject(svg_path=svg, mapping=mappings)
 
         assert result.inject_stats.inserted_translations == 2
-        assert result.inject_stats.all_languages == 2
+        assert result.inject_stats.all_languages_count == 2
 
     def test_inject_multiple_switches(self, tmp_path: Path):
         inner = """
@@ -506,7 +506,7 @@ class TestSVGTranslationInjectorLanguageTracking(TestSetup):
 
         result = inj.inject(svg_path=svg, mapping=mappings)
 
-        assert result.inject_stats.new_languages == 2
+        assert result.inject_stats.new_languages_count == 2
         assert sorted(result.inject_stats.languages_after) == ["ar", "fr"]
 
     def test_existing_languages_tracked(self, tmp_path: Path):
@@ -523,7 +523,7 @@ class TestSVGTranslationInjectorLanguageTracking(TestSetup):
         result = inj.inject(svg_path=svg, mapping=mappings)
 
         assert "es" in result.inject_stats.languages_before
-        assert result.inject_stats.all_languages == 2  # es + ar
+        assert result.inject_stats.all_languages_count == 2  # es + ar
 
 
 # ===========================================================================

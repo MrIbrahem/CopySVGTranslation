@@ -174,8 +174,8 @@ class SVGTranslationInjector:
         # 6. Languages after + stats
         after = tree_languages(tree)
         stats.languages_after = sorted(after - before)
-        stats.all_languages = len(after)
-        stats.new_languages = len(after - before)
+        stats.all_languages_count = len(after)
+        stats.new_languages_count = len(after - before)
 
         # 7. Save if requested
         if save and save_path:
