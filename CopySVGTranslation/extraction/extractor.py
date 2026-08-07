@@ -89,6 +89,30 @@ class SVGTranslationExtractor:
                     case_insensitive=False,  # key already normalized
                 )
 
+    def _extract_header_mapping(
+        self, root: etree._Element
+    ) -> dict[str, dict[str, str]]:
+        """Extract translations from header switches only.
+
+        Header switches are <switch> elements inside
+        <g class="HeaderView" id="header"> but NOT inside
+        <g class="markdown-text-wrap" id="subtitle">.
+        """
+        header_switches = root.xpath(
+            "//svg:g[@id='header']"
+            "//svg:switch"
+            "[not(ancestor::svg:g[@id='subtitle'])]",
+            namespaces=SVG_NS,
+        )
+        if not header_switches:
+            return {}
+
+        header_mapping = TranslationMapping()
+        for switch_el in header_switches:
+            self._process_switch(SwitchNode(switch_el), header_mapping)
+
+        return header_mapping.new
+
     def extract_from_root(self, root: etree._Element) -> TranslationMapping:
         mapping = TranslationMapping()
         # Find all switch elements
@@ -100,6 +124,11 @@ class SVGTranslationExtractor:
 
         if self.config.enable_year_titles and mapping.new:
             self.year_handler.build_templates(mapping)
+
+        # Extract header-specific translations
+        header = self._extract_header_mapping(root)
+        if header:
+            mapping.meta["header"] = header
 
         return mapping
 
