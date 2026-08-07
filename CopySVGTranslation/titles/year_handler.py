@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import re
+from typing import Any
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
@@ -80,9 +81,11 @@ class YearTitleHandler:
         if not self.enabled:
             return
 
-        self.build_title_new_templates(mapping)
+        data = self.build_title_new_templates(mapping.new)
+        if data:
+            mapping.title_new.update(data)
 
-    def build_title_new_templates(self, mapping: TranslationMapping) -> None:
+    def build_title_new_templates(self, mapping_new: dict[str, Any]) -> dict[str, Any]:
         """
         Extract valid title translations by verifying that all translations in a mapping
         end with the same 4-digit year as the key.
@@ -103,7 +106,8 @@ class YearTitleHandler:
         Returns:
             A dictionary mapping base title -> { language -> title with `{year}` }.
         """
-        for source, translations in list(mapping.new.items()):
+        data = {}
+        for source, translations in list(mapping_new.items()):
             year = self.match_year(source)
 
             # if not year:
@@ -121,8 +125,9 @@ class YearTitleHandler:
                     templated[lang] = value_template
 
             if templated:
-                mapping.title_new[source_template] = templated
+                data[source_template] = templated
                 logger.debug("Title template: %r → %s", source_template, list(templated))
+        return data
 
     # ------------------------------------------------------------------
     # Injection side
