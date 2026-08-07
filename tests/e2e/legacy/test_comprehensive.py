@@ -60,8 +60,8 @@ class TestInjector:
         assert stats["inserted_translations"] == 1
 
         assert stats == {
-            "all_languages": 1,
-            "new_languages": 1,
+            "all_languages_count": 1,
+            "new_languages_count": 1,
             "processed_switches": 1,
             "inserted_translations": 1,
             "skipped_translations": 0,

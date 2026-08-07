@@ -7,8 +7,8 @@ from typing import Literal
 
 from lxml import etree
 
-from ..core.text_node import TextNode
 from ..config import TranslationConfig
+from ..core.text_node import TextNode
 from .id_manager import IdManager
 
 logger = logging.getLogger(__name__)
@@ -154,6 +154,7 @@ class TranslationApplier:
 
         element = res.text_node.element if res.text_node else None
         return ApplyResult(action=res.action, node=element)
+
 
 __all__ = [
     "ApplyResult",

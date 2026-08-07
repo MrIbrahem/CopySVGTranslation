@@ -37,8 +37,8 @@ def test_inject_tracks_new_languages(tmp_path):
     after_languages = tree_languages(tree)
 
     assert after_languages == {"ar", "fr"}
-    assert stats["all_languages"] == 2
-    assert stats["new_languages"] == 2
+    assert stats["all_languages_count"] == 2
+    assert stats["new_languages_count"] == 2
     assert stats["languages_after"] == ["ar", "fr"]
 
 
@@ -64,8 +64,8 @@ def test_inject_tracks_only_truly_new_languages(tmp_path):
         return_stats=True,
     )
 
-    assert stats["all_languages"] == 2
-    assert stats["new_languages"] == 1
+    assert stats["all_languages_count"] == 2
+    assert stats["new_languages_count"] == 1
     assert stats["languages_after"] == ["fr"]
 
 

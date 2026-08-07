@@ -150,7 +150,7 @@ class TestProcessEarlyExits(TestSetup):
         processor = make_processor(id_manager=id_manager)
 
         # available_translations will be non-empty, but each entry maps to
-        # an empty per-language dict, so all_languages() yields an empty set
+        # an empty per-language dict, so all_languages_count() yields an empty set
         processor.process(switch, {"new": {"hello": {}}}, stats)
 
         assert stats.processed_switches == 0

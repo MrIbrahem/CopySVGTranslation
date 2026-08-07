@@ -14,8 +14,8 @@ T = TypeVar("T")
 
 @dataclass(slots=True)
 class InjectorStats:
-    all_languages: int = 0
-    new_languages: int = 0
+    all_languages_count: int = 0
+    new_languages_count: int = 0
 
     processed_switches: int = 0
     inserted_translations: int = 0
@@ -30,8 +30,8 @@ class InjectorStats:
         """
         Serialize stats to a JSON-compatible dictionary.
         return {
-            "all_languages": self.all_languages,
-            "new_languages": self.new_languages,
+            "all_languages_count": self.all_languages_count,
+            "new_languages_count": self.new_languages_count,
             "processed_switches": self.processed_switches,
             "inserted_translations": self.inserted_translations,
             "skipped_translations": self.skipped_translations,

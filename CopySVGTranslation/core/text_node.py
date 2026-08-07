@@ -126,6 +126,7 @@ class TextNode:
 
         raise TypeError(f"Cannot convert {node} to TextNode")
 
+
 __all__ = [
     "TextNode",
 ]

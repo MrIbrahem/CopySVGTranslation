@@ -59,10 +59,12 @@ FULL_TEXT_EXAMPLE = """
 </svg>
 """
 
+
 def _write_full_svg(tmp_dir: Path, svg_text: str, name: str = "test.svg") -> Path:
     p = tmp_dir / name
     p.write_text(svg_text.strip(), encoding="utf-8")
     return p
+
 
 def test_basic_results(temp_dir: Path):
 
@@ -75,14 +77,13 @@ def test_basic_results(temp_dir: Path):
 
     # serialized = json.dumps(result.new, ensure_ascii=True)
 
-    assert result.new  == {
-        "parkinson's disease prevalence, 1990": {
-            "dag": "Parkinson's doro ni, yuuni 1990 puli ni"
-        },
+    assert result.new == {
+        "parkinson's disease prevalence, 1990": {"dag": "Parkinson's doro ni, yuuni 1990 puli ni"},
         "estimated number of people with parkinson's disease\u00b9 per 100,000 people.": {
             "dag": "Salo kalinli ban daa mali Parkinson's doro \u014b\u0254 daadam 100,000 kalinli li."
-        }
+        },
     }
+
 
 def test_header_result(temp_dir: Path):
 
@@ -95,17 +96,13 @@ def test_header_result(temp_dir: Path):
 
     # serialized = json.dumps(result.new, ensure_ascii=True)
 
-    assert result.new  == {
-        "parkinson's disease prevalence, 1990": {
-            "dag": "Parkinson's doro ni, yuuni 1990 puli ni"
-        },
+    assert result.new == {
+        "parkinson's disease prevalence, 1990": {"dag": "Parkinson's doro ni, yuuni 1990 puli ni"},
         "estimated number of people with parkinson's disease\u00b9 per 100,000 people.": {
             "dag": "Salo kalinli ban daa mali Parkinson's doro \u014b\u0254 daadam 100,000 kalinli li."
-        }
+        },
     }
 
     assert result.meta.get("header") == {
-        "parkinson's disease prevalence, 1990": {
-            "dag": "Parkinson's doro ni, yuuni 1990 puli ni"
-        }
+        "parkinson's disease prevalence, 1990": {"dag": "Parkinson's doro ni, yuuni 1990 puli ni"}
     }

@@ -70,7 +70,7 @@ if not result.inject_stats.error:
     print(f"Inserted: {result.inject_stats.inserted_translations}")
     print(f"Updated:  {result.inject_stats.updated_translations}")
     print(f"Skipped:  {result.inject_stats.skipped_translations}")
-    print(f"Languages: {result.inject_stats.all_languages}")
+    print(f"Languages: {result.inject_stats.all_languages_count}")
 ```
 
 ## API Reference
@@ -164,8 +164,8 @@ result: InjectorData = injector.inject(
 
 | Field                   | Type        | Description                                                 |
 | ----------------------- | ----------- | ----------------------------------------------------------- |
-| `all_languages`         | `int`       | Total number of languages in the SVG after injection.       |
-| `new_languages`         | `int`       | Number of new languages added.                              |
+| `all_languages_count`         | `int`       | Total number of languages in the SVG after injection.       |
+| `new_languages_count`         | `int`       | Number of new languages added.                              |
 | `processed_switches`    | `int`       | Number of `<switch>` elements processed.                    |
 | `inserted_translations` | `int`       | Number of new `<text>` nodes inserted.                      |
 | `skipped_translations`  | `int`       | Number of existing translations skipped (not overwritten).  |
@@ -419,7 +419,7 @@ result = injector.inject(
 )
 
 print(f"Inserted: {result.inject_stats.inserted_translations}")
-print(f"Languages: {result.inject_stats.all_languages}")
+print(f"Languages: {result.inject_stats.all_languages_count}")
 ```
 
 ### Output SVG (translated/target.svg)
