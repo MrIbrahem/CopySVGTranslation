@@ -83,13 +83,13 @@ class TranslationApplier:
     # Public API
     # ------------------------------------------------------------------
 
-    def apply_language(
+    def apply_language_node(
         self,
-        default_node: etree._Element,
+        default_node: TextNode,
         default_texts: list[str],
         lang: str,
         translations: dict[str, str],  # source -> translated for each segment
-        existing_lang_node: etree._Element | None,
+        existing_lang_node: TextNode | None,
     ) -> ApplyResult:
         """
         - If existing_lang_node and not overwrite -> skipped
@@ -98,10 +98,10 @@ class TranslationApplier:
         """
         if existing_lang_node is not None:
             if not self.config.overwrite:
-                return ApplyResult(action="skipped", node=existing_lang_node)
+                return ApplyResult(action="skipped", text_node=existing_lang_node)
 
             # Update tspans in place
-            tspans = existing_lang_node.xpath("./svg:tspan", namespaces={"svg": SVG_NS})
+            tspans = existing_lang_node.tspans()
             if tspans:
                 for i, tspan in enumerate(tspans):
                     if i < len(default_texts):
@@ -119,10 +119,34 @@ class TranslationApplier:
             return ApplyResult(action="updated", node=existing_lang_node)
 
         # Clone default node
-        cloned = self._create_node(TextNode(default_node), default_texts, lang, translations)
+        cloned = self._create_node(default_node, default_texts, lang, translations)
 
-        return ApplyResult(action="inserted", node=cloned.element)
+        return ApplyResult(action="inserted", text_node=cloned)
 
+    def apply_language(
+        self,
+        default_node: etree._Element,
+        default_texts: list[str],
+        lang: str,
+        translations: dict[str, str],  # source -> translated for each segment
+        existing_lang_node: etree._Element | None,
+    ) -> ApplyResult:
+        """
+        Alias
+        """
+        default = TextNode.from_any(default_node)
+        existing_node = TextNode.from_any_or_none(existing_lang_node)
+
+        res = self.apply_language_node(
+            default_node=default,
+            default_texts=default_texts,
+            lang=lang,
+            translations=translations,
+            existing_lang_node=existing_node,
+        )
+
+        element = res.text_node.element if res.text_node else None
+        return ApplyResult(action=res.action, node=element)
 
 __all__ = [
     "ApplyResult",
