@@ -18,7 +18,7 @@ class TranslationConfig:
     """Treat source text keys as case-insensitive (lowercased)."""
 
     # --- Injection behaviour ---
-    overwrite: bool = False
+    overwrite_translations: bool = False
     """If True, update existing language nodes instead of skipping them."""
 
     pretty_print: bool | None = None

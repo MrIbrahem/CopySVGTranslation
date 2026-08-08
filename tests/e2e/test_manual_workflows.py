@@ -213,7 +213,7 @@ class TestInjectManual:
             inject_file=svg_file,
             save_path=svg_file,
             mapping=data,
-            overwrite=True,
+            overwrite_translations=True,
             pretty_print=False,
             save_result=True,
         )

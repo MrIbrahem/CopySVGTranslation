@@ -32,11 +32,13 @@ def _make_text(text: str, id_: str = "t0", tspans: bool = True) -> etree._Elemen
 
 
 def _make_applier(
-    overwrite: bool = False,
+    overwrite_translations: bool = False,
     existing_ids: set[str] | None = None,
     fallback_to_default_text: set[str] | None = None,
 ) -> TranslationApplier:
-    config = TranslationConfig(overwrite=overwrite, fallback_to_default_text=fallback_to_default_text)
+    config = TranslationConfig(
+        overwrite_translations=overwrite_translations, fallback_to_default_text=fallback_to_default_text
+    )
     id_mgr = IdManager(existing_ids)
     return TranslationApplier(config, id_mgr)
 
@@ -169,13 +171,13 @@ class TestApplyLanguageInsert:
 
 
 # ---------------------------------------------------------------------------
-# TranslationApplier — skip (existing node, overwrite=False)
+# TranslationApplier — skip (existing node, overwrite_translations=False)
 # ---------------------------------------------------------------------------
 class TestApplyLanguageSkip:
     """Tests for skipping an existing language node."""
 
     def test_skip_when_overwrite_false(self):
-        applier = _make_applier(overwrite=False)
+        applier = _make_applier(overwrite_translations=False)
         default_node = _make_text("Hello", id_="t0")
         existing = _make_text("Hola", id_="t0-es")
         existing.set("systemLanguage", "es")
@@ -190,7 +192,7 @@ class TestApplyLanguageSkip:
         assert result.node is existing
 
     def test_skip_preserves_existing_text(self):
-        applier = _make_applier(overwrite=False)
+        applier = _make_applier(overwrite_translations=False)
         default_node = _make_text("Hello", id_="t0")
         existing = _make_text("Hola", id_="t0-es")
         existing.set("systemLanguage", "es")
@@ -208,13 +210,13 @@ class TestApplyLanguageSkip:
 
 
 # ---------------------------------------------------------------------------
-# TranslationApplier — update (existing node, overwrite=True)
+# TranslationApplier — update (existing node, overwrite_translations=True)
 # ---------------------------------------------------------------------------
 class TestApplyLanguageUpdate:
     """Tests for updating an existing language node."""
 
     def test_update_with_tspans(self):
-        applier = _make_applier(overwrite=True)
+        applier = _make_applier(overwrite_translations=True)
         default_node = _make_text("Hello", id_="t0")
         existing = _make_text("Hola", id_="t0-es")
         existing.set("systemLanguage", "es")
@@ -232,7 +234,7 @@ class TestApplyLanguageUpdate:
         assert tspans[0].text == "Hola nueva"
 
     def test_update_without_tspans(self):
-        applier = _make_applier(overwrite=True)
+        applier = _make_applier(overwrite_translations=True)
         default_node = _make_text("Hello", id_="t0", tspans=False)
         existing = etree.Element(f"{{{SVG_NS}}}text")
         existing.set("systemLanguage", "fr")
@@ -250,7 +252,7 @@ class TestApplyLanguageUpdate:
         assert result.node.text == "Bonjour new"
 
     def test_update_no_matching_translation(self):
-        applier = _make_applier(overwrite=True)
+        applier = _make_applier(overwrite_translations=True)
         default_node = _make_text("Hello", id_="t0")
         existing = _make_text("Hola", id_="t0-es")
         existing.set("systemLanguage", "es")
@@ -269,7 +271,7 @@ class TestApplyLanguageUpdate:
         assert tspans[0].text == "Hola"
 
     def test_update_empty_default_texts(self):
-        applier = _make_applier(overwrite=True)
+        applier = _make_applier(overwrite_translations=True)
         default_node = _make_text("", id_="t0", tspans=False)
         existing = etree.Element(f"{{{SVG_NS}}}text")
         existing.set("systemLanguage", "fr")

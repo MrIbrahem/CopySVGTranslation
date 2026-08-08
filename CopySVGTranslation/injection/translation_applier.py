@@ -100,7 +100,7 @@ class TranslationApplier:
         - Else -> clone default_node, set systemLanguage, fill translations, new IDs
         """
         if existing_lang_node is not None:
-            if not self.config.overwrite:
+            if not self.config.overwrite_translations:
                 return ApplyResult(action="skipped", text_node=existing_lang_node)
 
             # Update tspans in place

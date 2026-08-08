@@ -194,7 +194,7 @@ class TestSVGTranslate(TestSetup):
         self.assert_tree_has_translations(tree)
 
     def test_inject_overwrite(self):
-        """Test injection with overwrite option."""
+        """Test injection with overwrite_translations option."""
         # Create test SVG with existing translations
         svg_with_existing = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg"
@@ -225,11 +225,11 @@ class TestSVGTranslate(TestSetup):
         with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
-        # Inject translations with overwrite
+        # Inject translations with overwrite_translations
         tree, stats = inject_file_tree(
             inject_file=svg_path,
             mapping_files=[mapping_path],
-            overwrite=True,
+            overwrite_translations=True,
             return_stats=True,
             save_path=svg_path,
             save_result=True,

@@ -193,7 +193,7 @@ class TestSVGTranslate(TestSetup):
         assert "switch" in tree_str
 
     def test_inject_without_overwrite_skips_existing(self):
-        """Test injection without overwrite skips existing translations."""
+        """Test injection without overwrite_translations skips existing translations."""
         # Create SVG with existing Arabic translation
         svg_with_existing = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg">
@@ -215,11 +215,11 @@ class TestSVGTranslate(TestSetup):
         with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
-        # Inject without overwrite
+        # Inject without overwrite_translations
         tree, stats = inject_file_tree(
             inject_file=svg_path,
             mapping_files=[mapping_path],
-            overwrite=False,
+            overwrite_translations=False,
             return_stats=True,
             save_path=svg_path,
             save_result=True,
@@ -289,11 +289,11 @@ class TestSVGTranslate(TestSetup):
         with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
-        # Test with overwrite=True
+        # Test with overwrite_translations=True
         tree, stats = inject_file_tree(
             inject_file=svg_path,
             mapping_files=[mapping_path],
-            overwrite=True,
+            overwrite_translations=True,
             return_stats=True,
         )
 

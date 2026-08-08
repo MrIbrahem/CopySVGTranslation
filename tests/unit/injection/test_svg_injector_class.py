@@ -154,18 +154,18 @@ class TestSVGTranslationInjectorInit(TestSetup):
         config = TranslationConfig()
         inj = SVGTranslationInjector(config)
         assert inj.config.case_insensitive is True
-        assert inj.config.overwrite is False
+        assert inj.config.overwrite_translations is False
         assert inj.config.pretty_print is None
 
     def test_custom_parameters(self):
         config = TranslationConfig(
             case_insensitive=False,
-            overwrite=True,
+            overwrite_translations=True,
             pretty_print=False,
         )
         inj = SVGTranslationInjector(config)
         assert inj.config.case_insensitive is False
-        assert inj.config.overwrite is True
+        assert inj.config.overwrite_translations is True
         assert inj.config.pretty_print is False
 
 
@@ -305,7 +305,7 @@ class TestSVGTranslationInjectorCaseSensitivity(TestSetup):
 
 
 class TestSVGTranslationInjectorOverwrite(TestSetup):
-    """Tests for overwrite behaviour."""
+    """Tests for overwrite_translations behaviour."""
 
     def test_skip_existing_language_without_overwrite(self, tmp_path: Path):
         inner = """
@@ -315,7 +315,7 @@ class TestSVGTranslationInjectorOverwrite(TestSetup):
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        config = TranslationConfig(overwrite=False)
+        config = TranslationConfig(overwrite_translations=False)
         inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "New"}}}
 
@@ -332,7 +332,7 @@ class TestSVGTranslationInjectorOverwrite(TestSetup):
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        config = TranslationConfig(overwrite=True)
+        config = TranslationConfig(overwrite_translations=True)
         inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "New"}}}
 
@@ -349,7 +349,7 @@ class TestSVGTranslationInjectorOverwrite(TestSetup):
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        config = TranslationConfig(overwrite=True)
+        config = TranslationConfig(overwrite_translations=True)
         inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "New Arabic"}}}
 
@@ -370,7 +370,7 @@ class TestSVGTranslationInjectorOverwrite(TestSetup):
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        config = TranslationConfig(overwrite=False)
+        config = TranslationConfig(overwrite_translations=False)
         inj = SVGTranslationInjector(config)
         mappings = {"new": {"hello": {"ar": "Should skip", "fr": "Should insert"}}}
 

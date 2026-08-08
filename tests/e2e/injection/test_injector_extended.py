@@ -21,10 +21,10 @@ def work_on_switches(
     existing_ids: set[str],
     mapping: Mapping,
     case_insensitive: bool = True,
-    overwrite: bool = False,
+    overwrite_translations: bool = False,
 ) -> dict:
     """Process ``<switch>`` elements and insert or update translations."""
-    config = TranslationConfig(case_insensitive=case_insensitive, overwrite=overwrite)
+    config = TranslationConfig(case_insensitive=case_insensitive, overwrite_translations=overwrite_translations)
     injector = SVGTranslationInjector(config)
 
     stats = InjectorStats()
@@ -83,7 +83,7 @@ class TestWorkOnSwitches(TestSetup):
         existing_ids = {"text1", "text1-ar"}
         mapping = {"new": {"hello": {"ar": "مرحبا جديد", "fr": "Bonjour"}}}
 
-        stats = work_on_switches(root, existing_ids, mapping, overwrite=False)
+        stats = work_on_switches(root, existing_ids, mapping, overwrite_translations=False)
 
         assert stats["skipped_translations"] == 1
         assert stats["inserted_translations"] == 1
@@ -100,7 +100,7 @@ class TestWorkOnSwitches(TestSetup):
         existing_ids = {"text1", "text1-ar"}
         mapping = {"new": {"hello": {"ar": "New"}}}
 
-        stats = work_on_switches(root, existing_ids, mapping, overwrite=True)
+        stats = work_on_switches(root, existing_ids, mapping, overwrite_translations=True)
 
         assert stats["updated_translations"] == 1
 

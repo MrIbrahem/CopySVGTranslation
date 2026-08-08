@@ -33,7 +33,7 @@ class TestWorkflows:
         assert "processed_switches" in stats
 
     def test_inject_with_overwrite(self, temp_dir):
-        """Test inject with overwrite parameter."""
+        """Test inject with overwrite_translations parameter."""
         target = temp_dir / "target.svg"
         target.write_text(
             """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
@@ -45,7 +45,7 @@ class TestWorkflows:
         tree, stats = inject_file_tree(
             mapping=translations,
             inject_file=target,
-            overwrite=True,
+            overwrite_translations=True,
             return_stats=True,
         )
         assert tree is not None
