@@ -73,10 +73,12 @@ def stats():
 
 
 def make_config(
-    overwrite: bool = False, case_insensitive: bool = False, fallback_to_default_text: bool = False
+    overwrite_translations: bool = False, case_insensitive: bool = False, fallback_to_default_text: bool = False
 ) -> TranslationConfig:
     return TranslationConfig(
-        overwrite=overwrite, case_insensitive=case_insensitive, fallback_to_default_text=fallback_to_default_text
+        overwrite_translations=overwrite_translations,
+        case_insensitive=case_insensitive,
+        fallback_to_default_text=fallback_to_default_text,
     )
 
 
@@ -310,14 +312,14 @@ class TestProcessInsertion(TestSetup):
 
 
 # ---------------------------------------------------------------------------
-# process() - existing language nodes: skip vs overwrite
+# process() - existing language nodes: skip vs overwrite_translations
 # ---------------------------------------------------------------------------
 
 
 class TestProcessExistingLanguage(TestSetup):
     def test_existing_language_is_skipped_when_overwrite_disabled(self, id_manager, stats):
         switch = make_switch('<text id="t1">hello</text><text id="t1-ar" systemLanguage="ar">مرحبا قديم</text>')
-        processor = make_processor(config=make_config(overwrite=False), id_manager=id_manager)
+        processor = make_processor(config=make_config(overwrite_translations=False), id_manager=id_manager)
 
         processor.process(switch, {"new": {"hello": {"ar": "مرحبا جديد"}}}, stats)
 
@@ -333,7 +335,7 @@ class TestProcessExistingLanguage(TestSetup):
             '<text id="t1"><tspan id="s1">hello</tspan></text>'
             '<text id="t1-ar" systemLanguage="ar"><tspan id="s1-ar">مرحبا قديم</tspan></text>'
         )
-        processor = make_processor(config=make_config(overwrite=True), id_manager=id_manager)
+        processor = make_processor(config=make_config(overwrite_translations=True), id_manager=id_manager)
 
         processor.process(switch, {"new": {"hello": {"ar": "مرحبا جديد"}}}, stats)
 
@@ -352,7 +354,7 @@ class TestProcessExistingLanguage(TestSetup):
             '<text id="a1" systemLanguage="ar"><tspan id="a1s">old1</tspan></text>'
             '<text id="a2" systemLanguage="ar"><tspan id="a2s">old2</tspan></text>'
         )
-        processor = make_processor(config=make_config(overwrite=True), id_manager=id_manager)
+        processor = make_processor(config=make_config(overwrite_translations=True), id_manager=id_manager)
 
         processor.process(switch, {"new": {"hello": {"ar": "new"}}}, stats)
 
@@ -371,7 +373,7 @@ class TestProcessExistingLanguage(TestSetup):
             '<text id="t1"><tspan id="s1">hello</tspan></text>'
             '<text id="fr1" systemLanguage="fr"><tspan id="frs">bonjour</tspan></text>'
         )
-        processor = make_processor(config=make_config(overwrite=True), id_manager=id_manager)
+        processor = make_processor(config=make_config(overwrite_translations=True), id_manager=id_manager)
 
         processor.process(switch, {"new": {"hello": {"fr": "bonjour2"}}}, stats)
 
@@ -387,7 +389,7 @@ class TestProcessExistingLanguage(TestSetup):
             '<text id="t1"><tspan id="s1">hello</tspan></text>'
             '<text id="ar1" systemLanguage="ar">plain text no tspans</text>'
         )
-        processor = make_processor(config=make_config(overwrite=True), id_manager=id_manager)
+        processor = make_processor(config=make_config(overwrite_translations=True), id_manager=id_manager)
 
         processor.process(switch, {"new": {"hello": {"ar": "new"}}}, stats)
 
@@ -405,7 +407,7 @@ class TestProcessExistingLanguage(TestSetup):
             '<tspan id="a1">old1</tspan><tspan id="a2">old2</tspan>'
             "</text>"
         )
-        processor = make_processor(config=make_config(overwrite=True), id_manager=id_manager)
+        processor = make_processor(config=make_config(overwrite_translations=True), id_manager=id_manager)
 
         processor.process(switch, {"new": {"hello": {"ar": "new"}}}, stats)
 

@@ -95,8 +95,7 @@ class TestTranslationMappingFactory:
         """Legacy format where 'new' key is absent and the dict itself is the map."""
         data = {"hello": {"ar": "مرحبا"}}
         m = TranslationMapping.from_any(data)
-        # When 'new' is not a key, the whole dict becomes .new
-        assert "hello" in m.new
+        assert "hello" not in m.new
 
     def test_from_extractor_data(self):
         data = {"new": {"hello": {"ar": "مرحبا"}}, "tspans_by_id": {"t0": "hello"}}

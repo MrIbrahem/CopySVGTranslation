@@ -66,7 +66,7 @@ class TranslationMapping:
         if isinstance(data, TranslationMapping):
             return data
         return cls(
-            new=dict(data.get("new", data if "new" not in data else {})),
+            new=dict(data.get("new", {})),
             title_new=dict(data.get("title_new", {})),
             tspans_by_id=dict(data.get("tspans_by_id", {})),
             meta=dict(data.get("meta", {})),

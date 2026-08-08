@@ -242,7 +242,9 @@ def make_new_title_translations(new: dict[str, dict[str, str]]) -> dict[str, dic
     year_handler = YearTitleHandler(config)
     mapping = TranslationMapping(new=new)
 
-    year_handler.build_title_new_templates(mapping)
+    data = year_handler.build_title_new_templates(mapping.new)
+    if data:
+        mapping.title_new.update(data)
 
     return mapping.title_new
 

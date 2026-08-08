@@ -15,6 +15,7 @@ from ..exceptions import SvgIOError, SvgParseError
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
 from ..utils.text import normalize_text
+from .header_adder import AddTitlesTranslationsFromTitles
 from .strategies import ByTspanIdStrategy, MatchingStrategy
 
 logger = logging.getLogger(__name__)
@@ -125,6 +126,7 @@ class SVGTranslationExtractor:
         header = self._extract_header_mapping(root)
         if header:
             mapping.meta["header"] = header
+            self.process_new_header_titles(mapping)
 
         return mapping
 
@@ -156,6 +158,29 @@ class SVGTranslationExtractor:
         result = self.extract(path)
 
         return result.to_json()
+
+    def process_new_header_titles(self, mapping: TranslationMapping) -> None:
+        """Insert new translations into the translations dictionary."""
+        if not self.config.create_lang_template:
+            return
+
+        header = mapping.meta.get("header", {})
+        extra_titles_new = self.year_handler.build_title_new_templates(header, create_lang_template=True)
+
+        if not extra_titles_new:
+            return
+
+        # create new object with new titles, so we don't modify the original title_new or most likely overwrite it
+        new_object = TranslationMapping.from_any({"title_new": extra_titles_new})
+
+        adder = AddTitlesTranslationsFromTitles(new_object)
+        adder.run()
+
+        if adder.changes is False:
+            return
+
+        mapping.new.update(new_object.new)
+        return
 
 
 __all__ = [

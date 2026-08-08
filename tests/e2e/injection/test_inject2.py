@@ -93,7 +93,7 @@ class Testinject:
             inject_file=file,
             save_path=file,
             mapping=data,
-            overwrite=True,
+            overwrite_translations=True,
             pretty_print=True,
         )
 
