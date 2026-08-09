@@ -52,6 +52,7 @@ class NestedStructureService:
                 parser = etree.XMLParser(
                     remove_blank_text=True,
                     resolve_entities=False,
+                    no_network=True,
                 )
                 tree = etree.parse(str(path), parser)
                 root = tree.getroot()
@@ -81,6 +82,7 @@ class NestedStructureService:
             parser = etree.XMLParser(
                 remove_blank_text=False,
                 resolve_entities=False,
+                no_network=True,
             )
             tree = etree.parse(str(path), parser)
             root = tree.getroot()
@@ -127,6 +129,7 @@ class NestedStructureService:
             parser = etree.XMLParser(
                 remove_blank_text=False,
                 resolve_entities=False,
+                no_network=True,
             )
             tree = etree.parse(str(src_path), parser)
             root = tree.getroot()

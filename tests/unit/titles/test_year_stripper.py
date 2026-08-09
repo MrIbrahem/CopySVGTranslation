@@ -87,9 +87,10 @@ class TestByLanguage:
         assert ByLanguage("abr", text).run() == expected
 
     def test_abr_returns_none_when_suffix_does_not_match(self):
-        # "abr" only recognizes ", afe {year}", not the generic comma suffix.
+        # "abr" only recognizes ", afe {year}" for its specific pattern,
+        # but falls back to generic comma suffix stripping.
         text = "Parkinson yareɛ a ebu soɔ, {year}"
-        assert ByLanguage("abr", text).run() is None
+        assert ByLanguage("abr", text).run() == "Parkinson yareɛ a ebu soɔ"
 
     def test_ja_strips_prefix(self):
         text = "{year}年のパーキンソン病の流行"
@@ -104,7 +105,8 @@ class TestByLanguage:
 
     def test_ja_returns_none_when_no_known_pattern(self):
         text = "パーキンソン病の流行 {year}"
-        assert ByLanguage("ja", text).run() is None
+        # With generic fallback, " {year}" is stripped
+        assert ByLanguage("ja", text).run() == "パーキンソン病の流行"
 
 
 # ---------------------------------------------------------------------------
@@ -171,7 +173,7 @@ class TestRenderTitlesTranslations:
         # stripping should not be included, even if the English key does.
         title_new = {
             "prevalence, {year}": {
-                "es": "prevalencia {year}",  # no matching suffix pattern -> None -> skipped
+                "es": "prevalencia",  # no {year} -> None -> skipped
                 "ar": "الانتشار، {year}",
             }
         }
@@ -197,7 +199,7 @@ class TestRenderTitlesTranslations:
         # key should not appear in the final output at all.
         title_new = {
             "prevalence, {year}": {
-                "es": "prevalencia {year}",  # unmatched suffix -> None
+                "es": "prevalencia",  # no {year} -> None -> skipped
             }
         }
         result = render_translations_for_titles(title_new)

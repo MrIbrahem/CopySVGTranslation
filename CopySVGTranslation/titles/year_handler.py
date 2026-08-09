@@ -111,9 +111,15 @@ class YearTitleHandler:
         if not changed:
             return False
 
+        # Capture the destination state before merging
+        import copy
+        before_new = copy.deepcopy(mapping.new)
+
         # Merge translations per-key, preserving existing language translations
         mapping.merge(new_object, merge_keys=["new"])
-        return True
+
+        # Return True only when the merge adds or changes destination entries
+        return before_new != mapping.new
 
     def build_templates(self, mapping: TranslationMapping) -> None:
         """

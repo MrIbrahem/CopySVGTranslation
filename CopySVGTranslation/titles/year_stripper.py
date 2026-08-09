@@ -21,6 +21,7 @@ class YearPatternStripper:
         ",{year}",
         "، {year}",
         "،{year}",
+        " {year}",
     ]
 
     LANG_SPECIFIC = {
@@ -53,7 +54,6 @@ class YearPatternStripper:
             for suffix in spec.get("suffixes", []):
                 if self.text.endswith(suffix):
                     return self.text[:-len(suffix)].strip()
-            return None
 
         # Generic fallback
         for suffix in self.GENERIC_SUFFIXES:
