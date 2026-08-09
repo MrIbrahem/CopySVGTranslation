@@ -52,5 +52,4 @@ __all__ = [
     "TranslationConfig",
     "TranslationEntry",
     "TranslationMapping",
-    "__version__",
 ]

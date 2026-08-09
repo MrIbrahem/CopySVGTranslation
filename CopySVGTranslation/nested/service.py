@@ -49,7 +49,10 @@ class NestedStructureService:
                 logger.error("File does not exist: %s", path)
                 return []
             try:
-                parser = etree.XMLParser(remove_blank_text=True)
+                parser = etree.XMLParser(
+                    remove_blank_text=True,
+                    resolve_entities=False,
+                )
                 tree = etree.parse(str(path), parser)
                 root = tree.getroot()
                 if root is None:
@@ -75,7 +78,10 @@ class NestedStructureService:
 
         if isinstance(source, (Path, str)):
             path = Path(source)
-            parser = etree.XMLParser(remove_blank_text=False)
+            parser = etree.XMLParser(
+                remove_blank_text=False,
+                resolve_entities=False,
+            )
             tree = etree.parse(str(path), parser)
             root = tree.getroot()
             if root is not None:
@@ -118,7 +124,10 @@ class NestedStructureService:
 
         try:
             # Parse source file
-            parser = etree.XMLParser(remove_blank_text=False)
+            parser = etree.XMLParser(
+                remove_blank_text=False,
+                resolve_entities=False,
+            )
             tree = etree.parse(str(src_path), parser)
             root = tree.getroot()
 

@@ -41,7 +41,10 @@ class NestedTspanDetector:
             return []
 
         try:
-            parser = etree.XMLParser(remove_blank_text=True)
+            parser = etree.XMLParser(
+                remove_blank_text=True,
+                resolve_entities=False,
+            )
             tree = etree.parse(str(path), parser)
             root = tree.getroot()
             if root is None:

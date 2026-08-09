@@ -52,7 +52,10 @@ class MatchFixNestedTags:
         if not self.source_file:
             return None
 
-        parser = etree.XMLParser(remove_blank_text=False)
+        parser = etree.XMLParser(
+            remove_blank_text=False,
+            resolve_entities=False,
+        )
         try:
             tree = etree.parse(str(self.source_file), parser)
             self.root = tree.getroot()
