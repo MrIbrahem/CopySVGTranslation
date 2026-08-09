@@ -197,15 +197,18 @@ class TestTranslationMappingMutation:
         assert data["new"] == {"a": {"ar": "1"}}
         assert data["title_new"] == {"t {year}": {"ar": "2 {year}"}}
         assert data["tspans_by_id"] == {"t0": "a"}
-        # assert data["meta"] == {"source": "test"}
+        assert data["meta"] == m.meta
 
     def test_to_json_roundtrip(self):
-        m = TranslationMapping(new={"x": {"ar": "y"}})
+        m = TranslationMapping(
+            new={"x": {"ar": "y"}},
+            meta={"source": "test"},
+        )
         data = m.to_json()
         m2 = TranslationMapping.from_any(data)
         assert m2.new == m.new
         assert m2.title_new == m.title_new
-        # Note: meta is not round-tripped through to_json (it's excluded)
+        assert m2.meta == m.meta
 
 
 class TestMerge:

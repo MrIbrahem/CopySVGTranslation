@@ -125,7 +125,7 @@ class TranslationMapping:
                         self_new[source][lang] = text
 
         if merge_keys is None:
-            merge_keys = ["new", "title_new"]
+            merge_keys = ["new", "title_new", "tspans_by_id"]
 
         other = self.from_any(other)
 
