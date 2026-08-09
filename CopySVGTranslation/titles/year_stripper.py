@@ -1,4 +1,6 @@
-""" """
+"""
+Module for stripping year patterns from title translations and merging them into mapping.new.
+"""
 
 from __future__ import annotations
 
@@ -9,42 +11,31 @@ from ..core.mapping import TranslationMapping
 logger = logging.getLogger(__name__)
 
 
-class ByLanguage:
+class YearPatternStripper:
+    """
+    Language-specific removal of `{year}` (and related suffixes/prefixes) from a single string.
+    """
+
+    GENERIC_SUFFIXES = [
+        ", {year}",
+        ",{year}",
+        "، {year}",
+        "،{year}",
+    ]
+
+    LANG_SPECIFIC = {
+        "abr": {
+            "suffixes": [", afe {year}"],
+        },
+        "ja": {
+            "prefixes": ["{year}年の", "{year}年"],
+            "suffixes": ["年{year}"],
+        },
+    }
 
     def __init__(self, lang: str, text: str) -> None:
         self.lang = lang
         self.text = text
-        self.ends_data = [
-            ", {year}",
-            ",{year}",
-            "، {year}",
-            "،{year}",
-        ]
-
-    def abr(self) -> str | None:
-        # "abr"	Parkinson yareɛ a ebu soɔ, afe {year}
-        if self.text.endswith(", afe {year}"):
-            return self.text.removesuffix(", afe {year}").strip()
-        else:
-            return None
-
-    def ja(self) -> str | None:
-        # "ja": {year}年のパーキンソン病の流行
-        if self.text.startswith("{year}年の"):
-            return self.text.removeprefix("{year}年の").strip()
-        elif self.text.startswith("{year}年"):
-            return self.text.removeprefix("{year}年").strip()
-        elif self.text.endswith("年{year}"):
-            return self.text.removesuffix("年{year}").strip()
-        else:
-            return None
-
-    def multi_langs(self) -> str | None:
-        # other languages
-        for end_data in self.ends_data:
-            if self.text.endswith(end_data):
-                return self.text.removesuffix(end_data).strip()
-        return None
 
     def run(self) -> str | None:
         if not self.text:
@@ -53,14 +44,27 @@ class ByLanguage:
         if "{year}" not in self.text:
             return None
 
-        langs_funcs = {
-            "abr": self.abr,
-            "ja": self.ja,
-        }
-        if self.lang in langs_funcs:
-            return langs_funcs[self.lang]()
+        # Check language-specific patterns first
+        spec = self.LANG_SPECIFIC.get(self.lang)
+        if spec:
+            for prefix in spec.get("prefixes", []):
+                if self.text.startswith(prefix):
+                    return self.text[len(prefix):].strip()
+            for suffix in spec.get("suffixes", []):
+                if self.text.endswith(suffix):
+                    return self.text[:-len(suffix)].strip()
+            return None
 
-        return self.multi_langs()
+        # Generic fallback
+        for suffix in self.GENERIC_SUFFIXES:
+            if self.text.endswith(suffix):
+                return self.text[:-len(suffix)].strip()
+
+        return None
+
+
+# For backward compatibility
+ByLanguage = YearPatternStripper
 
 
 class TitlesTranslationsRenderer:
@@ -75,7 +79,7 @@ class TitlesTranslationsRenderer:
 
     @staticmethod
     def _text_by_lang(lang: str, text: str) -> str | None:
-        return ByLanguage(lang, text).run()
+        return YearPatternStripper(lang, text).run()
 
     def _render_translations(self, translations: dict[str, str]) -> dict[str, str]:
         new_key_data = {}
@@ -104,7 +108,10 @@ class TitlesTranslationsRenderer:
         return data
 
 
-class AddTitlesTranslationsFromTitles:
+class YearFreeTitleMerger:
+    """
+    Merges year-free title translations into the mapping's standard translations dictionary.
+    """
 
     def __init__(self, mapping: TranslationMapping) -> None:
         self.mapping = mapping
@@ -113,12 +120,10 @@ class AddTitlesTranslationsFromTitles:
     def _add_from_titles(self, titles_new: dict[str, dict[str, str]], new_keys: list[str]) -> dict[str, dict[str, str]]:
         title_new_translations = TitlesTranslationsRenderer(titles_new).run()
         result = {x: v for x, v in title_new_translations.items() if x not in new_keys}
-
         return result
 
     def run(self) -> None:
         """Insert new translations into the translations dictionary."""
-
         titles_new = self.mapping.title_new
         new_translations = self.mapping.new
 
@@ -136,9 +141,39 @@ class AddTitlesTranslationsFromTitles:
             self.changes = False
 
 
+# For backward compatibility
+AddTitlesTranslationsFromTitles = YearFreeTitleMerger
+
+
+# ---------------------------------------------------------------------------
+# Pure / Explicit APIs
+# ---------------------------------------------------------------------------
+
+def derive_year_free_entries(
+    title_new: dict[str, dict[str, str]],
+) -> dict[str, dict[str, str]]:
+    """
+    Derives year-free translation entries from title templates containing {year}.
+    """
+    return TitlesTranslationsRenderer(title_new).run()
+
+
+def merge_year_free_into_new(mapping: TranslationMapping) -> bool:
+    """
+    Merges year-free title translations from mapping.title_new into mapping.new.
+    Returns True if mapping.new was modified.
+    """
+    merger = YearFreeTitleMerger(mapping)
+    merger.run()
+    return bool(merger.changes)
+
+
 __all__ = [
+    "YearPatternStripper",
     "ByLanguage",
     "TitlesTranslationsRenderer",
-    # MAIN API:
+    "YearFreeTitleMerger",
     "AddTitlesTranslationsFromTitles",
+    "derive_year_free_entries",
+    "merge_year_free_into_new",
 ]

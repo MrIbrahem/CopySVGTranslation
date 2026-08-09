@@ -5,7 +5,7 @@ import pytest
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.core.mapping import TranslationMapping
 from CopySVGTranslation.extraction import SVGTranslationExtractor
-from CopySVGTranslation.extraction.header_adder import (
+from CopySVGTranslation.titles.year_stripper import (
     AddTitlesTranslationsFromTitles,
     ByLanguage,
     TitlesTranslationsRenderer,

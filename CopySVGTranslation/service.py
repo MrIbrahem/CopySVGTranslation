@@ -13,6 +13,7 @@ from .core.mapping import TranslationMapping
 from .extraction.extractor import SVGTranslationExtractor
 from .injection.injector import SVGTranslationInjector
 from .io.mapping_store import MappingStore
+from .nested import NestedStructureService
 from .result import InjectorData, OperationResult
 
 logger = logging.getLogger(__name__)
@@ -32,10 +33,61 @@ class SVGTranslationService:
         self._extractor = SVGTranslationExtractor(self.config)
         self._injector = SVGTranslationInjector(self.config)
         self._mapping_store = MappingStore(self.config)
+        self._nested = NestedStructureService(
+            strategy=self.config.nested_strategy,
+            also_fix_a=True,
+        )
 
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
+
+    def analyze_nested(
+        self,
+        svg_path: Path | str,
+    ) -> OperationResult[list[str]]:
+        """
+        Detect nested tspan/a structures. Read-only.
+        """
+        try:
+            findings = self._nested.analyze(Path(svg_path))
+            return OperationResult.ok(data=findings)
+        except Exception as exc:
+            return OperationResult.fail(
+                error=str(exc),
+                error_code=getattr(exc, "code", "nested_analyze_error"),
+            )
+
+    def repair_nested(
+        self,
+        svg_path: Path | str,
+        *,
+        output: Path | str | None = None,
+        strategy: Any = None,  # Can be NestedStrategy or None
+        save: bool = True,
+    ) -> OperationResult[etree._ElementTree]:
+        """
+        Repair nested structures and optionally save.
+        Does NOT run as part of extract/inject.
+        """
+        try:
+            tree = self._nested.repair(
+                Path(svg_path),
+                strategy=strategy or self.config.nested_strategy,
+            )
+            if save:
+                if output is None:
+                    return OperationResult.fail(
+                        error="save=True but no output path",
+                        error_code="missing_output_path",
+                    )
+                self._save_tree(tree, Path(output))
+            return OperationResult.ok(data=tree)
+        except Exception as exc:
+            return OperationResult.fail(
+                error=str(exc),
+                error_code=getattr(exc, "code", "nested_repair_error"),
+            )
 
     def extract(
         self,

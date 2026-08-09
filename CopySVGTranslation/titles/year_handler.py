@@ -81,6 +81,40 @@ class YearTitleHandler:
     # Extraction side
     # ------------------------------------------------------------------
 
+    def process_header_titles(self, mapping: TranslationMapping) -> bool:
+        """
+        Extract titles with years from mapping.meta['header'], template them,
+        strip their years, and merge the year-free translations into mapping.new.
+        Respects enable_year_titles (self.enabled) and config.create_lang_template.
+        Returns True if mapping.new was modified.
+        """
+        if not self.enabled:
+            return False
+
+        if not self.config.create_lang_template:
+            return False
+
+        header = mapping.meta.get("header", {})
+        if not header:
+            return False
+
+        extra_titles_new = self.build_title_new_templates(header, create_lang_template=True)
+        if not extra_titles_new:
+            return False
+
+        # Create new object with new titles, so we don't modify the original title_new or overwrite it
+        new_object = TranslationMapping.from_any({"title_new": extra_titles_new})
+
+        from .year_stripper import merge_year_free_into_new
+        changed = merge_year_free_into_new(new_object)
+
+        if not changed:
+            return False
+
+        # Merge translations per-key, preserving existing language translations
+        mapping.merge(new_object, merge_keys=["new"])
+        return True
+
     def build_templates(self, mapping: TranslationMapping) -> None:
         """
         Populate mapping.title_new from mapping.new.
