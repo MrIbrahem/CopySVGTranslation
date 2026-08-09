@@ -73,7 +73,7 @@ class TranslationMapping:
     def is_empty(self) -> bool:
         return not self.new and not self.title_new
 
-    def all_languages_count(self) -> set[str]:
+    def all_languages(self) -> set[str]:
         langs: set[str] = set()
         for section in (self.new, self.title_new):
             for trans in section.values():
