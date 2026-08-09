@@ -113,6 +113,7 @@ def test_header_result_with_false_config(temp_dir: Path):
         "parkinson's disease prevalence, 1990": {"dag": "Parkinson's doro ni, yuuni 1990 puli ni"}
     }
 
+
 def test_header_result_with_true_config(temp_dir: Path):
 
     svg = _write_full_svg(temp_dir, FULL_TEXT_EXAMPLE, name="testx.svg")
@@ -125,15 +126,13 @@ def test_header_result_with_true_config(temp_dir: Path):
     # serialized = json.dumps(result.new, ensure_ascii=True)
 
     assert result.new == {
-        "parkinson's disease prevalence, 1990": {
-            "dag": "Parkinson's doro ni, yuuni 1990 puli ni"
-        },
+        "parkinson's disease prevalence, 1990": {"dag": "Parkinson's doro ni, yuuni 1990 puli ni"},
         "estimated number of people with parkinson's disease\u00b9 per 100,000 people.": {
             "dag": "Salo kalinli ban daa mali Parkinson's doro \u014b\u0254 daadam 100,000 kalinli li."
         },
-       "parkinson's disease prevalence": {
-           "dag": "Parkinson's doro ni",
-       },
+        "parkinson's disease prevalence": {
+            "dag": "Parkinson's doro ni",
+        },
     }
 
     assert result.meta.get("header") == {

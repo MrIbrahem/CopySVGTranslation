@@ -167,7 +167,7 @@ class TestTranslationMappingQuery:
 # Mutation helpers
 # ---------------------------------------------------------------------------
 class TestTranslationMappingMutation:
-    """Tests for add, merge, and to_json."""
+    """Tests for add and to_json."""
 
     def test_add_case_insensitive(self):
         m = TranslationMapping()
@@ -186,6 +186,29 @@ class TestTranslationMappingMutation:
         m.add("hello", "fr", "bonjour")
         assert m.new["hello"] == {"ar": "مرحبا", "fr": "bonjour"}
 
+    def test_to_json(self):
+        m = TranslationMapping(
+            new={"a": {"ar": "1"}},
+            title_new={"t {year}": {"ar": "2 {year}"}},
+            tspans_by_id={"t0": "a"},
+            meta={"source": "test"},
+        )
+        data = m.to_json()
+        assert data["new"] == {"a": {"ar": "1"}}
+        assert data["title_new"] == {"t {year}": {"ar": "2 {year}"}}
+        assert data["tspans_by_id"] == {"t0": "a"}
+        # assert data["meta"] == {"source": "test"}
+
+    def test_to_json_roundtrip(self):
+        m = TranslationMapping(new={"x": {"ar": "y"}})
+        data = m.to_json()
+        m2 = TranslationMapping.from_any(data)
+        assert m2.new == m.new
+        assert m2.title_new == m.title_new
+        # Note: meta is not round-tripped through to_json (it's excluded)
+
+
+class TestMerge:
     def test_merge_mappings(self):
         m1 = TranslationMapping(new={"a": {"ar": "1"}})
         m2 = TranslationMapping(new={"b": {"fr": "2"}}, title_new={"t": {"ar": "3"}})
@@ -211,23 +234,32 @@ class TestTranslationMappingMutation:
         m1.merge(m2)
         assert m1.tspans_by_id == {"t0": "hello", "t1": "world"}
 
-    def test_to_json(self):
-        m = TranslationMapping(
-            new={"a": {"ar": "1"}},
-            title_new={"t {year}": {"ar": "2 {year}"}},
-            tspans_by_id={"t0": "a"},
-            meta={"source": "test"},
-        )
-        data = m.to_json()
-        assert data["new"] == {"a": {"ar": "1"}}
-        assert data["title_new"] == {"t {year}": {"ar": "2 {year}"}}
-        assert data["tspans_by_id"] == {"t0": "a"}
-        # assert data["meta"] == {"source": "test"}
+    def test_merge_mappings_not_replace_old(self):
+        data_1 = {
+            "new": {
+                "a": {"ar": "1"},
+            },
+            "title_new": {
+                "t": {"en": "en"},
+            },
+        }
+        data_2 = {
+            "new": {
+                "a": {"ar": "2"},
+                "b": {"fr": "2"},
+            },
+            "title_new": {
+                "t": {"ar": "ar"},
+            },
+        }
+        m1 = TranslationMapping.from_any(data_1)
+        m2 = TranslationMapping.from_any(data_2)
+        m1.merge(m2)
 
-    def test_to_json_roundtrip(self):
-        m = TranslationMapping(new={"x": {"ar": "y"}})
-        data = m.to_json()
-        m2 = TranslationMapping.from_any(data)
-        assert m2.new == m.new
-        assert m2.title_new == m.title_new
-        # Note: meta is not round-tripped through to_json (it's excluded)
+        assert m1.to_json() == {
+            "new": {"a": {"ar": "1"}, "b": {"fr": "2"}},
+            "title_new": {"t": {"ar": "ar", "en": "en"}},
+            "tspans_by_id": {},
+            "meta": {},
+            "error": "",
+        }

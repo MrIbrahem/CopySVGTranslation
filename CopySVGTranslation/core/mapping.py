@@ -39,7 +39,7 @@ class TranslationMapping:
     title_new: dict[str, dict[str, str]] = field(default_factory=dict)
     tspans_by_id: dict[str, str] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
-    error: str = ""
+    error: str | None = None
 
     # ------------------------------------------------------------------
     # Factory helpers
@@ -48,12 +48,18 @@ class TranslationMapping:
     def from_any(cls, data: Mapping[str, Any] | TranslationMapping) -> TranslationMapping:
         if isinstance(data, TranslationMapping):
             return data
+
+        data_json = data
+
+        if not isinstance(data_json, dict) and not isinstance(data_json, Mapping):
+            raise TypeError(f"Expected Mapping/TranslationMapping/dict, got {type(data_json)}")
+
         return cls(
-            new=dict(data.get("new", {})),
-            title_new=dict(data.get("title_new", {})),
-            tspans_by_id=dict(data.get("tspans_by_id", {})),
-            meta=dict(data.get("meta", {})),
-            error=data.get("error", ""),
+            new=dict(data_json.get("new", {})),
+            title_new=dict(data_json.get("title_new", {})),
+            tspans_by_id=dict(data_json.get("tspans_by_id", {})),
+            meta=dict(data_json.get("meta", {})),
+            error=data_json.get("error", ""),
         )
 
     @classmethod
@@ -98,16 +104,46 @@ class TranslationMapping:
         key = source.lower() if case_insensitive else source
         self.new.setdefault(key, {})[lang] = text
 
-    def merge(self, other: TranslationMapping | Mapping[str, Any]) -> None:
+    def merge(self, other: TranslationMapping | Mapping[str, Any], merge_keys: list[str] | None = None) -> None:
+        """
+        Mapping structure to understand merge logic:
+        {
+            "new": { "text, 1990": { "abr": "text, afe 1990", "ar": "نص، 1990" } },
+            "tspans_by_id": { "trsvg1": "text, 1990" },
+            "title_new": { "text, {year}": { "abr": "text, afe {year}", "ar": "نص، {year}" } },
+            "meta": {
+                "header": { "text, 1990": { "abr": "text, afe 1990", "ar": "نص، 1990" } }
+            },
+            "error": ""
+        }
+        """
+        def _merge_dict(self_new, other_new) -> None:
+            for source, lang_dict in other_new.items():
+                self_new.setdefault(source, {})
+                for lang, text in lang_dict.items():
+                    if lang not in self_new[source]:
+                        self_new[source][lang] = text
+
+        if merge_keys is None:
+            merge_keys = ["new", "title_new"]
+
         other = self.from_any(other)
 
-        for source, trans in other.new.items():
-            self.new.setdefault(source, {}).update(trans)
+        # Merge new mapping
+        # new structure: {"new": { "text, 1990": { "abr": "text, afe 1990", "ar": "نص، 1990" } }, ...}
+        if "new" in merge_keys:
+            _merge_dict(self.new, other.new)
 
-        for source, trans in other.title_new.items():
-            self.title_new.setdefault(source, {}).update(trans)
+        # Merge title_new mapping
+        # title_new structure: {"title_new": { "text, {year}": { "abr": "text, afe {year}", "ar": "نص، {year}" } }, ...}
+        if "title_new" in merge_keys:
+            _merge_dict(self.title_new, other.title_new)
 
-        self.tspans_by_id.update(other.tspans_by_id)
+        # Merge tspans_by_id mapping
+        if "tspans_by_id" in merge_keys:
+            self.tspans_by_id.update(other.tspans_by_id)
+
+        # Should we Merge meta?
 
     def to_json(self) -> dict[str, Any]:
         error = self.error or self.meta.get("error") or ""

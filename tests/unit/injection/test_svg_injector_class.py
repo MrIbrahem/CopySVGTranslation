@@ -709,7 +709,7 @@ class TestExtractorInjectorE2E(TestSetup):
         # Extract
         extractor = SVGTranslationExtractor()
         extract_result = extractor.extract(source_svg)
-        assert extract_result.error == ""
+        assert extract_result.error is None
 
         # Inject
         injector = SVGTranslationInjector()

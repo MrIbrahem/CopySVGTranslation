@@ -180,11 +180,7 @@ class SVGTranslationExtractor:
             return
 
         # Merge translations per-key, preserving existing language translations
-        for key, lang_dict in new_object.new.items():
-            mapping.new.setdefault(key, {})
-            for lang, text in lang_dict.items():
-                if lang not in mapping.new[key]:
-                    mapping.new[key][lang] = text
+        mapping.merge(new_object, merge_keys=["new"])
 
 
 __all__ = [
