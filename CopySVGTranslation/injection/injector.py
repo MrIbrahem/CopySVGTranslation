@@ -117,6 +117,7 @@ class SVGTranslationInjector:
 
         # 4. Process every switch
         mapping_obj = TranslationMapping.from_any(mapping)
+
         self.work_on_switches(
             root=root,
             mapping=mapping_obj,

@@ -46,7 +46,7 @@ class TestExtractorData:
         assert data.new == {}
         assert data.tspans_by_id == {}
         assert data.title_new == {}
-        assert data.error == ""
+        assert data.error is None
 
     def test_to_json_returns_dict(self):
         data = TranslationMapping()
@@ -125,7 +125,7 @@ class TestSVGTranslationExtractorExtract:
         result = ext.extract(svg)
 
         assert isinstance(result, TranslationMapping)
-        assert result.error == ""
+        assert result.error is None
         assert "hello" in result.new
         assert result.new["hello"]["ar"] == "مرحبا"
 
@@ -145,7 +145,7 @@ class TestSVGTranslationExtractorExtract:
         ext = SVGTranslationExtractor()
         result = ext.extract(svg)
 
-        assert result.error == ""
+        assert result.error is None
         assert "hello" in result.new
         assert result.new["hello"]["ar"] == "مرحبا"
         assert result.new["hello"]["fr"] == "Bonjour"
@@ -212,7 +212,7 @@ class TestSVGTranslationExtractorExtract:
         ext = SVGTranslationExtractor()
         result = ext.extract(svg)
 
-        assert result.error == ""
+        assert result.error is None
         # The full text should be in "new"
         assert "population 2020" in result.new
         # Title section should have the year-stripped version
@@ -224,7 +224,7 @@ class TestSVGTranslationExtractorExtract:
         ext = SVGTranslationExtractor()
         result = ext.extract(svg)
 
-        assert result.error == ""
+        assert result.error is None
         assert result.new == {}
 
     def test_text_without_tspan(self, tmp_path: Path):
@@ -241,14 +241,14 @@ class TestSVGTranslationExtractorExtract:
         # Without tspan children the text node content is used directly.
         # The key may not appear in "new" if there's no tspan id to match,
         # but the extractor should not crash.
-        assert result.error == ""
+        assert result.error is None
 
     def test_empty_svg(self, tmp_path: Path):
         svg = _write_svg(tmp_path, "")
         ext = SVGTranslationExtractor()
         result = ext.extract(svg)
 
-        assert result.error == ""
+        assert result.error is None
         assert result.new == {}
 
     def test_whitespace_normalization(self, tmp_path: Path):
@@ -306,7 +306,7 @@ class TestSVGTranslationExtractorErrors:
         svg = _write_svg(tmp_path, '<switch><text id="t0"><tspan id="t0">Hi</tspan></text></switch>')
         ext = SVGTranslationExtractor()
         result = ext.extract(svg)
-        assert result.error == ""
+        assert result.error is None
 
 
 # ===========================================================================
