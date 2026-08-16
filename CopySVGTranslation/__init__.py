@@ -29,12 +29,13 @@ from .injection import SVGTranslationInjector
 # ---------------------------------------------------------------------------
 # Legacy compatibility layer (deprecated)
 # ---------------------------------------------------------------------------
-from .nested import NestedTspanDetector, NestedTspanFlattener
+from .nested import MatchFixNestedTags, NestedTspanDetector, NestedTspanFlattener
 from .service import SVGTranslationService
 
 __all__ = [
     # version
     "__version__",
+    "MatchFixNestedTags",
     "NestedTspanDetector",
     "NestedTspanFlattener",
     "SVGTranslationExtractor",
@@ -43,4 +44,5 @@ __all__ = [
     "TranslationConfig",
     "TranslationEntry",
     "TranslationMapping",
+    "__version__",
 ]

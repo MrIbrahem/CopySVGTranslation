@@ -1,47 +1,12 @@
-# extraction/header.py
+""" """
+
 from __future__ import annotations
 
 import logging
-from lxml import etree
 
-from ..config import TranslationConfig
-from ..core import SwitchNode
 from ..core.mapping import TranslationMapping
-from .strategies import ByTspanIdStrategy, MatchingStrategy
-from .switch_collector import SwitchTranslationCollector
 
 logger = logging.getLogger(__name__)
-SVG_NS = {"svg": "http://www.w3.org/2000/svg"}
-
-
-class HeaderMappingExtractor:
-    """
-    Extract translations only from header switches:
-    //svg:g[@id='header']//svg:switch[not(ancestor::svg:g[@id='subtitle'])]
-    """
-
-    def __init__(
-        self,
-        config: TranslationConfig | None = None,
-        strategy: MatchingStrategy | None = None,
-    ) -> None:
-        self.config = config or TranslationConfig()
-        self.strategy = strategy or ByTspanIdStrategy()
-        self.collector = SwitchTranslationCollector(self.config, self.strategy)
-
-    def extract(self, root: etree._Element) -> dict[str, dict[str, str]]:
-        switches = root.xpath(
-            "//svg:g[@id='header']//svg:switch[not(ancestor::svg:g[@id='subtitle'])]",
-            namespaces=SVG_NS,
-        )
-        if not switches:
-            return {}
-
-        mapping = TranslationMapping()
-        for el in switches:
-            self.collector.collect(SwitchNode(el), mapping)
-
-        return mapping.new
 
 
 class ByLanguage:
@@ -57,12 +22,14 @@ class ByLanguage:
         ]
 
     def abr(self) -> str | None:
+        # "abr"	Parkinson yareɛ a ebu soɔ, afe {year}
         if self.text.endswith(", afe {year}"):
             return self.text.removesuffix(", afe {year}").strip()
         else:
             return None
 
     def ja(self) -> str | None:
+        # "ja": {year}年のパーキンソン病の流行
         if self.text.startswith("{year}年の"):
             return self.text.removeprefix("{year}年の").strip()
         elif self.text.startswith("{year}年"):
@@ -73,6 +40,7 @@ class ByLanguage:
             return None
 
     def multi_langs(self) -> str | None:
+        # other languages
         for end_data in self.ends_data:
             if self.text.endswith(end_data):
                 return self.text.removesuffix(end_data).strip()
@@ -171,6 +139,6 @@ class AddTitlesTranslationsFromTitles:
 __all__ = [
     "ByLanguage",
     "TitlesTranslationsRenderer",
+    # MAIN API:
     "AddTitlesTranslationsFromTitles",
-    "HeaderMappingExtractor",
 ]
