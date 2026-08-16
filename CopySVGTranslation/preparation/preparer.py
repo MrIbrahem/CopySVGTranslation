@@ -15,11 +15,12 @@ from .steps import (
     NormalizeTspans,
     PreparationContext,
     PreparationStep,
+    RemoveEmptyNodes,
     ReorderTexts,
     SplitLanguages,
     ValidateStructure,
+    ValidateSwitchLanguages,
     WrapTextElements,
-    WrapTspans,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,9 +44,10 @@ class SvgPreparationPipeline:
         self.steps: list[PreparationStep] = [
             LoadDocument(config),
             ValidateStructure(config),
+            ValidateSwitchLanguages(config),
             NormalizeTspans(config),
             AssignIds(config),
-            WrapTspans(config),
+            RemoveEmptyNodes(config),
             WrapTextElements(config),
             SplitLanguages(config),
             ReorderTexts(config),

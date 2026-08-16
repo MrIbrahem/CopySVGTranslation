@@ -76,7 +76,7 @@ class TestAssignIds:
     def test_blank_existing_id_raises_invalid_id_error(self, assign_ids_step):
         from CopySVGTranslation.exceptions import SvgInvalidIdError
 
-        root = make_root('<text id="  ">hello</text>')
+        root = make_root('<g id="  ">hello</g>')
         ctx = make_ctx(root=root)
 
         with pytest.raises(SvgInvalidIdError) as exc_info:

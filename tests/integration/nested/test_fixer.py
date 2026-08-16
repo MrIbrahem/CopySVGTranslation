@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from CopySVGTranslation.nested import MatchFixNestedTags
+from CopySVGTranslation.nested.fixer import MatchFixNestedTags
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
