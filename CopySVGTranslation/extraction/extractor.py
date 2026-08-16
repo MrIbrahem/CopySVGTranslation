@@ -9,14 +9,14 @@ from typing import Any
 from lxml import etree
 
 from ..config import TranslationConfig
-from ..core import SwitchNode
+from ..core import SwitchNode, TextNode
 from ..core.mapping import TranslationMapping
 from ..exceptions import SvgIOError, SvgParseError
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
-from .header import AddTitlesTranslationsFromTitles, HeaderMappingExtractor
+from ..utils.text import normalize_text
+from .header_adder import AddTitlesTranslationsFromTitles
 from .strategies import ByTspanIdStrategy, MatchingStrategy
-from .switch_collector import SwitchTranslationCollector
 
 logger = logging.getLogger(__name__)
 SVG_NS = {"svg": "http://www.w3.org/2000/svg"}
@@ -35,8 +35,80 @@ class SVGTranslationExtractor:
         self.config = config or TranslationConfig()
         self.year_handler = YearTitleHandler(self.config)
         self.strategy = matching_strategy or ByTspanIdStrategy()
-        self.collector = SwitchTranslationCollector(self.config, self.strategy)
-        self.header_extractor = HeaderMappingExtractor(self.config, self.strategy)
+
+    # ------------------------------------------------------------------
+    # Per-switch logic
+    # ------------------------------------------------------------------
+    def _process_switch(
+        self,
+        switch: SwitchNode,
+        mapping: TranslationMapping,
+    ) -> None:
+        # Return the default (no systemLanguage) text node, if any.
+        default: TextNode | None = switch.default_text_node()
+        if default is None:
+            return
+
+        # Find all text elements within this switch
+        default_texts = default.texts(
+            normalize=True,
+            case_insensitive=self.config.case_insensitive,
+        )
+        if not any(default_texts):
+            return
+
+        # Record diagnostic id → text (optional)
+        for tspan in default.tspans():
+            tid = tspan.get("id")
+            if tid and tspan.text and tspan.text.strip():
+                mapping.tspans_by_id[tid] = tspan.text.strip()
+
+        # Ensure keys exist in mapping.new
+        for x in default_texts:
+            key = normalize_text(x, self.config.case_insensitive)
+            mapping.new.setdefault(key, {})
+
+        # Match every language node
+        for node in switch.text_nodes():
+            if node.is_fallback:
+                continue
+            lang = node.language
+            if not lang:
+                continue
+
+            matches = self.strategy.match(
+                default,
+                node,
+                case_insensitive=self.config.case_insensitive,
+            )
+            for m in matches:
+                key = normalize_text(m.default_text, self.config.case_insensitive)
+                mapping.add(
+                    key,
+                    lang,
+                    m.translated_text,
+                    case_insensitive=False,  # key already normalized
+                )
+
+    def _extract_header_mapping(self, root: etree._Element) -> dict[str, dict[str, str]]:
+        """Extract translations from header switches only.
+
+        Header switches are <switch> elements inside
+        <g class="HeaderView" id="header"> but NOT inside
+        <g class="markdown-text-wrap" id="subtitle">.
+        """
+        header_switches = root.xpath(
+            "//svg:g[@id='header']//svg:switch[not(ancestor::svg:g[@id='subtitle'])]",
+            namespaces=SVG_NS,
+        )
+        if not header_switches:
+            return {}
+
+        header_mapping = TranslationMapping()
+        for switch_el in header_switches:
+            self._process_switch(SwitchNode(switch_el), header_mapping)
+
+        return header_mapping.new
 
     def extract_from_root(self, root: etree._Element) -> TranslationMapping:
         mapping = TranslationMapping()
@@ -45,13 +117,13 @@ class SVGTranslationExtractor:
         logger.debug("Found %d switch elements", len(switches))
 
         for switch_el in switches:
-            self.collector.collect(SwitchNode(switch_el), mapping)
+            self._process_switch(SwitchNode(switch_el), mapping)
 
         if self.config.enable_year_titles and mapping.new:
             self.year_handler.build_templates(mapping)
 
         # Extract header-specific translations
-        header = self.header_extractor.extract(root)
+        header = self._extract_header_mapping(root)
         if header:
             mapping.meta["header"] = header
             self.process_new_header_titles(mapping)

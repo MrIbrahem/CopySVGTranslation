@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from CopySVGTranslation.nested.fixer import MatchFixNestedTags
+from CopySVGTranslation.nested import MatchFixNestedTags
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
