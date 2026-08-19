@@ -104,6 +104,9 @@ class TestSVGTranslationExtractorInit:
 
         assert ext.config.case_insensitive is False
 
+    def test_prepare_before_extraction_is_disabled_by_default(self):
+        assert TranslationConfig().prepare_before_extraction is False
+
 
 # ===========================================================================
 # SVGTranslationExtractor.extract() tests
@@ -226,6 +229,20 @@ class TestSVGTranslationExtractorExtract:
 
         assert result.error is None
         assert result.new == {}
+
+    def test_prepare_before_extraction_extracts_text_without_switch(self, tmp_path: Path):
+        inner = '<text id="t0">Just text</text>'
+        svg = _write_svg(tmp_path, inner)
+        original_content = svg.read_text(encoding="utf-8")
+
+        ext = SVGTranslationExtractor(TranslationConfig(prepare_before_extraction=True))
+        result = ext.extract(svg)
+
+        assert result.error is None
+        assert result.new == {"just text": {}}
+        assert set(result.tspans_by_id.values()) == {"Just text"}
+        assert svg.read_text(encoding="utf-8") == original_content
+        assert "<switch" not in original_content
 
     def test_text_without_tspan(self, tmp_path: Path):
         inner = """

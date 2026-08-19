@@ -167,6 +167,7 @@ config = TranslationConfig(
     remove_blank_text=True,
     normalize_languages=True,
     assign_missing_ids=True,
+    prepare_before_extraction=False,  # Prepare SVG text in memory before extraction
     sort_switches=False,
 
     # Diagnostics

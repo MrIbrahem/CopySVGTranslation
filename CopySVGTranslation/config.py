@@ -66,6 +66,9 @@ class TranslationConfig:
     assign_missing_ids: bool = True
     """Automatically assign trsvgN IDs to translatable nodes that lack an id."""
 
+    prepare_before_extraction: bool = False
+    """Run SvgPreparationPipeline before extraction to make non-prepared SVG text translatable."""
+
     sort_switches: bool = False
 
     # --- Logging / diagnostics ---

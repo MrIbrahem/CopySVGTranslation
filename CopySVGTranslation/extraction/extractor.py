@@ -141,6 +141,12 @@ class SVGTranslationExtractor:
         logger.debug(f"Extracting translations from {path}")
 
         try:
+            if self.config.prepare_before_extraction:
+                from ..preparation import SvgPreparationPipeline
+
+                _, root = SvgPreparationPipeline(self.config).run(Path(path))
+                return self.extract_from_root(root)
+
             doc = SvgDocument.load(path, config=self.config)
         except FileNotFoundError as exc:
             logger.error(f"SVG file not found: {path}")

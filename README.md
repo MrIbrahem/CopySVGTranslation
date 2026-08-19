@@ -40,6 +40,19 @@ if not result.error:
     # }
 ```
 
+### Extract from an SVG without `<switch>` elements
+
+By default, extraction reads existing `<switch>` elements only. To prepare an SVG in memory before extraction, enable `prepare_before_extraction`. The preparation pipeline wraps eligible `<text>` elements in `<switch>` blocks, normalizes `<tspan>` content, and assigns missing IDs without modifying the source file.
+
+```python
+from CopySVGTranslation import SVGTranslationExtractor, TranslationConfig
+
+extractor = SVGTranslationExtractor(
+    TranslationConfig(prepare_before_extraction=True),
+)
+mapping = extractor.extract("diagram-without-switches.svg")
+```
+
 ### Inject translations into an SVG
 
 ```python
