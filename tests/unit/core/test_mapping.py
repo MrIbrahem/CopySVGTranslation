@@ -131,11 +131,11 @@ class TestTranslationMappingQuery:
             new={"a": {"ar": "1", "fr": "2"}},
             title_new={"c": {"es": "4"}},
         )
-        assert m.all_languages_count() == {"ar", "fr", "es"}
+        assert m.all_languages() == {"ar", "fr", "es"}
 
     def test_all_languages_empty(self):
         m = TranslationMapping()
-        assert m.all_languages_count() == set()
+        assert m.all_languages() == set()
 
     def test_lookup_case_insensitive(self):
         m = TranslationMapping(new={"Hello": {"ar": "مرحبا"}})
