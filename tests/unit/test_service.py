@@ -50,6 +50,18 @@ class TestSVGTranslationService:
         assert isinstance(result.data, TranslationMapping)
         assert "hello" in result.data.new
 
+    def test_extract_prepares_svg_without_switch_when_enabled(self, tmp_path: Path):
+        svg = _write_svg(tmp_path, '<text id="t0">Hello</text>')
+        service = SVGTranslationService(
+            TranslationConfig(prepare_before_extraction=True),
+        )
+
+        result = service.extract(svg)
+
+        assert result.success is True
+        assert result.data is not None
+        assert result.data.new == {"hello": {}}
+
     def test_extract_file_not_found(self, tmp_path: Path):
         service = SVGTranslationService()
         result = service.extract(tmp_path / "missing.svg")
