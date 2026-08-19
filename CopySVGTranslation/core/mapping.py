@@ -174,7 +174,6 @@ class InjectorStats:
 
     languages_before: list[str] = field(default_factory=list)
     languages_after: list[str] = field(default_factory=list)
-    error: str = ""
 
     def to_json(self) -> dict[str, Any]:
         """
@@ -187,15 +186,29 @@ class InjectorStats:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    def has_changes(self) -> bool:
+        return any((
+            self.new_languages_count,
+            self.updated_translations,
+            self.inserted_translations,
+        ))
 
 @dataclass
 class Error:
-    code: str | None
-    label: str | None
+    code: str | None = None
+    label: str | None = None
 
     def to_json(self) -> dict[str, Any]:
         return asdict(self)  # pyright: ignore[reportCallIssue]
 
+    def from_error(self, exc) -> Error:
+        label = getattr(exc, "label", None) or getattr(exc, "info", None)
+        if label:
+            self.label = label
+
+        code=getattr(exc, "code", None) or str(exc)
+        if code:
+            self.code = code
 
 @dataclass
 class InjectorData:
@@ -203,35 +216,23 @@ class InjectorData:
 
     tree: etree._ElementTree | None = None
     inject_stats: InjectorStats = field(default_factory=InjectorStats)
-    error: Error | None = None
+    error: Error = field(default_factory=Error)
 
     def to_json(self) -> dict[str, Any]:
         inject_stats = self.inject_stats.to_json()
 
-        error = self._create_error_if_needed(inject_stats)
-
         return {
             "tree": self.tree,
             "inject_stats": inject_stats,
-            "error": error.to_json() if error else None,
+            "error": self.error.to_json() if (self.error.code or self.error.label) else None,
         }
-
-    def _create_error_if_needed(self, inject_stats) -> Error | None:
-        error = self.error if self.error else None
-
-        if not error and inject_stats["error"]:
-            error = Error(
-                code="injector_error",
-                label=inject_stats["error"],
-            )
-
-        return error
 
     @classmethod
     def from_error(cls, exc) -> InjectorData:
+        label = getattr(exc, "label", None) or getattr(exc, "info", None)
         error = Error(
             code=getattr(exc, "code", None) or str(exc),
-            label=getattr(exc, "label", None),
+            label=label,
         )
         return cls(error=error)
 

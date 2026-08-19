@@ -68,7 +68,6 @@ class TestInjector:
             "updated_translations": 0,
             "languages_before": [],
             "languages_after": ["ar"],
-            "error": "",
         }
 
 

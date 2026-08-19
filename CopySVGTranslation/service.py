@@ -140,8 +140,8 @@ class SVGTranslationService:
 
         if injector_data.tree is None:
             return OperationResult.fail(
-                error=injector_data.inject_stats.error or "Injection returned no tree",
-                error_code="injection_failed",
+                error=injector_data.error.label or "Injection returned no tree",
+                error_code=injector_data.error.code or "injection_failed",
                 stats=injector_data.inject_stats,
             )
 
