@@ -49,19 +49,51 @@ class InjectorStats:
 
 
 @dataclass
+class Error:
+    code: str | None
+    label: str | None
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)  # pyright: ignore[reportCallIssue]
+
+
+@dataclass
 class InjectorData:
     """Container for SVG data."""
 
     tree: etree._ElementTree | None = None
     inject_stats: InjectorStats = field(default_factory=InjectorStats)
+    error: Error | None = None
 
     def to_json(self) -> dict[str, Any]:
         inject_stats = self.inject_stats.to_json()
+
+        error = self._create_error_if_needed(inject_stats)
+
         return {
             "tree": self.tree,
             "inject_stats": inject_stats,
-            "error": inject_stats["error"],
+            "error": error.to_json() if error else None,
         }
+
+    def _create_error_if_needed(self, inject_stats) -> Error | None:
+        error = self.error if self.error else None
+
+        if not error and inject_stats["error"]:
+            error = Error(
+                code="injector_error",
+                label=inject_stats["error"],
+            )
+
+        return error
+
+    @classmethod
+    def from_error(cls, exc) -> InjectorData:
+        error = Error(
+            code=getattr(exc, "code", None) or str(exc),
+            label=getattr(exc, "label", None),
+        )
+        return cls(error=error)
 
 
 @dataclass(slots=True)

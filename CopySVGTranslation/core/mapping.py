@@ -117,6 +117,7 @@ class TranslationMapping:
             "error": ""
         }
         """
+
         def _merge_dict(self_new, other_new) -> None:
             for source, lang_dict in other_new.items():
                 self_new.setdefault(source, {})

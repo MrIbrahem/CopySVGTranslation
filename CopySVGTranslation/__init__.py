@@ -14,12 +14,13 @@ from __future__ import annotations
 
 __version__ = "0.2.3"
 
+from .config import TranslationConfig
+from .core.mapping import TranslationEntry, TranslationMapping
+
 # ---------------------------------------------------------------------------
 # Primary public API
 # ---------------------------------------------------------------------------
 from .exceptions import CopySVGTranslationError
-from .config import TranslationConfig
-from .core.mapping import TranslationEntry, TranslationMapping
 
 # ---------------------------------------------------------------------------
 # Optional advanced exports (still public, but less commonly needed)

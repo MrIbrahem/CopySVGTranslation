@@ -20,8 +20,9 @@ i18n_data = {
     "structure-error-switch-text-content-outside-text": "This file has text content inside a switch element but outside of a text tag, and SVG Translate can not handle this.",
     "structure-error-switch-child-not-text": "This file contains a switch element that contains an element that is not a text element.",
     "structure-error-multiple-lang-in-text": "This file contains a text elements that have a repeated language code '$2' in the systemLanguage attributes.",
-    "structure-error-no-id": "[element ID could be determined]"
+    "structure-error-no-id": "[element ID could be determined]",
 }
+
 
 class CopySVGTranslationError(Exception):
     """Base error for the whole package."""
