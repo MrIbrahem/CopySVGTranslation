@@ -8,13 +8,13 @@ from pathlib import Path
 from lxml import etree
 
 from ..config import TranslationConfig
-from ..core.mapping import TranslationMapping
+from ..core.mapping import InjectorData, TranslationMapping
 from ..exceptions import (
     SvgNestedTspanError,
     SvgStructureError,
 )
 from ..preparation import SvgPreparationPipeline
-from ..result import InjectorData, InjectorStats
+from ..result import InjectorStats
 from ..titles import YearTitleHandler
 from ..utils import sort_switch_texts
 from ..utils.xml import tree_languages

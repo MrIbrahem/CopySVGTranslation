@@ -13,7 +13,7 @@ from lxml import etree
 
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.core.mapping import TranslationMapping
-from CopySVGTranslation.result import InjectorData, InjectorStats
+from CopySVGTranslation.core.mapping import InjectorData, InjectorStats
 from CopySVGTranslation.service import SVGTranslationService
 
 SVG_NS = "http://www.w3.org/2000/svg"

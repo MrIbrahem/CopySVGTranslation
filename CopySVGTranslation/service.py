@@ -9,11 +9,11 @@ from typing import Any
 from lxml import etree
 
 from .config import TranslationConfig
-from .core.mapping import TranslationMapping
+from .core.mapping import InjectorData, TranslationMapping
 from .extraction.extractor import SVGTranslationExtractor
 from .injection.injector import SVGTranslationInjector
 from .io.mapping_store import MappingStore
-from .result import InjectorData, OperationResult
+from .result import OperationResult
 
 logger = logging.getLogger(__name__)
 

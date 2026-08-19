@@ -53,7 +53,7 @@ from CopySVGTranslation.injection.switch_processor import (
     SVG_NS,
     SwitchProcessor,
 )
-from CopySVGTranslation.result import InjectorStats
+from CopySVGTranslation.core.mapping import InjectorStats
 
 NSMAP = {"svg": SVG_NS}
 

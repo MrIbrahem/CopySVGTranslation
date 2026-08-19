@@ -10,7 +10,7 @@ from lxml import etree
 
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.injection.injector import SVGTranslationInjector
-from CopySVGTranslation.result import InjectorData, InjectorStats
+from CopySVGTranslation.core.mapping import InjectorData, InjectorStats
 
 SVG_NS = "http://www.w3.org/2000/svg"
 SVG_NSMAP = {"svg": SVG_NS}
@@ -139,7 +139,7 @@ class TestInjectorData(TestSetup):
         data = InjectorData()
         data.inject_stats.error = "Something broke"
         result = data.to_json()
-        assert result["error"] == "Something broke"
+        assert result["error"]["label"] == "Something broke"
 
 
 # ===========================================================================
