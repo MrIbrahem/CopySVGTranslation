@@ -3,6 +3,25 @@ from __future__ import annotations
 
 from typing import Any
 
+i18n_data = {
+    "invalid-format": "Only SVG files are supported.",
+    "invalid-svg": "Error reading file.",
+    "structure-error-no-doc-element": "No document element found.",
+    "structure-error-nested-tspans-not-supported": "This file can not be translated because it contains nested tspan elements in $1.",
+    "structure-error-multiple-text-same-lang": "Multiple text elements found with language code '$2' (in element with ID '$1').",
+    "structure-error-contains-tref": "This file contains tref tags, which are not supported by this tool.",
+    "structure-error-css-too-complex": "This file contains CSS that is too complicated to parse.",
+    "structure-error-css-has-ids": "This file uses element IDs in the CSS, which may break when SVG Translate adds new IDs. It should use classes instead, if possible.",
+    "structure-error-unexpected-node-in-text": "This file has unexpected content within a text element. Only tspan elements should be used within text.",
+    "structure-error-invalid-node-id": "This file contains a text element ID ($1) that contains characters that are not permitted with SVG Translate.",
+    "structure-error-text-contains-dollar": "This file contains unsupported text content in $1 ('$2'). SVG Translate is not able to work with the dollar-number syntax.",
+    "structure-error-non-tspan-inside-text": "This file contains a text element with content that is not a tspan element.",
+    "structure-error-switch-text-is-not-node": "This file has non-node content within a switch element.",
+    "structure-error-switch-text-content-outside-text": "This file has text content inside a switch element but outside of a text tag, and SVG Translate can not handle this.",
+    "structure-error-switch-child-not-text": "This file contains a switch element that contains an element that is not a text element.",
+    "structure-error-multiple-lang-in-text": "This file contains a text elements that have a repeated language code '$2' in the systemLanguage attributes.",
+    "structure-error-no-id": "[element ID could be determined]"
+}
 
 class CopySVGTranslationError(Exception):
     """Base error for the whole package."""
@@ -18,6 +37,7 @@ class CopySVGTranslationError(Exception):
         self.code = code or self.default_code()
         self.element = element
         self.extra = extra
+        self.label = i18n_data.get(self.code, "")
 
         parts = [self.code]
         if message:

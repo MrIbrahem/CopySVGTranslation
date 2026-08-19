@@ -17,6 +17,7 @@ __version__ = "0.2.3"
 # ---------------------------------------------------------------------------
 # Primary public API
 # ---------------------------------------------------------------------------
+from .exceptions import CopySVGTranslationError
 from .config import TranslationConfig
 from .core.mapping import TranslationEntry, TranslationMapping
 
@@ -35,6 +36,7 @@ from .service import SVGTranslationService
 __all__ = [
     # version
     "__version__",
+    "CopySVGTranslationError",
     "MatchFixNestedTags",
     "NestedTspanDetector",
     "NestedTspanFlattener",

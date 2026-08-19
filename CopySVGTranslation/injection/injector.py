@@ -81,6 +81,7 @@ class SVGTranslationInjector:
             return result
 
         logger.debug(f"Injecting translations into {svg_path}")
+
         # 1. Prepare (pipeline)
         try:
             tree, root = self.preparer.run(svg_path)

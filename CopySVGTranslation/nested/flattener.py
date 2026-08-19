@@ -85,7 +85,6 @@ class NestedTspanFlattener:
             element_children = [c for c in tspan if isinstance(c.tag, str)]
             if element_children:
                 # Nested tspans or children not supported
-                # raise SvgStructureError('structure-error-nested-tspans-not-supported', tspan, element_children)
                 node_text = etree.tostring(tspan, pretty_print=True).decode("utf-8")
                 raise SvgNestedTspanError(
                     element=tspan,
