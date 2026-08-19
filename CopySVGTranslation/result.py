@@ -9,7 +9,7 @@ from typing import Any, Generic, TypeVar
 
 from lxml import etree
 
-T = TypeVar("T")
+TY = TypeVar("TY")
 
 
 @dataclass(slots=True)
@@ -97,9 +97,9 @@ class InjectorData:
 
 
 @dataclass(slots=True)
-class OperationResult(Generic[T]):
+class OperationResult(Generic[TY]):
     success: bool
-    data: T | None = None
+    data: TY | None = None
     stats: InjectorStats | None = None
     error: str | None = None
     error_code: str | None = None
@@ -108,10 +108,10 @@ class OperationResult(Generic[T]):
     @classmethod
     def ok(
         cls,
-        data: T,
+        data: TY,
         stats: InjectorStats | None = None,
         warnings: list[str] | None = None,
-    ) -> OperationResult[T]:
+    ) -> OperationResult[TY]:
         return cls(
             success=True,
             data=data,
@@ -126,7 +126,7 @@ class OperationResult(Generic[T]):
         error_code: str | None = None,
         stats: InjectorStats | None = None,
         warnings: list[str] | None = None,
-    ) -> OperationResult[T]:
+    ) -> OperationResult[TY]:
         return cls(
             success=False,
             error=error,

@@ -76,8 +76,11 @@ class TranslationMapping:
     def all_languages(self) -> set[str]:
         langs: set[str] = set()
         for section in (self.new, self.title_new):
-            for trans in section.values():
-                langs.update(trans.keys())
+            for translate in section.values():
+                if isinstance(translate, dict):
+                    langs.update(translate.keys())
+                else:
+                    raise TypeError(f"Unexpected type: {type(translate)}: section: {str(section)}")
 
         return langs
 
