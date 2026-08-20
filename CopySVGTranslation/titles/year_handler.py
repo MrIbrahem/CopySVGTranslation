@@ -8,7 +8,7 @@ from typing import Any
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
-from .year_stripper import YearFreeTitleMerger
+from .year_stripper import merge_year_free_into_new
 
 logger = logging.getLogger(__name__)
 
@@ -85,25 +85,31 @@ class YearTitleHandler:
 
     def process_header_titles(self, mapping: TranslationMapping) -> bool:
         """
-        Process the `title_new` entries in the mapping's header, if any.
+        Extract titles with years from mapping.meta['header'], template them,
+        strip their years, and merge the year-free translations into mapping.new.
+        Respects enable_year_titles (self.enabled) and config.create_lang_template.
+        Returns True if mapping.new was modified.
         """
+        # if not self.enabled: return False
 
         if not self.config.create_lang_template:
             return False
 
         header = mapping.meta.get("header", {})
+        if not header:
+            return False
+
         extra_titles_new = self.build_title_new_templates(header, create_lang_template=True)
 
         if not extra_titles_new:
             return False
 
-        # create new object with new titles, so we don't modify the original title_new or most likely overwrite it
+        # Create new object with new titles, so we don't modify the original title_new or overwrite it
         new_object = TranslationMapping.from_any({"title_new": extra_titles_new})
 
-        adder = YearFreeTitleMerger(new_object)
-        adder.run()
+        changed = merge_year_free_into_new(new_object)
 
-        if adder.changes is False:
+        if not changed:
             return False
 
         # Capture the destination state before merging
