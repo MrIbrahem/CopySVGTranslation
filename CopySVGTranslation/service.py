@@ -9,11 +9,11 @@ from typing import Any
 from lxml import etree
 
 from .config import TranslationConfig
-from .core.mapping import TranslationMapping
+from .core.mapping import InjectorData, TranslationMapping
 from .extraction.extractor import SVGTranslationExtractor
 from .injection.injector import SVGTranslationInjector
 from .io.mapping_store import MappingStore
-from .result import InjectorData, OperationResult
+from .result import OperationResult
 
 logger = logging.getLogger(__name__)
 
@@ -140,8 +140,8 @@ class SVGTranslationService:
 
         if injector_data.tree is None:
             return OperationResult.fail(
-                error=injector_data.inject_stats.error or "Injection returned no tree",
-                error_code="injection_failed",
+                error=injector_data.error.label or "Injection returned no tree",
+                error_code=injector_data.error.code or "injection_failed",
                 stats=injector_data.inject_stats,
             )
 

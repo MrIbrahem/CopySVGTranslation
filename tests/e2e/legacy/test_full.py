@@ -182,7 +182,6 @@ def test_inject_with_empty_translations(tmp_path: Path, target_svg: Path) -> Non
         "updated_translations": 0,
         "languages_before": [],
         "languages_after": [],
-        "error": "",
     }
 
 
@@ -278,5 +277,4 @@ def test_inject_multiple_operations(tmp_path: Path, target_svg: Path, fixtures_d
         "updated_translations": 0,
         "languages_before": [],
         "languages_after": ["ar", "fr"],
-        "error": "",
     }

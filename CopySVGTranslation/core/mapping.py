@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Mapping
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any
+
+from lxml import etree
 
 
 @dataclass(slots=True, frozen=True)
@@ -76,8 +78,11 @@ class TranslationMapping:
     def all_languages(self) -> set[str]:
         langs: set[str] = set()
         for section in (self.new, self.title_new):
-            for trans in section.values():
-                langs.update(trans.keys())
+            for translate in section.values():
+                if isinstance(translate, dict):
+                    langs.update(translate.keys())
+                else:
+                    raise TypeError(f"Unexpected type: {type(translate)}: section: {str(section)}")
 
         return langs
 
@@ -117,6 +122,7 @@ class TranslationMapping:
             "error": ""
         }
         """
+
         def _merge_dict(self_new, other_new) -> None:
             for source, lang_dict in other_new.items():
                 self_new.setdefault(source, {})
@@ -154,6 +160,85 @@ class TranslationMapping:
             "meta": self.meta,
             "error": error,
         }
+
+
+@dataclass(slots=True)
+class InjectorStats:
+    all_languages_count: int = 0
+    new_languages_count: int = 0
+
+    processed_switches: int = 0
+    inserted_translations: int = 0
+    skipped_translations: int = 0
+    updated_translations: int = 0
+
+    languages_before: list[str] = field(default_factory=list)
+    languages_after: list[str] = field(default_factory=list)
+
+    def to_json(self) -> dict[str, Any]:
+        """
+        Serialize stats to a JSON-compatible dictionary.
+        }
+        """
+        return asdict(self)
+
+    def _update(self, **kwargs) -> None:
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+    def has_changes(self) -> bool:
+        return any(
+            (
+                self.new_languages_count,
+                self.updated_translations,
+                self.inserted_translations,
+            )
+        )
+
+
+@dataclass
+class Error:
+    code: str | None = None
+    label: str | None = None
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)  # pyright: ignore[reportCallIssue]
+
+    def from_error(self, exc: Exception | Any) -> None:
+        label = getattr(exc, "label", None) or getattr(exc, "info", None)
+        if label:
+            self.label = str(label)
+
+        code = getattr(exc, "code", None) or str(exc)
+        if code:
+            self.code = str(code)
+
+
+@dataclass
+class InjectorData:
+    """Container for SVG data."""
+
+    tree: etree._ElementTree | None = None
+    inject_stats: InjectorStats = field(default_factory=InjectorStats)
+    error: Error = field(default_factory=Error)
+
+    def to_json(self) -> dict[str, Any]:
+        inject_stats = self.inject_stats.to_json()
+
+        return {
+            "tree": self.tree,
+            "inject_stats": inject_stats,
+            "error": self.error.to_json() if (self.error.code or self.error.label) else None,
+        }
+
+    @classmethod
+    def from_error(cls, exc) -> InjectorData:
+        label = getattr(exc, "label", None) or getattr(exc, "info", None)
+        error = Error(
+            code=getattr(exc, "code", None) or str(exc),
+            label=label,
+        )
+        return cls(error=error)
 
 
 __all__ = [

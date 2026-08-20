@@ -1,4 +1,3 @@
-
 # CopySVGTranslation
 
 [![PyPI Version](https://img.shields.io/pypi/v/CopySVGTranslation.svg?style=flat-square)](https://pypi.org/project/CopySVGTranslation/)
@@ -12,13 +11,13 @@ CopySVGTranslation works with SVG files that use the `<switch>` element and `sys
 
 ## Features
 
-- Extract translations from `<switch>` elements into a structured mapping
-- Inject translations, creating or updating language nodes
-- Preparation pipeline that normalizes SVG structure before injection
-- Configurable handling of nested `<tspan>` / `<a>` elements
-- Special support for titles containing 4-digit years
-- Case-insensitive matching and language-tag normalization
-- Clean class-based API + thin legacy compatibility layer
+-   Extract translations from `<switch>` elements into a structured mapping
+-   Inject translations, creating or updating language nodes
+-   Preparation pipeline that normalizes SVG structure before injection
+-   Configurable handling of nested `<tspan>` / `<a>` elements
+-   Special support for titles containing 4-digit years
+-   Case-insensitive matching and language-tag normalization
+-   Clean class-based API + thin legacy compatibility layer
 
 ---
 
@@ -186,13 +185,13 @@ new_config = config.with_updates(overwrite=True, nested_strategy="preserve_style
 
 High-level facade that wires extractor, injector, preparation and mapping I/O together.
 
-| Method | Description |
-|--------|-------------|
-| `extract(svg_path, *, save_mapping=None)` | Extract → `OperationResult[TranslationMapping]` |
-| `inject(svg_path, mapping, *, output=None, save=None)` | Inject → `OperationResult[InjectorData]` |
-| `extract_and_inject(source, target, ...)` | Convenience one-shot |
-| `prepare_only(svg_path, *, output=None)` | Run only the normalization pipeline |
-| `load_mapping(path)` / `save_mapping(mapping, path)` | JSON mapping helpers |
+| Method                                                 | Description                                     |
+| ------------------------------------------------------ | ----------------------------------------------- |
+| `extract(svg_path, *, save_mapping=None)`              | Extract → `OperationResult[TranslationMapping]` |
+| `inject(svg_path, mapping, *, output=None, save=None)` | Inject → `OperationResult[InjectorData]`        |
+| `extract_and_inject(source, target, ...)`              | Convenience one-shot                            |
+| `prepare_only(svg_path, *, output=None)`               | Run only the normalization pipeline             |
+| `load_mapping(path)` / `save_mapping(mapping, path)`   | JSON mapping helpers                            |
 
 ### `SVGTranslationExtractor`
 
@@ -203,13 +202,13 @@ mapping: TranslationMapping = extractor.extract(source_file)
 
 **Returns** a `TranslationMapping` with these fields:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `new` | `dict[str, dict[str, str]]` | Normalized source text → `{lang: translation}` |
-| `title_new` | `dict[str, dict[str, str]]` | Year-title templates (`{year}` placeholder) |
-| `tspans_by_id` | `dict[str, str]` | Diagnostic map of tspan ID → default text |
-| `meta` | `dict` | Extra metadata (e.g. header translations) |
-| `error` | `str` | Non-empty only on failure |
+| Field          | Type                        | Description                                    |
+| -------------- | --------------------------- | ---------------------------------------------- |
+| `new`          | `dict[str, dict[str, str]]` | Normalized source text → `{lang: translation}` |
+| `title_new`    | `dict[str, dict[str, str]]` | Year-title templates (`{year}` placeholder)    |
+| `tspans_by_id` | `dict[str, str]`            | Diagnostic map of tspan ID → default text      |
+| `meta`         | `dict`                      | Extra metadata (e.g. header translations)      |
+| `error`        | `str`                       | Non-empty only on failure                      |
 
 Call `mapping.to_json()` for a plain serializable dict.
 
@@ -227,24 +226,24 @@ result: InjectorData = injector.inject(
 
 **`InjectorData`**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `tree` | `etree._ElementTree \| None` | Modified SVG tree |
-| `inject_stats` | `InjectorStats` | Run statistics |
+| Field          | Type                         | Description       |
+| -------------- | ---------------------------- | ----------------- |
+| `tree`         | `etree._ElementTree \| None` | Modified SVG tree |
+| `inject_stats` | `InjectorStats`              | Run statistics    |
 
 **`InjectorStats`**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `all_languages_count` | `int` | Total languages after injection |
-| `new_languages_count` | `int` | Newly added languages |
-| `processed_switches` | `int` | `<switch>` elements processed |
-| `inserted_translations` | `int` | New language nodes created |
-| `updated_translations` | `int` | Existing nodes overwritten |
-| `skipped_translations` | `int` | Existing nodes left untouched |
-| `languages_before` | `list[str]` | Languages present before |
-| `languages_after` | `list[str]` | Newly added language codes |
-| `error` | `str` | Non-empty on failure |
+| Field                   | Type        | Description                     |
+| ----------------------- | ----------- | ------------------------------- |
+| `all_languages_count`   | `int`       | Total languages after injection |
+| `new_languages_count`   | `int`       | Newly added languages           |
+| `processed_switches`    | `int`       | `<switch>` elements processed   |
+| `inserted_translations` | `int`       | New language nodes created      |
+| `updated_translations`  | `int`       | Existing nodes overwritten      |
+| `skipped_translations`  | `int`       | Existing nodes left untouched   |
+| `languages_before`      | `list[str]` | Languages present before        |
+| `languages_after`       | `list[str]` | Newly added language codes      |
+| `error`                 | `str`       | Non-empty on failure            |
 
 ---
 
@@ -252,28 +251,28 @@ result: InjectorData = injector.inject(
 
 ```json
 {
-  "new": {
-    "music in 2020": {
-      "ar": "الموسيقى في عام 2020",
-      "fr": "La musique en 2020"
+    "new": {
+        "music in 2020": {
+            "ar": "الموسيقى في عام 2020",
+            "fr": "La musique en 2020"
+        },
+        "hello": {
+            "ar": "مرحبا",
+            "fr": "Bonjour"
+        }
     },
-    "hello": {
-      "ar": "مرحبا",
-      "fr": "Bonjour"
-    }
-  },
-  "title_new": {
-    "music in {year}": {
-      "ar": "الموسيقى في عام {year}",
-      "fr": "La musique en {year}"
-    }
-  },
-  "tspans_by_id": {
-    "t0": "Music in 2020",
-    "t1": "Hello"
-  },
-  "meta": {},
-  "error": ""
+    "title_new": {
+        "music in {year}": {
+            "ar": "الموسيقى في عام {year}",
+            "fr": "La musique en {year}"
+        }
+    },
+    "tspans_by_id": {
+        "t0": "Music in 2020",
+        "t1": "Hello"
+    },
+    "meta": {},
+    "error": ""
 }
 ```
 
@@ -319,22 +318,22 @@ The injector accepts both the nested format above and older flat dictionaries.
 
 ```json
 {
-  "new": {
-    "music in 2020": {
-      "ar": "الموسيقى في عام 2020",
-      "fr": "La musique en 2020"
+    "new": {
+        "music in 2020": {
+            "ar": "الموسيقى في عام 2020",
+            "fr": "La musique en 2020"
+        },
+        "hello": {
+            "ar": "مرحبا",
+            "fr": "Bonjour"
+        }
     },
-    "hello": {
-      "ar": "مرحبا",
-      "fr": "Bonjour"
-    }
-  },
-  "tspans_by_id": {
-    "t0": "Music in 2020",
-    "t1": "Hello"
-  },
-  "title_new": {},
-  "error": ""
+    "tspans_by_id": {
+        "t0": "Music in 2020",
+        "t1": "Hello"
+    },
+    "title_new": {},
+    "error": ""
 }
 ```
 
@@ -384,10 +383,10 @@ The injector accepts both the nested format above and older flat dictionaries.
 
 ## Nested `<tspan>` Strategies
 
-| Strategy | Behaviour |
-|----------|-----------|
-| `raise` (default) | Raise `SvgNestedTspanError` |
-| `flatten` | Concatenate all nested text into a single tspan |
+| Strategy                                 | Behaviour                                                        |
+| ---------------------------------------- | ---------------------------------------------------------------- |
+| `raise` (default)                        | Raise `SvgNestedTspanError`                                      |
+| `flatten`                                | Concatenate all nested text into a single tspan                  |
 | `preserve_style` / `split_nested_tspans` | Convert nested styled tspans into sibling tspans (keeps styling) |
 
 ---
@@ -429,17 +428,20 @@ translations = result.data.to_json() if result.success else None
 ## Implementation Notes
 
 ### Text Normalization
-- Trim leading/trailing whitespace
-- Collapse internal whitespace to a single space
-- Optionally lower-case for case-insensitive keys
+
+-   Trim leading/trailing whitespace
+-   Collapse internal whitespace to a single space
+-   Optionally lower-case for case-insensitive keys
 
 ### ID Generation
-- Prefer `base-lang` form (e.g. `trsvg12` → `trsvg12-ar`)
-- On collision append a numeric suffix (`trsvg12-ar_1`, …)
-- Missing IDs are automatically allocated as `trsvgN`
+
+-   Prefer `base-lang` form (e.g. `trsvg12` → `trsvg12-ar`)
+-   On collision append a numeric suffix (`trsvg12-ar_1`, …)
+-   Missing IDs are automatically allocated as `trsvgN`
 
 ### Error Handling
-Typed exceptions (`SvgNestedTspanError`, `SvgStructureError`, `SvgParseError`, `MappingError`, …) are raised by the lower layers.  
+
+Typed exceptions (`SvgNestedTspanError`, `SvgStructureError`, `SvgParseError`, `MappingError`, …) are raised by the lower layers.
 `SVGTranslationService` converts them into `OperationResult` so callers can handle success/failure uniformly.
 
 ---
@@ -453,4 +455,3 @@ python -m pytest tests -v
 ---
 
 ## License
-

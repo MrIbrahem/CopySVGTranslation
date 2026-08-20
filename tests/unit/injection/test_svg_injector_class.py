@@ -9,8 +9,8 @@ from pathlib import Path
 from lxml import etree
 
 from CopySVGTranslation.config import TranslationConfig
+from CopySVGTranslation.core.mapping import InjectorData, InjectorStats
 from CopySVGTranslation.injection.injector import SVGTranslationInjector
-from CopySVGTranslation.result import InjectorData, InjectorStats
 
 SVG_NS = "http://www.w3.org/2000/svg"
 SVG_NSMAP = {"svg": SVG_NS}
@@ -75,7 +75,6 @@ class TestInjectorStats(TestSetup):
         assert stats.updated_translations == 0
         assert stats.languages_before == []
         assert stats.languages_after == []
-        assert stats.error == ""
 
     def test_to_json_returns_dict(self):
         stats = InjectorStats()
@@ -90,7 +89,6 @@ class TestInjectorStats(TestSetup):
             "updated_translations",
             "languages_before",
             "languages_after",
-            "error",
         }
         assert set(result.keys()) == expected_keys
 
@@ -100,7 +98,6 @@ class TestInjectorStats(TestSetup):
             all_languages_count=3,
             new_languages_count=2,
             inserted_translations=5,
-            error="",
         )
         result = stats.to_json()
         assert result["all_languages_count"] == 3
@@ -137,9 +134,9 @@ class TestInjectorData(TestSetup):
 
     def test_to_json_error_from_stats(self):
         data = InjectorData()
-        data.inject_stats.error = "Something broke"
+        data.error.label = "Something broke"
         result = data.to_json()
-        assert result["error"] == "Something broke"
+        assert result["error"]["label"] == "Something broke"
 
 
 # ===========================================================================
@@ -191,7 +188,7 @@ class TestSVGTranslationInjectorBasic(TestSetup):
 
         assert isinstance(result, InjectorData)
         assert result.tree is not None
-        assert result.inject_stats.error == ""
+        assert result.error.code is None
         assert result.inject_stats.inserted_translations == 1
 
     def test_inject_multiple_languages(self, tmp_path: Path):
@@ -446,7 +443,7 @@ class TestSVGTranslationInjectorSave(TestSetup):
             save_path=None,
         )
 
-        assert result.inject_stats.error != ""
+        assert result.error.code != ""
 
     def test_saved_file_is_valid_xml(self, tmp_path: Path):
         inner = """
@@ -540,7 +537,7 @@ class TestSVGTranslationInjectorErrors(TestSetup):
 
         result = inj.inject(svg_path=tmp_path / "missing.svg", mapping=mappings)
 
-        assert result.inject_stats.error == "File does not exist"
+        assert result.error.label == "File does not exist"
         assert result.tree is None
 
     def test_no_mappings(self, tmp_path: Path):
@@ -549,7 +546,7 @@ class TestSVGTranslationInjectorErrors(TestSetup):
 
         result = inj.inject(svg_path=svg, mapping=None)
 
-        assert result.inject_stats.error == "No valid mappings found"
+        assert result.error.label == "No valid mappings found"
         assert result.tree is None
 
     def test_empty_mappings(self, tmp_path: Path):
@@ -558,7 +555,7 @@ class TestSVGTranslationInjectorErrors(TestSetup):
 
         result = inj.inject(svg_path=svg, mapping={})
 
-        assert result.inject_stats.error == "No valid mappings found"
+        assert result.error.label == "No valid mappings found"
 
     def test_invalid_xml(self, tmp_path: Path):
         svg = tmp_path / "bad.svg"
@@ -568,7 +565,7 @@ class TestSVGTranslationInjectorErrors(TestSetup):
 
         result = inj.inject(svg_path=svg, mapping=mappings)
 
-        assert result.inject_stats.error != ""
+        assert result.error.code != ""
         assert result.tree is None
 
 
@@ -721,7 +718,7 @@ class TestExtractorInjectorE2E(TestSetup):
         )
 
         assert inject_result.tree is not None
-        assert inject_result.inject_stats.error == ""
+        assert inject_result.error.code is None
         assert inject_result.inject_stats.languages_before == []
         assert inject_result.inject_stats.languages_after == ["ar", "fr"]
 

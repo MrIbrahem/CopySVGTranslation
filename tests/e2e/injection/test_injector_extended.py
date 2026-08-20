@@ -12,8 +12,8 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation import TranslationConfig
+from CopySVGTranslation.core.mapping import InjectorStats
 from CopySVGTranslation.injection.injector import SVGTranslationInjector
-from CopySVGTranslation.result import InjectorStats
 
 
 def work_on_switches(

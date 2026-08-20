@@ -8,13 +8,13 @@ from pathlib import Path
 from lxml import etree
 
 from ..config import TranslationConfig
-from ..core.mapping import TranslationMapping
+from ..core.mapping import InjectorData, TranslationMapping
 from ..exceptions import (
     SvgNestedTspanError,
     SvgStructureError,
 )
 from ..preparation import SvgPreparationPipeline
-from ..result import InjectorData, InjectorStats
+from ..result import InjectorStats
 from ..titles import YearTitleHandler
 from ..utils import sort_switch_texts
 from ..utils.xml import tree_languages
@@ -72,38 +72,39 @@ class SVGTranslationInjector:
 
         if not svg_path.exists():
             logger.error(f"SVG file not found: {svg_path}")
-            result.inject_stats.error = "File does not exist"
+            result.error.label = "File does not exist"
             return result
 
         if not mapping:
             logger.error("No valid mappings found")
-            result.inject_stats.error = "No valid mappings found"
+            result.error.label = "No valid mappings found"
             return result
 
         logger.debug(f"Injecting translations into {svg_path}")
+
         # 1. Prepare (pipeline)
         try:
             tree, root = self.preparer.run(svg_path)
         except SvgNestedTspanError as exc:
-            result.inject_stats.error = "nested_tspan_error"
+            result.error.code = "nested_tspan_error"
             return result
 
         except SvgStructureError as exc:
-            result.inject_stats.error = str(exc)
+            result.error.from_error(exc)
             return result
 
         except etree.XMLSyntaxError as exc:
             logger.error("Failed with XMLSyntaxError when parse SVG file: %s", exc)
-            result.inject_stats.error = str(exc)
+            result.error.from_error(exc)
             return result
 
         except Exception as exc:
             logger.error("Failed to parse SVG file: %s", exc)
-            result.inject_stats.error = f"preparation_failed: {exc}"
+            result.error.from_error(exc)
             return result
 
         if tree is None or root is None:
-            result.inject_stats.error = "preparation_returned_none_tree"
+            result.error.code = "preparation_returned_none_tree"
             return result
 
         result.tree = tree
@@ -131,20 +132,18 @@ class SVGTranslationInjector:
         after_languages = tree_languages(tree)
         self._update_data(result.inject_stats, before_languages, after_languages)
 
-        if not save:
-            return result
+        if save:
+            # 7. Save if requested
+            if save_path is None:
+                logger.error("save is True but no save_path was provided")
+                result.error.label = "No target path provided"
+                return result
 
-        # 7. Save if requested
-        if save_path is None:
-            logger.error("save is True but no save_path was provided")
-            result.inject_stats.error = "No target path provided"
-            return result
-
-        try:
-            self._save(tree, save_path)
-        except OSError as e:
-            logger.error(f"Failed writing {str(save_path)}: {e}")
-            result.inject_stats.error = f"Failed writing {str(save_path)}: {e}"
+            try:
+                self._save(tree, save_path)
+            except OSError as e:
+                logger.error(f"Failed writing {str(save_path)}: {e}")
+                result.error.label = f"Failed writing {str(save_path)}: {e}"
 
         return result
 

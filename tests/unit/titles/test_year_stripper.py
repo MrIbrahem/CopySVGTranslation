@@ -5,10 +5,10 @@ import pytest
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.core.mapping import TranslationMapping
 from CopySVGTranslation.extraction import SVGTranslationExtractor
-from CopySVGTranslation.extraction.header_adder import (
-    AddTitlesTranslationsFromTitles,
-    ByLanguage,
+from CopySVGTranslation.titles.year_stripper import (
     TitlesTranslationsRenderer,
+    YearFreeTitleMerger,
+    YearPatternStripper,
 )
 
 
@@ -30,7 +30,7 @@ def add_translations_from_titles(
 ) -> dict[str, dict] | TranslationMapping:
     """Insert new translations into the translations dictionary."""
     extractor_data = TranslationMapping.from_any(translations)
-    adder = AddTitlesTranslationsFromTitles(extractor_data)
+    adder = YearFreeTitleMerger(extractor_data)
     adder.run()
 
     if adder.changes is False:
@@ -41,18 +41,18 @@ def add_translations_from_titles(
 
 
 # ---------------------------------------------------------------------------
-# ByLanguage
+# YearPatternStripper
 # ---------------------------------------------------------------------------
 
 
 class TestByLanguage:
     def test_run_returns_none_for_empty_text(self):
         # Empty string should short-circuit before any lang-specific logic.
-        assert ByLanguage("en", "").run() is None
+        assert YearPatternStripper("en", "").run() is None
 
     def test_run_returns_none_when_no_year_placeholder(self):
         # Text without "{year}" is not a candidate for translation stripping.
-        assert ByLanguage("en", "parkinson's disease prevalence").run() is None
+        assert YearPatternStripper("en", "parkinson's disease prevalence").run() is None
 
     @pytest.mark.parametrize(
         "text,expected",
@@ -63,48 +63,57 @@ class TestByLanguage:
     )
     def test_multi_langs_comma_suffix(self, text, expected):
         # Generic comma + "{year}" suffix stripping (used for "en", "es", etc.).
-        assert ByLanguage("en", text).run() == expected
+        assert YearPatternStripper("en", text).run() == expected
 
     def test_multi_langs_arabic_comma_suffix(self):
         # Arabic comma variant "، {year}".
         text = "انتشار مرض باركنسون، {year}"
         expected = "انتشار مرض باركنسون"
-        assert ByLanguage("ar", text).run() == expected
+        assert YearPatternStripper("ar", text).run() == expected
 
     def test_multi_langs_arabic_comma_no_space_suffix(self):
         # Arabic comma variant without a following space "،{year}".
         text = "انتشار مرض باركنسون،{year}"
         expected = "انتشار مرض باركنسون"
-        assert ByLanguage("ar", text).run() == expected
+        assert YearPatternStripper("ar", text).run() == expected
 
     def test_multi_langs_returns_none_when_no_known_suffix(self):
         # "{year}" is present but not in any recognized suffix pattern.
-        assert ByLanguage("es", "algo {year} raro").run() is None
+        assert YearPatternStripper("es", "algo {year} raro").run() is None
 
     def test_abr_strips_known_suffix(self):
         text = "Parkinson yareɛ a ebu soɔ, afe {year}"
         expected = "Parkinson yareɛ a ebu soɔ"
-        assert ByLanguage("abr", text).run() == expected
+        assert YearPatternStripper("abr", text).run() == expected
 
     def test_abr_returns_none_when_suffix_does_not_match(self):
         # "abr" only recognizes ", afe {year}", not the generic comma suffix.
+        text = "Parkinson yareɛ a ebu soɔ-{year}"
+        assert YearPatternStripper("abr", text).run() is None
+
+        # "abr" only recognizes ", afe {year}" for its specific pattern,
+        # but falls back to generic comma suffix stripping.
         text = "Parkinson yareɛ a ebu soɔ, {year}"
-        assert ByLanguage("abr", text).run() is None
+        assert YearPatternStripper("abr", text).run() == "Parkinson yareɛ a ebu soɔ"
 
     def test_ja_strips_prefix(self):
         text = "{year}年のパーキンソン病の流行"
         # expected = "のパーキンソン病の流行"
         expected = "パーキンソン病の流行"
-        assert ByLanguage("ja", text).run() == expected
+        assert YearPatternStripper("ja", text).run() == expected
 
     def test_ja_strips_suffix(self):
         text = "パーキンソン病の流行年{year}"
         expected = "パーキンソン病の流行"
-        assert ByLanguage("ja", text).run() == expected
+        assert YearPatternStripper("ja", text).run() == expected
 
     def test_ja_returns_none_when_no_known_pattern(self):
-        text = "パーキンソン病の流行 {year}"
-        assert ByLanguage("ja", text).run() is None
+        text = "パーキンソン病の流行-{year}"
+        assert YearPatternStripper("ja", text).run() is None
+
+        # With generic fallback, " {year}" is stripped
+        text2 = "パーキンソン病の流行 {year}"
+        assert YearPatternStripper("ja", text2).run() == "パーキンソン病の流行"
 
 
 # ---------------------------------------------------------------------------
@@ -171,7 +180,7 @@ class TestRenderTitlesTranslations:
         # stripping should not be included, even if the English key does.
         title_new = {
             "prevalence, {year}": {
-                "es": "prevalencia {year}",  # no matching suffix pattern -> None -> skipped
+                "es": "prevalencia-{year}",  # no matching suffix pattern -> None -> skipped
                 "ar": "الانتشار، {year}",
             }
         }
@@ -181,7 +190,7 @@ class TestRenderTitlesTranslations:
         assert result["prevalence"]["ar"] == "الانتشار"
 
     def test_skips_empty_translation_values(self):
-        # Empty strings must be ignored, not passed to ByLanguage.
+        # Empty strings must be ignored, not passed to YearPatternStripper.
         title_new = {
             "prevalence, {year}": {
                 "es": "",
@@ -197,7 +206,7 @@ class TestRenderTitlesTranslations:
         # key should not appear in the final output at all.
         title_new = {
             "prevalence, {year}": {
-                "es": "prevalencia {year}",  # unmatched suffix -> None
+                "es": "prevalencia {yearz}",  # unmatched suffix -> None
             }
         }
         result = render_translations_for_titles(title_new)
@@ -354,7 +363,7 @@ class TestAddTranslationsWithExtractorData:
         }
         translations = TranslationMapping.from_any(data)
 
-        bot = AddTitlesTranslationsFromTitles(translations)
+        bot = YearFreeTitleMerger(translations)
 
         bot.run()
 
@@ -407,7 +416,7 @@ class TestWithMeta:
         }
         translations = TranslationMapping.from_any(data)
 
-        bot = AddTitlesTranslationsFromTitles(translations)
+        bot = YearFreeTitleMerger(translations)
 
         bot.run()
 

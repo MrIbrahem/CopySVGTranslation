@@ -14,11 +14,13 @@ from __future__ import annotations
 
 __version__ = "0.2.3"
 
+from .config import TranslationConfig
+from .core.mapping import TranslationEntry, TranslationMapping
+
 # ---------------------------------------------------------------------------
 # Primary public API
 # ---------------------------------------------------------------------------
-from .config import TranslationConfig
-from .core.mapping import TranslationEntry, TranslationMapping
+from .exceptions import CopySVGTranslationError
 
 # ---------------------------------------------------------------------------
 # Optional advanced exports (still public, but less commonly needed)
@@ -29,12 +31,17 @@ from .injection import SVGTranslationInjector
 # ---------------------------------------------------------------------------
 # Legacy compatibility layer (deprecated)
 # ---------------------------------------------------------------------------
-from .nested import MatchFixNestedTags, NestedTspanDetector, NestedTspanFlattener
+from .nested import (
+    MatchFixNestedTags,
+    NestedTspanDetector,
+    NestedTspanFlattener,
+)
 from .service import SVGTranslationService
 
 __all__ = [
     # version
     "__version__",
+    "CopySVGTranslationError",
     "MatchFixNestedTags",
     "NestedTspanDetector",
     "NestedTspanFlattener",
@@ -44,5 +51,4 @@ __all__ = [
     "TranslationConfig",
     "TranslationEntry",
     "TranslationMapping",
-    "__version__",
 ]
