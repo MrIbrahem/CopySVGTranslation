@@ -129,7 +129,7 @@ class NestedStructureService:
         root: etree._Element | None,
         strategy: NestedStrategy | None = None,
     ) -> RepairResult:
-        if not root:
+        if root is None:
             return RepairResult(
                 success=False,
                 len_tags_before_fix=0,
