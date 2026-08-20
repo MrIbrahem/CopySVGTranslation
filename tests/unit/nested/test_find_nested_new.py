@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from CopySVGTranslation.nested import MatchFixNestedTags
+from CopySVGTranslation.nested import NestedStructureService
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -18,14 +18,12 @@ def fix_nested_file_new(
     new_path: Path | None = None,
     pretty_print: bool | None = None,
 ) -> bool:
-    processer = MatchFixNestedTags(
-        source_file,
-        new_path,
-        pretty_print=pretty_print,
+    processer = NestedStructureService(
         strategy="preserve_style",
     )
 
-    return processer.fix_file()
+    fixed = processer.repair_file(source_file, new_path)
+    return fixed.success
 
 
 def _svg(inner: str) -> str:

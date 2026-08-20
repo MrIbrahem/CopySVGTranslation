@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from CopySVGTranslation.nested import MatchFixNestedTags
+from CopySVGTranslation.nested import NestedStructureService
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -37,13 +37,13 @@ class TestMatchAndFix(TestSetup):
             </g>
         """
         p = _write_svg(temp_dir, text, name="testx.svg")
-        matcher = MatchFixNestedTags(p, p, strategy="preserve_style")
-        before = len(matcher.match_nested())
-        fixed = matcher.fix_file()
+        matcher = NestedStructureService(strategy="preserve_style")
+        before = len(matcher.analyze_file(p))
+        fixed = matcher.repair_file(p, p)
 
-        assert fixed is True
+        assert fixed.success is True
 
-        after = len(matcher.match_nested())
+        after = len(matcher.analyze_file(p))
         assert before == 1
         assert after == 0
 
@@ -92,13 +92,13 @@ class TestMatchAndFix(TestSetup):
             </g>
         """
         p = _write_svg(temp_dir, text, name="testx.svg")
-        matcher = MatchFixNestedTags(p, p, strategy="preserve_style")
+        matcher = NestedStructureService(strategy="preserve_style")
 
-        before = len(matcher.match_nested())
-        fixed = matcher.fix_file()
-        assert fixed is True
+        before = len(matcher.analyze_file(p))
+        fixed = matcher.repair_file(p, p)
+        assert fixed.success is True
 
-        after = len(matcher.match_nested())
+        after = len(matcher.analyze_file(p))
         assert before == 2
         assert after == 0
 
@@ -145,15 +145,15 @@ class TestTodo(TestSetup):
             </g>
         """
         p = _write_svg(temp_dir, text, name="testx.svg")
-        matcher = MatchFixNestedTags(p, p, strategy="preserve_style")
+        matcher = NestedStructureService(strategy="preserve_style")
 
-        before = len(matcher.match_nested())
+        before = len(matcher.analyze_file(p))
 
-        fixed = matcher.fix_file()
+        fixed = matcher.repair_file(p, p)
 
-        assert fixed is True
+        assert fixed.success is True
 
-        after = len(matcher.match_nested())
+        after = len(matcher.analyze_file(p))
         assert before == 1
         assert after == 0
 
@@ -183,15 +183,15 @@ class TestTodo(TestSetup):
             </g>
         """
         p = _write_svg(temp_dir, text, name="testx.svg")
-        matcher = MatchFixNestedTags(p, p, strategy="flatten")
+        matcher = NestedStructureService(strategy="flatten")
 
-        before = len(matcher.match_nested())
+        before = len(matcher.analyze_file(p))
 
-        fixed = matcher.fix_file()
+        fixed = matcher.repair_file(p, p)
 
-        assert fixed is True
+        assert fixed.success is True
 
-        after = len(matcher.match_nested())
+        after = len(matcher.analyze_file(p))
         assert before == 1
         assert after == 0
 

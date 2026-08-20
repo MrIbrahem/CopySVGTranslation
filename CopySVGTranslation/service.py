@@ -13,6 +13,7 @@ from .core.mapping import InjectorData, TranslationMapping
 from .extraction.extractor import SVGTranslationExtractor
 from .injection.injector import SVGTranslationInjector
 from .io.mapping_store import MappingStore
+from .nested import NestedStructureService
 from .result import OperationResult
 
 logger = logging.getLogger(__name__)
@@ -32,9 +33,69 @@ class SVGTranslationService:
         self._extractor = SVGTranslationExtractor(self.config)
         self._injector = SVGTranslationInjector(self.config)
         self._mapping_store = MappingStore(self.config)
+        self._nested = NestedStructureService(
+            strategy=self.config.nested_strategy,
+            also_fix_a=True,
+        )
 
     # ------------------------------------------------------------------
-    # Public API
+    # Public API for nested
+    # ------------------------------------------------------------------
+
+    def analyze_nested(
+        self,
+        svg_path: Path | str,
+    ) -> OperationResult[list[str]]:
+        """
+        Detect nested tspan/a structures. Read-only.
+        """
+        try:
+            findings = self._nested.analyze_file(Path(svg_path))
+            return OperationResult.ok(data=findings)
+        except Exception as exc:
+            return OperationResult.fail(
+                error=str(exc),
+                error_code=getattr(exc, "code", "nested_analyze_error"),
+            )
+
+    def repair_nested(
+        self,
+        svg_path: Path | str,
+        *,
+        output: Path | str | None = None,
+        strategy: Any = None,  # Can be NestedStrategy or None
+        save: bool = True,
+    ) -> OperationResult:
+        """
+        Repair nested structures and optionally save.
+        Does NOT run as part of extract/inject.
+        """
+        if save and output is None:
+            return OperationResult.fail(
+                error="save=True but no output path",
+                error_code="missing_output_path",
+            )
+        try:
+            result = self._nested.repair_file(
+                source=Path(svg_path),
+                output=output,
+                strategy=strategy or self.config.nested_strategy,
+                save=save,
+            )
+            if not result.success:
+                return OperationResult.fail(
+                    error="; ".join(result.warnings) if result.warnings else "Repair failed",
+                    error_code="nested_repair_error",
+                )
+            return OperationResult.ok(data=result)
+        except Exception as exc:
+            return OperationResult.fail(
+                error=str(exc),
+                error_code=getattr(exc, "code", "nested_repair_error"),
+            )
+
+    # ------------------------------------------------------------------
+    # Public API for extract and inject
     # ------------------------------------------------------------------
 
     def extract(

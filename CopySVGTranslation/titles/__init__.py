@@ -1,8 +1,8 @@
 from .year_handler import YearTitleHandler
 from .year_stripper import (
-    YearPatternStripper,
     TitlesTranslationsRenderer,
     YearFreeTitleMerger,
+    YearPatternStripper,
     derive_year_free_entries,
     merge_year_free_into_new,
 )

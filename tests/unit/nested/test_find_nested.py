@@ -9,7 +9,7 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 
-from CopySVGTranslation.nested import MatchFixNestedTags
+from CopySVGTranslation.nested import NestedStructureService
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -19,14 +19,12 @@ def fix_nested_file(
     new_path: Path | None = None,
     pretty_print: bool | None = None,
 ) -> bool:
-    processer = MatchFixNestedTags(
-        source_file,
-        new_path,
-        pretty_print=pretty_print,
+    processer = NestedStructureService(
         strategy="flatten",
     )
 
-    return processer.fix_file()
+    fixed = processer.repair_file(source_file, new_path)
+    return fixed.success
 
 
 def _svg(inner: str) -> str:
@@ -100,6 +98,7 @@ class TestFixNestedFile:
         with warnings.catch_warnings(record=True):
             warnings.simplefilter("always")
             result = fix_nested_file(src)
-        assert result is False
+
+        assert result is True
         content = src.read_text(encoding="utf-8")
         assert "Bold" in content
