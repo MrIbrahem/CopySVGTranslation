@@ -12,8 +12,7 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation.config import TranslationConfig
-from CopySVGTranslation.core.mapping import TranslationMapping
-from CopySVGTranslation.core.mapping import InjectorData
+from CopySVGTranslation.core.mapping import InjectorData, TranslationMapping
 from CopySVGTranslation.service import SVGTranslationService
 
 SVG_NS = "http://www.w3.org/2000/svg"

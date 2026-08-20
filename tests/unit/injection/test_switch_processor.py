@@ -47,13 +47,13 @@ from lxml import etree
 
 from CopySVGTranslation import TranslationConfig
 from CopySVGTranslation.core import TranslationMapping
+from CopySVGTranslation.core.mapping import InjectorStats
 from CopySVGTranslation.injection import TranslationApplier
 from CopySVGTranslation.injection.id_manager import IdManager
 from CopySVGTranslation.injection.switch_processor import (
     SVG_NS,
     SwitchProcessor,
 )
-from CopySVGTranslation.core.mapping import InjectorStats
 
 NSMAP = {"svg": SVG_NS}
 

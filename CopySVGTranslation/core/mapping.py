@@ -187,11 +187,14 @@ class InjectorStats:
             setattr(self, key, value)
 
     def has_changes(self) -> bool:
-        return any((
-            self.new_languages_count,
-            self.updated_translations,
-            self.inserted_translations,
-        ))
+        return any(
+            (
+                self.new_languages_count,
+                self.updated_translations,
+                self.inserted_translations,
+            )
+        )
+
 
 @dataclass
 class Error:
@@ -209,6 +212,7 @@ class Error:
         code = getattr(exc, "code", None) or str(exc)
         if code:
             self.code = str(code)
+
 
 @dataclass
 class InjectorData:
