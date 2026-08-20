@@ -185,8 +185,8 @@ class TestServiceExtractExtended:
         assert result.success is True
         assert out_path.exists()
 
-    def test_extract_save_mapping_failure_adds_warning(self, tmp_path: Path):
-        """If saving mapping fails, a warning is added but extraction succeeds."""
+    def test_extract_save_mapping_uses_conventional_fallback(self, tmp_path: Path):
+        """save_mapping=True uses MappingStore's conventional data-directory path."""
         inner = """
             <switch>
                 <text id="t0-ar" systemLanguage="ar"><tspan id="t0-ar">مرحبا</tspan></text>
@@ -194,14 +194,14 @@ class TestServiceExtractExtended:
             </switch>
         """
         svg = _write_svg(tmp_path, inner)
-        # Use a config with no mapping_output_dir and save_mapping=True
-        config = TranslationConfig(mapping_output_dir=None, create_parents=False)
-        service = SVGTranslationService(config)
+        service = SVGTranslationService(TranslationConfig(mapping_output_dir=None))
+
         result = service.extract(svg, save_mapping=True)
 
-        # Extraction should still succeed, but with a warning
+        expected_path = tmp_path / "data" / "test.svg.json"
         assert result.success is True
-        assert len(result.warnings) >= 1
+        assert result.warnings == []
+        assert expected_path.exists()
 
     def test_extract_string_path(self, tmp_path: Path):
         """Extract should accept string paths."""
@@ -282,6 +282,59 @@ class TestServiceExtractAndInject:
         service = SVGTranslationService()
         result = service.extract_and_inject(src, tgt)
         assert result.success is False
+
+    def test_extract_and_inject_saves_in_place_to_output(self, tmp_path: Path):
+        source = _write_svg(
+            tmp_path,
+            '''
+                <switch>
+                    <text id="t0-ar" systemLanguage="ar"><tspan id="t0-ar">مرحبا</tspan></text>
+                    <text id="t0"><tspan id="t0">Hello</tspan></text>
+                </switch>
+            ''',
+            "source.svg",
+        )
+        output = _write_svg(
+            tmp_path,
+            '<switch><text id="t0"><tspan id="t0">Hello</tspan></text></switch>',
+            "output.svg",
+        )
+        service = SVGTranslationService()
+
+        result = service.extract_and_inject(source=source, output=output, save=True)
+
+        assert result.success is True
+        assert 'systemLanguage="ar"' in output.read_text(encoding="utf-8")
+
+    def test_extract_and_inject_does_not_redirect_output_through_output_dir(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        source = _write_svg(
+            tmp_path,
+            '''
+                <switch>
+                    <text id="t0-ar" systemLanguage="ar"><tspan id="t0-ar">مرحبا</tspan></text>
+                    <text id="t0"><tspan id="t0">Hello</tspan></text>
+                </switch>
+            ''',
+            "source.svg",
+        )
+        output = _write_svg(
+            tmp_path,
+            '<switch><text id="t0"><tspan id="t0">Hello</tspan></text></switch>',
+            "output.svg",
+        )
+        redirected_directory = tmp_path / "redirected"
+        service = SVGTranslationService(TranslationConfig(output_dir=redirected_directory))
+        monkeypatch.chdir(tmp_path)
+
+        result = service.extract_and_inject(source=source, output="output.svg", save=True)
+
+        assert result.success is True
+        assert 'systemLanguage="ar"' in output.read_text(encoding="utf-8")
+        assert not (redirected_directory / "output.svg").exists()
 
     def test_merges_warnings(self, tmp_path: Path):
         """Warnings from both extract and inject should be merged."""
@@ -383,39 +436,94 @@ class TestServiceResolveHelpers:
         result = service._resolve_mapping_output(Path("/some/file.svg"), tmp_path / "explicit.json")
         assert result == tmp_path / "explicit.json"
 
-    def test_resolve_mapping_output_no_dir_raises(self):
-        config = TranslationConfig(mapping_output_dir=None)
-        service = SVGTranslationService(config)
-        with pytest.raises(ValueError, match="mapping_output_dir"):
-            service._resolve_mapping_output(Path("/some/file.svg"), True)
+    def test_resolve_mapping_output_without_configured_directory_uses_store_fallback(self, tmp_path: Path):
+        service = SVGTranslationService(TranslationConfig(mapping_output_dir=None))
+        source = tmp_path / "source.svg"
 
-    def test_resolve_mapping_output_creates_dir(self, tmp_path: Path):
+        result = service._resolve_mapping_output(source, True)
+
+        assert result == tmp_path / "data" / "source.svg.json"
+
+    def test_resolve_mapping_output_delegates_configured_directory_without_writing(self, tmp_path: Path):
         mapping_dir = tmp_path / "new_dir"
         config = TranslationConfig(mapping_output_dir=mapping_dir, create_parents=True)
         service = SVGTranslationService(config)
+
         result = service._resolve_mapping_output(Path("/some/file.svg"), True)
+
         assert result == mapping_dir / "file.svg.json"
-        assert mapping_dir.exists()
+        assert not mapping_dir.exists()
 
 
-class TestServiceSaveTree:
-    """Tests for _save_tree internal helper."""
+class TestServicePersistenceContracts:
+    """Public service methods share output resolution and write policy."""
 
-    def test_save_tree_creates_file(self, tmp_path: Path):
+    def test_inject_with_output_and_save_false_does_not_write(self, tmp_path: Path):
+        svg = _write_svg(tmp_path, '<switch><text id="t0"><tspan id="t0">Hello</tspan></text></switch>')
+        output = tmp_path / "not-written.svg"
         service = SVGTranslationService()
-        svg_content = f'<svg xmlns="{SVG_NS}"><text>Hello</text></svg>'
-        root = etree.fromstring(svg_content.encode("utf-8"))
-        tree = etree.ElementTree(root)
-        out = tmp_path / "saved.svg"
-        service._save_tree(tree, out)
-        assert out.exists()
 
-    def test_save_tree_creates_parents(self, tmp_path: Path):
-        config = TranslationConfig(create_parents=True)
+        result = service.inject(
+            svg,
+            {"new": {"hello": {"ar": "مرحبا"}}},
+            output=output,
+            save=False,
+        )
+
+        assert result.success is True
+        assert result.data.tree is not None
+        assert not output.exists()
+
+    def test_prepare_only_resolves_bare_output_filename(self, tmp_path: Path):
+        svg = _write_svg(tmp_path, '<text id="t0">Hello</text>')
+        output_dir = tmp_path / "prepared"
+        service = SVGTranslationService(TranslationConfig(output_dir=output_dir))
+
+        result = service.prepare_only(svg, output="prepared.svg")
+
+        expected = output_dir / "prepared.svg"
+        assert result.success is True
+        assert expected.exists()
+        assert expected.read_bytes().startswith(b"<?xml")
+
+    def test_repair_nested_resolves_bare_output_and_uses_shared_writer(self, tmp_path: Path):
+        svg = _write_svg(
+            tmp_path,
+            '<text id="t1"><tspan><tspan style="font-weight: 700;">Bold</tspan></tspan></text>',
+        )
+        output_dir = tmp_path / "nested" / "output"
+        config = TranslationConfig(output_dir=output_dir, create_parents=True, pretty_print=False)
         service = SVGTranslationService(config)
-        svg_content = f'<svg xmlns="{SVG_NS}"><text>Hello</text></svg>'
-        root = etree.fromstring(svg_content.encode("utf-8"))
-        tree = etree.ElementTree(root)
-        out = tmp_path / "sub" / "dir" / "saved.svg"
-        service._save_tree(tree, out)
-        assert out.exists()
+
+        result = service.repair_nested(svg, output="repaired.svg", strategy="preserve_style")
+
+        expected = output_dir / "repaired.svg"
+        assert result.success is True
+        assert expected.exists()
+        assert expected.read_bytes().startswith(b"<?xml")
+        assert etree.parse(str(expected)).getroot() is not None
+
+    def test_repair_nested_with_save_false_returns_result_without_writing(self, tmp_path: Path):
+        svg = _write_svg(
+            tmp_path,
+            '<text id="t1"><tspan><tspan>Nested</tspan></tspan></text>',
+        )
+        output = tmp_path / "not-written.svg"
+        service = SVGTranslationService()
+
+        result = service.repair_nested(svg, output=output, strategy="flatten", save=False)
+
+        assert result.success is True
+        assert not output.exists()
+
+    def test_repair_nested_requires_output_when_saving(self, tmp_path: Path):
+        svg = _write_svg(
+            tmp_path,
+            '<text id="t1"><tspan><tspan>Nested</tspan></tspan></text>',
+        )
+        service = SVGTranslationService()
+
+        result = service.repair_nested(svg, strategy="flatten", save=True)
+
+        assert result.success is False
+        assert result.error_code == "missing_output_path"

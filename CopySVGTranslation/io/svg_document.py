@@ -8,6 +8,7 @@ from lxml import etree
 
 from ..config import TranslationConfig
 from ..exceptions import SvgStructureError
+from .svg_writer import write_svg
 
 logger = logging.getLogger(__name__)
 
@@ -96,19 +97,12 @@ class SvgDocument:
         if target is None:
             raise ValueError("No target path provided for save")
 
-        cfg = self.config
-        pretty = cfg.pretty_print if pretty_print is None else pretty_print
-        pretty = pretty if pretty is not None else True
-        create = cfg.create_parents if create_parents is None else create_parents
-
-        if create:
-            target.parent.mkdir(parents=True, exist_ok=True)
-
-        self.tree.write(
-            str(target),
-            encoding="utf-8",
-            xml_declaration=True,
-            pretty_print=pretty,
+        target = write_svg(
+            self.tree,
+            target,
+            config=self.config,
+            pretty_print=pretty_print,
+            create_parents=create_parents,
         )
         logger.debug("Saved SVG to %s", target)
         return target

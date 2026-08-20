@@ -9,6 +9,8 @@ from pathlib import Path
 
 from lxml import etree
 
+from ..config import TranslationConfig
+from ..io.svg_writer import write_svg
 from .detector import NestedTspanDetector
 from .flattener import NestedStrategy, NestedTspanFlattener
 from .objects import RepairResult
@@ -25,9 +27,11 @@ class NestedStructureService:
         self,
         strategy: NestedStrategy = "flatten",
         also_fix_a: bool = True,
+        config: TranslationConfig | None = None,
     ) -> None:
         self.strategy = strategy
         self.also_fix_a = also_fix_a
+        self.config = config or TranslationConfig()
         self.detector = NestedTspanDetector()
         self.flattener = NestedTspanFlattener(strategy=strategy, also_fix_a=also_fix_a)
 
@@ -175,17 +179,10 @@ class NestedStructureService:
         root: etree._Element,
         out_path: Path | str,
     ) -> None:
-        _str = etree.tostring(
-            root,
-            encoding="unicode",
-            pretty_print=None,
-        )  # pyright: ignore[reportCallIssue]
-
         if not out_path:
-            raise Exception("new_path is None")
+            raise ValueError("new_path is None")
 
-        out_path = Path(out_path)
-        out_path.write_text(_str, encoding="utf-8")
+        write_svg(root, out_path, config=self.config)
 
 
 __all__ = [

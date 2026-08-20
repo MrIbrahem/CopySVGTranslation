@@ -42,6 +42,28 @@ def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path, fixtures
     assert "السكان 2020" in content
 
 
+def test_inject_legacy_save_path_implies_save_when_save_result_is_false(
+    tmp_path: Path,
+    target_svg: Path,
+    fixtures_dir,
+) -> None:
+    """The deprecated wrapper preserves its path-implies-save compatibility rule."""
+    translations = extract(fixtures_dir / "source.svg")
+    output_file = tmp_path / "legacy-output.svg"
+
+    tree, stats = inject_file_tree(
+        inject_file=target_svg,
+        mapping=translations,
+        save_path=output_file,
+        save_result=False,
+        return_stats=True,
+    )
+
+    assert tree is not None
+    assert isinstance(stats, dict)
+    assert output_file.exists()
+
+
 def test_inject_without_save_path(tmp_path: Path, target_svg: Path, fixtures_dir) -> None:
     """inject should handle missing save_path when save_result=False."""
     translations = extract(fixtures_dir / "source.svg")

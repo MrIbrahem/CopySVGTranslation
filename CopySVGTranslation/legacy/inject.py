@@ -97,8 +97,12 @@ def inject_file_tree(
     pretty_print: bool | None = None,
     sort_switches: bool | None = None,
 ) -> tuple[Any, Any] | Any:
-    """
-    Deprecated. Use SVGTranslationService.inject() instead.
+    """Deprecated compatibility wrapper for :meth:`SVGTranslationService.inject`.
+
+    Unlike the modern API, supplying ``save_path`` always saves the result,
+    including when ``save_result=False``. This path-implies-save rule is kept
+    solely for backward compatibility. Migrate to ``service.inject`` with an
+    explicit ``output`` path and ``save=True`` when a file must be written.
     """
     tree, stats = _inject_file_tree(
         inject_file=inject_file,

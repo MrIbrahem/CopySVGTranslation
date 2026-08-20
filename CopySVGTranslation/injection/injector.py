@@ -13,6 +13,7 @@ from ..exceptions import (
     SvgNestedTspanError,
     SvgStructureError,
 )
+from ..io.svg_writer import write_svg
 from ..preparation import SvgPreparationPipeline
 from ..result import InjectorStats
 from ..titles import YearTitleHandler
@@ -140,7 +141,7 @@ class SVGTranslationInjector:
                 return result
 
             try:
-                self._save(tree, save_path)
+                write_svg(tree, save_path, config=self.config)
             except OSError as e:
                 logger.error(f"Failed writing {str(save_path)}: {e}")
                 result.error.label = f"Failed writing {str(save_path)}: {e}"
@@ -179,23 +180,6 @@ class SVGTranslationInjector:
         svg_path = Path(svg_path)
         tree, _ = self.preparer.run(svg_path)
         return tree
-
-    def _save(
-        self,
-        tree: etree._ElementTree,
-        save_path: Path,
-    ) -> None:
-        if self.config.create_parents:
-            save_path.parent.mkdir(parents=True, exist_ok=True)
-
-        pretty = self.config.pretty_print if self.config.pretty_print is not None else True
-        tree.write(
-            str(save_path),
-            encoding="utf-8",
-            xml_declaration=True,
-            pretty_print=pretty,
-        )
-        logger.debug(f"Saved modified SVG to {save_path}")
 
     def _update_data(
         self,
