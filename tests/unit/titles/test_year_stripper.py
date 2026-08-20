@@ -171,7 +171,7 @@ class TestRenderTitlesTranslations:
         # stripping should not be included, even if the English key does.
         title_new = {
             "prevalence, {year}": {
-                "es": "prevalencia {year}",  # no matching suffix pattern -> None -> skipped
+                "es": "prevalencia-{year}",  # no matching suffix pattern -> None -> skipped
                 "ar": "الانتشار، {year}",
             }
         }
@@ -197,7 +197,7 @@ class TestRenderTitlesTranslations:
         # key should not appear in the final output at all.
         title_new = {
             "prevalence, {year}": {
-                "es": "prevalencia {year}",  # unmatched suffix -> None
+                "es": "prevalencia {yearz}",  # unmatched suffix -> None
             }
         }
         result = render_translations_for_titles(title_new)
