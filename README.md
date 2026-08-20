@@ -5,7 +5,7 @@
 
 **Extract multilingual text from SVG files and inject translations into other SVGs.**
 
-CopySVGTranslation works with SVG documents that use `<switch>` elements and `systemLanguage` attributes. The recommended public entry point, `SVGTranslationService`, coordinates extraction, injection, preparation, nested-structure repair, and JSON mapping I/O through one consistent result type.
+CopySVGTranslation works with SVG documents that use `<switch>` elements and `systemLanguage` attributes. The public entry point, `SVGTranslationService`, coordinates extraction, injection, preparation, nested-structure repair, and JSON mapping I/O through one consistent result type.
 
 ---
 
@@ -509,44 +509,6 @@ and a target SVG with only the default text:
 ```
 
 running `extract_and_inject(source, output, save=True)` creates the Arabic and French language nodes in the output document and saves them back to that same file. Whether existing language nodes are replaced or preserved is controlled by `overwrite_translations`.
-
----
-
-## Lower-Level APIs
-
-The service facade is recommended for application code. Advanced callers can use `SVGTranslationExtractor` and `SVGTranslationInjector` directly when they need the lower-level return types or pipeline control.
-
-```python
-from CopySVGTranslation import (
-    SVGTranslationExtractor,
-    SVGTranslationInjector,
-    TranslationConfig,
-)
-
-config = TranslationConfig()
-mapping = SVGTranslationExtractor(config).extract("source.svg")
-result = SVGTranslationInjector(config).inject("target.svg", mapping, save=False)
-```
-
----
-
-## Legacy API (Deprecated)
-
-> **Deprecated:** The compatibility functions in `CopySVGTranslation.legacy` will be removed in a future major release. Prefer `SVGTranslationService` for new code.
-
-```python
-# Before
-from CopySVGTranslation.legacy import extract
-
-translations = extract("source.svg", case_insensitive=True)
-
-# After
-from CopySVGTranslation import SVGTranslationService, TranslationConfig
-
-service = SVGTranslationService(TranslationConfig(case_insensitive=True))
-result = service.extract("source.svg")
-translations = result.data.to_json() if result.success else None
-```
 
 ---
 

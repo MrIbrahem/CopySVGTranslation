@@ -307,31 +307,19 @@ def test_by_position_matches_in_order(default_node, translated_node):
 ```python
 # tests/integration/test_service_extract_and_inject.py
 def test_extract_and_inject(service, svg_path, tmp_path):
-    out = tmp_path / "out.svg"
+    output = tmp_path / "translated.svg"
+    output.write_text(svg_path("simple_switch.svg").read_text(encoding="utf-8"), encoding="utf-8")
+
     result = service.extract_and_inject(
         source=svg_path("multi_lang.svg"),
-        target=svg_path("simple_switch.svg"),
-        output=out,
+        output=output,
         save=True,
     )
+
     assert result.success
-    assert out.exists()
+    assert output.exists()
     assert result.stats is not None
     assert result.stats.inserted_translations >= 1
-```
-
-**Legacy**
-
-```python
-# tests/legacy/test_extract.py
-import pytest
-from CopySVGTranslation import extract
-
-@pytest.mark.legacy
-def test_extract_deprecated(svg_path):
-    with pytest.warns(DeprecationWarning, match="deprecated"):
-        data = extract(svg_path("simple_switch.svg"))
-    assert data is None or isinstance(data, dict)
 ```
 
 ---
@@ -342,7 +330,6 @@ def test_extract_deprecated(svg_path):
 [tool.pytest.ini_options]
 markers = [
     "todo: work in progress",
-    "legacy: deprecated API",
 ]
 ```
 
@@ -352,8 +339,6 @@ Run subsets:
 pytest                         # all
 pytest tests/unit              # fast
 pytest tests/integration       # slower, file-based
-pytest -m legacy               # only legacy
-pytest -m "not legacy"         # modern only
 pytest -m "not todo"           # skip unfinished
 ```
 
@@ -364,9 +349,8 @@ pytest -m "not todo"           # skip unfinished
 | Area                                   | Target                                    |
 | -------------------------------------- | ----------------------------------------- |
 | `core`, `utils`, `titles`, `nested`    | ≥ 95%                                     |
-| `extraction`, `injection` (non-legacy) | ≥ 90%                                     |
+| `extraction`, `injection`              | ≥ 90%                                     |
 | `service`, `io`                        | ≥ 85%                                     |
-| `legacy/`                              | optional / omitted from required coverage |
 
 ---
 

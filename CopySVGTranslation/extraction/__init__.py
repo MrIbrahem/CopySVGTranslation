@@ -1,6 +1,5 @@
-"""Extraction phase helpers for CopySVGTranslation."""
+"""Internal extraction components for CopySVGTranslation."""
 
-from .extractor import SVGTranslationExtractor
 from .strategies import (
     ByPositionStrategy,
     ByTspanIdStrategy,
@@ -13,5 +12,4 @@ __all__ = [
     "ByTspanIdStrategy",
     "CompositeMatchingStrategy",
     "MatchingStrategy",
-    "SVGTranslationExtractor",
 ]

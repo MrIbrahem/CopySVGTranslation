@@ -156,7 +156,7 @@ from copy_svg_translation import SVGTranslationService, TranslationConfig
 
 config = TranslationConfig(
     case_insensitive=True,
-    overwrite=False,
+    overwrite_translations=False,
     pretty_print=True,
     auto_save=False,
 )
@@ -171,11 +171,11 @@ if result.success:
 # Inject
 result = service.inject(Path("target.svg"), mapping, output=Path("out.svg"))
 
-# Combined
+# Combined: updates the output SVG in place
 result = service.extract_and_inject(
     source=Path("translated.svg"),
-    target=Path("untranslated.svg"),
-    output=Path("result.svg"),
+    output=Path("untranslated.svg"),
+    save=True,
 )
 ```
 
@@ -683,11 +683,10 @@ result = service.inject(
 if result.success:
     print(result.stats.inserted_translations)
 
-# One-shot workflow
+# One-shot workflow: updates the output SVG in place
 result = service.extract_and_inject(
     source="already_translated.svg",
-    target="new_version.svg",
-    output="new_version_translated.svg",
+    output="new_version.svg",
     save=True,
 )
 ```
