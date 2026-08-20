@@ -12,6 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 class MatchFixNestedTags:
+    """
+    Deprecated legacy wrapper. Use NestedStructureService instead.
+    """
+
     def __init__(
         self,
         source_file: Path | str | None,
@@ -42,11 +46,11 @@ class MatchFixNestedTags:
         except (etree.XMLSyntaxError, OSError) as exc:
             logger.error(f"Failed to parse SVG file {self.source_file}: {exc}")
             return None
-        # ---
+
         self.root = tree.getroot()
         return self.root
 
-    def _save_file(self, root: etree.Element) -> None:
+    def _save_file(self, root: etree._Element) -> None:
         _str = etree.tostring(
             root,
             encoding="unicode",
@@ -59,32 +63,25 @@ class MatchFixNestedTags:
         self.new_path.write_text(_str, encoding="utf-8")
 
     def match_nested(self) -> list[str]:
-        root = self.root
-        if root is None:
-            root = self._get_root()
-        # ---
+        root = self._get_root()
         if root is None:
             return []
-        # ---
+
         return self.detector.find_in_tree_return_list(root)
 
     def fix_file(self) -> bool:
-        # ---
         root = self._get_root()
-        # ---
         if root is None:
             return False
-        # ---
+
         self.len_tags_before_fix = len(self.detector.find_in_tree(root))
-        # ---
         root = self._flatten_all(root)
-        # ---
+
         try:
             self._save_file(root)
             return True
         except Exception:
             logger.error(f"Failed to write fixed svg file to: {str(self.new_path)}")
-        # ---
         return False
 
 

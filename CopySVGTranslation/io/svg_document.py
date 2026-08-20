@@ -56,7 +56,10 @@ class SvgDocument:
         if not path.exists():
             raise FileNotFoundError(f"SVG file not found: {path}")
 
-        parser = etree.XMLParser(remove_blank_text=config.remove_blank_text)
+        parser = etree.XMLParser(
+            remove_blank_text=config.remove_blank_text,
+            resolve_entities=False,
+        )
 
         try:
             tree = etree.parse(str(path), parser)

@@ -6,7 +6,7 @@ from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.core.mapping import TranslationMapping
 from CopySVGTranslation.extraction import SVGTranslationExtractor
 from CopySVGTranslation.titles.year_stripper import (
-    AddTitlesTranslationsFromTitles,
+    YearFreeTitleMerger,
     YearPatternStripper,
     TitlesTranslationsRenderer,
 )
@@ -30,7 +30,7 @@ def add_translations_from_titles(
 ) -> dict[str, dict] | TranslationMapping:
     """Insert new translations into the translations dictionary."""
     extractor_data = TranslationMapping.from_any(translations)
-    adder = AddTitlesTranslationsFromTitles(extractor_data)
+    adder = YearFreeTitleMerger(extractor_data)
     adder.run()
 
     if adder.changes is False:
@@ -354,7 +354,7 @@ class TestAddTranslationsWithExtractorData:
         }
         translations = TranslationMapping.from_any(data)
 
-        bot = AddTitlesTranslationsFromTitles(translations)
+        bot = YearFreeTitleMerger(translations)
 
         bot.run()
 
@@ -407,7 +407,7 @@ class TestWithMeta:
         }
         translations = TranslationMapping.from_any(data)
 
-        bot = AddTitlesTranslationsFromTitles(translations)
+        bot = YearFreeTitleMerger(translations)
 
         bot.run()
 

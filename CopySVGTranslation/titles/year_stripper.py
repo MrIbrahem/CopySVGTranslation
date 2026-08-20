@@ -12,16 +12,22 @@ logger = logging.getLogger(__name__)
 
 
 class YearPatternStripper:
+    """
+    Language-specific removal of `{year}` (and related suffixes/prefixes) from a single string.
+    """
+
+    GENERIC_SUFFIXES = [
+        ", {year}",
+        ",{year}",
+        "، {year}",
+        "،{year}",
+        " {year}",
+    ]
+
 
     def __init__(self, lang: str, text: str) -> None:
         self.lang = lang
         self.text = text
-        self.ends_data = [
-            ", {year}",
-            ",{year}",
-            "، {year}",
-            "،{year}",
-        ]
 
     def abr(self) -> str | None:
         # "abr"	Parkinson yareɛ a ebu soɔ, afe {year}
@@ -43,7 +49,7 @@ class YearPatternStripper:
 
     def multi_langs(self) -> str | None:
         # other languages
-        for end_data in self.ends_data:
+        for end_data in self.GENERIC_SUFFIXES:
             if self.text.endswith(end_data):
                 return self.text.removesuffix(end_data).strip()
         return None
@@ -106,7 +112,7 @@ class TitlesTranslationsRenderer:
         return data
 
 
-class AddTitlesTranslationsFromTitles:
+class YearFreeTitleMerger:
 
     def __init__(self, mapping: TranslationMapping) -> None:
         self.mapping = mapping
@@ -140,5 +146,5 @@ class AddTitlesTranslationsFromTitles:
 __all__ = [
     "YearPatternStripper",
     "TitlesTranslationsRenderer",
-    "AddTitlesTranslationsFromTitles",
+    "YearFreeTitleMerger",
 ]

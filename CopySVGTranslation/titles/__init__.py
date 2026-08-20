@@ -1,9 +1,9 @@
 from .year_handler import YearTitleHandler
 from .year_stripper import (
-    AddTitlesTranslationsFromTitles,
+    YearFreeTitleMerger,
 )
 
 __all__ = [
     "YearTitleHandler",
-    "AddTitlesTranslationsFromTitles",
+    "YearFreeTitleMerger",
 ]
