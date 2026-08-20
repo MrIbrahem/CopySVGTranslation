@@ -60,7 +60,7 @@ def test_match_and_fix_paragraph_with_bold_numbers_and_link(temp_dir: Path):
     matcher = MatchFixNestedTags(strategy="flatten")
 
     before = len(matcher.match_nested(p))
-    matcher.fix_file(p, p)
+    matcher.repair_file(p, p)
     after = len(matcher.match_nested(p))
     # Current matcher flags any element child, so the first and third tspans are hits pre-fix
     assert before == 2
@@ -81,7 +81,7 @@ def test_match_and_fix_multiple_links_in_different_tspans(temp_dir: Path):
     matcher = MatchFixNestedTags(strategy="flatten")
 
     assert len(matcher.match_nested(p)) == 2
-    matcher.fix_file(p, p)
+    matcher.repair_file(p, p)
     assert len(matcher.match_nested(p)) == 0
 
 
@@ -96,7 +96,7 @@ def test_parametrized_various_patterns(temp_dir: Path, inner: str, expected_hits
     matcher = MatchFixNestedTags(strategy="flatten")
 
     assert len(matcher.match_nested(p)) == expected_hits
-    fixed = matcher.fix_file(p, p)
+    fixed = matcher.repair_file(p, p)
     assert fixed is True
     assert len(matcher.match_nested(p)) == 0
 
@@ -121,7 +121,7 @@ def test_match_and_fix(temp_dir: Path):
     matcher = MatchFixNestedTags(strategy="flatten")
 
     before = len(matcher.match_nested(p))
-    fixed = matcher.fix_file(p, p)
+    fixed = matcher.repair_file(p, p)
     assert fixed is True
 
     after = len(matcher.match_nested(p))
@@ -181,7 +181,7 @@ def test_match_and_fix_2(temp_dir: Path):
     matcher = MatchFixNestedTags(strategy="flatten")
 
     before = len(matcher.match_nested(p))
-    fixed = matcher.fix_file(p, p)
+    fixed = matcher.repair_file(p, p)
     assert fixed is True
 
     after = len(matcher.match_nested(p))
@@ -234,7 +234,7 @@ def test_match_and_fix_3(temp_dir: Path):
     matcher = MatchFixNestedTags(strategy="flatten")
 
     before = len(matcher.match_nested(p))
-    fixed = matcher.fix_file(p, p)
+    fixed = matcher.repair_file(p, p)
     assert fixed is True
 
     after = len(matcher.match_nested(p))

@@ -39,7 +39,7 @@ class TestMatchAndFix(TestSetup):
         p = _write_svg(temp_dir, text, name="testx.svg")
         matcher = MatchFixNestedTags(strategy="preserve_style")
         before = len(matcher.match_nested(p))
-        fixed = matcher.fix_file(p, p)
+        fixed = matcher.repair_file(p, p)
 
         assert fixed is True
 
@@ -95,7 +95,7 @@ class TestMatchAndFix(TestSetup):
         matcher = MatchFixNestedTags(strategy="preserve_style")
 
         before = len(matcher.match_nested(p))
-        fixed = matcher.fix_file(p, p)
+        fixed = matcher.repair_file(p, p)
         assert fixed is True
 
         after = len(matcher.match_nested(p))
@@ -149,7 +149,7 @@ class TestTodo(TestSetup):
 
         before = len(matcher.match_nested(p))
 
-        fixed = matcher.fix_file(p, p)
+        fixed = matcher.repair_file(p, p)
 
         assert fixed is True
 
@@ -187,7 +187,7 @@ class TestTodo(TestSetup):
 
         before = len(matcher.match_nested(p))
 
-        fixed = matcher.fix_file(p, p)
+        fixed = matcher.repair_file(p, p)
 
         assert fixed is True
 

@@ -137,7 +137,7 @@ class TestFixThenReCheck:
         matcher = MatchFixNestedTags(strategy="flatten")
 
         before = len(matcher.match_nested(p))
-        matcher.fix_file(p, p)
+        matcher.repair_file(p, p)
         after = len(matcher.match_nested(p))
         assert before == 1
         assert after == 0
@@ -148,7 +148,7 @@ class TestFixThenReCheck:
 
         assert len(matcher.match_nested(p)) == 1
 
-        matcher.fix_file(p, p)
+        matcher.repair_file(p, p)
         assert matcher.match_nested(p) == []
         # Validate content concatenation
         parser = etree.XMLParser(remove_blank_text=True)
@@ -160,7 +160,7 @@ class TestFixThenReCheck:
         p = _write_svg(temp_dir, "<text><tspan>L<tspan>1</tspan></tspan><tspan>L<tspan>2</tspan></tspan></text>")
         matcher = MatchFixNestedTags(strategy="flatten")
 
-        matcher.fix_file(p, p)
+        matcher.repair_file(p, p)
         parser = etree.XMLParser(remove_blank_text=True)
         root = etree.parse(str(p), parser).getroot()
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
@@ -170,7 +170,7 @@ class TestFixThenReCheck:
         p = _write_svg(temp_dir, '<text><tspan x="10" y="20" class="c">A<tspan>B</tspan></tspan></text>')
         matcher = MatchFixNestedTags(strategy="flatten")
 
-        matcher.fix_file(p, p)
+        matcher.repair_file(p, p)
         parser = etree.XMLParser(remove_blank_text=True)
         root = etree.parse(str(p), parser).getroot()
         t = root.find(f".//{{{SVG_NS}}}tspan")
@@ -184,7 +184,7 @@ class TestFixThenReCheck:
         # Create explicit tail by putting text outside; fix only sets tail for the fixed node
         matcher = MatchFixNestedTags(strategy="flatten")
 
-        matcher.fix_file(p, p)
+        matcher.repair_file(p, p)
         parser = etree.XMLParser(remove_blank_text=True)
         root = etree.parse(str(p), parser).getroot()
         t = root.find(f".//{{{SVG_NS}}}tspan")
@@ -195,7 +195,7 @@ class TestFixThenReCheck:
         p = _write_svg(temp_dir, "<text><tspan>0<tspan>1<tspan>2</tspan>3</tspan>4</tspan></text>")
         matcher = MatchFixNestedTags(strategy="flatten")
 
-        matcher.fix_file(p, p)
+        matcher.repair_file(p, p)
         parser = etree.XMLParser(remove_blank_text=True)
         root = etree.parse(str(p), parser).getroot()
         t = root.find(f".//{{{SVG_NS}}}tspan")
@@ -207,7 +207,7 @@ class TestFixThenReCheck:
         matcher = MatchFixNestedTags(strategy="flatten")
         before = Path.read_text(p, encoding="utf-8")
 
-        matcher.fix_file(p, p)
+        matcher.repair_file(p, p)
 
         after = Path.read_text(p, encoding="utf-8")
         # The serializer can change formatting. Compare tree-equivalence instead.
@@ -223,7 +223,7 @@ class TestOtherCases:
         p = _write_svg(temp_dir, "<text><tspan>Start<tspan>Mid</tspan>End</tspan><tspan>Foo</tspan></text>")
         matcher = MatchFixNestedTags(strategy="flatten")
 
-        matcher.fix_file(p, p)
+        matcher.repair_file(p, p)
         parser = etree.XMLParser(remove_blank_text=True)
         root = etree.parse(str(p), parser).getroot()
         t1, t2 = root.findall(f".//{{{SVG_NS}}}tspan")
@@ -248,7 +248,7 @@ class TestOtherCases:
 
         assert len(matcher.match_nested(p)) == expected_hits
 
-        matcher.fix_file(p, p)
+        matcher.repair_file(p, p)
         assert len(matcher.match_nested(p)) == 0
 
     # ---------- Safety on huge content ----------
@@ -268,7 +268,7 @@ class TestOtherCases:
 
         before = len(matcher.match_nested(p))
 
-        matcher.fix_file(p, p)
+        matcher.repair_file(p, p)
         after = len(matcher.match_nested(p))
         assert before == 50
         assert after == 0

@@ -38,7 +38,7 @@ class TestNestedFiles:
         matcher = MatchFixNestedTags(strategy="flatten")
 
         len_result_before = len(matcher.match_nested(file))
-        _fix_file = matcher.fix_file(file, file)
+        _fix_file = matcher.repair_file(file, file)
         len_result_after = len(matcher.match_nested(file))
 
         assert len_result_before == 2
@@ -63,7 +63,7 @@ class TestNestedFiles:
         matcher = MatchFixNestedTags(strategy="flatten")
 
         len_result_before = len(matcher.match_nested(file))
-        _fix_file = matcher.fix_file(file, file)
+        _fix_file = matcher.repair_file(file, file)
         len_result_after = len(matcher.match_nested(file))
 
         assert len_result_before == 1
@@ -90,7 +90,7 @@ class TestNestedFiles:
         matcher = MatchFixNestedTags(strategy="flatten")
 
         len_result_before = len(matcher.match_nested(file))
-        _fix_file = matcher.fix_file(file, file)
+        _fix_file = matcher.repair_file(file, file)
         len_result_after = len(matcher.match_nested(file))
 
         assert len_result_before == 1
@@ -115,7 +115,7 @@ class TestNestedFiles:
         matcher = MatchFixNestedTags(strategy="flatten")
 
         len_result_before = len(matcher.match_nested(file))
-        _fix_file = matcher.fix_file(file, file)
+        _fix_file = matcher.repair_file(file, file)
         len_result_after = len(matcher.match_nested(file))
 
         assert len_result_before == 2
@@ -181,7 +181,7 @@ class TestNestedFiles:
         matcher = MatchFixNestedTags(strategy="flatten")
 
         len_result_before = len(matcher.match_nested(file))
-        _fix_file = matcher.fix_file(file, file)
+        _fix_file = matcher.repair_file(file, file)
         len_result_after = len(matcher.match_nested(file))
 
         assert len_result_before == 7
