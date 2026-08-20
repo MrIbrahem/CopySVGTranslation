@@ -210,10 +210,11 @@ class TestFixThenReCheck:
         matcher.repair_file(p, p)
 
         after = Path.read_text(p, encoding="utf-8")
-        # The serializer can change formatting. Compare tree-equivalence instead.
-        rb = etree.tostring(etree.fromstring(before.encode("utf-8")), with_tail=False)
-        ra = etree.tostring(etree.fromstring(after.encode("utf-8")), with_tail=False)
-        assert rb == ra
+        # The shared writer adds a declaration and can change formatting. Compare normalized trees.
+        parser = etree.XMLParser(remove_blank_text=True)
+        before_root = etree.fromstring(before.encode("utf-8"), parser)
+        after_root = etree.fromstring(after.encode("utf-8"), parser)
+        assert etree.tostring(before_root, with_tail=False) == etree.tostring(after_root, with_tail=False)
 
 
 class TestOtherCases:

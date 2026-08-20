@@ -13,6 +13,8 @@ from .core.mapping import InjectorData, TranslationMapping
 from .extraction.extractor import SVGTranslationExtractor
 from .injection.injector import SVGTranslationInjector
 from .io.mapping_store import MappingStore
+from .io.output_paths import resolve_svg_output_path
+from .io.svg_writer import write_svg
 from .nested import NestedStructureService
 from .result import OperationResult
 
@@ -36,6 +38,7 @@ class SVGTranslationService:
         self._nested = NestedStructureService(
             strategy=self.config.nested_strategy,
             also_fix_a=True,
+            config=self.config,
         )
 
     # ------------------------------------------------------------------
@@ -76,9 +79,10 @@ class SVGTranslationService:
                 error_code="missing_output_path",
             )
         try:
+            resolved_output = self._resolve_output_path(output) if output else None
             result = self._nested.repair_file(
                 source=Path(svg_path),
-                output=output,
+                output=resolved_output,
                 strategy=strategy or self.config.nested_strategy,
                 save=save,
             )
@@ -265,7 +269,7 @@ class SVGTranslationService:
             tree = self._injector.prepare(svg_path)
             if output:
                 resolved_output = self._resolve_output_path(output)
-                self._save_tree(tree, resolved_output)
+                write_svg(tree, resolved_output, config=self.config)
             return OperationResult.ok(data=tree)
         except Exception as exc:
             return OperationResult.fail(
@@ -307,10 +311,7 @@ class SVGTranslationService:
         Resolve output path for SVG files, applying output_dir only when
         the given path is a bare filename (no directory component).
         """
-        output = Path(output)
-        if output.parent == Path(".") and self.config.output_dir is not None:
-            return self.config.output_dir / output
-        return output
+        return resolve_svg_output_path(output, config=self.config)
 
     def _resolve_mapping_output(
         self,
@@ -320,25 +321,7 @@ class SVGTranslationService:
         if isinstance(save_mapping, str | Path):
             return Path(save_mapping)
 
-        if self.config.mapping_output_dir is None:
-            raise ValueError("mapping_output_dir is not configured; cannot resolve mapping output path")
-
-        base_dir = self.config.mapping_output_dir
-        if self.config.create_parents:
-            base_dir.mkdir(parents=True, exist_ok=True)
-        return base_dir / f"{svg_path.name}.json"
-
-    def _save_tree(self, tree: etree._ElementTree, path: Path) -> None:
-        if self.config.create_parents:
-            path.parent.mkdir(parents=True, exist_ok=True)
-
-        pretty = self.config.pretty_print if self.config.pretty_print is not None else True
-        tree.write(
-            str(path),
-            encoding="utf-8",
-            xml_declaration=True,
-            pretty_print=pretty,
-        )
+        return self._mapping_store.default_mapping_path(svg_path)
 
 
 __all__ = [

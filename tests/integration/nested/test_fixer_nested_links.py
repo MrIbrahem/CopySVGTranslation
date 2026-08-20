@@ -25,6 +25,11 @@ def _write_full_svg(tmp_dir: Path, svg_text: str, name: str = "test.svg") -> Pat
     return p
 
 
+def _without_xml_declaration(content: str) -> str:
+    """Ignore writer metadata when asserting the repaired SVG structure."""
+    return content.split("?>", 1)[1] if content.startswith("<?xml") else content
+
+
 def test_tspan_with_a_link_is_counted_as_nested(temp_dir: Path):
     # NOTE: current implementation flags any element child, not just <tspan>
     p = _write_svg(temp_dir, '<text><tspan>See <a href="https://ex.com">link</a></tspan></text>')
@@ -142,7 +147,7 @@ def test_match_and_fix(temp_dir: Path):
             </g>
         </svg>
     """
-    new_text_strip = "".join(new_text.split())
+    new_text_strip = "".join(_without_xml_declaration(new_text).split())
     new_text_expected_strip = "".join(new_text_expected.split())
 
     assert new_text_strip == new_text_expected_strip
@@ -211,7 +216,7 @@ def test_match_and_fix_2(temp_dir: Path):
     # new_text_strip = "".join([line.strip() for line in new_text.splitlines() if line.strip()])
     # new_text_expected_strip = "".join([line.strip() for line in new_text_expected.splitlines() if line.strip()])
 
-    new_text_strip = "".join(new_text.split())
+    new_text_strip = "".join(_without_xml_declaration(new_text).split())
     new_text_expected_strip = "".join(new_text_expected.split())
 
     assert new_text_strip == new_text_expected_strip
@@ -245,7 +250,9 @@ def test_match_and_fix_3(temp_dir: Path):
     new_text_expected = """
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100" height="100"><g class="markdown-text-wrap"><text x="10.0" y="94.3" style="font-size: 12.375px; fill: rgb(133, 133, 133); line-height: 1.2;"><tspan x="10" y="124.0">Read more:How does age standardization make health metrics comparable?</tspan></text></g></svg>
     """
-    new_text_strip = "".join([line.strip() for line in new_text.splitlines() if line.strip()])
+    new_text_strip = "".join(
+        [line.strip() for line in _without_xml_declaration(new_text).splitlines() if line.strip()],
+    )
     new_text_expected_strip = "".join([line.strip() for line in new_text_expected.splitlines() if line.strip()])
 
     assert new_text_strip == new_text_expected_strip

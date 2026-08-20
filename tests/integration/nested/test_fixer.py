@@ -17,6 +17,11 @@ def _write_svg(tmp_dir: Path, inner_svg: str, name: str = "test.svg", width: int
     return p
 
 
+def _without_xml_declaration(content: str) -> str:
+    """Ignore writer metadata when asserting the repaired SVG structure."""
+    return content.split("?>", 1)[1] if content.startswith("<?xml") else content
+
+
 class TestSetup:
     def normalize(self, file_text):
         # return file_text.strip()
@@ -58,7 +63,7 @@ class TestMatchAndFix(TestSetup):
                 </g>
             </svg>
         """
-        new_text_strip = "".join(new_text.split())
+        new_text_strip = "".join(_without_xml_declaration(new_text).split())
         new_text_expected_strip = "".join(new_text_expected.split())
 
         assert new_text_strip == new_text_expected_strip
@@ -123,7 +128,7 @@ class TestMatchAndFix(TestSetup):
         # new_text_strip = "".join([line.strip() for line in new_text.splitlines() if line.strip()])
         # new_text_expected_strip = "".join([line.strip() for line in new_text_expected.splitlines() if line.strip()])
 
-        new_text_strip = "".join(new_text.split())
+        new_text_strip = "".join(_without_xml_declaration(new_text).split())
         new_text_expected_strip = "".join(new_text_expected.split())
 
         assert new_text_strip == new_text_expected_strip
@@ -166,7 +171,7 @@ class TestTodo(TestSetup):
                 </text>
             </g>
         </svg>"""
-        new_text_strip = "".join(new_text.split())
+        new_text_strip = "".join(_without_xml_declaration(new_text).split())
         new_text_expected_strip = "".join(new_text_expected.split())
 
         assert new_text_strip == new_text_expected_strip
@@ -204,7 +209,7 @@ class TestTodo(TestSetup):
                 </text>
             </g>
         </svg>"""
-        new_text_strip = "".join(new_text.split())
+        new_text_strip = "".join(_without_xml_declaration(new_text).split())
         new_text_expected_strip = "".join(new_text_expected.split())
 
         assert new_text_strip == new_text_expected_strip
