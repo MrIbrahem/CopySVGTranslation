@@ -52,8 +52,7 @@ service = SVGTranslationService(config)
 
 result = service.extract_and_inject(
     source="source.svg",
-    target="target.svg",
-    output="target-translated.svg",  # saved under translated/
+    output="target.svg",             # modified and saved in place
     save_mapping=True,                 # saved under mappings/
     save=True,
 )
@@ -86,7 +85,7 @@ service = SVGTranslationService()
 | `repair_nested(svg_path, *, output=None, strategy=None, save=True)` | Repair nested structures using a selected strategy. | `RepairResult` |
 | `extract(svg_path, *, save_mapping=None)` | Read translations from an SVG. | `TranslationMapping` |
 | `inject(svg_path, mapping, *, output=None, save=None)` | Apply a mapping to an SVG. | `InjectorData` |
-| `extract_and_inject(source, target, *, output=None, save_mapping=None, save=None)` | Extract from one SVG and inject into another. | `InjectorData` |
+| `extract_and_inject(source, output, *, save_mapping=None, save=None)` | Extract from one SVG and inject into the single output target. | `InjectorData` |
 | `prepare_only(svg_path, *, output=None)` | Normalize a document without injecting translations. | `lxml.etree._ElementTree` |
 | `load_mapping(path)` | Read a saved JSON mapping. | `TranslationMapping` |
 | `save_mapping(mapping, path)` | Write a `TranslationMapping` to JSON. | `pathlib.Path` |
@@ -147,7 +146,7 @@ result = service.extract(
 )
 ```
 
-Alternatively, pass `True` to write `<source filename>.json` under `TranslationConfig.mapping_output_dir`.
+Alternatively, pass `True` to write `<source filename>.json` under `TranslationConfig.mapping_output_dir`; when it is unset, the conventional destination is `<source parent>/data/<source filename>.json`.
 
 ```python
 from pathlib import Path
@@ -160,7 +159,7 @@ result = service.extract("source.svg", save_mapping=True)
 # Successful extraction writes mappings/source.svg.json.
 ```
 
-If extraction succeeds but the mapping cannot be saved, `success` remains `True` and the save issue is placed in `result.warnings`. When `save_mapping=True`, set `mapping_output_dir`; otherwise no default mapping destination can be resolved.
+If extraction succeeds but the mapping cannot be saved, `success` remains `True` and the save issue is placed in `result.warnings`. When `save_mapping=True`, `mapping_output_dir` takes precedence; otherwise the service uses the conventional `data/` directory beside the source SVG.
 
 ### Extract after in-memory preparation
 
@@ -253,7 +252,7 @@ Successful injection results expose `InjectorStats` through `result.stats`.
 
 ## Extract and Inject in One Step
 
-Use `extract_and_inject()` for the common workflow of copying translations from a source SVG to a target SVG. The method returns the injection result and carries forward any extraction warnings.
+Use `extract_and_inject()` for the common workflow of copying translations from a source SVG to one output target SVG. The supplied `output` file is read, modified, and—when saving is enabled—overwritten in place. This in-place workflow intentionally does not apply `TranslationConfig.output_dir`. The method returns the injection result and carries forward any extraction warnings.
 
 ```python
 from pathlib import Path
@@ -265,8 +264,7 @@ service = SVGTranslationService(
 
 result = service.extract_and_inject(
     source="source-multilingual.svg",
-    target="target-default-language.svg",
-    output="translated/target.svg",
+    output="target-default-language.svg",
     save_mapping=True,
     save=True,
 )
@@ -510,7 +508,7 @@ and a target SVG with only the default text:
 </svg>
 ```
 
-running `extract_and_inject(source, target)` creates the Arabic and French language nodes in the target document. Whether existing language nodes are replaced or preserved is controlled by `overwrite_translations`.
+running `extract_and_inject(source, output, save=True)` creates the Arabic and French language nodes in the output document and saves them back to that same file. Whether existing language nodes are replaced or preserved is controlled by `overwrite_translations`.
 
 ---
 

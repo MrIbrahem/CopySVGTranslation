@@ -215,16 +215,18 @@ class SVGTranslationService:
     def extract_and_inject(
         self,
         source: Path | str,
-        target: Path | str,
+        output: Path | str,
         *,
-        output: Path | str | None = None,
         save_mapping: bool | Path | None = None,
         save: bool | None = None,
     ) -> OperationResult:
-        """
-        Extract translations from `source` and inject them into `target`.
+        """Extract translations from ``source`` and apply them to ``output``.
 
-        This is the most common high-level workflow.
+        ``output`` is the one target file for the workflow: it is read as the
+        SVG to modify and, when saving is enabled, overwritten with the
+        translated result. ``config.output_dir`` is intentionally not applied
+        to this in-place workflow. This avoids a separate target/input path and
+        output/destination path for the same operation.
         """
         extract_result = self.extract(source, save_mapping=save_mapping)
         if not extract_result.success or extract_result.data is None:
@@ -234,10 +236,13 @@ class SVGTranslationService:
                 warnings=extract_result.warnings,
             )
 
+        # Use an absolute path so inject() does not reinterpret a bare output
+        # filename through config.output_dir. This workflow always saves in place.
+        output_path = Path(output).absolute()
         inject_result = self.inject(
-            target,
+            output_path,
             extract_result.data,
-            output=output,
+            output=output_path,
             save=save,
         )
 

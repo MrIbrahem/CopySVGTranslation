@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 from lxml import etree
 
 from CopySVGTranslation.config import TranslationConfig
@@ -281,6 +282,59 @@ class TestServiceExtractAndInject:
         service = SVGTranslationService()
         result = service.extract_and_inject(src, tgt)
         assert result.success is False
+
+    def test_extract_and_inject_saves_in_place_to_output(self, tmp_path: Path):
+        source = _write_svg(
+            tmp_path,
+            '''
+                <switch>
+                    <text id="t0-ar" systemLanguage="ar"><tspan id="t0-ar">مرحبا</tspan></text>
+                    <text id="t0"><tspan id="t0">Hello</tspan></text>
+                </switch>
+            ''',
+            "source.svg",
+        )
+        output = _write_svg(
+            tmp_path,
+            '<switch><text id="t0"><tspan id="t0">Hello</tspan></text></switch>',
+            "output.svg",
+        )
+        service = SVGTranslationService()
+
+        result = service.extract_and_inject(source=source, output=output, save=True)
+
+        assert result.success is True
+        assert 'systemLanguage="ar"' in output.read_text(encoding="utf-8")
+
+    def test_extract_and_inject_does_not_redirect_output_through_output_dir(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        source = _write_svg(
+            tmp_path,
+            '''
+                <switch>
+                    <text id="t0-ar" systemLanguage="ar"><tspan id="t0-ar">مرحبا</tspan></text>
+                    <text id="t0"><tspan id="t0">Hello</tspan></text>
+                </switch>
+            ''',
+            "source.svg",
+        )
+        output = _write_svg(
+            tmp_path,
+            '<switch><text id="t0"><tspan id="t0">Hello</tspan></text></switch>',
+            "output.svg",
+        )
+        redirected_directory = tmp_path / "redirected"
+        service = SVGTranslationService(TranslationConfig(output_dir=redirected_directory))
+        monkeypatch.chdir(tmp_path)
+
+        result = service.extract_and_inject(source=source, output="output.svg", save=True)
+
+        assert result.success is True
+        assert 'systemLanguage="ar"' in output.read_text(encoding="utf-8")
+        assert not (redirected_directory / "output.svg").exists()
 
     def test_merges_warnings(self, tmp_path: Path):
         """Warnings from both extract and inject should be merged."""
