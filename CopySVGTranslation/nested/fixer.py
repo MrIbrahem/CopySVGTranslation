@@ -30,7 +30,6 @@ class MatchFixNestedTags:
         self.flattener = NestedTspanFlattener(strategy=strategy, also_fix_a=also_fix_a)
         self.detector = NestedTspanDetector()
 
-        self.len_tags_before_fix = 0
         self.root: etree._Element | None = None
 
     def _flatten_all(self, root):
@@ -40,7 +39,7 @@ class MatchFixNestedTags:
 
     def _get_root(self):
         parser = etree.XMLParser(remove_blank_text=False)
-        # ---
+
         try:
             tree = etree.parse(str(self.source_file), parser)
         except (etree.XMLSyntaxError, OSError) as exc:
@@ -74,7 +73,6 @@ class MatchFixNestedTags:
         if root is None:
             return False
 
-        self.len_tags_before_fix = len(self.detector.find_in_tree(root))
         root = self._flatten_all(root)
 
         try:
@@ -82,6 +80,7 @@ class MatchFixNestedTags:
             return True
         except Exception:
             logger.error(f"Failed to write fixed svg file to: {str(self.new_path)}")
+
         return False
 
 

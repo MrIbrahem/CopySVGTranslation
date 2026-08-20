@@ -38,7 +38,6 @@ class YearPatternStripper:
         self.lang = lang
         self.text = text
 
-
     def run(self) -> str | None:
         if not self.text:
             return None
@@ -51,16 +50,16 @@ class YearPatternStripper:
         if spec:
             for prefix in spec.get("prefixes", []):
                 if self.text.startswith(prefix):
-                    return self.text[len(prefix):].strip()
+                    return self.text[len(prefix) :].strip()
             for suffix in spec.get("suffixes", []):
                 if self.text.endswith(suffix):
-                    return self.text[:-len(suffix)].strip()
+                    return self.text[: -len(suffix)].strip()
 
         # Generic fallback
         for suffix in self.GENERIC_SUFFIXES:
             if self.text.endswith(suffix):
                 # return self.text.removesuffix(suffix).strip()
-                return self.text[:-len(suffix)].strip()
+                return self.text[: -len(suffix)].strip()
 
         return None
 
@@ -144,6 +143,7 @@ class YearFreeTitleMerger:
 # ---------------------------------------------------------------------------
 # Pure / Explicit APIs
 # ---------------------------------------------------------------------------
+
 
 def derive_year_free_entries(
     title_new: dict[str, dict[str, str]],
