@@ -50,10 +50,11 @@ def test_nested_structure_service_repair_in_place():
         _svg("""<text id="t1"><tspan><tspan style="font-weight: 700;">Bold</tspan></tspan></text>""")
     )
     service = NestedStructureService()
-    tree = service.repair_root(root)
-    assert isinstance(tree, etree._ElementTree)
-    findings = service.analyze_file(root)
-    assert len(findings) == 0
+    result = service.repair_root(root)
+    assert isinstance(result, RepairResult)
+    assert result.success is True
+    assert result.len_tags_before_fix == 1
+    assert result.len_tags_after_fix == 0
 
 
 def test_nested_structure_service_repair_file(tmp_path: Path):

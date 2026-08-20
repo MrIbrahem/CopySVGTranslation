@@ -39,7 +39,7 @@ class SVGTranslationService:
         )
 
     # ------------------------------------------------------------------
-    # Public API
+    # Public API for nested
     # ------------------------------------------------------------------
 
     def analyze_nested(
@@ -65,30 +65,38 @@ class SVGTranslationService:
         output: Path | str | None = None,
         strategy: Any = None,  # Can be NestedStrategy or None
         save: bool = True,
-    ) -> OperationResult[etree._ElementTree]:
+    ) -> OperationResult:
         """
         Repair nested structures and optionally save.
         Does NOT run as part of extract/inject.
         """
-        try:
-            tree = self._nested.repair_file(
-                source=Path(svg_path),
-                strategy=strategy or self.config.nested_strategy,
-                save=False,
+        if save and output is None:
+            return OperationResult.fail(
+                error="save=True but no output path",
+                error_code="missing_output_path",
             )
-            if save:
-                if output is None:
-                    return OperationResult.fail(
-                        error="save=True but no output path",
-                        error_code="missing_output_path",
-                    )
-                self._save_tree(tree, Path(output))
-            return OperationResult.ok(data=tree)
+        try:
+            result = self._nested.repair_file(
+                source=Path(svg_path),
+                output=output,
+                strategy=strategy or self.config.nested_strategy,
+                save=save,
+            )
+            if not result.success:
+                return OperationResult.fail(
+                    error="; ".join(result.warnings) if result.warnings else "Repair failed",
+                    error_code="nested_repair_error",
+                )
+            return OperationResult.ok(data=result)
         except Exception as exc:
             return OperationResult.fail(
                 error=str(exc),
                 error_code=getattr(exc, "code", "nested_repair_error"),
             )
+
+    # ------------------------------------------------------------------
+    # Public API for extract and inject
+    # ------------------------------------------------------------------
 
     def extract(
         self,
