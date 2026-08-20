@@ -1,147 +1,176 @@
-# `SVGTranslationService` `target` / `output` Duplication Review
+# Persistence and Output-Path Duplication Review
 
 **Status:** Analysis only. This branch contains no production-code, test, or README changes.
 
-**Scope:** This review focuses on `SVGTranslationService.extract_and_inject()`, specifically the following documentation example from the earlier documentation branch:
-
-```python
-service.extract_and_inject(
-    source="source.svg",
-    target="target.svg",
-    output="target-translated.svg",
-    save=True,
-)
-```
+**Scope:** This report reviews duplicated or inconsistent persistence, output-path, and save-control logic around `SVGTranslationService` and its collaborators. It retains the existing `extract_and_inject()` finding for context, but the primary focus of this revision is the **other duplication outside that method**.
 
 ## Executive Summary
 
-`target` and `output` do not currently mean the same thing. `target` is the **input SVG** into which translations are injected in memory, while `output` is the optional **destination file** for the resulting SVG. The existing API therefore supports a non-destructive workflow: it reads `target.svg` and writes a separate output file.
+The earlier review identified that `extract_and_inject()` exposes both `target` and `output`. That remains a valid API-design issue, but it is not the only duplication in the codebase. The review found four additional areas where output behavior is duplicated or materially inconsistent:
 
-However, if the product decision is that `extract_and_inject()` must accept **one target file only**, retaining both parameters creates unnecessary cognitive overhead and makes the example confusing. The only coherent one-path design is to keep `target` as the file that is read and then updated **in place** when saving, and to remove `output` from this method only.
+| Priority | Finding | Why it matters |
+| --- | --- | --- |
+| High | The same SVG-writing behavior is implemented independently in the service, injector, and nested-structure service. | The implementations already produce different output behavior, so fixes and guarantees can drift. |
+| High | JSON mapping default-path logic exists in both `SVGTranslationService` and `MappingStore`, with conflicting fallback behavior. | A public helper is unused, and `save_mapping=True` can warn instead of using the documented conventional path. |
+| Medium | `inject()`, `prepare_only()`, and `repair_nested()` use three different save/output contracts. | Callers cannot reliably transfer knowledge from one service method to another. |
+| Medium | Deprecated injection wrappers duplicate the modern save contract but alter its semantics. | Legacy callers can save merely by supplying a path, while modern callers must explicitly enable saving. |
 
-> `output` cannot replace `target` while leaving only one path parameter. The method still needs a path from which to read the target SVG. Therefore, the single remaining path must be `target`, not `output`.
+> The recommended direction is not to eliminate every `output` parameter. The real issue is duplicated responsibility for resolving paths and writing files. The implementation should centralize those responsibilities and define one consistent save contract for comparable service operations.
 
-| Recommended decision | Result |
-| --- | --- |
-| Remove `output` from `extract_and_inject()` | `target` becomes the only target-SVG path. |
-| When `save=True` or `config.auto_save=True` | Write the result back to `target`. |
-| When `save=False` | Return the modified tree in `OperationResult.data` without writing a file. |
-| Future implementation scope | Do not change the `inject()`, `prepare_only()`, or `repair_nested()` contracts as part of this work. |
+## Current Persistence Architecture
 
-## Current Behavior and the Source of the Duplication
-
-`extract_and_inject()` currently has three logical file paths: `source` for extracting translations, `target` for reading, preparing, and injecting into the target SVG, and `output` for writing the result when saving is enabled. The implementation follows this flow:
+The package has four paths that can write artifacts: translated SVG injection, prepared SVG output, nested-structure repair, and JSON mapping persistence. Each path resolves destinations and writes files in a different location.
 
 ```text
-source ──extract──> TranslationMapping
-                         │
-                         ▼
-target ──inject(mapping, output, save)──> modified SVG in memory / saved file
+SVGTranslationService
+├── inject() ────────────────> SVGTranslationInjector._save()
+├── prepare_only() ──────────> SVGTranslationService._save_tree()
+├── repair_nested() ─────────> NestedStructureService._save_file()
+└── extract()/save_mapping() ─> MappingStore.save()
 ```
 
-In implementation terms, the method invokes `self.inject(target, extract_result.data, output=output, save=save)`. Consequently, `target` is not written automatically; saving depends on `output` whenever the effective `save` value is true.
+This split is not inherently incorrect. The duplication becomes a maintenance problem because the methods serve the same general responsibility—persisting a transformed SVG or a derived mapping—while disagreeing on directory creation, formatting, XML declaration handling, default paths, and the meaning of a supplied path.
 
-| Parameter | Current meaning in `extract_and_inject()` | Required when saving? |
-| --- | --- | --- |
-| `source` | SVG that contains the translations to extract. | Yes; it is the extraction input. |
-| `target` | SVG whose default-language text is matched and into which translations are injected in memory. | Yes; it is the injection input. |
-| `output` | Separate path to which the injected SVG is written. | Yes, but only when the effective `save` value is true. |
+## Finding 1 — Duplicated SVG Writers With Divergent Behavior
 
-This separation is technically valid when preserving the original `target` file is a requirement. It does not fit a one-target-file API, however: callers must name both the target and the transformed copy even when the intended operation is to update that target itself.
+### Evidence
 
-## Locations Where the Duplication Exists or Is Relied Upon
+Three separate private methods write transformed SVG content to disk.
 
-The following table distinguishes locations that would change in a future implementation from locations that use `output` for a different, valid purpose and should remain out of scope.
+| Writer | Location | Input | Parent directories | XML declaration | Formatting source |
+| --- | --- | --- | --- | --- | --- |
+| `SVGTranslationService._save_tree()` | [`service.py`, lines 331–341](../CopySVGTranslation/service.py#L331-L341) | `ElementTree` | Creates parents when `config.create_parents` is true. | Always writes one. | `config.pretty_print`, defaulting to `True`. |
+| `SVGTranslationInjector._save()` | [`injection/injector.py`, lines 183–198](../CopySVGTranslation/injection/injector.py#L183-L198) | `ElementTree` | Creates parents when `config.create_parents` is true. | Always writes one. | `config.pretty_print`, defaulting to `True`. |
+| `NestedStructureService._save_file()` | [`nested/service.py`, lines 173–188](../CopySVGTranslation/nested/service.py#L173-L188) | XML root element | Does **not** create parents. | Does not request one. | `etree.tostring(..., pretty_print=None)`, independent of `TranslationConfig`. |
 
-| Location | Evidence | Current role | Future action |
-| --- | --- | --- | --- |
-| [`CopySVGTranslation/service.py`, lines 211–248](../CopySVGTranslation/service.py#L211-L248) | `extract_and_inject(source, target, *, output=None, ...)` passes `output` to `inject()`. | Primary duplication point. | Remove `output` from the signature and direct saving to `target` when enabled. |
-| [`CopySVGTranslation/service.py`, lines 151–209](../CopySVGTranslation/service.py#L151-L209) | `inject(svg_path, mapping, *, output=None, save=None)`. | Separates injection input from a destination copy. | **No change**. This lower-level API has a valid non-destructive use case. |
-| [`CopySVGTranslation/service.py`, lines 305–313](../CopySVGTranslation/service.py#L305-L313) | `_resolve_output_path(output)`. | Applies `output_dir` to bare output filenames. | Retain for `inject()` and `prepare_only()`; do not use it in the combined workflow after `output` is removed. |
-| [`tests/unit/test_service.py`, lines 100–120](../tests/unit/test_service.py#L100-L120) | `extract_and_inject(src, tgt)` test without saving. | Validates in-memory injection only; does not cover a save contract. | Update the test and add in-place `target` save coverage. |
-| [`README.md`, lines 74–79](../README.md#L74-L79) | Current `main` example passes both `target` and `output`. | User-facing source of the confusion. | Replace with a one-`target` example after the API changes. |
-| [PR #78 — documentation branch](https://github.com/MrIbrahem/CopySVGTranslation/pull/78) | The expanded examples repeat the separation, including `target="target.svg"` and `output="target-translated.svg"`. | Documentation not merged into `main` at the time of this review; it will be affected by the decision. | Update or rebase it on the new API before merging. |
-| [`CopySVGTranslation/nested/service.py`, lines 79–125](../CopySVGTranslation/nested/service.py#L79-L125) | `repair_file(source, output, ...)`. | General file transformation that may write to a separate output or the source itself. | **Out of scope**. It is not part of the translation-copy workflow. |
+The service and injector implementations are near-duplicates: both create parents conditionally, derive the same formatting default, and call `ElementTree.write()` with the same encoding and XML-declaration options. The nested writer performs the same broad job differently: it serializes a root element to Unicode text, writes it directly, does not create directories, and does not use the shared configuration.
 
-## Detailed Proposal
+### Impact
 
-### Public API After the Change
+The output of `inject()`, `prepare_only()`, and `repair_nested()` is not governed by a single file-writing policy. For example, a new nested-repair output directory can fail even when `create_parents=True`, whereas the equivalent injection or preparation operation creates it. An SVG repaired through the nested service can also differ in declaration and formatting from an SVG written through the other two routes.
 
-```python
-result = service.extract_and_inject(
-    source="source.svg",
-    target="target.svg",
-    save=True,
-)
-```
+### Recommendation
 
-`source` retains its existing meaning. `target` becomes the only SVG path to which translations are applied and, when saving is enabled, the path to which the result is written. `output` is no longer part of the public API for this combined workflow.
+Introduce one internal SVG writer, for example `SvgFileStore` or `write_svg_tree()`, under the I/O layer. It should accept an `ElementTree` or root element and consistently apply:
 
-The proposed signature is:
+- destination validation;
+- parent-directory creation based on `TranslationConfig.create_parents`;
+- UTF-8 encoding;
+- XML-declaration behavior;
+- `TranslationConfig.pretty_print`; and
+- atomic file replacement when an existing source may be overwritten.
 
-```python
-def extract_and_inject(
-    self,
-    source: Path | str,
-    target: Path | str,
-    *,
-    save_mapping: bool | Path | None = None,
-    save: bool | None = None,
-) -> OperationResult:
-    ...
-```
+Both `SVGTranslationService._save_tree()` and `SVGTranslationInjector._save()` should be removed in favor of that writer. `NestedStructureService._save_file()` should use it after wrapping its root in an `ElementTree`.
 
-### Proposed Save Semantics
+## Finding 2 — Duplicated Mapping Default-Path Resolution With Conflicting Semantics
 
-`extract_and_inject()` should calculate its effective save value in the same way as `inject()` currently does:
+### Evidence
 
-```python
-should_save = self.config.auto_save if save is None else save
-```
+Two components calculate a default location for an extracted JSON mapping.
 
-When `should_save` is true, the method should internally pass `target` as the save path. The expected behavior is:
-
-| `save` | `config.auto_save` | Result |
-| --- | --- | --- |
-| `True` | Any value | Save over `target`. |
-| `False` | Any value | Do not write a file; return the tree and statistics only. |
-| `None` | `True` | Save over `target`. |
-| `None` | `False` | Do not write a file; preserve the current in-memory default. |
-
-### Protecting Against Data Loss
-
-Removing `output` makes saving destructive for the target file. A future implementation should therefore use atomic writing: write to a temporary file in the same directory, then replace `target` only after the write succeeds. This does not preserve a logical backup of the original, but it prevents a partial write or an interrupted save from corrupting the target file.
-
-If retaining an original copy is a real product requirement, it conflicts with the requirement of one target-file path. The product decision must then be explicit: either adopt the in-place update model proposed here or retain `output` as a non-destructive transformation model.
-
-## Rejected Alternatives
-
-| Alternative | Reason for rejection |
+| Location | Behavior |
 | --- | --- |
-| Keep both `target` and `output`, but rename them to `input_target` and `destination`. | Improves naming only; it does not satisfy the one-target-path requirement. |
-| Remove `target` and keep `output`. | Functionally impossible; there would be no path from which to read the SVG that receives the translations. |
-| Change `inject()`, `prepare_only()`, and `repair_nested()` at the same time. | Unnecessary scope expansion that would break valid non-destructive transformation workflows outside the combined method. |
-| Always save over `target`, regardless of `save`. | Breaks the current ability to preview the modified tree in memory. |
+| [`SVGTranslationService._resolve_mapping_output()`, lines 315–329](../CopySVGTranslation/service.py#L315-L329) | When `save_mapping=True`, requires `config.mapping_output_dir`. If the option is `None`, it raises `ValueError`, which `extract()` converts into a warning. |
+| [`MappingStore.default_mapping_path()`, lines 81–84](../CopySVGTranslation/io/mapping_store.py#L81-L84) | Uses `config.mapping_output_dir` when configured; otherwise falls back to `<svg parent>/data/<svg name>.json`. |
 
-## Compatibility and Release Impact
+`MappingStore.default_mapping_path()` is not referenced elsewhere in the package. It is therefore a duplicate, inactive definition of the conventional path. More importantly, it does not agree with the active service behavior: one path has a `data/` fallback, while the other treats the absence of `mapping_output_dir` as a warning condition.
 
-This is a breaking change for callers of `extract_and_inject()` that pass `output=`. The change should therefore be released in a new major version. If a gradual transition is required, the method could temporarily accept `output` with a deprecation warning before removing it in the next major release. That transitional approach does not satisfy the one-parameter requirement immediately, so it is appropriate only if compatibility is more important than immediate API simplification.
+### Impact
 
-## Recommended Future Implementation Plan
+A caller using `service.extract("source.svg", save_mapping=True)` receives a successful extraction with a warning unless `mapping_output_dir` is configured. The existence of an unused helper that advertises a usable fallback makes this behavior harder to understand and maintain. Future changes can update one rule but forget the other.
 
-This plan is not implemented in this branch. It is the proposed follow-up work once the design decision is approved.
+### Recommendation
 
-1. Remove `output` from the `SVGTranslationService.extract_and_inject()` signature and docstring.
-2. Calculate `should_save` internally and pass `target` as the internal save path when required.
-3. Add atomic target-file writing, or clearly document the risk if that safety measure is deferred.
-4. Update the combined-workflow test to verify that `target` contains the injected language after `save=True`.
-5. Add tests for `save=False`, plus `save=None` with both values of `auto_save`, and for write failures that must not corrupt the target.
-6. Remove `output` from the README example and API table, and update [PR #78](https://github.com/MrIbrahem/CopySVGTranslation/pull/78) to match the new contract before merging it.
-7. Publish migration notes stating that callers needing a non-destructive save still have `inject(svg_path, mapping, output=...)` available directly; the simplified `extract_and_inject()` flow would no longer offer that option.
+Make `MappingStore.default_mapping_path()` the single authority for conventional mapping destinations. `SVGTranslationService._resolve_mapping_output()` should delegate to it for the `True` case, while retaining an explicit `Path` argument unchanged. The project must decide whether `<svg parent>/data/` is the desired default; if it is not, remove the unused helper instead of keeping two definitions.
+
+## Finding 3 — Inconsistent Save and Output Contracts Across Service Methods
+
+### Evidence
+
+Comparable public operations use different combinations of output path and save flag.
+
+| Public method | Relevant signature | Save rule | Output-path behavior |
+| --- | --- | --- | --- |
+| [`inject()`](../CopySVGTranslation/service.py#L151-L209) | `inject(svg_path, mapping, *, output=None, save=None)` | `save=None` uses `config.auto_save`; an effective true value requires `output`. | Bare filenames are resolved through `config.output_dir`. |
+| [`prepare_only()`](../CopySVGTranslation/service.py#L251-L274) | `prepare_only(svg_path, *, output=None)` | No `save` argument; supplying `output` always writes the file. | Bare filenames are resolved through `config.output_dir`. |
+| [`repair_nested()`](../CopySVGTranslation/service.py#L61-L95) | `repair_nested(svg_path, *, output=None, strategy=None, save=True)` | Defaults to saving; an effective true value requires `output`. | The path is passed directly to the nested service; `config.output_dir` is not applied. |
+| [`NestedStructureService.repair_file()`](../CopySVGTranslation/nested/service.py#L79-L125) | `repair_file(source, output=None, strategy=None, save=True)` | Defaults to saving; when no output is supplied, its internal default is the source path. | Uses the supplied path directly and does not create parent directories. |
+
+The facade and its collaborator additionally disagree about `repair_file(output=None)`: the nested service can default to overwriting `source`, but `SVGTranslationService.repair_nested()` rejects that same call before delegation whenever `save=True`. This makes the lower-level fallback unreachable through the recommended facade.
+
+### Impact
+
+The same expression—supplying or omitting `output`—means different things depending on the operation. `prepare_only()` treats it as an implicit save instruction; `inject()` treats it as insufficient unless saving is also enabled; `repair_nested()` requires it by default; and the lower-level repair function uses a missing path as an in-place overwrite default. The caller must memorize method-specific rules rather than using a consistent model.
+
+### Recommendation
+
+Adopt a documented, uniform save contract for all high-level service methods that persist SVGs. A minimal and explicit model is:
+
+| Case | Recommended behavior |
+| --- | --- |
+| `output is None` and effective save is false | Return the transformed tree only. |
+| `output is None` and effective save is true | Either fail uniformly or overwrite the input uniformly; choose one policy and apply it to every comparable method. |
+| `output is provided` and effective save is false | Do not write; retain the path only if future API design needs it, otherwise reject this ambiguous combination. |
+| `output is provided` and effective save is true | Resolve it through one path resolver and write using the shared SVG writer. |
+
+For backward compatibility, `prepare_only()` can initially preserve its path-implies-save behavior, but it should be documented as an exception or migrated to the shared rule in a major release. The facade must also choose whether nested repair supports in-place saves; the inner and outer methods should no longer disagree.
+
+## Finding 4 — Legacy Adapters Duplicate and Change Modern Save Semantics
+
+### Evidence
+
+The deprecated injection API retains its own `save_path` and `save_result` contract.
+
+| Location | Behavior |
+| --- | --- |
+| [`legacy/inject.py`, lines 19–84](../CopySVGTranslation/legacy/inject.py#L19-L84) | `_inject_file_tree()` maps `save_path` to modern `output` and `save_result` to modern `save`. |
+| [`legacy/inject.py`, lines 87–118](../CopySVGTranslation/legacy/inject.py#L87-L118) | `inject_file_tree()` changes the supplied flag to `save_result or bool(save_path)` before delegation. |
+| [`SVGTranslationService.inject()`](../CopySVGTranslation/service.py#L151-L209) | Requires an effective true `save` value and an output path to write a file. |
+
+The wrapper means that a legacy caller who supplies `save_path` but explicitly sets `save_result=False` still saves the file. A modern caller who supplies `output` and explicitly sets `save=False` does not. This behavior may be intentional as legacy compatibility, but it is a duplicate save-policy decision outside the modern service and is not evident from the service-level contract.
+
+### Impact
+
+The same concepts have four names and two rules across the codebase: `output`, `save`, `save_path`, and `save_result`. This increases documentation burden and makes migration from the legacy functions non-mechanical.
+
+### Recommendation
+
+Keep the wrappers only for compatibility, but make the divergence explicit in their deprecation documentation and tests. At the next major version, remove the wrappers rather than adding new save behavior to them. Do not make the modern service emulate `save_result or bool(save_path)`; that would further blur the modern contract.
+
+## Existing `extract_and_inject()` Finding (Context Only)
+
+The original finding remains valid: [`SVGTranslationService.extract_and_inject()`](../CopySVGTranslation/service.py#L211-L248) accepts both `target` (the SVG read and modified in memory) and `output` (a distinct saved copy). If the product requires a one-target-file combined workflow, keep `target`, remove `output` from that method, and save over `target` when the effective save value is true.
+
+This finding is deliberately not the primary subject of the present revision. It should be implemented only after the shared writer and shared save contract have been decided; otherwise it risks adding another special case to an already inconsistent persistence layer.
+
+## Recommended Implementation Sequence
+
+No implementation is included in this branch. The following order reduces duplication without forcing an immediate breaking API change.
+
+1. Decide the canonical high-level save contract, including whether in-place writes are allowed when no output path is supplied.
+2. Add a shared SVG writer and migrate `inject()`, `prepare_only()`, and nested repair to it, preserving behavior through tests where intentionally required.
+3. Add a shared output-path resolver and apply `output_dir` consistently, or document which operations intentionally bypass it.
+4. Select one mapping default-path rule; delegate from the service to `MappingStore.default_mapping_path()` or remove that inactive helper.
+5. Add tests that verify parity across writers: parent creation, encoding, declaration, pretty printing, and failures.
+6. Add contract tests for every high-level save combination, including `save=None`, `auto_save`, missing output paths, bare filenames, and in-place repair decisions.
+7. Update legacy migration guidance to state the `save_path`/`save_result` compatibility behavior precisely.
+8. Only then implement the optional one-`target` simplification for `extract_and_inject()` and update the README examples.
+
+## Suggested Test Matrix
+
+| Scenario | `inject()` | `prepare_only()` | `repair_nested()` | Expected common result after standardization |
+| --- | --- | --- | --- | --- |
+| Bare output filename with `output_dir` | Covered by resolver helper tests. | Covered by resolver helper tests. | Not currently resolved through `output_dir`. | Same resolved path for all relevant methods. |
+| Missing parent directory with `create_parents=True` | Created. | Created. | Not created. | Created for all persisted SVG output. |
+| Pretty-printed XML and declaration | Controlled by config. | Controlled by config. | Independent of config. | Controlled by config for all persisted SVG output. |
+| Save disabled | Returns modified tree. | No explicit flag. | Defaults to save. | One documented and testable rule. |
+| Missing output with save enabled | Fails. | Not applicable. | Facade fails; lower layer overwrites source. | One documented policy, applied consistently. |
 
 ## Review References
 
-1. [`SVGTranslationService` in `service.py`](../CopySVGTranslation/service.py) — method signature, call flow, and save semantics.
-2. [`SVGTranslationInjector` in `injection/injector.py`](../CopySVGTranslation/injection/injector.py) — internal `save_path` contract and save behavior.
-3. [`Service tests`](../tests/unit/test_service.py) — current combined-workflow and save coverage.
-4. [`README.md`](../README.md) and [PR #78](https://github.com/MrIbrahem/CopySVGTranslation/pull/78) — public examples and the locations of the confusion.
+1. [`SVGTranslationService` in `service.py`](../CopySVGTranslation/service.py) — public save contracts, output resolution, mapping output resolution, and the combined workflow.
+2. [`SVGTranslationInjector` in `injection/injector.py`](../CopySVGTranslation/injection/injector.py) — injection-specific SVG writing behavior.
+3. [`NestedStructureService` in `nested/service.py`](../CopySVGTranslation/nested/service.py) — repair path defaults and independent writing behavior.
+4. [`MappingStore` in `io/mapping_store.py`](../CopySVGTranslation/io/mapping_store.py) — mapping persistence and unused default-path helper.
+5. [`Legacy injection adapter`](../CopySVGTranslation/legacy/inject.py) — compatibility save-path and save-result behavior.
+6. [`Service tests`](../tests/unit/test_service.py) and [`nested-service tests`](../tests/unit/nested/test_service_and_api.py) — current coverage of save operations and repair output.
