@@ -201,14 +201,14 @@ class Error:
     def to_json(self) -> dict[str, Any]:
         return asdict(self)  # pyright: ignore[reportCallIssue]
 
-    def from_error(self, exc) -> Error:
+    def from_error(self, exc: Exception | Any) -> None:
         label = getattr(exc, "label", None) or getattr(exc, "info", None)
         if label:
-            self.label = label
+            self.label = str(label)
 
-        code=getattr(exc, "code", None) or str(exc)
+        code = getattr(exc, "code", None) or str(exc)
         if code:
-            self.code = code
+            self.code = str(code)
 
 @dataclass
 class InjectorData:
