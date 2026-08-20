@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import asdict, dataclass, field
-from typing import Any
+from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
 
@@ -23,15 +22,4 @@ class RepairResult:
         self.len_tags_fixed = max(0, self.len_tags_before_fix - self.len_tags_after_fix)
 
 
-@dataclass
-class DetectionResult:
-    count: int
-    tags: list[str] = field(default_factory=list)
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)  # pyright: ignore[reportCallIssue]
-
-
-__all__ = [
-    "DetectionResult",
-]
+__all__ = []

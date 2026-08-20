@@ -32,7 +32,6 @@ from .injection import SVGTranslationInjector
 # Legacy compatibility layer (deprecated)
 # ---------------------------------------------------------------------------
 from .nested import (
-    MatchFixNestedTags,
     NestedTspanDetector,
     NestedTspanFlattener,
 )
@@ -42,7 +41,6 @@ __all__ = [
     # version
     "__version__",
     "CopySVGTranslationError",
-    "MatchFixNestedTags",
     "NestedTspanDetector",
     "NestedTspanFlattener",
     "SVGTranslationExtractor",

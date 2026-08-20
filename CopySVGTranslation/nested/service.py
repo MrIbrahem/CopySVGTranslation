@@ -1,3 +1,7 @@
+"""
+Service for detecting and repairing nested <tspan> / <a> elements in SVGs.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -7,14 +11,14 @@ from lxml import etree
 
 from .detector import NestedTspanDetector
 from .flattener import NestedStrategy, NestedTspanFlattener
-from .objects import DetectionResult, RepairResult
+from .objects import RepairResult
 
 logger = logging.getLogger(__name__)
 
 
-class MatchFixNestedTags:
+class NestedStructureService:
     """
-    Deprecated legacy wrapper. Use NestedStructureService instead.
+    Service for analyzing and repairing nested tspan/a elements.
     """
 
     def __init__(
@@ -54,7 +58,6 @@ class MatchFixNestedTags:
         except (etree.XMLSyntaxError, OSError) as exc:
             logger.error("Failed to parse %s: %s", path, exc)
             return []
-
 
     def _get_tree(
         self,
@@ -167,5 +170,5 @@ class MatchFixNestedTags:
 
 
 __all__ = [
-    "MatchFixNestedTags",
+    "NestedStructureService",
 ]

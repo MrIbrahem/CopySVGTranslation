@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.nested.fixer import MatchFixNestedTags
+from CopySVGTranslation.nested.service import NestedStructureService
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -29,9 +29,9 @@ def test_tspan_with_a_link_is_counted_as_nested(temp_dir: Path):
     # NOTE: current implementation flags any element child, not just <tspan>
     p = _write_svg(temp_dir, '<text><tspan>See <a href="https://ex.com">link</a></tspan></text>')
 
-    matcher = MatchFixNestedTags(strategy="flatten")
+    matcher = NestedStructureService(strategy="flatten")
 
-    res = matcher.match_nested(p)
+    res = matcher.analyze_file(p)
     assert len(res) == 1
     assert "<a" in res[0]
 
@@ -57,11 +57,11 @@ def test_match_and_fix_paragraph_with_bold_numbers_and_link(temp_dir: Path):
         </g>
         """,
     )
-    matcher = MatchFixNestedTags(strategy="flatten")
+    matcher = NestedStructureService(strategy="flatten")
 
-    before = len(matcher.match_nested(p))
+    before = len(matcher.analyze_file(p))
     matcher.repair_file(p, p)
-    after = len(matcher.match_nested(p))
+    after = len(matcher.analyze_file(p))
     # Current matcher flags any element child, so the first and third tspans are hits pre-fix
     assert before == 2
     assert after == 0
@@ -78,11 +78,11 @@ def test_match_and_fix_multiple_links_in_different_tspans(temp_dir: Path):
         </text>
         """,
     )
-    matcher = MatchFixNestedTags(strategy="flatten")
+    matcher = NestedStructureService(strategy="flatten")
 
-    assert len(matcher.match_nested(p)) == 2
+    assert len(matcher.analyze_file(p)) == 2
     matcher.repair_file(p, p)
-    assert len(matcher.match_nested(p)) == 0
+    assert len(matcher.analyze_file(p)) == 0
 
 
 @pytest.mark.parametrize(
@@ -93,12 +93,12 @@ def test_match_and_fix_multiple_links_in_different_tspans(temp_dir: Path):
 )
 def test_parametrized_various_patterns(temp_dir: Path, inner: str, expected_hits: int):
     p = _write_svg(temp_dir, inner)
-    matcher = MatchFixNestedTags(strategy="flatten")
+    matcher = NestedStructureService(strategy="flatten")
 
-    assert len(matcher.match_nested(p)) == expected_hits
+    assert len(matcher.analyze_file(p)) == expected_hits
     fixed = matcher.repair_file(p, p)
     assert fixed.success is True
-    assert len(matcher.match_nested(p)) == 0
+    assert len(matcher.analyze_file(p)) == 0
 
 
 def test_match_and_fix(temp_dir: Path):
@@ -118,13 +118,13 @@ def test_match_and_fix(temp_dir: Path):
         </svg>
     """
     p = _write_full_svg(temp_dir, text, name="testx.svg")
-    matcher = MatchFixNestedTags(strategy="flatten")
+    matcher = NestedStructureService(strategy="flatten")
 
-    before = len(matcher.match_nested(p))
+    before = len(matcher.analyze_file(p))
     fixed = matcher.repair_file(p, p)
     assert fixed.success is True
 
-    after = len(matcher.match_nested(p))
+    after = len(matcher.analyze_file(p))
     assert before == 1
     assert after == 0
 
@@ -178,13 +178,13 @@ def test_match_and_fix_2(temp_dir: Path):
 
     """
     p = _write_full_svg(temp_dir, text, name="testx.svg")
-    matcher = MatchFixNestedTags(strategy="flatten")
+    matcher = NestedStructureService(strategy="flatten")
 
-    before = len(matcher.match_nested(p))
+    before = len(matcher.analyze_file(p))
     fixed = matcher.repair_file(p, p)
     assert fixed.success is True
 
-    after = len(matcher.match_nested(p))
+    after = len(matcher.analyze_file(p))
     assert before == 2
     assert after == 0
 
@@ -231,13 +231,13 @@ def test_match_and_fix_3(temp_dir: Path):
 
     """
     p = _write_svg(temp_dir, text, name="testx.svg")
-    matcher = MatchFixNestedTags(strategy="flatten")
+    matcher = NestedStructureService(strategy="flatten")
 
-    before = len(matcher.match_nested(p))
+    before = len(matcher.analyze_file(p))
     fixed = matcher.repair_file(p, p)
     assert fixed.success is True
 
-    after = len(matcher.match_nested(p))
+    after = len(matcher.analyze_file(p))
     assert before == 1
     assert after == 0
 
