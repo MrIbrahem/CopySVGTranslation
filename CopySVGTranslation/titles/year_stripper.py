@@ -11,7 +11,7 @@ from ..core.mapping import TranslationMapping
 logger = logging.getLogger(__name__)
 
 
-class ByLanguage:
+class YearPatternStripper:
 
     def __init__(self, lang: str, text: str) -> None:
         self.lang = lang
@@ -77,7 +77,7 @@ class TitlesTranslationsRenderer:
 
     @staticmethod
     def _text_by_lang(lang: str, text: str) -> str | None:
-        return ByLanguage(lang, text).run()
+        return YearPatternStripper(lang, text).run()
 
     def _render_translations(self, translations: dict[str, str]) -> dict[str, str]:
         new_key_data = {}
@@ -137,10 +137,8 @@ class AddTitlesTranslationsFromTitles:
         else:
             self.changes = False
 
-
 __all__ = [
-    "ByLanguage",
+    "YearPatternStripper",
     "TitlesTranslationsRenderer",
-    # MAIN API:
     "AddTitlesTranslationsFromTitles",
 ]

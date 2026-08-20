@@ -7,7 +7,7 @@ from CopySVGTranslation.core.mapping import TranslationMapping
 from CopySVGTranslation.extraction import SVGTranslationExtractor
 from CopySVGTranslation.titles.year_stripper import (
     AddTitlesTranslationsFromTitles,
-    ByLanguage,
+    YearPatternStripper,
     TitlesTranslationsRenderer,
 )
 
@@ -41,18 +41,18 @@ def add_translations_from_titles(
 
 
 # ---------------------------------------------------------------------------
-# ByLanguage
+# YearPatternStripper
 # ---------------------------------------------------------------------------
 
 
 class TestByLanguage:
     def test_run_returns_none_for_empty_text(self):
         # Empty string should short-circuit before any lang-specific logic.
-        assert ByLanguage("en", "").run() is None
+        assert YearPatternStripper("en", "").run() is None
 
     def test_run_returns_none_when_no_year_placeholder(self):
         # Text without "{year}" is not a candidate for translation stripping.
-        assert ByLanguage("en", "parkinson's disease prevalence").run() is None
+        assert YearPatternStripper("en", "parkinson's disease prevalence").run() is None
 
     @pytest.mark.parametrize(
         "text,expected",
@@ -63,48 +63,48 @@ class TestByLanguage:
     )
     def test_multi_langs_comma_suffix(self, text, expected):
         # Generic comma + "{year}" suffix stripping (used for "en", "es", etc.).
-        assert ByLanguage("en", text).run() == expected
+        assert YearPatternStripper("en", text).run() == expected
 
     def test_multi_langs_arabic_comma_suffix(self):
         # Arabic comma variant "، {year}".
         text = "انتشار مرض باركنسون، {year}"
         expected = "انتشار مرض باركنسون"
-        assert ByLanguage("ar", text).run() == expected
+        assert YearPatternStripper("ar", text).run() == expected
 
     def test_multi_langs_arabic_comma_no_space_suffix(self):
         # Arabic comma variant without a following space "،{year}".
         text = "انتشار مرض باركنسون،{year}"
         expected = "انتشار مرض باركنسون"
-        assert ByLanguage("ar", text).run() == expected
+        assert YearPatternStripper("ar", text).run() == expected
 
     def test_multi_langs_returns_none_when_no_known_suffix(self):
         # "{year}" is present but not in any recognized suffix pattern.
-        assert ByLanguage("es", "algo {year} raro").run() is None
+        assert YearPatternStripper("es", "algo {year} raro").run() is None
 
     def test_abr_strips_known_suffix(self):
         text = "Parkinson yareɛ a ebu soɔ, afe {year}"
         expected = "Parkinson yareɛ a ebu soɔ"
-        assert ByLanguage("abr", text).run() == expected
+        assert YearPatternStripper("abr", text).run() == expected
 
     def test_abr_returns_none_when_suffix_does_not_match(self):
         # "abr" only recognizes ", afe {year}", not the generic comma suffix.
         text = "Parkinson yareɛ a ebu soɔ, {year}"
-        assert ByLanguage("abr", text).run() is None
+        assert YearPatternStripper("abr", text).run() is None
 
     def test_ja_strips_prefix(self):
         text = "{year}年のパーキンソン病の流行"
         # expected = "のパーキンソン病の流行"
         expected = "パーキンソン病の流行"
-        assert ByLanguage("ja", text).run() == expected
+        assert YearPatternStripper("ja", text).run() == expected
 
     def test_ja_strips_suffix(self):
         text = "パーキンソン病の流行年{year}"
         expected = "パーキンソン病の流行"
-        assert ByLanguage("ja", text).run() == expected
+        assert YearPatternStripper("ja", text).run() == expected
 
     def test_ja_returns_none_when_no_known_pattern(self):
         text = "パーキンソン病の流行 {year}"
-        assert ByLanguage("ja", text).run() is None
+        assert YearPatternStripper("ja", text).run() is None
 
 
 # ---------------------------------------------------------------------------
@@ -181,7 +181,7 @@ class TestRenderTitlesTranslations:
         assert result["prevalence"]["ar"] == "الانتشار"
 
     def test_skips_empty_translation_values(self):
-        # Empty strings must be ignored, not passed to ByLanguage.
+        # Empty strings must be ignored, not passed to YearPatternStripper.
         title_new = {
             "prevalence, {year}": {
                 "es": "",
