@@ -1,8 +1,8 @@
-# تقرير مراجعة التكرار بين `target` و`output` في `SVGTranslationService`
+# `SVGTranslationService` `target` / `output` Duplication Review
 
-**الحالة:** تقرير تحليلي فقط؛ لا يتضمن هذا الفرع أي تعديل لملفات التنفيذ أو الاختبارات أو README.
+**Status:** Analysis only. This branch contains no production-code, test, or README changes.
 
-**النطاق:** تركز هذه المراجعة على `SVGTranslationService.extract_and_inject()`، وبالأخص المثال الآتي الذي ظهر في فرع التوثيق:
+**Scope:** This review focuses on `SVGTranslationService.extract_and_inject()`, specifically the following documentation example from the earlier documentation branch:
 
 ```python
 service.extract_and_inject(
@@ -13,59 +13,59 @@ service.extract_and_inject(
 )
 ```
 
-## الخلاصة التنفيذية
+## Executive Summary
 
-`target` و`output` ليسا متطابقين من حيث السلوك الحالي: الأول هو **ملف الإدخال** الذي تُحقن فيه الترجمة داخل الذاكرة، والثاني هو **وجهة حفظ اختيارية** للنسخة الناتجة. لذلك فالتصميم القائم يدعم التحويل غير المتلف: يقرأ من `target.svg` ويكتب إلى ملف آخر.
+`target` and `output` do not currently mean the same thing. `target` is the **input SVG** into which translations are injected in memory, while `output` is the optional **destination file** for the resulting SVG. The existing API therefore supports a non-destructive workflow: it reads `target.svg` and writes a separate output file.
 
-لكن إذا كان قرار المنتج هو أن عملية `extract_and_inject()` يجب أن تتعامل مع **ملف هدف واحد فقط**، فإن الاحتفاظ بالمعاملين يضيف عبئًا ذهنيًا غير ضروري ويجعل المثال مربكًا. الخيار المتسق الوحيد مع هذا القرار هو اعتماد `target` باعتباره الملف الذي يُقرأ ثم يُحدَّث **في مكانه** عند الحفظ، وإزالة `output` من هذه الدالة فقط.
+However, if the product decision is that `extract_and_inject()` must accept **one target file only**, retaining both parameters creates unnecessary cognitive overhead and makes the example confusing. The only coherent one-path design is to keep `target` as the file that is read and then updated **in place** when saving, and to remove `output` from this method only.
 
-> لا يمكن استبدال `target` بـ `output` مع الإبقاء على معامل واحد؛ فالعملية تحتاج بالضرورة إلى مسار ملف تقرأ منه الـSVG الهدف. لذلك يكون المسار الواحد هو `target`، وليس `output`.
+> `output` cannot replace `target` while leaving only one path parameter. The method still needs a path from which to read the target SVG. Therefore, the single remaining path must be `target`, not `output`.
 
-| القرار المقترح | النتيجة |
+| Recommended decision | Result |
 | --- | --- |
-| إزالة `output` من `extract_and_inject()` | يبقى `target` مسار SVG الهدف الوحيد. |
-| عند `save=True` أو `config.auto_save=True` | تُكتب النتيجة فوق `target` نفسه. |
-| عند `save=False` | تُعاد الشجرة المعدّلة داخل `OperationResult.data` ولا يُكتب ملف. |
-| نطاق التنفيذ المستقبلي | لا يُغيَّر عقد `inject()` أو `prepare_only()` أو `repair_nested()` في هذه المبادرة. |
+| Remove `output` from `extract_and_inject()` | `target` becomes the only target-SVG path. |
+| When `save=True` or `config.auto_save=True` | Write the result back to `target`. |
+| When `save=False` | Return the modified tree in `OperationResult.data` without writing a file. |
+| Future implementation scope | Do not change the `inject()`, `prepare_only()`, or `repair_nested()` contracts as part of this work. |
 
-## السلوك الحالي ولماذا ظهر التكرار
+## Current Behavior and the Source of the Duplication
 
-تعرّف `extract_and_inject()` ثلاثة مسارات ملفات منطقية: `source` لاستخراج الترجمات، و`target` لقراءة SVG المستهدف وتحضيره وحقن الترجمات فيه، و`output` لكتابة النتيجة عند الحفظ. ينفذ الكود التسلسل التالي:
+`extract_and_inject()` currently has three logical file paths: `source` for extracting translations, `target` for reading, preparing, and injecting into the target SVG, and `output` for writing the result when saving is enabled. The implementation follows this flow:
 
 ```text
 source ──extract──> TranslationMapping
                          │
                          ▼
-target ──inject(mapping, output, save)──> SVG معدّل في الذاكرة / ملف محفوظ
+target ──inject(mapping, output, save)──> modified SVG in memory / saved file
 ```
 
-عمليًا، يستدعي التنفيذ `self.inject(target, extract_result.data, output=output, save=save)`. ومن ثمّ لا يكتب `target` تلقائيًا؛ بل يعتمد الحفظ على `output` إذا كانت قيمة `save` الفعلية صحيحة.
+In implementation terms, the method invokes `self.inject(target, extract_result.data, output=output, save=save)`. Consequently, `target` is not written automatically; saving depends on `output` whenever the effective `save` value is true.
 
-| المعامل | المعنى الحالي في `extract_and_inject()` | هل هو مطلوب للحفظ؟ |
+| Parameter | Current meaning in `extract_and_inject()` | Required when saving? |
 | --- | --- | --- |
-| `source` | SVG الذي يحتوي الترجمات المراد استخراجها. | نعم، لأنه مدخل الاستخراج. |
-| `target` | SVG الذي يطابق النص الافتراضي وتُطبَّق عليه الترجمات في الذاكرة. | نعم، لأنه مدخل الحقن. |
-| `output` | مسار ملف مستقل تُحفظ فيه نتيجة الحقن. | نعم فقط عندما تكون قيمة `save` الفعلية صحيحة. |
+| `source` | SVG that contains the translations to extract. | Yes; it is the extraction input. |
+| `target` | SVG whose default-language text is matched and into which translations are injected in memory. | Yes; it is the injection input. |
+| `output` | Separate path to which the injected SVG is written. | Yes, but only when the effective `save` value is true. |
 
-هذا فصل مشروع تقنيًا عندما يكون المطلوب الحفاظ على `target` الأصلي. لكنه لا يتوافق مع مطلب واجهة ذات ملف هدف واحد؛ ففي هذه الحالة يحتاج المستدعي إلى تسمية كلٍ من الملف المستهدف والنسخة الناتجة رغم أن النتيجة المقصودة هي تحديث ذلك الهدف نفسه.
+This separation is technically valid when preserving the original `target` file is a requirement. It does not fit a one-target-file API, however: callers must name both the target and the transformed copy even when the intended operation is to update that target itself.
 
-## مواضع التكرار والاعتماد عليه
+## Locations Where the Duplication Exists or Is Relied Upon
 
-الجدول يميز بين المواضع التي يجب تغييرها في تنفيذ مقترح لاحق، والمواضع التي تستخدم `output` لغرض مختلف وينبغي أن تبقى خارج نطاق هذا القرار.
+The following table distinguishes locations that would change in a future implementation from locations that use `output` for a different, valid purpose and should remain out of scope.
 
-| الموضع | الدليل | الدور الحالي | الإجراء المقترح لاحقًا |
+| Location | Evidence | Current role | Future action |
 | --- | --- | --- | --- |
-| [`CopySVGTranslation/service.py`، الأسطر 211–248](../CopySVGTranslation/service.py#L211-L248) | توقيع `extract_and_inject(source, target, *, output=None, ...)` وتمرير `output` إلى `inject()`. | موضع التكرار الأساسي. | إزالة `output` من التوقيع؛ وتوجيه الحفظ إلى `target` عند تفعيله. |
-| [`CopySVGTranslation/service.py`، الأسطر 151–209](../CopySVGTranslation/service.py#L151-L209) | `inject(svg_path, mapping, *, output=None, save=None)`. | فصل مدخل الحقن عن وجهة النسخة الناتجة. | **لا تغيير**؛ هذه واجهة أقل تجريدًا ولها حالة استخدام غير متلفة صالحة. |
-| [`CopySVGTranslation/service.py`، الأسطر 305–313](../CopySVGTranslation/service.py#L305-L313) | `_resolve_output_path(output)`. | تطبيق `output_dir` على أسماء ملفات الإخراج المجردة. | يبقى لخدمة `inject()` و`prepare_only()`؛ ولا ينبغي استدعاؤه من المسار الموحّد بعد إزالة `output`. |
-| [`tests/unit/test_service.py`، الأسطر 100–120](../tests/unit/test_service.py#L100-L120) | اختبار `extract_and_inject(src, tgt)` دون حفظ. | يتحقق من الحقن في الذاكرة فقط، ولا يغطي عقد الحفظ. | تعديل الاختبار المستقبلي وإضافة حالات الحفظ داخل `target`. |
-| [`README.md`، الأسطر 74–79](../README.md#L74-L79) | المثال الحالي في `main` يمرر `target` و`output`. | مصدر الالتباس للمستخدم. | استبداله بمثال ذي `target` واحد بعد تعديل الواجهة. |
-| [PR #78 — README في فرع التوثيق](https://github.com/MrIbrahem/CopySVGTranslation/pull/78) | تكرر الأمثلة الموسعة الفصل نفسه، ومنها `target="target.svg"` و`output="target-translated.svg"`. | توثيق غير مدمج في `main` وقت إعداد التقرير؛ سيتأثر بالقرار. | تحديثه أو إعادة تأسيسه على الواجهة الجديدة قبل دمجه. |
-| [`CopySVGTranslation/nested/service.py`، الأسطر 79–125](../CopySVGTranslation/nested/service.py#L79-L125) | `repair_file(source, output, ...)`. | تحويل ملف عام مع اختيار الكتابة إلى مسار آخر أو المصدر نفسه. | **خارج النطاق**؛ لا يخص تدفق نسخ الترجمات. |
+| [`CopySVGTranslation/service.py`, lines 211–248](../CopySVGTranslation/service.py#L211-L248) | `extract_and_inject(source, target, *, output=None, ...)` passes `output` to `inject()`. | Primary duplication point. | Remove `output` from the signature and direct saving to `target` when enabled. |
+| [`CopySVGTranslation/service.py`, lines 151–209](../CopySVGTranslation/service.py#L151-L209) | `inject(svg_path, mapping, *, output=None, save=None)`. | Separates injection input from a destination copy. | **No change**. This lower-level API has a valid non-destructive use case. |
+| [`CopySVGTranslation/service.py`, lines 305–313](../CopySVGTranslation/service.py#L305-L313) | `_resolve_output_path(output)`. | Applies `output_dir` to bare output filenames. | Retain for `inject()` and `prepare_only()`; do not use it in the combined workflow after `output` is removed. |
+| [`tests/unit/test_service.py`, lines 100–120](../tests/unit/test_service.py#L100-L120) | `extract_and_inject(src, tgt)` test without saving. | Validates in-memory injection only; does not cover a save contract. | Update the test and add in-place `target` save coverage. |
+| [`README.md`, lines 74–79](../README.md#L74-L79) | Current `main` example passes both `target` and `output`. | User-facing source of the confusion. | Replace with a one-`target` example after the API changes. |
+| [PR #78 — documentation branch](https://github.com/MrIbrahem/CopySVGTranslation/pull/78) | The expanded examples repeat the separation, including `target="target.svg"` and `output="target-translated.svg"`. | Documentation not merged into `main` at the time of this review; it will be affected by the decision. | Update or rebase it on the new API before merging. |
+| [`CopySVGTranslation/nested/service.py`, lines 79–125](../CopySVGTranslation/nested/service.py#L79-L125) | `repair_file(source, output, ...)`. | General file transformation that may write to a separate output or the source itself. | **Out of scope**. It is not part of the translation-copy workflow. |
 
-## المقترح التفصيلي
+## Detailed Proposal
 
-### الواجهة العامة بعد التغيير
+### Public API After the Change
 
 ```python
 result = service.extract_and_inject(
@@ -75,9 +75,9 @@ result = service.extract_and_inject(
 )
 ```
 
-يظل معنى `source` كما هو. ويصبح `target` المسار الوحيد للـSVG الذي ستطبق عليه الترجمات، وعند الحفظ تُكتب النتيجة في الملف نفسه. لا يعود `output` جزءًا من الواجهة العامة لهذا المسار الموحّد.
+`source` retains its existing meaning. `target` becomes the only SVG path to which translations are applied and, when saving is enabled, the path to which the result is written. `output` is no longer part of the public API for this combined workflow.
 
-التوقيع المقترح هو:
+The proposed signature is:
 
 ```python
 def extract_and_inject(
@@ -91,57 +91,57 @@ def extract_and_inject(
     ...
 ```
 
-### منطق الحفظ المقترح
+### Proposed Save Semantics
 
-ينبغي أن يحسب `extract_and_inject()` قيمة الحفظ الفعلية بالطريقة نفسها التي تعمل بها `inject()` حاليًا:
+`extract_and_inject()` should calculate its effective save value in the same way as `inject()` currently does:
 
 ```python
 should_save = self.config.auto_save if save is None else save
 ```
 
-ثم يمرر `target` كمسار حفظ داخلي فقط عندما يكون `should_save` صحيحًا. السلوك المتوقع يكون كما يلي:
+When `should_save` is true, the method should internally pass `target` as the save path. The expected behavior is:
 
-| `save` | `config.auto_save` | النتيجة |
+| `save` | `config.auto_save` | Result |
 | --- | --- | --- |
-| `True` | أي قيمة | يحفظ فوق `target`. |
-| `False` | أي قيمة | لا يكتب ملفًا؛ يعيد الشجرة والإحصاءات فقط. |
-| `None` | `True` | يحفظ فوق `target`. |
-| `None` | `False` | لا يكتب ملفًا؛ يحافظ على السلوك الافتراضي الحالي في الذاكرة. |
+| `True` | Any value | Save over `target`. |
+| `False` | Any value | Do not write a file; return the tree and statistics only. |
+| `None` | `True` | Save over `target`. |
+| `None` | `False` | Do not write a file; preserve the current in-memory default. |
 
-### الحفاظ على الحماية من فقدان البيانات
+### Protecting Against Data Loss
 
-إزالة `output` تجعل الكتابة متلفة لملف `target` عند تفعيل الحفظ. لذلك يجب أن يتضمن التنفيذ المستقبلي كتابة ذرية: الكتابة إلى ملف مؤقت في المجلد نفسه ثم استبداله بـ `target` بعد نجاح الكتابة. هذا لا يعيد النسخة السابقة منطقيًا، لكنه يمنع تلف الملف الناتج عن كتابة جزئية أو فشل أثناء الاستبدال.
+Removing `output` makes saving destructive for the target file. A future implementation should therefore use atomic writing: write to a temporary file in the same directory, then replace `target` only after the write succeeds. This does not preserve a logical backup of the original, but it prevents a partial write or an interrupted save from corrupting the target file.
 
-إذا كان الاحتفاظ بنسخة أصلية متطلبًا فعليًا، فذلك يتعارض مع شرط «مسار هدف واحد فقط». عندها ينبغي اتخاذ قرار منتج صريح بين نموذج التحديث في المكان المقترح هنا، أو الإبقاء على `output` كنموذج تحويل غير متلف.
+If retaining an original copy is a real product requirement, it conflicts with the requirement of one target-file path. The product decision must then be explicit: either adopt the in-place update model proposed here or retain `output` as a non-destructive transformation model.
 
-## بدائل مرفوضة
+## Rejected Alternatives
 
-| البديل | سبب الرفض |
+| Alternative | Reason for rejection |
 | --- | --- |
-| الإبقاء على `target` و`output` مع تغيير الأسماء فقط، مثل `input_target` و`destination`. | يحسن التسمية لكنه لا يلبي مطلب معامل ملف هدف واحد. |
-| حذف `target` والإبقاء على `output`. | غير ممكن وظيفيًا؛ لا يبقى مسار لقراءة SVG الذي ستُطبّق عليه الترجمة. |
-| تغيير `inject()` و`prepare_only()` و`repair_nested()` معًا. | توسع غير مطلوب ويكسر استعمالات صحيحة لعمليات التحويل غير المتلفة خارج التدفق الموحّد. |
-| حفظ فوق `target` دائمًا بغض النظر عن `save`. | يكسر السلوك الحالي الذي يدعم المعاينة داخل الذاكرة. |
+| Keep both `target` and `output`, but rename them to `input_target` and `destination`. | Improves naming only; it does not satisfy the one-target-path requirement. |
+| Remove `target` and keep `output`. | Functionally impossible; there would be no path from which to read the SVG that receives the translations. |
+| Change `inject()`, `prepare_only()`, and `repair_nested()` at the same time. | Unnecessary scope expansion that would break valid non-destructive transformation workflows outside the combined method. |
+| Always save over `target`, regardless of `save`. | Breaks the current ability to preview the modified tree in memory. |
 
-## أثر التوافق والإطلاق
+## Compatibility and Release Impact
 
-هذا تغيير كاسر لمستدعي `extract_and_inject()` الذين يمررون `output=`. ينبغي رفع الإصدار الرئيسي أو، إذا لزم انتقال تدريجي، اعتماد مرحلة إهمال مؤقتة: قبول `output` مؤقتًا مع تحذير إهمال ثم إزالته في إصدار رئيسي لاحق. لا يحقق الإهمال مطلب «واحد فقط» فورًا، ولذلك يوصى به فقط إذا كانت سلامة التوافق أهم من بساطة الواجهة الفورية.
+This is a breaking change for callers of `extract_and_inject()` that pass `output=`. The change should therefore be released in a new major version. If a gradual transition is required, the method could temporarily accept `output` with a deprecation warning before removing it in the next major release. That transitional approach does not satisfy the one-parameter requirement immediately, so it is appropriate only if compatibility is more important than immediate API simplification.
 
-## خطة تنفيذ مستقبلية مقترحة
+## Recommended Future Implementation Plan
 
-لا تُنفذ هذه الخطة في هذا الفرع؛ وهي قائمة العمل المقترحة بعد اعتماد القرار.
+This plan is not implemented in this branch. It is the proposed follow-up work once the design decision is approved.
 
-1. إزالة `output` من توقيع `SVGTranslationService.extract_and_inject()` ووثيقته النصية.
-2. احتساب `should_save` داخليًا وتمرير `target` كمسار الحفظ عند الحاجة.
-3. إضافة كتابة ذرية للملف عند الحفظ في المكان، أو توثيق المخاطرة بوضوح إذا أُجلت هذه الحماية.
-4. تحديث اختبار التدفق الموحّد ليتحقق من أن `target` يحتوي اللغة المضافة بعد `save=True`.
-5. إضافة اختبارات لحالات `save=False` و`save=None` مع `auto_save` بالقيمتين، وللفشل في الكتابة مع ضمان عدم تلف الهدف.
-6. إزالة `output` من مثال README وجدول API، وتعديل [PR #78](https://github.com/MrIbrahem/CopySVGTranslation/pull/78) ليعكس العقد الجديد قبل دمجه.
-7. إصدار ملاحظات هجرة تبين أن الحفظ غير المتلف يظل متاحًا مباشرة عبر `inject(svg_path, mapping, output=...)`، وليس عبر `extract_and_inject()` بعد التغيير.
+1. Remove `output` from the `SVGTranslationService.extract_and_inject()` signature and docstring.
+2. Calculate `should_save` internally and pass `target` as the internal save path when required.
+3. Add atomic target-file writing, or clearly document the risk if that safety measure is deferred.
+4. Update the combined-workflow test to verify that `target` contains the injected language after `save=True`.
+5. Add tests for `save=False`, plus `save=None` with both values of `auto_save`, and for write failures that must not corrupt the target.
+6. Remove `output` from the README example and API table, and update [PR #78](https://github.com/MrIbrahem/CopySVGTranslation/pull/78) to match the new contract before merging it.
+7. Publish migration notes stating that callers needing a non-destructive save still have `inject(svg_path, mapping, output=...)` available directly; the simplified `extract_and_inject()` flow would no longer offer that option.
 
-## مراجع المراجعة
+## Review References
 
-1. [`SVGTranslationService` في `service.py`](../CopySVGTranslation/service.py) — التوقيع وتسلسل الاستدعاء ودلالات الحفظ.
-2. [`SVGTranslationInjector` في `injection/injector.py`](../CopySVGTranslation/injection/injector.py) — عقد `save_path` الداخلي ومعالجة الحفظ.
-3. [`اختبارات الخدمة`](../tests/unit/test_service.py) — التغطية الحالية للتدفق الموحّد والحفظ.
-4. [`README.md`](../README.md) و[PR #78](https://github.com/MrIbrahem/CopySVGTranslation/pull/78) — أمثلة الواجهة العامة ومواقع الالتباس.
+1. [`SVGTranslationService` in `service.py`](../CopySVGTranslation/service.py) — method signature, call flow, and save semantics.
+2. [`SVGTranslationInjector` in `injection/injector.py`](../CopySVGTranslation/injection/injector.py) — internal `save_path` contract and save behavior.
+3. [`Service tests`](../tests/unit/test_service.py) — current combined-workflow and save coverage.
+4. [`README.md`](../README.md) and [PR #78](https://github.com/MrIbrahem/CopySVGTranslation/pull/78) — public examples and the locations of the confusion.
