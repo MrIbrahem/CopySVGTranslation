@@ -37,13 +37,13 @@ class TestMatchAndFix(TestSetup):
             </g>
         """
         p = _write_svg(temp_dir, text, name="testx.svg")
-        matcher = MatchFixNestedTags(p, p, strategy="preserve_style")
-        before = len(matcher.match_nested())
-        fixed = matcher.fix_file()
+        matcher = MatchFixNestedTags(strategy="preserve_style")
+        before = len(matcher.match_nested(p))
+        fixed = matcher.fix_file(p, p)
 
         assert fixed is True
 
-        after = len(matcher.match_nested())
+        after = len(matcher.match_nested(p))
         assert before == 1
         assert after == 0
 
@@ -92,13 +92,13 @@ class TestMatchAndFix(TestSetup):
             </g>
         """
         p = _write_svg(temp_dir, text, name="testx.svg")
-        matcher = MatchFixNestedTags(p, p, strategy="preserve_style")
+        matcher = MatchFixNestedTags(strategy="preserve_style")
 
-        before = len(matcher.match_nested())
-        fixed = matcher.fix_file()
+        before = len(matcher.match_nested(p))
+        fixed = matcher.fix_file(p, p)
         assert fixed is True
 
-        after = len(matcher.match_nested())
+        after = len(matcher.match_nested(p))
         assert before == 2
         assert after == 0
 
@@ -145,15 +145,15 @@ class TestTodo(TestSetup):
             </g>
         """
         p = _write_svg(temp_dir, text, name="testx.svg")
-        matcher = MatchFixNestedTags(p, p, strategy="preserve_style")
+        matcher = MatchFixNestedTags(strategy="preserve_style")
 
-        before = len(matcher.match_nested())
+        before = len(matcher.match_nested(p))
 
-        fixed = matcher.fix_file()
+        fixed = matcher.fix_file(p, p)
 
         assert fixed is True
 
-        after = len(matcher.match_nested())
+        after = len(matcher.match_nested(p))
         assert before == 1
         assert after == 0
 
@@ -183,15 +183,15 @@ class TestTodo(TestSetup):
             </g>
         """
         p = _write_svg(temp_dir, text, name="testx.svg")
-        matcher = MatchFixNestedTags(p, p, strategy="flatten")
+        matcher = MatchFixNestedTags(strategy="flatten")
 
-        before = len(matcher.match_nested())
+        before = len(matcher.match_nested(p))
 
-        fixed = matcher.fix_file()
+        fixed = matcher.fix_file(p, p)
 
         assert fixed is True
 
-        after = len(matcher.match_nested())
+        after = len(matcher.match_nested(p))
         assert before == 1
         assert after == 0
 

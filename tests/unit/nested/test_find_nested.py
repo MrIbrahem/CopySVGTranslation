@@ -20,13 +20,10 @@ def fix_nested_file(
     pretty_print: bool | None = None,
 ) -> bool:
     processer = MatchFixNestedTags(
-        source_file,
-        new_path,
-        pretty_print=pretty_print,
         strategy="flatten",
     )
 
-    return processer.fix_file()
+    return processer.fix_file(source_file, new_path)
 
 
 def _svg(inner: str) -> str:
@@ -100,6 +97,7 @@ class TestFixNestedFile:
         with warnings.catch_warnings(record=True):
             warnings.simplefilter("always")
             result = fix_nested_file(src)
-        assert result is False
+
+        assert result is True
         content = src.read_text(encoding="utf-8")
         assert "Bold" in content

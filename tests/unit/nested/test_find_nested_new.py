@@ -19,13 +19,10 @@ def fix_nested_file_new(
     pretty_print: bool | None = None,
 ) -> bool:
     processer = MatchFixNestedTags(
-        source_file,
-        new_path,
-        pretty_print=pretty_print,
         strategy="preserve_style",
     )
 
-    return processer.fix_file()
+    return processer.fix_file(source_file, new_path)
 
 
 def _svg(inner: str) -> str:

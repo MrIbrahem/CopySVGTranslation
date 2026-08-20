@@ -35,11 +35,11 @@ class TestNestedFiles:
             </svg>
         """,
         )
-        matcher = MatchFixNestedTags(file, file, strategy="flatten")
+        matcher = MatchFixNestedTags(strategy="flatten")
 
-        len_result_before = len(matcher.match_nested())
-        _fix_file = matcher.fix_file()
-        len_result_after = len(matcher.match_nested())
+        len_result_before = len(matcher.match_nested(file))
+        _fix_file = matcher.fix_file(file, file)
+        len_result_after = len(matcher.match_nested(file))
 
         assert len_result_before == 2
         assert len_result_after == 0
@@ -60,11 +60,11 @@ class TestNestedFiles:
             </g>
         </svg>""",
         )
-        matcher = MatchFixNestedTags(file, file, strategy="flatten")
+        matcher = MatchFixNestedTags(strategy="flatten")
 
-        len_result_before = len(matcher.match_nested())
-        _fix_file = matcher.fix_file()
-        len_result_after = len(matcher.match_nested())
+        len_result_before = len(matcher.match_nested(file))
+        _fix_file = matcher.fix_file(file, file)
+        len_result_after = len(matcher.match_nested(file))
 
         assert len_result_before == 1
         assert len_result_after == 0
@@ -87,11 +87,11 @@ class TestNestedFiles:
                 age standardization
                 make health metrics comparable?</a></tspan></text></g></g></svg>""",
         )
-        matcher = MatchFixNestedTags(file, file, strategy="flatten")
+        matcher = MatchFixNestedTags(strategy="flatten")
 
-        len_result_before = len(matcher.match_nested())
-        _fix_file = matcher.fix_file()
-        len_result_after = len(matcher.match_nested())
+        len_result_before = len(matcher.match_nested(file))
+        _fix_file = matcher.fix_file(file, file)
+        len_result_after = len(matcher.match_nested(file))
 
         assert len_result_before == 1
         assert len_result_after == 0
@@ -112,11 +112,11 @@ class TestNestedFiles:
                 </g>
             </svg>""",
         )
-        matcher = MatchFixNestedTags(file, file, strategy="flatten")
+        matcher = MatchFixNestedTags(strategy="flatten")
 
-        len_result_before = len(matcher.match_nested())
-        _fix_file = matcher.fix_file()
-        len_result_after = len(matcher.match_nested())
+        len_result_before = len(matcher.match_nested(file))
+        _fix_file = matcher.fix_file(file, file)
+        len_result_after = len(matcher.match_nested(file))
 
         assert len_result_before == 2
         assert len_result_after == 0
@@ -178,11 +178,11 @@ class TestNestedFiles:
                 </g>
             </svg>""",
         )
-        matcher = MatchFixNestedTags(file, file, strategy="flatten")
+        matcher = MatchFixNestedTags(strategy="flatten")
 
-        len_result_before = len(matcher.match_nested())
-        _fix_file = matcher.fix_file()
-        len_result_after = len(matcher.match_nested())
+        len_result_before = len(matcher.match_nested(file))
+        _fix_file = matcher.fix_file(file, file)
+        len_result_after = len(matcher.match_nested(file))
 
         assert len_result_before == 7
         assert len_result_after == 0
