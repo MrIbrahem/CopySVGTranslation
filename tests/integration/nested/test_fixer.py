@@ -41,7 +41,7 @@ class TestMatchAndFix(TestSetup):
         before = len(matcher.match_nested(p))
         fixed = matcher.repair_file(p, p)
 
-        assert fixed is True
+        assert fixed.success is True
 
         after = len(matcher.match_nested(p))
         assert before == 1
@@ -96,7 +96,7 @@ class TestMatchAndFix(TestSetup):
 
         before = len(matcher.match_nested(p))
         fixed = matcher.repair_file(p, p)
-        assert fixed is True
+        assert fixed.success is True
 
         after = len(matcher.match_nested(p))
         assert before == 2
@@ -151,7 +151,7 @@ class TestTodo(TestSetup):
 
         fixed = matcher.repair_file(p, p)
 
-        assert fixed is True
+        assert fixed.success is True
 
         after = len(matcher.match_nested(p))
         assert before == 1
@@ -189,7 +189,7 @@ class TestTodo(TestSetup):
 
         fixed = matcher.repair_file(p, p)
 
-        assert fixed is True
+        assert fixed.success is True
 
         after = len(matcher.match_nested(p))
         assert before == 1

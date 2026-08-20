@@ -23,7 +23,8 @@ def fix_nested_file(
         strategy="flatten",
     )
 
-    return processer.repair_file(source_file, new_path)
+    fixed = processer.repair_file(source_file, new_path)
+    return fixed.success
 
 
 def _svg(inner: str) -> str:

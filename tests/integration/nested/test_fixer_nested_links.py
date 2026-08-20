@@ -97,7 +97,7 @@ def test_parametrized_various_patterns(temp_dir: Path, inner: str, expected_hits
 
     assert len(matcher.match_nested(p)) == expected_hits
     fixed = matcher.repair_file(p, p)
-    assert fixed is True
+    assert fixed.success is True
     assert len(matcher.match_nested(p)) == 0
 
 
@@ -122,7 +122,7 @@ def test_match_and_fix(temp_dir: Path):
 
     before = len(matcher.match_nested(p))
     fixed = matcher.repair_file(p, p)
-    assert fixed is True
+    assert fixed.success is True
 
     after = len(matcher.match_nested(p))
     assert before == 1
@@ -182,7 +182,7 @@ def test_match_and_fix_2(temp_dir: Path):
 
     before = len(matcher.match_nested(p))
     fixed = matcher.repair_file(p, p)
-    assert fixed is True
+    assert fixed.success is True
 
     after = len(matcher.match_nested(p))
     assert before == 2
@@ -235,7 +235,7 @@ def test_match_and_fix_3(temp_dir: Path):
 
     before = len(matcher.match_nested(p))
     fixed = matcher.repair_file(p, p)
-    assert fixed is True
+    assert fixed.success is True
 
     after = len(matcher.match_nested(p))
     assert before == 1

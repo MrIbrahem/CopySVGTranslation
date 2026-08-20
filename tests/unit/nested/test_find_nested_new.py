@@ -22,7 +22,8 @@ def fix_nested_file_new(
         strategy="preserve_style",
     )
 
-    return processer.repair_file(source_file, new_path)
+    fixed = processer.repair_file(source_file, new_path)
+    return fixed.success
 
 
 def _svg(inner: str) -> str:
