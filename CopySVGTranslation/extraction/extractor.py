@@ -14,8 +14,8 @@ from ..core.mapping import TranslationMapping
 from ..exceptions import SvgIOError, SvgParseError
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
+from ..titles.year_stripper import AddTitlesTranslationsFromTitles
 from ..utils.text import normalize_text
-from .header_adder import AddTitlesTranslationsFromTitles
 from .strategies import ByTspanIdStrategy, MatchingStrategy
 
 logger = logging.getLogger(__name__)

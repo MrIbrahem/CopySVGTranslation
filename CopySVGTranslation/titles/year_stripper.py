@@ -1,4 +1,6 @@
-""" """
+"""
+Module for stripping year patterns from title translations and merging them into mapping.new.
+"""
 
 from __future__ import annotations
 
