@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 from lxml import etree
 
@@ -81,15 +82,15 @@ class NestedStructureService:
         source: Path | str,
         output: Path | str | None = None,
         strategy: NestedStrategy | None = None,
+        save: bool = True,
     ) -> RepairResult:
         """
         Repair nested tags in a file and write the result to another file.
         """
-        src_path = Path(source)
+        src_path = Path(str(source)) if source else None
         out_path = Path(output) if output else src_path
-        warnings: list[str] = []
 
-        if not src_path.exists():
+        if not src_path or not src_path.exists():
             return RepairResult(
                 success=False,
                 len_tags_before_fix=0,
@@ -97,26 +98,47 @@ class NestedStructureService:
                 warnings=[f"Source file does not exist: {src_path}"],
             )
 
+        # Parse source file
+        tree = self._get_tree(src_path)
+        if tree is None:
+            return RepairResult(
+                success=False,
+                len_tags_before_fix=0,
+                len_tags_after_fix=0,
+                warnings=[f"Failed to parse source file: {src_path}"],
+            )
+        root = tree.getroot()
+
+        if root is None:
+            return RepairResult(
+                success=False,
+                len_tags_before_fix=0,
+                len_tags_after_fix=0,
+                warnings=["Empty SVG root"],
+            )
+
+        result = self.repair_root(root, strategy)
+
+        if result.success and save:
+            # Write out
+            self._save_file(root, out_path)
+
+        return result
+
+    def repair_root(
+        self,
+        root: etree._Element | None,
+        strategy: NestedStrategy | None = None,
+    ) -> RepairResult:
+        if not root:
+            return RepairResult(
+                success=False,
+                len_tags_before_fix=0,
+                len_tags_after_fix=0,
+                warnings=["Empty SVG root"],
+            )
+
         try:
-            # Parse source file
-            tree = self._get_tree(src_path)
-            if tree is None:
-                return RepairResult(
-                    success=False,
-                    len_tags_before_fix=0,
-                    len_tags_after_fix=0,
-                    warnings=[f"Failed to parse source file: {src_path}"],
-                )
-            root = tree.getroot()
-
-            if root is None:
-                return RepairResult(
-                    success=False,
-                    len_tags_before_fix=0,
-                    len_tags_after_fix=0,
-                    warnings=["Empty SVG root"],
-                )
-
             # Count before fix
             len_before = len(self.detector.find_in_tree(root))
 
@@ -132,24 +154,22 @@ class NestedStructureService:
             # Count after fix
             len_after = len(self.detector.find_in_tree(root))
 
-            # Write out
-            self._save_file(root, out_path)
-
-            return RepairResult(
+            result = RepairResult(
                 success=True,
                 len_tags_before_fix=len_before,
                 len_tags_after_fix=len_after,
-                warnings=warnings,
             )
 
         except Exception as exc:
-            logger.error("Failed to repair file %s: %s", src_path, exc)
-            return RepairResult(
+            logger.error("Failed to repair: %s", exc)
+            result = RepairResult(
                 success=False,
                 len_tags_before_fix=0,
                 len_tags_after_fix=0,
                 warnings=[str(exc)],
             )
+
+        return result
 
     def _save_file(
         self,
