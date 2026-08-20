@@ -265,6 +265,7 @@ exclude = [
 
     # Global System Paths
     "C:/**",
+    "**/.*",
 ]
 
 # Diagnostic modes: "basic" or "standard" or "strict"

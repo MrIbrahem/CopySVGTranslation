@@ -88,8 +88,13 @@ class TestByLanguage:
 
     def test_abr_returns_none_when_suffix_does_not_match(self):
         # "abr" only recognizes ", afe {year}", not the generic comma suffix.
-        text = "Parkinson yareɛ a ebu soɔ, {year}"
+        text = "Parkinson yareɛ a ebu soɔ-{year}"
         assert YearPatternStripper("abr", text).run() is None
+
+        # "abr" only recognizes ", afe {year}" for its specific pattern,
+        # but falls back to generic comma suffix stripping.
+        text = "Parkinson yareɛ a ebu soɔ, {year}"
+        assert YearPatternStripper("abr", text).run() == "Parkinson yareɛ a ebu soɔ"
 
     def test_ja_strips_prefix(self):
         text = "{year}年のパーキンソン病の流行"
@@ -103,8 +108,12 @@ class TestByLanguage:
         assert YearPatternStripper("ja", text).run() == expected
 
     def test_ja_returns_none_when_no_known_pattern(self):
-        text = "パーキンソン病の流行 {year}"
+        text = "パーキンソン病の流行-{year}"
         assert YearPatternStripper("ja", text).run() is None
+
+        # With generic fallback, " {year}" is stripped
+        text2 = "パーキンソン病の流行 {year}"
+        assert YearPatternStripper("ja", text2).run() == "パーキンソン病の流行"
 
 
 # ---------------------------------------------------------------------------
