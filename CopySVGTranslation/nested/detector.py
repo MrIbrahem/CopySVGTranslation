@@ -10,26 +10,30 @@ SVG_NS = "http://www.w3.org/2000/svg"
 
 
 class NestedTspanDetector:
-    """
-    Find <tspan> elements that contain nested element children.
-    Useful for diagnostics and pre-flight checks.
+    """Find repairable nested structures inside SVG ``<tspan>`` elements.
+
+    The nested flattener only changes ``<tspan>`` elements that contain
+    descendant ``<tspan>`` or ``<a>`` nodes.  An outer clickable title wrapper,
+    such as ``<a><text><tspan>Title</tspan></text></a>``, is valid SVG and is
+    intentionally not changed by the flattener, so it must not be reported as
+    a nested structure.
     """
 
     def __init__(self, tags: tuple[str, ...] = ("tspan", "a")) -> None:
+        """Configure descendant SVG tags that make a ``<tspan>`` repairable."""
         self.tags = tags
 
     def find_in_tree(self, root: etree._Element) -> list[etree._Element]:
-        """
-        Return all elements of configured tags that have element children.
+        """Return ``<tspan>`` elements containing configured descendants.
+
+        This criterion deliberately matches :class:`NestedTspanFlattener`.
+        It keeps links nested *inside* text spans detectable while ignoring
+        valid link wrappers that merely contain text or tspan elements.
         """
         result: list[etree._Element] = []
-        for tag in self.tags:
-            elements = root.findall(f".//{{{SVG_NS}}}{tag}")
-            for elem in elements:
-                # Check if element has element children (nested tags)
-                element_children = [c for c in elem if isinstance(c.tag, str)]
-                if element_children:
-                    result.append(elem)
+        for tspan in root.findall(f".//{{{SVG_NS}}}tspan"):
+            if any(tspan.findall(f".//{{{SVG_NS}}}{tag}") for tag in self.tags):
+                result.append(tspan)
         return result
 
     def find_in_file(self, source_file: Path | str) -> list[str]:

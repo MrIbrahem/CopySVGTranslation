@@ -31,18 +31,60 @@ def test_nested_structure_service_analyze(tmp_path: Path):
     assert "Bold" in findings[0]
 
 
-def test_nested_structure_service_analyze_nested_anchor_only(tmp_path: Path):
+def test_nested_structure_service_ignores_link_wrapping_tspan(tmp_path: Path):
+    """A valid link wrapper is not repairable nesting and must be ignored."""
     src = tmp_path / "input.svg"
-    # An anchor (<a>) containing a nested element child, without an enclosing <tspan>
     src.write_text(
         _svg("""<text id="t1"><a href="outer"><tspan style="font-weight: 700;">Nested</tspan></a></text>"""),
         encoding="utf-8",
     )
 
     service = NestedStructureService()
+
+    assert service.analyze_file(src) == []
+
+    repair_result = service.repair_file(src)
+    assert repair_result.success is True
+    assert repair_result.len_tags_before_fix == 0
+    assert repair_result.len_tags_after_fix == 0
+    assert repair_result.len_tags_fixed == 0
+
+
+def test_nested_structure_service_ignores_link_wrapping_text_and_tspan(tmp_path: Path):
+    """The clickable title structure from OWID SVGs must not be a false hit."""
+    src = tmp_path / "input.svg"
+    src.write_text(
+        _svg(
+            """<a href="https://example.org/chart" id="title"><text><tspan id="trsvg1">Chart title</tspan></text></a>"""
+        ),
+        encoding="utf-8",
+    )
+
+    service = NestedStructureService()
+
+    assert service.analyze_file(src) == []
+
+
+def test_nested_structure_service_detects_link_inside_tspan(tmp_path: Path):
+    """A link inside text content remains repairable nested structure."""
+    src = tmp_path / "input.svg"
+    src.write_text(
+        _svg("""<text id="t1"><tspan>Read <a href="inner">more</a></tspan></text>"""),
+        encoding="utf-8",
+    )
+
+    service = NestedStructureService(strategy="flatten")
     findings = service.analyze_file(src)
+
     assert len(findings) == 1
-    assert "Nested" in findings[0]
+    assert findings[0].startswith("<tspan")
+    assert "<a" in findings[0]
+
+    repair_result = service.repair_file(src)
+    assert repair_result.success is True
+    assert repair_result.len_tags_before_fix == 1
+    assert repair_result.len_tags_after_fix == 0
+    assert repair_result.len_tags_fixed == 1
 
 
 def test_nested_structure_service_repair_in_place():
