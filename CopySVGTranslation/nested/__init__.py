@@ -2,10 +2,11 @@
 
 from .detector import NestedTspanDetector
 from .flattener import NestedTspanFlattener
-from .service import NestedStructureService
+from .service import NestedStructureService, RepairResult
 
 __all__ = [
     "NestedTspanDetector",
     "NestedTspanFlattener",
     "NestedStructureService",
+    "RepairResult",
 ]

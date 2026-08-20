@@ -34,6 +34,8 @@ from .injection import SVGTranslationInjector
 from .nested import (
     NestedTspanDetector,
     NestedTspanFlattener,
+    NestedStructureService,
+    RepairResult,
 )
 from .service import SVGTranslationService
 
@@ -43,6 +45,8 @@ __all__ = [
     "CopySVGTranslationError",
     "NestedTspanDetector",
     "NestedTspanFlattener",
+    "NestedStructureService",
+    "RepairResult",
     "SVGTranslationExtractor",
     "SVGTranslationInjector",
     "SVGTranslationService",
