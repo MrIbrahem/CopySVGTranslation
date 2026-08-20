@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import stat
 
 import pytest
 from lxml import etree
@@ -53,6 +54,17 @@ def test_write_svg_accepts_root_and_atomically_replaces_existing_file(tmp_path: 
     assert "updated" in content
     assert content.startswith("<?xml")
     assert list(tmp_path.glob(f".{target.name}.*.tmp")) == []
+
+
+def test_write_svg_preserves_existing_file_permissions(tmp_path: Path) -> None:
+    target = tmp_path / "public.svg"
+    target.write_text("old content", encoding="utf-8")
+    target.chmod(0o644)
+
+    write_svg(_tree("updated"), target, config=TranslationConfig())
+
+    assert stat.S_IMODE(target.stat().st_mode) == 0o644
+    assert "updated" in target.read_text(encoding="utf-8")
 
 
 def test_write_svg_rejects_directory_target(tmp_path: Path) -> None:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import stat
 import tempfile
 from pathlib import Path
 
@@ -55,6 +56,8 @@ def write_svg(
             )
             temporary_file.flush()
             os.fsync(temporary_file.fileno())
+        if target.exists():
+            temporary_path.chmod(stat.S_IMODE(target.stat().st_mode))
         os.replace(temporary_path, target)
     except Exception:
         temporary_path.unlink(missing_ok=True)
