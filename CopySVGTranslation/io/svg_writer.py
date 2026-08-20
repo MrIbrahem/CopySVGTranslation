@@ -30,6 +30,7 @@ def write_svg(
     target = Path(path)
     if target.exists() and target.is_dir():
         raise IsADirectoryError(f"SVG output path is a directory: {target}")
+    existing_mode = stat.S_IMODE(target.stat().st_mode) if target.exists() else None
 
     should_create_parents = config.create_parents if create_parents is None else create_parents
     if should_create_parents:
@@ -47,6 +48,8 @@ def write_svg(
     temporary_path = Path(temporary_name)
 
     try:
+        if existing_mode is not None:
+            os.chmod(temporary_path, existing_mode)
         with os.fdopen(file_descriptor, "wb") as temporary_file:
             tree.write(
                 temporary_file,
@@ -56,8 +59,6 @@ def write_svg(
             )
             temporary_file.flush()
             os.fsync(temporary_file.fileno())
-        if target.exists():
-            temporary_path.chmod(stat.S_IMODE(target.stat().st_mode))
         os.replace(temporary_path, target)
     except Exception:
         temporary_path.unlink(missing_ok=True)
