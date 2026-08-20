@@ -24,7 +24,6 @@ class YearPatternStripper:
         " {year}",
     ]
 
-
     def __init__(self, lang: str, text: str) -> None:
         self.lang = lang
         self.text = text
@@ -142,6 +141,7 @@ class YearFreeTitleMerger:
             self.changes = True
         else:
             self.changes = False
+
 
 __all__ = [
     "YearPatternStripper",

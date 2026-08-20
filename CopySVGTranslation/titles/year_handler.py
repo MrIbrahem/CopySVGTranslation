@@ -1,12 +1,14 @@
 # titles/year_handler.py
 from __future__ import annotations
 
+import copy
 import logging
 import re
 from typing import Any
 
 from ..config import TranslationConfig
 from ..core.mapping import TranslationMapping
+from .year_stripper import YearFreeTitleMerger
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +82,38 @@ class YearTitleHandler:
     # ------------------------------------------------------------------
     # Extraction side
     # ------------------------------------------------------------------
+
+    def process_header_titles(self, mapping: TranslationMapping) -> bool:
+        """
+        Process the `title_new` entries in the mapping's header, if any.
+        """
+
+        if not self.config.create_lang_template:
+            return False
+
+        header = mapping.meta.get("header", {})
+        extra_titles_new = self.build_title_new_templates(header, create_lang_template=True)
+
+        if not extra_titles_new:
+            return False
+
+        # create new object with new titles, so we don't modify the original title_new or most likely overwrite it
+        new_object = TranslationMapping.from_any({"title_new": extra_titles_new})
+
+        adder = YearFreeTitleMerger(new_object)
+        adder.run()
+
+        if adder.changes is False:
+            return False
+
+        # Capture the destination state before merging
+        before_new = copy.deepcopy(mapping.new)
+
+        # Merge translations per-key, preserving existing language translations
+        mapping.merge(new_object, merge_keys=["new"])
+
+        # Return True only when the merge adds or changes destination entries
+        return before_new != mapping.new
 
     def build_templates(self, mapping: TranslationMapping) -> None:
         """

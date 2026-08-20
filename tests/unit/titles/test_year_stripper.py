@@ -6,9 +6,9 @@ from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.core.mapping import TranslationMapping
 from CopySVGTranslation.extraction import SVGTranslationExtractor
 from CopySVGTranslation.titles.year_stripper import (
+    TitlesTranslationsRenderer,
     YearFreeTitleMerger,
     YearPatternStripper,
-    TitlesTranslationsRenderer,
 )
 
 
