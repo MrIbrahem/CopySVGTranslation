@@ -28,8 +28,10 @@ def write_svg(
     optionally creates the destination's parent directories.
     """
     target = Path(path)
+
     if target.exists() and target.is_dir():
         raise IsADirectoryError(f"SVG output path is a directory: {target}")
+
     existing_mode = stat.S_IMODE(target.stat().st_mode) if target.exists() else None
 
     should_create_parents = config.create_parents if create_parents is None else create_parents

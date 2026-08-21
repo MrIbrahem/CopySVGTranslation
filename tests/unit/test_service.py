@@ -471,6 +471,7 @@ class TestServicePersistenceContracts:
         )
 
         assert result.success is True
+        assert result.data is not None
         assert result.data.tree is not None
         assert not output.exists()
 
