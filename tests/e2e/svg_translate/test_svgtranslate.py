@@ -10,8 +10,9 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from CopySVGTranslation.legacy.extract import extract
-from CopySVGTranslation.legacy.inject import inject_file_tree
+from CopySVGTranslation import SVGTranslationService, TranslationConfig
+from CopySVGTranslation.core.mapping import InjectorData
+from CopySVGTranslation.io.mapping_store import MappingStore
 
 
 class TestSetup:
@@ -76,7 +77,11 @@ class TestSVGTranslate(TestSetup):
             f.write(self.arabic_svg_content)
 
         # Extract translations
-        translations = extract(arabic_svg_path)
+        service = SVGTranslationService()
+        _result = service.extract(arabic_svg_path)
+        assert _result.success
+        assert _result.data is not None
+        translations = _result.data.to_json()
 
         # Verify translations
         assert translations is not None
@@ -93,7 +98,11 @@ class TestSVGTranslate(TestSetup):
             f.write(self.arabic_svg_content)
 
         # Extract translations with case insensitive option
-        translations = extract(arabic_svg_path, case_insensitive=True)
+        service = SVGTranslationService()
+        _result = service.extract(arabic_svg_path)
+        assert _result.success
+        assert _result.data is not None
+        translations = _result.data.to_json()
 
         # Verify translations (keys should be lowercase)
         assert translations is not None
@@ -104,8 +113,10 @@ class TestSVGTranslate(TestSetup):
     def test_extract_nonexistent_file(self):
         """Test extraction with non-existent file."""
         nonexistent_path = self.test_dir / "nonexistent.svg"
-        translations = extract(nonexistent_path)
-        assert translations is None
+        service = SVGTranslationService()
+        result = service.extract(nonexistent_path)
+        assert not result.success
+        assert result.data is None
 
     def test_inject(self):
         """Test injection of translations into SVG."""
@@ -123,14 +134,23 @@ class TestSVGTranslate(TestSetup):
         with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
-        # Inject translations
-        tree, stats = inject_file_tree(
-            inject_file=no_translations_path,
-            mapping_files=[mapping_path],
-            return_stats=True,
-            save_path=no_translations_path,
-            save_result=True,
+        # Load mapping and inject
+        store = MappingStore()
+        mapping = store.load(mapping_path)
+
+        service = SVGTranslationService()
+        result = service.inject(
+            svg_path=no_translations_path,
+            mapping=mapping,
+            output=no_translations_path,
+            save=True,
         )
+
+        # Verify success
+        assert result.success
+        assert isinstance(result.data, InjectorData)
+        tree = result.data.tree
+        stats = result.data.inject_stats.to_json()
 
         # Verify stats
         assert tree is not None
@@ -152,7 +172,7 @@ class TestSVGTranslate(TestSetup):
         assert "لكنها موصولة بمرحلتين متعاكستين." in modified_svg
 
     def test_inject_dry_run(self):
-        """Test injection in dry-run mode."""
+        """Test injection in dry-run mode (no save)."""
         # Create test files
         arabic_svg_path = self.test_dir / "arabic.svg"
         no_translations_path = self.test_dir / "no_translations.svg"
@@ -171,14 +191,22 @@ class TestSVGTranslate(TestSetup):
         with open(no_translations_path, "r", encoding="utf-8") as f:
             original_content = f.read()
 
-        # Inject translations in dry-run mode
-        tree, stats = inject_file_tree(
-            inject_file=no_translations_path,
-            mapping_files=[mapping_path],
-            return_stats=True,
+        # Load mapping and inject (dry-run: no save)
+        store = MappingStore()
+        mapping = store.load(mapping_path)
+
+        service = SVGTranslationService()
+        result = service.inject(
+            svg_path=no_translations_path,
+            mapping=mapping,
         )
 
         # Verify stats
+        assert result.success
+        assert result.data is not None
+        tree = result.data.tree
+        stats = result.data.inject_stats.to_json()
+
         assert tree is not None
         assert stats is not None
         assert stats["processed_switches"] == 2
@@ -225,17 +253,24 @@ class TestSVGTranslate(TestSetup):
         with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
-        # Inject translations with overwrite_translations
-        tree, stats = inject_file_tree(
-            inject_file=svg_path,
-            mapping_files=[mapping_path],
-            overwrite_translations=True,
-            return_stats=True,
-            save_path=svg_path,
-            save_result=True,
+        # Load mapping and inject with overwrite
+        store = MappingStore()
+        mapping = store.load(mapping_path)
+
+        service = SVGTranslationService(TranslationConfig(overwrite_translations=True))
+        result = service.inject(
+            svg_path=svg_path,
+            mapping=mapping,
+            output=svg_path,
+            save=True,
         )
 
         # Verify stats
+        assert result.success
+        assert result.data is not None
+        tree = result.data.tree
+        stats = result.data.inject_stats.to_json()
+
         assert tree is not None
         assert stats is not None
         assert stats["processed_switches"] == 1
@@ -261,8 +296,12 @@ class TestSVGTranslate(TestSetup):
         with open(mapping_path, "w", encoding="utf-8") as f:
             json.dump(self.expected_translations, f, ensure_ascii=False)
 
-        result = inject_file_tree(inject_file=nonexistent_path, mapping_files=[mapping_path])
-        assert result is None
+        store = MappingStore()
+        mapping = store.load(mapping_path)
+
+        service = SVGTranslationService()
+        result = service.inject(svg_path=nonexistent_path, mapping=mapping, output=nonexistent_path)
+        assert not result.success
 
     def test_inject_nonexistent_mapping(self):
         """Test injection with non-existent mapping file."""
@@ -274,8 +313,10 @@ class TestSVGTranslate(TestSetup):
 
         assert svg_path.exists()
 
-        result = inject_file_tree(
-            inject_file=svg_path,
-            mapping_files=[nonexistent_mapping],
-        )
-        # assert result is None
+        store = MappingStore()
+        mapping = store.load_many([nonexistent_mapping])
+
+        service = SVGTranslationService()
+        result = service.inject(svg_path=svg_path, mapping=mapping, output=svg_path)
+        # With empty mapping from load_many, injection succeeds but does nothing
+        assert result.success

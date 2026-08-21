@@ -10,8 +10,6 @@ Extract translations from SVG files and inject them into others.
 Modern entry point:
     from copy_svg_translation import SVGTranslationService, TranslationConfig
 
-Legacy functions (deprecated):
-    from copy_svg_translation import extract, inject_file_tree
 """
 
 from __future__ import annotations
@@ -46,11 +44,6 @@ from .titles import YearTitleHandler
 from .nested import NestedTspanDetector, NestedTspanFlattener
 from .io import SvgDocument, MappingStore
 
-# ---------------------------------------------------------------------------
-# Legacy compatibility layer (deprecated)
-# ---------------------------------------------------------------------------
-from .legacy import extract, inject_file_tree
-
 __all__ = [
     # version
     "__version__",
@@ -79,9 +72,6 @@ __all__ = [
     "NestedTspanFlattener",
     "SvgDocument",
     "MappingStore",
-    # legacy (deprecated)
-    "extract",
-    "inject_file_tree",
 ]
 ```
 
@@ -114,57 +104,18 @@ from copy_svg_translation import (
 )
 ```
 
-**Legacy (still works, emits deprecation warnings):**
-
-```python
-from copy_svg_translation import extract, inject_file_tree
-```
-
 ---
 
 ### Design choices
 
-| Choice                                            | Reason                                                                |
-| ------------------------------------------------- | --------------------------------------------------------------------- |
-| Service + Config first                            | Clear modern entry point                                              |
-| `OperationResult` + `TranslationMapping` exported | Needed to use the service effectively                                 |
-| Exceptions exported at top level                  | Callers can catch specific errors easily                              |
-| Advanced classes still public                     | Power users and tests can reach them without deep imports             |
-| Legacy kept in `__all__` for now                  | Backward compatibility during migration                               |
+| Choice                                            | Reason                                                                  |
+| ------------------------------------------------- | ----------------------------------------------------------------------- |
+| Service + Config first                            | Clear modern entry point                                                |
+| `OperationResult` + `TranslationMapping` exported | Needed to use the service effectively                                   |
+| Exceptions exported at top level                  | Callers can catch specific errors easily                                |
+| Advanced classes still public                     | Power users and tests can reach them without deep imports               |
 | Explicit `__all__`                                | Controls `from copy_svg_translation import *` and documents the surface |
 
 ---
-
-### After Phase 3 (cleanup)
-
-Once legacy is removed, the bottom section becomes:
-
-```python
-# No legacy exports
-__all__ = [
-    "__version__",
-    "SVGTranslationService",
-    "TranslationConfig",
-    "OperationResult",
-    "InjectorStats",
-    "TranslationMapping",
-    "TranslationEntry",
-    "CopySVGTranslationError",
-    "SvgStructureError",
-    "SvgNestedTspanError",
-    "SvgParseError",
-    "SvgIOError",
-    "MappingError",
-    "ConfigurationError",
-    "SVGTranslationExtractor",
-    "SVGTranslationInjector",
-    "SvgPreparationPipeline",
-    "YearTitleHandler",
-    "NestedTspanDetector",
-    "NestedTspanFlattener",
-    "SvgDocument",
-    "MappingStore",
-]
-```
 
 This is the stable public face of the redesigned package.

@@ -236,7 +236,6 @@ This finishes the shared foundation that core, extraction, injection, titles, an
 
 | Part                                    | Status        |
 | --------------------------------------- | ------------- |
-| `legacy/` wrappers                      | Optional next |
 | Package root `__init__.py` (public API) | Optional next |
 | CLI                                     | Low priority  |
 

@@ -1,8 +1,16 @@
-from CopySVGTranslation.legacy.extract import extract
+import pytest
+
+from CopySVGTranslation import TranslationConfig, TranslationMapping
+from CopySVGTranslation.service import SVGTranslationService
 
 
 class TestExtractor:
     """Test cases for extraction functions."""
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        config = TranslationConfig()
+        self.service = SVGTranslationService(config)
 
     def test_extract_with_no_tspan_ids(self, temp_dir):
         """Test extraction with multiple languages."""
@@ -23,7 +31,11 @@ class TestExtractor:
             </svg>""",
             encoding="utf-8",
         )
-        result = extract(svg)
+        _result = self.service.extract(svg)
+
+        assert isinstance(_result.data, TranslationMapping)
+        result = _result.data.to_json()
+
         assert result is not None
         assert "new" in result
         assert result == {"new": {"hello": {}}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
@@ -49,7 +61,11 @@ class TestExtractor:
             </svg>""",
             encoding="utf-8",
         )
-        result = extract(svg)
+        _result = self.service.extract(svg)
+
+        assert isinstance(_result.data, TranslationMapping)
+        result = _result.data.to_json()
+
         assert result is not None
         assert "new" in result
         assert "ar" in result["new"]["hello"]

@@ -1,7 +1,8 @@
 import textwrap
 from pathlib import Path
 
-from CopySVGTranslation.legacy.inject import inject_file_tree
+from CopySVGTranslation import SVGTranslationService
+from CopySVGTranslation.core.mapping import InjectorData
 from CopySVGTranslation.utils.xml import (
     tree_languages,
 )
@@ -27,12 +28,13 @@ def test_inject_tracks_new_languages(tmp_path):
 
     mapping = {"new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}}}
 
-    tree, stats = inject_file_tree(
-        inject_file=svg_path,
-        mapping=mapping,
-        save_result=False,
-        return_stats=True,
-    )
+    service = SVGTranslationService()
+    result = service.inject(svg_path=svg_path, mapping=mapping, output=svg_path)
+
+    assert result.success
+    assert isinstance(result.data, InjectorData)
+    tree = result.data.tree
+    stats = result.data.inject_stats.to_json()
 
     after_languages = tree_languages(tree)
 
@@ -57,12 +59,11 @@ def test_inject_tracks_only_truly_new_languages(tmp_path):
 
     mapping = {"new": {"hello": {"ar": "مرحبا جديد", "fr": "Bonjour"}}}
 
-    _, stats = inject_file_tree(
-        inject_file=svg_path,
-        mapping=mapping,
-        save_result=False,
-        return_stats=True,
-    )
+    service = SVGTranslationService()
+    result = service.inject(svg_path=svg_path, mapping=mapping, output=svg_path)
+
+    assert result.success
+    stats = result.data.inject_stats.to_json()
 
     assert stats["all_languages_count"] == 2
     assert stats["new_languages_count"] == 1
@@ -81,11 +82,13 @@ def test_file_langs_handles_element_tree(tmp_path):
         """,
     )
 
-    tree, _ = inject_file_tree(
-        inject_file=svg_path,
+    service = SVGTranslationService()
+    result = service.inject(
+        svg_path=svg_path,
         mapping={"new": {"hello": {"ar": "مرحبا"}}},
-        save_result=False,
-        return_stats=True,
+        output=svg_path,
     )
 
+    assert result.success
+    tree = result.data.tree
     assert tree_languages(tree) == {"ar"}

@@ -6,8 +6,7 @@ from pathlib import Path
 
 # Test that the public API is importable
 import CopySVGTranslation
-from CopySVGTranslation.legacy.extract import extract
-from CopySVGTranslation.legacy.inject import inject_file_tree
+from CopySVGTranslation import SVGTranslationService
 
 
 class TestPublicAPIExports:
@@ -18,15 +17,17 @@ class TestPublicAPIExports:
         assert hasattr(CopySVGTranslation, "__all__")
         assert isinstance(CopySVGTranslation.__all__, list)
 
-    def test_extract_is_importable(self):
-        """The extract function should be importable from top-level module."""
-        assert callable(extract)
-        assert extract.__name__ == "extract"
-
     def test_module_has_docstring(self):
         """The module should have a docstring."""
         assert CopySVGTranslation.__doc__ is not None
         assert len(CopySVGTranslation.__doc__) > 0
+
+    def test_service_is_importable(self):
+        """SVGTranslationService should be importable from the public API."""
+        from CopySVGTranslation import SVGTranslationService
+
+        assert callable(SVGTranslationService)
+        assert SVGTranslationService.__name__ == "SVGTranslationService"
 
     def test_star_import(self):
         """Test that star import works correctly."""
@@ -46,12 +47,20 @@ class TestExtractFunction:
 
     def test_extract_returns_dict(self, fixtures_dir):
         """extract should return a dictionary of translations."""
-        result = extract(fixtures_dir / "source.svg")
+        service = SVGTranslationService()
+        _result = service.extract(fixtures_dir / "source.svg")
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
         assert isinstance(result, dict)
 
     def test_extract_has_expected_keys(self, fixtures_dir):
         """extract should return a dict with expected top-level keys."""
-        result = extract(fixtures_dir / "source.svg")
+        service = SVGTranslationService()
+        _result = service.extract(fixtures_dir / "source.svg")
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
         assert "new" in result
         assert result == {
             "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
@@ -62,13 +71,19 @@ class TestExtractFunction:
         }
 
     def test_extract_nonexistent_file_returns_none(self):
-        """extract should return None for non-existent files."""
-        result = extract(Path("/nonexistent/file.svg"))
-        assert result is None
+        """extract should return failed result for non-existent files."""
+        service = SVGTranslationService()
+        result = service.extract(Path("/nonexistent/file.svg"))
+        assert not result.success
+        assert result.data is None
 
     def test_extract_case_insensitive_default(self, fixtures_dir):
         """extract should be case insensitive by default."""
-        result = extract(fixtures_dir / "source.svg")
+        service = SVGTranslationService()
+        _result = service.extract(fixtures_dir / "source.svg")
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
         assert result is not None
         # Should have lowercase keys
         assert "population 2020" in result["new"]
@@ -82,7 +97,11 @@ class TestExtractFunction:
 
     def test_extract_with_arabic_translations(self, fixtures_dir):
         """extract should properly extract Arabic translations."""
-        result = extract(fixtures_dir / "source.svg")
+        service = SVGTranslationService()
+        _result = service.extract(fixtures_dir / "source.svg")
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
         assert result is not None
         assert "ar" in result["new"]["population 2020"]
         assert result["new"]["population 2020"]["ar"] == "السكان 2020"
@@ -104,18 +123,20 @@ class TestIntegrationWorkflows:
         target_svg.write_text((fixtures_dir / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
 
         # Extract translations first
-        translations = extract(fixtures_dir / "source.svg")
+        service = SVGTranslationService()
+        _extract_result = service.extract(fixtures_dir / "source.svg")
+        assert _extract_result.success
 
-        # Inject using the dict
-        result, stats = inject_file_tree(
-            inject_file=target_svg,
-            mapping=translations,
-            save_path=tmp_path / "target2.svg",
-            return_stats=True,
-            save_result=True,
+        # Inject using the TranslationMapping via the public service API
+        result = service.inject(
+            svg_path=target_svg,
+            mapping=_extract_result.data,
+            output=tmp_path / "target2.svg",
+            save=True,
         )
 
-        assert result is not None
+        assert result.success
+        stats = result.data.inject_stats.to_json()
         assert isinstance(stats, dict)
         assert "inserted_translations" in stats
 
@@ -128,26 +149,31 @@ class TestEdgeCasesAndErrorHandling:
         empty_svg = tmp_path / "empty.svg"
         empty_svg.write_text("", encoding="utf-8")
 
-        result = extract(empty_svg)
-        # Should either return None or empty dict depending on implementation
-        assert result is None
+        service = SVGTranslationService()
+        result = service.extract(empty_svg)
+        # Should return a failed result
+        assert not result.success
+        assert result.data is None
 
     def test_extract_with_invalid_xml(self, tmp_path: Path):
         """extract should handle invalid XML gracefully."""
         invalid_svg = tmp_path / "invalid.svg"
         invalid_svg.write_text("<svg><unclosed>", encoding="utf-8")
 
-        result = extract(invalid_svg)
-        assert result is None
+        service = SVGTranslationService()
+        result = service.extract(invalid_svg)
+        assert not result.success
+        assert result.data is None
 
-    def test_inject_with_empty_mapping_list(self, tmp_path: Path, fixtures_dir):
-        """inject should handle empty mapping file list."""
+    def test_inject_with_none_mapping_raises(self, tmp_path: Path, fixtures_dir):
+        """inject should return a failed result when mapping is None."""
         target_svg = tmp_path / "target.svg"
         target_svg.write_text((fixtures_dir / "target.svg").read_text(encoding="utf-8"), encoding="utf-8")
 
-        result = inject_file_tree(inject_file=target_svg, mapping_files=[])
-        # Should return None or handle gracefully
-        assert result is None
+        service = SVGTranslationService()
+        result = service.inject(svg_path=target_svg, mapping=None)
+        assert not result.success
+        assert result.error is not None
 
 
 class TestAPIConsistency:
@@ -156,11 +182,11 @@ class TestAPIConsistency:
     def test_import_paths_consistency(self):
         """Verify that functions are accessible from both paths."""
         # These should all refer to the same function objects
-        from CopySVGTranslation.legacy.extract import extract as extract1
-        from CopySVGTranslation.legacy.extract import extract as extract2
+        from CopySVGTranslation import SVGTranslationService as Svc1
+        from CopySVGTranslation import SVGTranslationService as Svc2
 
-        # The functions should be the same object
-        assert extract1 is extract2
+        # The class should be the same object
+        assert Svc1 is Svc2
 
     def test_module_name_is_correct(self):
         """The module should have the correct name."""

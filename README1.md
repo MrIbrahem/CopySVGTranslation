@@ -177,8 +177,8 @@ result: InjectorData = injector.inject(
 
 | Field                   | Type        | Description                                                 |
 | ----------------------- | ----------- | ----------------------------------------------------------- |
-| `all_languages_count`         | `int`       | Total number of languages in the SVG after injection.       |
-| `new_languages_count`         | `int`       | Number of new languages added.                              |
+| `all_languages_count`   | `int`       | Total number of languages in the SVG after injection.       |
+| `new_languages_count`   | `int`       | Number of new languages added.                              |
 | `processed_switches`    | `int`       | Number of `<switch>` elements processed.                    |
 | `inserted_translations` | `int`       | Number of new `<text>` nodes inserted.                      |
 | `skipped_translations`  | `int`       | Number of existing translations skipped (not overwritten).  |

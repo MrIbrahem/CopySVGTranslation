@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.legacy.extract import extract
+from CopySVGTranslation import SVGTranslationService
 
 
 class TestExtractEdgeCases:
@@ -19,6 +19,7 @@ class TestExtractEdgeCases:
     def setUp(self):
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
+        self.service = SVGTranslationService()
 
         yield
         """Clean up test fixtures."""
@@ -33,9 +34,10 @@ class TestExtractEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        result = extract(svg_path)
+        result = self.service.extract(svg_path)
 
-        assert result is None
+        assert not result.success
+        assert result.data is None
 
     def test_extract_switch_without_default_text(self):
         """Test extraction with switch containing only translated text."""
@@ -47,9 +49,10 @@ class TestExtractEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        result = extract(svg_path)
+        result = self.service.extract(svg_path)
 
-        assert result is None
+        assert not result.success
+        assert result.data is None
 
     def test_extract_with_mixed_tspan_and_text(self):
         """Test extraction with mixed tspan and direct text."""
@@ -64,9 +67,10 @@ class TestExtractEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        result = extract(svg_path)
+        result = self.service.extract(svg_path)
 
-        assert result is not None
+        assert result.success
+        assert result.data is not None
 
     def test_extract_case_insensitive_default(self):
         """Test that case_insensitive is True by default."""
@@ -79,9 +83,11 @@ class TestExtractEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        result = extract(svg_path, case_insensitive=True)
+        _result = self.service.extract(svg_path)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
 
-        assert result is not None
         assert "new" in result
 
         # Keys should be lowercase
@@ -105,9 +111,10 @@ class TestExtractEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        result = extract(svg_path)
+        result = self.service.extract(svg_path)
 
-        assert result is None
+        assert not result.success
+        assert result.data is None
 
     def test_extract_with_base_id_fallback(self):
         """Test extraction with base_id lookup fallback."""
@@ -120,9 +127,11 @@ class TestExtractEdgeCases:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        result = extract(svg_path)
+        _result = self.service.extract(svg_path)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
 
-        assert result is not None
         assert result == {
             "new": {"hello": {"ar": "مرحبا"}},
             "tspans_by_id": {"TEXT1": "Hello"},

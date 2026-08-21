@@ -88,7 +88,6 @@ addopts = [
 ]
 markers = [
     "todo: tests not yet implemented / work in progress",
-    "legacy: tests for the deprecated function API",
 ]
 filterwarnings = [
     # Surface our own deprecations during tests
@@ -101,9 +100,7 @@ filterwarnings = [
 [tool.coverage.run]
 source = ["copy_svg_translation"]
 branch = true
-omit = [
-    "copy_svg_translation/legacy/*",
-]
+
 
 [tool.coverage.report]
 show_missing = true
@@ -160,11 +157,6 @@ show_error_codes = true
 [[tool.mypy.overrides]]
 module = ["lxml.*"]
 ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["copy_svg_translation.legacy.*"]
-# Legacy wrappers can be less strict while they exist
-disallow_untyped_defs = false
 ```
 
 ---
@@ -216,7 +208,6 @@ mypy copy_svg_translation
 | Import package `copy_svg_translation` | Matches your existing code layout                 |
 | `requires-python = ">=3.10"`          | Fits modern typing (`X \| Y`, `slots=True`, etc.) |
 | `lxml>=4.9`                           | Only hard runtime dependency                      |
-| Legacy excluded from coverage         | Avoids treating temporary shims as core code      |
 | `py.typed`                            | Enables type checking for downstream users        |
 | Version `x.x.x`                       | Signals the class-based redesign + deprecations   |
 

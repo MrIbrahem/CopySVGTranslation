@@ -11,15 +11,11 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from CopySVGTranslation import TranslationConfig
+from CopySVGTranslation import SVGTranslationService, TranslationConfig
 from CopySVGTranslation.exceptions import (
     SvgNestedTspanError,
     SvgStructureError,
 )
-from CopySVGTranslation.legacy import (
-    inject_file_tree,
-)
-from CopySVGTranslation.legacy.extract import extract
 from CopySVGTranslation.preparation import SvgPreparationPipeline
 
 # ------------------------------------------------------------------ #
@@ -41,7 +37,7 @@ def _write_svg(temp_dir, content: str, name: str = "test.svg"):
 
 def preparer_run(source_file: Path | str) -> tuple[etree._ElementTree, etree._Element]:
     """
-    Legacy function-style wrapper around SvgPreparationPipeline, kept for
+    unction-style wrapper around SvgPreparationPipeline, kept for
     backward compatibility with existing callers.
     """
     config = TranslationConfig(
@@ -92,7 +88,11 @@ class TestExtractManual:
             encoding="utf-8",
         )
 
-        result = extract(svg_file)
+        service = SVGTranslationService()
+        _result = service.extract(svg_file)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
 
         assert result is not None
         assert isinstance(result, dict)
@@ -109,7 +109,11 @@ class TestExtractManual:
             encoding="utf-8",
         )
 
-        result = extract(svg_file)
+        service = SVGTranslationService()
+        _result = service.extract(svg_file)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
         assert result is not None
 
         default_texts = set(result["new"].keys())
@@ -128,7 +132,11 @@ class TestExtractManual:
             encoding="utf-8",
         )
 
-        result = extract(svg_file)
+        service = SVGTranslationService()
+        _result = service.extract(svg_file)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
         assert result is not None
 
         # "Music in 2020" translations
@@ -153,7 +161,11 @@ class TestExtractManual:
             encoding="utf-8",
         )
 
-        result = extract(svg_file)
+        service = SVGTranslationService()
+        _result = service.extract(svg_file)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
         assert result is not None
         assert result["error"] == ""
 
@@ -209,14 +221,15 @@ class TestInjectManual:
             encoding="utf-8",
         )
 
-        result = inject_file_tree(
-            inject_file=svg_file,
-            save_path=svg_file,
+        service = SVGTranslationService(TranslationConfig(overwrite_translations=True, pretty_print=False))
+        result = service.inject(
+            svg_path=svg_file,
             mapping=data,
-            overwrite_translations=True,
-            pretty_print=False,
-            save_result=True,
+            output=svg_file,
+            save=True,
         )
+
+        assert result.success
 
         # The file should now contain the injected translation
         file_text = svg_file.read_text(encoding="utf-8")

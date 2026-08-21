@@ -32,17 +32,13 @@ The codebase follows a modular pipeline: **Preparation**, **Extraction**, **Inje
 
 ### Public API
 
-The primary, recommended API uses class-based interfaces. Legacy function-based wrappers are available but deprecated.
+The supported public API uses `SVGTranslationService` with `TranslationConfig` and `TranslationMapping`. Extraction and injection components are internal implementation details.
 
-| Class / Function          | Module                          | Status                  |
-| ------------------------- | ------------------------------- | ----------------------- |
-| `SVGTranslationService`   | `CopySVGTranslation.service`    | **Current** (Facade)    |
-| `SVGTranslationExtractor` | `CopySVGTranslation.extraction` | **Current**             |
-| `SVGTranslationInjector`  | `CopySVGTranslation.injection`  | **Current**             |
-| `TranslationMapping`      | `CopySVGTranslation.core`       | **Current** (dataclass) |
-| `InjectorData`            | `CopySVGTranslation.injection`  | **Current** (dataclass) |
-| `extract()`               | `CopySVGTranslation.legacy`     | Deprecated (wrapper)    |
-| `inject_file_tree()`      | `CopySVGTranslation.legacy`     | Deprecated (wrapper)    |
+| Class                   | Module               | Status                      |
+| ----------------------- | -------------------- | --------------------------- |
+| `SVGTranslationService` | `CopySVGTranslation` | **Current** (Facade)        |
+| `TranslationConfig`     | `CopySVGTranslation` | **Current** (configuration) |
+| `TranslationMapping`    | `CopySVGTranslation` | **Current** (data model)    |
 
 ### Core Modules
 

@@ -1,7 +1,6 @@
 """Additional comprehensive pytest tests for CopySVGTranslation."""
 
-from CopySVGTranslation.legacy import inject_file_tree
-from CopySVGTranslation.legacy.extract import extract
+from CopySVGTranslation import SVGTranslationService, TranslationConfig
 
 # -------------------------------
 # Preparation function tests
@@ -17,21 +16,21 @@ class TestWorkflowFunctions:
     """Tests for high-level workflow functions."""
 
     def test_inject_basic_workflow(self, temp_dir):
-        """Test basic inject workflow."""
+        """Test basic inject workflow – save=True without output should fail."""
         target = temp_dir / "target.svg"
         content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t1"><tspan>Hi</tspan></text></switch></svg>"""
         target.write_text(content, encoding="utf-8")
 
         translations = {"new": {"hi": {"ar": "مرحبا"}}}
 
-        tree, stats = inject_file_tree(
+        service = SVGTranslationService()
+        result = service.inject(
+            svg_path=target,
             mapping=translations,
-            inject_file=target,
-            return_stats=True,
-            save_result=True,
+            save=True,
         )
 
-        assert tree is None
+        assert not result.success
 
 
 # -------------------------------
@@ -50,8 +49,11 @@ class TestExtractorEdgeCases:
 <text id="t-fr" systemLanguage="fr"><tspan id="s-fr">Bonjour</tspan></text>
 <text id="t"><tspan id="s">Hello</tspan></text></switch></svg>"""
         svg.write_text(content, encoding="utf-8")
-        result = extract(svg)
-        assert result is not None
+        service = SVGTranslationService()
+        _result = service.extract(svg)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
         assert "new" in result
         assert result == {
             "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour"}},
@@ -65,8 +67,10 @@ class TestExtractorEdgeCases:
         """Test extract handles empty SVG gracefully."""
         svg = temp_dir / "empty.svg"
         svg.write_text('<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"></svg>', encoding="utf-8")
-        result = extract(svg)
-        assert result is None
+        service = SVGTranslationService()
+        result = service.extract(svg)
+        assert not result.success
+        assert result.data is None
 
 
 # -------------------------------
@@ -85,12 +89,16 @@ class TestInjectionEdgeCases:
         content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hi</tspan></text></switch></svg>"""
         svg.write_text(content, encoding="utf-8")
         mappings = {"new": {"hi": {"ar": "مرحبا"}}}
-        tree = inject_file_tree(
-            inject_file=svg,
+        service = SVGTranslationService()
+        result = service.inject(
+            svg_path=svg,
             mapping=mappings,
-            save_path=out_dir / "test.svg",
+            output=out_dir / "test.svg",
+            save=True,
         )
-        assert tree is not None
+        assert result.success
+        assert result.data is not None
+        assert result.data.tree is not None
         assert (out_dir / "test.svg").exists()
 
     def test_inject_case_sensitive_mode(self, temp_dir):
@@ -99,11 +107,14 @@ class TestInjectionEdgeCases:
         content = """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><switch><text id="t"><tspan>Hello</tspan></text></switch></svg>"""
         svg.write_text(content, encoding="utf-8")
         mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
-        tree, stats = inject_file_tree(
-            inject_file=svg,
+        service = SVGTranslationService(TranslationConfig(case_insensitive=False))
+        result = service.inject(
+            svg_path=svg,
             mapping=mappings,
-            case_insensitive=False,
-            return_stats=True,
+            output=svg,
         )
-        assert tree is not None
+        assert result.success
+        assert result.data is not None
+        assert result.data.tree is not None
+        stats = result.data.inject_stats.to_json()
         assert stats is not None

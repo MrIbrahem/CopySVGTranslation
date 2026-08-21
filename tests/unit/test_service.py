@@ -286,12 +286,12 @@ class TestServiceExtractAndInject:
     def test_extract_and_inject_saves_in_place_to_output(self, tmp_path: Path):
         source = _write_svg(
             tmp_path,
-            '''
+            """
                 <switch>
                     <text id="t0-ar" systemLanguage="ar"><tspan id="t0-ar">مرحبا</tspan></text>
                     <text id="t0"><tspan id="t0">Hello</tspan></text>
                 </switch>
-            ''',
+            """,
             "source.svg",
         )
         output = _write_svg(
@@ -313,12 +313,12 @@ class TestServiceExtractAndInject:
     ):
         source = _write_svg(
             tmp_path,
-            '''
+            """
                 <switch>
                     <text id="t0-ar" systemLanguage="ar"><tspan id="t0-ar">مرحبا</tspan></text>
                     <text id="t0"><tspan id="t0">Hello</tspan></text>
                 </switch>
-            ''',
+            """,
             "source.svg",
         )
         output = _write_svg(

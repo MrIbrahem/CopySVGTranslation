@@ -72,11 +72,6 @@ class TranslationMapping:
             meta=dict(data.get("meta", {})),
         )
 
-    @classmethod
-    def from_extractor_data(cls, data: Mapping[str, Any]) -> TranslationMapping:
-        """Create from the dict currently returned by the legacy extractor."""
-        return cls.from_any(data)
-
     # ------------------------------------------------------------------
     # Query helpers
     # ------------------------------------------------------------------
