@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.legacy.inject import inject_file_tree
+from CopySVGTranslation import SVGTranslationService, TranslationConfig
 
 
 class TestSetup:
@@ -27,10 +27,10 @@ class TestSetup:
 
 
 class TestInjectEdgeCases(TestSetup):
-    """Test suite for inject_file_tree function edge cases."""
+    """Test suite for inject edge cases."""
 
     def test_inject_with_invalid_svg_structure(self):
-        """Test inject_file_tree with invalid SVG structure."""
+        """Test inject with invalid SVG structure."""
         svg_path = self.test_dir / "invalid.svg"
         svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <text id="bad|id">Test</text>
@@ -39,17 +39,14 @@ class TestInjectEdgeCases(TestSetup):
 
         mappings = {"new": {"test": {"ar": "اختبار"}}}
 
-        result, stats = inject_file_tree(
-            inject_file=svg_path,
-            mapping=mappings,
-            return_stats=True,
-        )
+        service = SVGTranslationService()
+        result = service.inject(svg_path=svg_path, mapping=mappings, output=svg_path)
 
-        assert result is None
-        assert "error" in stats
+        assert not result.success
+        assert result.error is not None
 
     def test_inject_case_insensitive_false(self):
-        """Test inject_file_tree with case-sensitive matching."""
+        """Test inject with case-sensitive matching."""
         svg_path = self.test_dir / "test.svg"
         svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <switch><text id="t1"><tspan>Hello</tspan></text></switch>
@@ -58,16 +55,15 @@ class TestInjectEdgeCases(TestSetup):
 
         mappings = {"new": {"Hello": {"ar": "مرحبا"}}}
 
-        result = inject_file_tree(
-            inject_file=svg_path,
-            mapping=mappings,
-            case_insensitive=False,
-        )
+        service = SVGTranslationService(TranslationConfig(case_insensitive=False))
+        result = service.inject(svg_path=svg_path, mapping=mappings, output=svg_path)
 
-        assert result is not None
+        assert result.success
+        assert result.data is not None
+        assert result.data.tree is not None
 
     def test_inject_save_result_creates_output_file(self):
-        """Test that save_result=True creates the output file."""
+        """Test that save=True with output creates the output file."""
         svg_path = self.test_dir / "test.svg"
         svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
             <switch><text id="t1"><tspan>Hello</tspan></text></switch>
@@ -77,10 +73,13 @@ class TestInjectEdgeCases(TestSetup):
         _output_file = self.test_dir / "output.svg"
         mappings = {"new": {"hello": {"ar": "مرحبا"}}}
 
-        inject_file_tree(
-            inject_file=svg_path,
+        service = SVGTranslationService()
+        result = service.inject(
+            svg_path=svg_path,
             mapping=mappings,
-            save_path=_output_file,
+            output=_output_file,
+            save=True,
         )
 
+        assert result.success
         assert _output_file.exists() is True

@@ -290,7 +290,6 @@ __all__ = [
 | **NormalizeTspans** (preparation step)   | `NestedTspanFlattener(config.nested_strategy).process(root)`           |
 | **ValidateStructure** (preparation step) | If strategy is `"raise"`, can call detector or let the flattener raise |
 | **Service / CLI**                        | Optional pre-check: `NestedTspanDetector().find_in_file(path)`         |
-| **Legacy `fix_nested_file`**             | Thin wrapper around `NestedTspanFlattener` + `SvgDocument.save`        |
 
 ---
 

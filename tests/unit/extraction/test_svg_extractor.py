@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
+from CopySVGTranslation import SVGTranslationService
 from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor  # noqa: F401
-from CopySVGTranslation.legacy.extract import extract
 
 SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -66,7 +66,10 @@ def test_extract_with_string_path_zz(fixtures_dir) -> None:
     """extract should work with string paths."""
     source_path = str(fixtures_dir / "Parkinsons disease prevalence ihme, World, 1990.svg")
 
-    result = extract(source_path)
+    service = SVGTranslationService()
+    _result = service.extract(source_path)
+    assert _result.success
+    result = _result.data.to_json()
 
     assert result is not None
     assert isinstance(result, dict)

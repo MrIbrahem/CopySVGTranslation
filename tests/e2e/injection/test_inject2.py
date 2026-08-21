@@ -10,17 +10,16 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from CopySVGTranslation import TranslationConfig
+from CopySVGTranslation import SVGTranslationService, TranslationConfig
 from CopySVGTranslation.exceptions import (
     SvgStructureError,
 )
-from CopySVGTranslation.legacy.inject import inject_file_tree
 from CopySVGTranslation.preparation import SvgPreparationPipeline
 
 
 def preparer_run(source_file: Path | str) -> tuple[etree._ElementTree, etree._Element]:
     """
-    Legacy function-style wrapper around SvgPreparationPipeline, kept for
+    function-style wrapper around SvgPreparationPipeline, kept for
     backward compatibility with existing callers.
     """
     config = TranslationConfig(
@@ -89,12 +88,12 @@ class Testinject:
         # write to file
         tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
-        _result = inject_file_tree(
-            inject_file=file,
-            save_path=file,
+        _service = SVGTranslationService(TranslationConfig(overwrite_translations=True, pretty_print=True))
+        _result = _service.inject(
+            svg_path=file,
             mapping=data,
-            overwrite_translations=True,
-            pretty_print=True,
+            output=file,
+            save=True,
         )
 
         file_text = file.read_text(encoding="utf-8")
@@ -140,12 +139,12 @@ class Testinject:
         # write to file
         tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
-        _result = inject_file_tree(
-            inject_file=file,
-            save_path=file,
+        _service = SVGTranslationService(TranslationConfig(pretty_print=False, sort_switches=True))
+        _result = _service.inject(
+            svg_path=file,
             mapping=data,
-            pretty_print=False,
-            sort_switches=True,
+            output=file,
+            save=True,
         )
         file_text = file.read_text(encoding="utf-8")
 

@@ -57,10 +57,6 @@ copy_svg_translation/
 │   ├── text.py                 # normalize_text, normalize_lang
 │   └── xml.py                  # thin lxml / SVG helpers
 │
-└── legacy/                     # Temporary compatibility layer
-    ├── __init__.py
-    ├── extract.py
-    ├── inject.py
 ```
 
 #### Key Classes (proposed)
@@ -97,7 +93,6 @@ copy_svg_translation/
 
 1. Create `config.py`, `result.py`, `exceptions.py`, `core/models.py`.
 2. Introduce `SVGTranslationService` that currently delegates to existing `extract` / `inject`.
-3. Move current functions into `legacy/` and re-export them with `DeprecationWarning`.
 4. Add `TranslationConfig` and start using it inside the service.
 5. Unify error handling: convert internal `None` + `error` strings into `OperationResult`.
 6. Keep public API backward-compatible:
@@ -119,10 +114,7 @@ copy_svg_translation/
 4. Implement new `SVGTranslationInjector` that uses the pipeline + `IdManager`.
 5. Merge `titles.py` + `titles_new.py` → `YearTitleHandler`.
 6. Promote `find_nested_new` logic into `NestedTspanFlattener` (style-preserving default).
-7. Update `SVGTranslationService` to use the new classes instead of legacy functions.
 8. Add comprehensive unit tests for models, pipeline steps, and service.
-
-**Exit criteria:** New path is default; legacy path still works but marked deprecated.
 
 ---
 
@@ -130,7 +122,6 @@ copy_svg_translation/
 
 **Goal:** Remove technical debt and polish the API.
 
-1. Delete or heavily reduce `legacy/` package.
 2. Remove duplicate helpers and old title modules.
 3. Make file I/O explicit only (no automatic `data/` or `translated/` folders unless configured).
 4. Improve logging (structured, consistent levels).
@@ -156,7 +147,7 @@ from copy_svg_translation import SVGTranslationService, TranslationConfig
 
 config = TranslationConfig(
     case_insensitive=True,
-    overwrite=False,
+    overwrite_translations=False,
     pretty_print=True,
     auto_save=False,
 )
@@ -171,11 +162,11 @@ if result.success:
 # Inject
 result = service.inject(Path("target.svg"), mapping, output=Path("out.svg"))
 
-# Combined
+# Combined: updates the output SVG in place
 result = service.extract_and_inject(
     source=Path("translated.svg"),
-    target=Path("untranslated.svg"),
-    output=Path("result.svg"),
+    output=Path("untranslated.svg"),
+    save=True,
 )
 ```
 
@@ -683,11 +674,10 @@ result = service.inject(
 if result.success:
     print(result.stats.inserted_translations)
 
-# One-shot workflow
+# One-shot workflow: updates the output SVG in place
 result = service.extract_and_inject(
     source="already_translated.svg",
-    target="new_version.svg",
-    output="new_version_translated.svg",
+    output="new_version.svg",
     save=True,
 )
 ```

@@ -15,7 +15,7 @@ from CopySVGTranslation.preparation import SvgPreparationPipeline
 
 def preparer_run(source_file: Path | str) -> tuple[etree._ElementTree, etree._Element]:
     """
-    Legacy function-style wrapper around SvgPreparationPipeline, kept for
+    unction-style wrapper around SvgPreparationPipeline, kept for
     backward compatibility with existing callers.
     """
     config = TranslationConfig(

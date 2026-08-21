@@ -2,8 +2,7 @@ import json
 
 import pytest
 
-from CopySVGTranslation.legacy.extract import extract
-from CopySVGTranslation.legacy.inject import inject_file_tree
+from CopySVGTranslation import SVGTranslationService
 
 
 class TestIntegrationWorkflows:
@@ -32,15 +31,19 @@ class TestIntegrationWorkflows:
         self.expected_text = expected_svg.read_text(encoding="utf-8")
 
     def test_inject_with_dict(self):
-        translations = extract(self.source_svg)
-        result, stats = inject_file_tree(
-            inject_file=self.target_svg,
-            save_path=self.test_dir / "t.svg",
-            mapping=translations,
-            return_stats=True,
-            save_result=True,
+        service = SVGTranslationService()
+        _extract_result = service.extract(self.source_svg)
+        assert _extract_result.success
+
+        result = service.inject(
+            svg_path=self.target_svg,
+            mapping=_extract_result.data,
+            output=self.test_dir / "t.svg",
+            save=True,
         )
-        assert result is not None
+        assert result.success
+        assert result.data is not None
+        stats = result.data.inject_stats.to_json()
         assert isinstance(stats, dict)
         assert "inserted_translations" in stats
 
@@ -49,7 +52,11 @@ class TestIntegrationWorkflows:
 
     def test_translations(self):
         new_data_file = self.fixtures_dir / "data.json"
-        translations = extract(self.source_svg)
+        service = SVGTranslationService()
+        _result = service.extract(self.source_svg)
+        assert _result.success
+        assert _result.data is not None
+        translations = _result.data.to_json()
 
         with open(new_data_file, "w", encoding="utf-8") as handle:
             json.dump(translations, handle, indent=4, ensure_ascii=False)

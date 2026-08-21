@@ -75,7 +75,7 @@ class TestTranslationMappingCreation:
 # Factory methods
 # ---------------------------------------------------------------------------
 class TestTranslationMappingFactory:
-    """Tests for from_any and from_extractor_data."""
+    """Tests for from_any."""
 
     def test_from_any_with_dict(self):
         data = {"new": {"hello": {"ar": "مرحبا"}}, "title_new": {}}
@@ -92,16 +92,10 @@ class TestTranslationMappingFactory:
         assert m.new == {}
 
     def test_from_any_legacy_format(self):
-        """Legacy format where 'new' key is absent and the dict itself is the map."""
+        """format where 'new' key is absent and the dict itself is the map."""
         data = {"hello": {"ar": "مرحبا"}}
         m = TranslationMapping.from_any(data)
         assert "hello" not in m.new
-
-    def test_from_extractor_data(self):
-        data = {"new": {"hello": {"ar": "مرحبا"}}, "tspans_by_id": {"t0": "hello"}}
-        m = TranslationMapping.from_extractor_data(data)
-        assert "hello" in m.new
-        assert m.tspans_by_id["t0"] == "hello"
 
 
 # ---------------------------------------------------------------------------

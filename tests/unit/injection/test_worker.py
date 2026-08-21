@@ -1,10 +1,6 @@
 # ruff: noqa: F401
 """
-pytest tests for CopySVGTranslation.legacy.inject.
+pytest tests for CopySVGTranslation injection via the public service API.
 """
 
-import json
-
-from CopySVGTranslation.legacy.inject import (
-    inject_file_tree,
-)
+from CopySVGTranslation import SVGTranslationService

@@ -1,4 +1,4 @@
-"""Injection phase helpers for CopySVGTranslation."""
+"""Internal injection components for CopySVGTranslation."""
 
 from .id_manager import IdManager
 from .injector import SVGTranslationInjector

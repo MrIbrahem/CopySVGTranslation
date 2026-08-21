@@ -12,7 +12,6 @@ Scope: **nested** and **extraction** only (preparation/steps already covered).
 |------|------|--------|
 | `detector.py` | Find nested `<tspan>` / `<a>` | Good, keep |
 | `flattener.py` | Apply strategy (`raise` / `flatten` / `preserve_style`) | Good, keep |
-| `fixer.py` (`MatchFixNestedTags`) | Load file → detect → flatten → save | I/O mixed with logic; duplicates flattener; legacy style |
 
 ### Target design
 
@@ -21,7 +20,6 @@ nested/
   detector.py      # unchanged (minor cleanups OK)
   flattener.py     # unchanged (single source of truth for strategies)
   __init__.py      # export Detector + Flattener only
-  # fixer.py       → remove from public API (or move to legacy/cli)
 ```
 
 ### Proposed changes
@@ -360,11 +358,11 @@ __all__ = [
 4. PR with before/after fixture diffs.
 
 ### Phase 5 – Verification checklist
-- [ ] Valid SVGs: extract JSON unchanged  
-- [ ] Header-only mapping unchanged under `meta["header"]`  
-- [ ] Nested strategies still behave as before inside preparation  
-- [ ] No remaining imports of `MatchFixNestedTags` in core paths  
-- [ ] No module named `header_adder` under `extraction/`  
+- [ ] Valid SVGs: extract JSON unchanged
+- [ ] Header-only mapping unchanged under `meta["header"]`
+- [ ] Nested strategies still behave as before inside preparation
+- [ ] No remaining imports of `MatchFixNestedTags` in core paths
+- [ ] No module named `header_adder` under `extraction/`
 - [ ] Legacy helper (if kept) emits `DeprecationWarning`
 
 ### Risk notes

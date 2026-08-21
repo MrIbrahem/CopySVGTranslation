@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.legacy.extract import extract
+from CopySVGTranslation import SVGTranslationService
 
 
 class TestExtractYearHandling:
@@ -19,6 +19,7 @@ class TestExtractYearHandling:
     def setUp(self):
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
+        self.service = SVGTranslationService()
 
         yield
         """Clean up test fixtures."""
@@ -36,8 +37,10 @@ class TestExtractYearHandling:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        result = extract(svg_path)
-        assert result is not None
+        _result = self.service.extract(svg_path)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
 
         # Should create title mapping for year-suffixed text
         assert isinstance(result["title_new"], dict)
@@ -57,7 +60,10 @@ class TestExtractYearHandling:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        result = extract(svg_path)
+        _result = self.service.extract(svg_path)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
 
         assert result is not None
         assert "new" in result
@@ -80,7 +86,10 @@ class TestExtractYearHandling:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        result = extract(svg_path)
+        _result = self.service.extract(svg_path)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
 
         assert result is not None
         assert result == {
@@ -103,7 +112,10 @@ class TestExtractYearHandling:
         </svg>"""
         svg_path.write_text(svg_content, encoding="utf-8")
 
-        result = extract(svg_path)
+        _result = self.service.extract(svg_path)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
 
         assert result is not None
         assert "new" in result

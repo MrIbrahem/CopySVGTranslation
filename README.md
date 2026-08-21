@@ -5,19 +5,19 @@
 
 **Extract multilingual text from SVG files and inject translations into other SVGs.**
 
-CopySVGTranslation works with SVG documents that use `<switch>` elements and `systemLanguage` attributes. The recommended public entry point, `SVGTranslationService`, coordinates extraction, injection, preparation, nested-structure repair, and JSON mapping I/O through one consistent result type.
+CopySVGTranslation works with SVG documents that use `<switch>` elements and `systemLanguage` attributes. The public entry point, `SVGTranslationService`, coordinates extraction, injection, preparation, nested-structure repair, and JSON mapping I/O through one consistent result type.
 
 ---
 
 ## Features
 
-- Extract language variants from `<switch>` elements into a `TranslationMapping`.
-- Inject missing translations or update existing language nodes.
-- Prepare SVGs by normalizing structure, IDs, and language tags before translation work.
-- Inspect and repair nested `<tspan>` / `<a>` structures independently of extraction and injection.
-- Save and load JSON translation mappings.
-- Configure matching, overwrite, output, and nested-node behavior in `TranslationConfig`.
-- Receive uniform `OperationResult` objects instead of unhandled lower-level errors when using the service facade.
+-   Extract language variants from `<switch>` elements into a `TranslationMapping`.
+-   Inject missing translations or update existing language nodes.
+-   Prepare SVGs by normalizing structure, IDs, and language tags before translation work.
+-   Inspect and repair nested `<tspan>` / `<a>` structures independently of extraction and injection.
+-   Save and load JSON translation mappings.
+-   Configure matching, overwrite, output, and nested-node behavior in `TranslationConfig`.
+-   Receive uniform `OperationResult` objects instead of unhandled lower-level errors when using the service facade.
 
 ---
 
@@ -79,16 +79,16 @@ from CopySVGTranslation import SVGTranslationService
 service = SVGTranslationService()
 ```
 
-| Method | Purpose | Successful `data` payload |
-| --- | --- | --- |
-| `analyze_nested(svg_path)` | Detect nested `<tspan>` / `<a>` structures without changing the file. | `list[str]` of findings |
-| `repair_nested(svg_path, *, output=None, strategy=None, save=True)` | Repair nested structures using a selected strategy. | `RepairResult` |
-| `extract(svg_path, *, save_mapping=None)` | Read translations from an SVG. | `TranslationMapping` |
-| `inject(svg_path, mapping, *, output=None, save=None)` | Apply a mapping to an SVG. | `InjectorData` |
-| `extract_and_inject(source, output, *, save_mapping=None, save=None)` | Extract from one SVG and inject into the single output target. | `InjectorData` |
-| `prepare_only(svg_path, *, output=None)` | Normalize a document without injecting translations. | `lxml.etree._ElementTree` |
-| `load_mapping(path)` | Read a saved JSON mapping. | `TranslationMapping` |
-| `save_mapping(mapping, path)` | Write a `TranslationMapping` to JSON. | `pathlib.Path` |
+| Method                                                                | Purpose                                                               | Successful `data` payload |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------- |
+| `analyze_nested(svg_path)`                                            | Detect nested `<tspan>` / `<a>` structures without changing the file. | `list[str]` of findings   |
+| `repair_nested(svg_path, *, output=None, strategy=None, save=True)`   | Repair nested structures using a selected strategy.                   | `RepairResult`            |
+| `extract(svg_path, *, save_mapping=None)`                             | Read translations from an SVG.                                        | `TranslationMapping`      |
+| `inject(svg_path, mapping, *, output=None, save=None)`                | Apply a mapping to an SVG.                                            | `InjectorData`            |
+| `extract_and_inject(source, output, *, save_mapping=None, save=None)` | Extract from one SVG and inject into the single output target.        | `InjectorData`            |
+| `prepare_only(svg_path, *, output=None)`                              | Normalize a document without injecting translations.                  | `lxml.etree._ElementTree` |
+| `load_mapping(path)`                                                  | Read a saved JSON mapping.                                            | `TranslationMapping`      |
+| `save_mapping(mapping, path)`                                         | Write a `TranslationMapping` to JSON.                                 | `pathlib.Path`            |
 
 The following sections show each supported use case in detail.
 
@@ -109,14 +109,14 @@ else:
     print(f"Operation failed ({result.error_code}): {result.error}")
 ```
 
-| Field | Meaning |
-| --- | --- |
-| `success` | `True` when the operation completed successfully. |
-| `data` | The method-specific payload, or `None` on failure. |
-| `stats` | `InjectorStats` for successful injection workflows and some injection failures. |
-| `error` | Human-readable error text when `success` is `False`. |
-| `error_code` | Machine-readable failure identifier when available. |
-| `warnings` | Non-fatal issues, such as a mapping that was extracted successfully but could not be saved. |
+| Field        | Meaning                                                                                     |
+| ------------ | ------------------------------------------------------------------------------------------- |
+| `success`    | `True` when the operation completed successfully.                                           |
+| `data`       | The method-specific payload, or `None` on failure.                                          |
+| `stats`      | `InjectorStats` for successful injection workflows and some injection failures.             |
+| `error`      | Human-readable error text when `success` is `False`.                                        |
+| `error_code` | Machine-readable failure identifier when available.                                         |
+| `warnings`   | Non-fatal issues, such as a mapping that was extracted successfully but could not be saved. |
 
 ---
 
@@ -237,16 +237,16 @@ if extract_result.success:
 
 Successful injection results expose `InjectorStats` through `result.stats`.
 
-| Field | Meaning |
-| --- | --- |
-| `processed_switches` | Number of `<switch>` elements processed. |
-| `inserted_translations` | Language nodes created during the run. |
-| `updated_translations` | Existing language nodes overwritten during the run. |
-| `skipped_translations` | Existing language nodes left unchanged. |
-| `all_languages_count` | Total number of languages after injection. |
-| `new_languages_count` | Number of newly added languages. |
-| `languages_before` | Languages present before injection. |
-| `languages_after` | Languages present after injection. |
+| Field                   | Meaning                                             |
+| ----------------------- | --------------------------------------------------- |
+| `processed_switches`    | Number of `<switch>` elements processed.            |
+| `inserted_translations` | Language nodes created during the run.              |
+| `updated_translations`  | Existing language nodes overwritten during the run. |
+| `skipped_translations`  | Existing language nodes left unchanged.             |
+| `all_languages_count`   | Total number of languages after injection.          |
+| `new_languages_count`   | Number of newly added languages.                    |
+| `languages_before`      | Languages present before injection.                 |
+| `languages_after`       | Languages present after injection.                  |
 
 ---
 
@@ -352,12 +352,12 @@ result = service.repair_nested(
 )
 ```
 
-| Strategy | Behavior |
-| --- | --- |
-| `raise` | Stops when nested `<tspan>` structures are encountered. This is the default. |
-| `flatten` | Concatenates nested text into a single `<tspan>`. |
-| `preserve_style` | Converts nested styled spans to sibling spans while retaining styling. |
-| `split_nested_tspans` | Alias behavior for `preserve_style`. |
+| Strategy              | Behavior                                                                     |
+| --------------------- | ---------------------------------------------------------------------------- |
+| `raise`               | Stops when nested `<tspan>` structures are encountered. This is the default. |
+| `flatten`             | Concatenates nested text into a single `<tspan>`.                            |
+| `preserve_style`      | Converts nested styled spans to sibling spans while retaining styling.       |
+| `split_nested_tspans` | Alias behavior for `preserve_style`.                                         |
 
 `RepairResult` reports `len_tags_before_fix`, `len_tags_after_fix`, the derived `len_tags_fixed`, and any warnings.
 
@@ -393,38 +393,38 @@ if load_result.success:
 
 ```json
 {
-  "new": {
-    "music in 2020": {
-      "ar": "الموسيقى في عام 2020",
-      "fr": "La musique en 2020"
+    "new": {
+        "music in 2020": {
+            "ar": "الموسيقى في عام 2020",
+            "fr": "La musique en 2020"
+        },
+        "hello": {
+            "ar": "مرحبا",
+            "fr": "Bonjour"
+        }
     },
-    "hello": {
-      "ar": "مرحبا",
-      "fr": "Bonjour"
-    }
-  },
-  "title_new": {
-    "music in {year}": {
-      "ar": "الموسيقى في عام {year}",
-      "fr": "La musique en {year}"
-    }
-  },
-  "tspans_by_id": {
-    "t0": "Music in 2020",
-    "t1": "Hello"
-  },
-  "meta": {},
-  "error": ""
+    "title_new": {
+        "music in {year}": {
+            "ar": "الموسيقى في عام {year}",
+            "fr": "La musique en {year}"
+        }
+    },
+    "tspans_by_id": {
+        "t0": "Music in 2020",
+        "t1": "Hello"
+    },
+    "meta": {},
+    "error": ""
 }
 ```
 
-| Key | Purpose |
-| --- | --- |
-| `new` | Normalized source text mapped to language-code/translation pairs. |
-| `title_new` | Templates for titles containing years, with a `{year}` placeholder. |
-| `tspans_by_id` | Diagnostic map of tspan IDs to default text. |
-| `meta` | Extra metadata. |
-| `error` | Mapping-level error text, when present. |
+| Key            | Purpose                                                             |
+| -------------- | ------------------------------------------------------------------- |
+| `new`          | Normalized source text mapped to language-code/translation pairs.   |
+| `title_new`    | Templates for titles containing years, with a `{year}` placeholder. |
+| `tspans_by_id` | Diagnostic map of tspan IDs to default text.                        |
+| `meta`         | Extra metadata.                                                     |
+| `error`        | Mapping-level error text, when present.                             |
 
 Call `mapping.to_json()` to obtain a serializable dictionary.
 
@@ -472,15 +472,15 @@ config = TranslationConfig(
 updated_config = config.with_updates(overwrite_translations=True)
 ```
 
-| Group | Options |
-| --- | --- |
-| Matching | `case_insensitive` |
-| Injection | `overwrite_translations`, `pretty_print`, `fallback_to_default_text` |
-| Nested content | `nested_strategy` |
-| Title handling | `enable_year_titles`, `create_lang_template` |
-| Output | `auto_save`, `output_dir`, `mapping_output_dir`, `create_parents` |
-| Parsing and preparation | `remove_blank_text`, `normalize_languages`, `assign_missing_ids`, `prepare_before_extraction`, `sort_switches` |
-| Diagnostics and extension | `collect_warnings`, `extra` |
+| Group                     | Options                                                                                                        |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Matching                  | `case_insensitive`                                                                                             |
+| Injection                 | `overwrite_translations`, `pretty_print`, `fallback_to_default_text`                                           |
+| Nested content            | `nested_strategy`                                                                                              |
+| Title handling            | `enable_year_titles`, `create_lang_template`                                                                   |
+| Output                    | `auto_save`, `output_dir`, `mapping_output_dir`, `create_parents`                                              |
+| Parsing and preparation   | `remove_blank_text`, `normalize_languages`, `assign_missing_ids`, `prepare_before_extraction`, `sort_switches` |
+| Diagnostics and extension | `collect_warnings`, `extra`                                                                                    |
 
 ---
 
@@ -509,44 +509,6 @@ and a target SVG with only the default text:
 ```
 
 running `extract_and_inject(source, output, save=True)` creates the Arabic and French language nodes in the output document and saves them back to that same file. Whether existing language nodes are replaced or preserved is controlled by `overwrite_translations`.
-
----
-
-## Lower-Level APIs
-
-The service facade is recommended for application code. Advanced callers can use `SVGTranslationExtractor` and `SVGTranslationInjector` directly when they need the lower-level return types or pipeline control.
-
-```python
-from CopySVGTranslation import (
-    SVGTranslationExtractor,
-    SVGTranslationInjector,
-    TranslationConfig,
-)
-
-config = TranslationConfig()
-mapping = SVGTranslationExtractor(config).extract("source.svg")
-result = SVGTranslationInjector(config).inject("target.svg", mapping, save=False)
-```
-
----
-
-## Legacy API (Deprecated)
-
-> **Deprecated:** The compatibility functions in `CopySVGTranslation.legacy` will be removed in a future major release. Prefer `SVGTranslationService` for new code.
-
-```python
-# Before
-from CopySVGTranslation.legacy import extract
-
-translations = extract("source.svg", case_insensitive=True)
-
-# After
-from CopySVGTranslation import SVGTranslationService, TranslationConfig
-
-service = SVGTranslationService(TranslationConfig(case_insensitive=True))
-result = service.extract("source.svg")
-translations = result.data.to_json() if result.success else None
-```
 
 ---
 

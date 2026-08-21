@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from CopySVGTranslation.legacy import inject_file_tree
-from CopySVGTranslation.legacy.extract import extract
+from CopySVGTranslation import SVGTranslationService, TranslationConfig
+from CopySVGTranslation.core.mapping import InjectorData
 
 
 @pytest.fixture()
@@ -20,18 +20,25 @@ def target_svg(tmp_path: Path, fixtures_dir) -> Path:
 
 def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path, fixtures_dir) -> None:
     """inject should reuse an already-extracted mapping structure."""
-    translations = extract(fixtures_dir / "source.svg")
+    service = SVGTranslationService()
+    _extract_result = service.extract(fixtures_dir / "source.svg")
+    assert _extract_result.success
 
     _output_dir = tmp_path / "outputs"
     _output_dir.mkdir(parents=True, exist_ok=True)
     output_file = _output_dir / target_svg.name
 
-    tree, stats = inject_file_tree(
-        inject_file=target_svg,
-        mapping=translations,
-        save_path=output_file,
-        return_stats=True,
+    result = service.inject(
+        svg_path=target_svg,
+        mapping=_extract_result.data,
+        output=output_file,
+        save=True,
     )
+
+    assert result.success
+    assert isinstance(result.data, InjectorData)
+    tree = result.data.tree
+    stats = result.data.inject_stats.to_json()
 
     assert tree is not None
     assert stats["inserted_translations"] >= 1
@@ -42,57 +49,41 @@ def test_inject_uses_existing_mapping(tmp_path: Path, target_svg: Path, fixtures
     assert "السكان 2020" in content
 
 
-def test_inject_legacy_save_path_implies_save_when_save_result_is_false(
-    tmp_path: Path,
-    target_svg: Path,
-    fixtures_dir,
-) -> None:
-    """The deprecated wrapper preserves its path-implies-save compatibility rule."""
-    translations = extract(fixtures_dir / "source.svg")
-    output_file = tmp_path / "legacy-output.svg"
-
-    tree, stats = inject_file_tree(
-        inject_file=target_svg,
-        mapping=translations,
-        save_path=output_file,
-        save_result=False,
-        return_stats=True,
-    )
-
-    assert tree is not None
-    assert isinstance(stats, dict)
-    assert output_file.exists()
-
-
 def test_inject_without_save_path(tmp_path: Path, target_svg: Path, fixtures_dir) -> None:
-    """inject should handle missing save_path when save_result=False."""
-    translations = extract(fixtures_dir / "source.svg")
+    """inject should handle save=False without output path."""
+    service = SVGTranslationService()
+    _extract_result = service.extract(fixtures_dir / "source.svg")
+    assert _extract_result.success
 
-    tree, stats = inject_file_tree(
-        inject_file=target_svg,
-        mapping=translations,
-        save_result=False,
-        return_stats=True,
+    result = service.inject(
+        svg_path=target_svg,
+        mapping=_extract_result.data,
+        save=False,
     )
 
-    assert tree is not None
+    assert result.success
+    assert result.data is not None
+    assert result.data.tree is not None
+    stats = result.data.inject_stats.to_json()
     assert isinstance(stats, dict)
 
 
 def test_inject_returns_stats(tmp_path: Path, target_svg: Path, fixtures_dir) -> None:
-    """inject should return detailed statistics when requested."""
-    translations = extract(fixtures_dir / "source.svg")
+    """inject should return detailed statistics."""
+    service = SVGTranslationService()
+    _extract_result = service.extract(fixtures_dir / "source.svg")
+    assert _extract_result.success
 
-    result = inject_file_tree(
-        inject_file=target_svg,
-        mapping=translations,
-        return_stats=True,
+    result = service.inject(
+        svg_path=target_svg,
+        mapping=_extract_result.data,
+        output=target_svg,
     )
 
-    assert isinstance(result, tuple), "Should return tuple when return_stats=True"
-    tree, stats = result
+    assert result.success
+    assert isinstance(result.data, InjectorData)
+    stats = result.data.inject_stats.to_json()
 
-    assert tree is not None
     assert isinstance(stats, dict)
     # Verify expected stats keys
     expected_keys = ["inserted_translations", "updated_translations", "processed_switches"]
@@ -101,25 +92,31 @@ def test_inject_returns_stats(tmp_path: Path, target_svg: Path, fixtures_dir) ->
 
 
 def test_inject_without_stats(tmp_path: Path, target_svg: Path, fixtures_dir) -> None:
-    """inject should return only tree when return_stats=False."""
-    translations = extract(fixtures_dir / "source.svg")
+    """inject always returns InjectorData (stats are always available)."""
+    service = SVGTranslationService()
+    _extract_result = service.extract(fixtures_dir / "source.svg")
+    assert _extract_result.success
 
-    result = inject_file_tree(
-        inject_file=target_svg,
-        mapping=translations,
-        return_stats=False,
+    result = service.inject(
+        svg_path=target_svg,
+        mapping=_extract_result.data,
+        output=target_svg,
     )
 
-    # When return_stats=False, might return just tree or (tree, None)
-    # We need to check what's actually returned
-    assert result is not None
+    assert result.success
+    assert result.data is not None
+    assert result.data.tree is not None
 
 
 def test_extract_with_pathlib_path(fixtures_dir) -> None:
     """extract should work with pathlib.Path objects."""
     source_path = fixtures_dir / "source.svg"
 
-    result = extract(source_path)
+    service = SVGTranslationService()
+    _result = service.extract(source_path)
+    assert _result.success
+    assert _result.data is not None
+    result = _result.data.to_json()
 
     assert result is not None
     assert isinstance(result, dict)
@@ -129,7 +126,11 @@ def test_extract_with_string_path(fixtures_dir) -> None:
     """extract should work with string paths."""
     source_path = str(fixtures_dir / "source.svg")
 
-    result = extract(source_path)
+    service = SVGTranslationService()
+    _result = service.extract(source_path)
+    assert _result.success
+    assert _result.data is not None
+    result = _result.data.to_json()
 
     assert result is not None
     assert isinstance(result, dict)
@@ -142,9 +143,11 @@ def test_extract_empty_svg(tmp_path: Path) -> None:
         '<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg"></svg>', encoding="utf-8"
     )
 
-    result = extract(empty_svg)
+    service = SVGTranslationService()
+    result = service.extract(empty_svg)
 
-    assert result is None
+    assert not result.success
+    assert result.data is None
 
 
 def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
@@ -171,9 +174,12 @@ def test_extract_preserves_multiple_languages(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    result = extract(multi_lang_svg)
+    service = SVGTranslationService()
+    _result = service.extract(multi_lang_svg)
+    assert _result.success
+    assert _result.data is not None
+    result = _result.data.to_json()
 
-    assert result is not None
     # Should have translations for ar, fr, and es
     assert result == {
         "new": {"hello": {"ar": "مرحبا", "fr": "Bonjour", "es": "Hola"}},
@@ -188,13 +194,16 @@ def test_inject_with_empty_translations(tmp_path: Path, target_svg: Path) -> Non
     """inject should handle empty translation dictionaries gracefully."""
     empty_translations = {"new": {}}
 
-    tree, stats = inject_file_tree(
-        inject_file=target_svg,
+    service = SVGTranslationService()
+    result = service.inject(
+        svg_path=target_svg,
         mapping=empty_translations,
-        save_result=False,
-        return_stats=True,
+        output=target_svg,
     )
 
+    assert result.success
+    assert result.data is not None
+    stats = result.data.inject_stats.to_json()
     assert stats == {
         "all_languages_count": 0,
         "new_languages_count": 0,
@@ -213,9 +222,12 @@ def test_extract_with_case_insensitive_true(fixtures_dir) -> None:
 
     Verifies that calling extract on the sample SVG with case_insensitive enabled produces a result whose "new" translation keys (string keys) are all lowercase.
     """
-    result = extract(fixtures_dir / "source.svg", case_insensitive=True)
+    service = SVGTranslationService()
+    _result = service.extract(fixtures_dir / "source.svg")
+    assert _result.success
+    assert _result.data is not None
+    result = _result.data.to_json()
 
-    assert result is not None
     assert result == {
         "new": {"population 2020": {"ar": "السكان 2020", "fr": "Population 2020 FR"}},
         "tspans_by_id": {"label": "Population 2020"},
@@ -243,10 +255,11 @@ def test_extract_with_case_insensitive_false(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    result = extract(
-        svg_with_caps,
-        case_insensitive=False,
-    )
+    service = SVGTranslationService(TranslationConfig(case_insensitive=False))
+    _result = service.extract(svg_with_caps)
+    assert _result.success
+    assert _result.data is not None
+    result = _result.data.to_json()
 
     assert result == {
         "new": {"HELLO WORLD": {"ar": "مرحبا"}},
@@ -259,35 +272,44 @@ def test_extract_with_case_insensitive_false(tmp_path: Path) -> None:
 
 def test_inject_multiple_operations(tmp_path: Path, target_svg: Path, fixtures_dir) -> None:
     """inject should handle multiple injection operations."""
-    translations = extract(fixtures_dir / "source.svg")
+    service = SVGTranslationService()
+    _extract_result = service.extract(fixtures_dir / "source.svg")
+    assert _extract_result.success
 
     # First injection
     output1 = tmp_path / "output1"
     output1.mkdir()
-    tree1, stats1 = inject_file_tree(
-        inject_file=target_svg,
-        mapping=translations,
-        save_path=output1 / target_svg.name,
-        return_stats=True,
+    result1 = service.inject(
+        svg_path=target_svg,
+        mapping=_extract_result.data,
+        output=output1 / target_svg.name,
+        save=True,
     )
+    assert result1.success
+    assert result1.data is not None
+    stats1 = result1.data.inject_stats.to_json()
 
     # Second injection to different location
     output2 = tmp_path / "output2"
     output2.mkdir()
-    tree2, stats2 = inject_file_tree(
-        inject_file=target_svg,
-        mapping=translations,
-        save_path=output2 / target_svg.name,
-        return_stats=True,
+    # Use a fresh service and re-read the original target_svg
+    service2 = SVGTranslationService()
+    result2 = service2.inject(
+        svg_path=target_svg,
+        mapping=_extract_result.data,
+        output=output2 / target_svg.name,
+        save=True,
     )
+    assert result2.success
+    assert result2.data is not None
+    stats2 = result2.data.inject_stats.to_json()
 
-    assert tree1 is not None
-    assert tree2 is not None
+    assert result1.data.tree is not None
+    assert result2.data.tree is not None
     assert (output1 / target_svg.name).exists()
     assert (output2 / target_svg.name).exists()
 
     # Both should have inserted the same number of translations
-
     assert stats1["inserted_translations"] == stats2["inserted_translations"]
 
     assert stats1 == {

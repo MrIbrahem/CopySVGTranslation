@@ -2,8 +2,8 @@
 Comprehensive pytest tests for CopySVGTranslation covering edge cases and additional functionality.
 """
 
-from CopySVGTranslation.legacy.extract import extract
-from CopySVGTranslation.legacy.inject import inject_file_tree
+from CopySVGTranslation import SVGTranslationService, TranslationConfig, TranslationMapping
+from CopySVGTranslation.core.mapping import InjectorData
 
 # -------------------------------
 # Workflows tests
@@ -14,7 +14,7 @@ class TestWorkflows:
     """Test cases for workflow functions."""
 
     def test_inject_with_return_stats(self, temp_dir):
-        """Test inject with return_stats=True."""
+        """Test inject returns stats via InjectorData."""
         target = temp_dir / "target.svg"
         target.write_text(
             """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg">
@@ -22,12 +22,16 @@ class TestWorkflows:
             encoding="utf-8",
         )
         translations = {"new": {"hello": {"ar": "مرحبا"}}}
-        tree, stats = inject_file_tree(
+        service = SVGTranslationService()
+        result = service.inject(
+            svg_path=target,
             mapping=translations,
-            inject_file=target,
-            save_result=False,
-            return_stats=True,
+            output=target,
         )
+        assert result.success
+        assert isinstance(result.data, InjectorData)
+        tree = result.data.tree
+        stats = result.data.inject_stats.to_json()
         assert tree is not None
         assert stats is not None
         assert "processed_switches" in stats
@@ -42,12 +46,16 @@ class TestWorkflows:
             encoding="utf-8",
         )
         translations = {"new": {"hello": {"ar": "New"}}}
-        tree, stats = inject_file_tree(
+        service = SVGTranslationService(TranslationConfig(overwrite_translations=True))
+        result = service.inject(
+            svg_path=target,
             mapping=translations,
-            inject_file=target,
-            overwrite_translations=True,
-            return_stats=True,
+            output=target,
         )
+        assert result.success
+        assert result.data is not None
+        tree = result.data.tree
+        stats = result.data.inject_stats.to_json()
         assert tree is not None
         assert stats.get("updated_translations", 0) > 0
 
@@ -67,8 +75,10 @@ class TestExtractor:
             """<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><text>Just text</text></svg>""",
             encoding="utf-8",
         )
-        result = extract(svg)
-        assert result is None
+        service = SVGTranslationService()
+        result = service.extract(svg)
+        assert not result.success
+        assert result.data is None
 
     def test_extract_case_sensitive(self, temp_dir):
         """Test extraction with case_insensitive=False."""
@@ -79,11 +89,11 @@ class TestExtractor:
             <text id="t"><tspan>Hello World</tspan></text></switch></svg>""",
             encoding="utf-8",
         )
-        result = extract(
-            svg,
-            case_insensitive=False,
-        )
-        assert result is not None
+        service = SVGTranslationService(TranslationConfig(case_insensitive=False))
+        _result = service.extract(svg)
+        assert _result.success
+        assert isinstance(_result.data, TranslationMapping)
+        result = _result.data.to_json()
         assert "new" in result
 
         assert result == {"new": {"Hello World": {}}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
@@ -106,8 +116,11 @@ class TestExtractor:
                 """,
             encoding="utf-8",
         )
-        result = extract(svg)
-        assert result is not None
+        service = SVGTranslationService()
+        _result = service.extract(svg)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
 
         assert result == {"new": {"population 2020": {}}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
 
@@ -119,8 +132,10 @@ class TestExtractor:
             <switch><text id="t"><tspan></tspan></text></switch></svg>""",
             encoding="utf-8",
         )
-        result = extract(svg)
-        assert result is None
+        service = SVGTranslationService()
+        result = service.extract(svg)
+        assert not result.success
+        assert result.data is None
 
     def test_extract_translation_tspan_without_id(self, temp_dir):
         """Translations without IDs should fall back to positional matching."""
@@ -140,8 +155,11 @@ class TestExtractor:
             """,
             encoding="utf-8",
         )
-        result = extract(svg)
-        assert result is not None
+        service = SVGTranslationService()
+        _result = service.extract(svg)
+        assert _result.success
+        assert _result.data is not None
+        result = _result.data.to_json()
         assert "new" in result
         assert "hello" in result["new"]
         # assert result["new"]["hello"].get("es") == "Hola"
@@ -168,5 +186,7 @@ class TestEdgeCases:
         """Test extraction with malformed XML."""
         svg = temp_dir / "bad.svg"
         svg.write_text("<svg><text>Unclosed", encoding="utf-8")
-        result = extract(svg)
-        assert result is None
+        service = SVGTranslationService()
+        result = service.extract(svg)
+        assert not result.success
+        assert result.data is None
