@@ -3,11 +3,7 @@
 [![PyPI Version](https://img.shields.io/pypi/v/CopySVGTranslation.svg?style=flat-square)](https://pypi.org/project/CopySVGTranslation/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg?style=flat-square)](https://www.python.org/downloads/)
 
-**Extract multilingual text from SVG files and inject translations into other SVGs.**
-
-CopySVGTranslation works with SVG documents that use `<switch>` elements and `systemLanguage` attributes. The public entry point, `SVGTranslationService`, coordinates extraction, injection, preparation, nested-structure repair, and JSON mapping I/O through one consistent result type.
-
----
+CopySVGTranslation is a Python library that extracts multilingual text from SVG files and injects translations into other SVGs. It works with SVG documents that use `<switch>` elements and `systemLanguage` attributes — the SVG standard mechanism for internationalization. Rather than manipulating raw XML yourself, you interact with a single facade class, `SVGTranslationService`, which orchestrates extraction, injection, preparation, nested-structure repair, and JSON mapping I/O through one consistent result type: `OperationResult`.
 
 ## Features
 
@@ -122,6 +118,8 @@ else:
 ---
 
 ## Extract Translations
+
+**Extract multilingual text from SVG files and inject translations into other SVGs.**
 
 Use `extract()` to collect the translations already present in a multilingual SVG. It accepts either a `str` or `pathlib.Path`.
 
