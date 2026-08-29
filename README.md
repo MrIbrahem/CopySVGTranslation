@@ -16,6 +16,7 @@ CopySVGTranslation works with SVG documents that use `<switch>` elements and `sy
 -   Prepare SVGs by normalizing structure, IDs, and language tags before translation work.
 -   Inspect and repair nested `<tspan>` / `<a>` structures independently of extraction and injection.
 -   Save and load JSON translation mappings.
+-   Check whether `<switch>` elements are correctly ordered and fix them in place (`check_switches_sorted` / `sort_switches`). On Wikimedia Commons, files with an out-of-order fallback `<text>` (one lacking `systemLanguage`) will not display translations, so this is the check to run before re-uploading.
 -   Configure matching, overwrite, output, and nested-node behavior in `TranslationConfig`.
 -   Receive uniform `OperationResult` objects instead of unhandled lower-level errors when using the service facade.
 
@@ -360,6 +361,42 @@ result = service.repair_nested(
 | `split_nested_tspans` | Alias behavior for `preserve_style`.                                         |
 
 `RepairResult` reports `len_tags_before_fix`, `len_tags_after_fix`, the derived `len_tags_fixed`, and any warnings.
+
+---
+
+## Check and Fix Switch Ordering
+
+For translations to render on Wikimedia Commons, every `<switch>` must keep its fallback `<text>` (the one without a `systemLanguage` attribute) **last** among its `<text>` children. Files where the fallback appears earlier will silently fail to show translations. Use the ordering check before re-uploading a file to Commons.
+
+### Check whether switches are already sorted
+
+`check_switches_sorted()` is read-only and returns `True` when every `<switch>` in the file is correctly ordered.
+
+```python
+from CopySVGTranslation import SVGTranslationService
+
+service = SVGTranslationService()
+result = service.check_switches_sorted("diagram.svg")
+
+if result.success and not result.data:
+    print("Switches are out of order — fix and re-upload.")
+```
+
+### Fix switches and save
+
+`sort_switches()` reorders only when necessary and returns `True` if the file was actually modified (so you can decide whether a re-upload is needed).
+
+```python
+result = service.sort_switches(
+    "diagram.svg",
+    output="fixed/diagram.svg",
+)
+
+if result.success and result.data:
+    print("File was modified; upload fixed/diagram.svg to Commons.")
+```
+
+If you omit `output`, the file is checked and reordered in memory only and `True` is still returned when a change would be required.
 
 ---
 
