@@ -126,3 +126,63 @@ class TestSortSwitchTexts(TestSetup):
 
         texts = switch.findall(".//{http://www.w3.org/2000/svg}text")
         assert len(texts) == 1
+
+
+class TestSwitchSorted(TestSetup):
+    """Test suite for is_switch_sorted / are_switches_sorted functions."""
+
+    def _switch(self, content: str):
+        svg_content = f"""<svg xmlns="http://www.w3.org/2000/svg">
+            <switch>
+                {content}
+            </switch>
+        </svg>"""
+        root = etree.fromstring(svg_content)
+        return root, root.find(".//{http://www.w3.org/2000/svg}switch")
+
+    def test_is_switch_sorted_when_sorted(self):
+        _, switch = self._switch(
+            '<text systemLanguage="ar">Arabic</text>'
+            '<text systemLanguage="fr">French</text>'
+            '<text>Default</text>'
+        )
+        assert is_switch_sorted(switch) is True
+        assert are_switches_sorted(switch) is True
+
+    def test_is_switch_sorted_when_fallback_first(self):
+        _, switch = self._switch(
+            '<text>Default</text>'
+            '<text systemLanguage="ar">Arabic</text>'
+        )
+        assert is_switch_sorted(switch) is False
+
+    def test_is_switch_sorted_when_lang_after_fallback(self):
+        _, switch = self._switch(
+            '<text>Default</text>'
+            '<text systemLanguage="fr">French</text>'
+            '<text systemLanguage="ar">Arabic</text>'
+        )
+        assert is_switch_sorted(switch) is False
+
+    def test_are_switches_sorted_empty_tree(self):
+        root = etree.fromstring('<svg xmlns="http://www.w3.org/2000/svg"></svg>')
+        assert are_switches_sorted(root) is True
+
+    def test_are_switches_sorted_multiple_switches(self):
+        svg_content = """<svg xmlns="http://www.w3.org/2000/svg">
+            <switch>
+                <text>Default</text>
+                <text systemLanguage="ar">Arabic</text>
+            </switch>
+            <switch>
+                <text systemLanguage="fr">French</text>
+                <text>Default</text>
+            </switch>
+        </svg>"""
+        root = etree.fromstring(svg_content)
+        # First switch is unsorted, so the whole tree is unsorted.
+        assert are_switches_sorted(root) is False
+
+    def test_none_inputs_return_true(self):
+        assert are_switches_sorted(None) is True
+        assert is_switch_sorted(None) is True
