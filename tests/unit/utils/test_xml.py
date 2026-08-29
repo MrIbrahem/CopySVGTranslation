@@ -14,10 +14,12 @@ import pytest
 from lxml import etree
 
 from CopySVGTranslation.utils.xml import (
+    are_switches_sorted,
     collect_ids,
     extract_root_languages,
     findall_svg,
     is_svg_element,
+    is_switch_sorted,
     local_name,
     sort_switch_children,
     sort_switch_texts,
