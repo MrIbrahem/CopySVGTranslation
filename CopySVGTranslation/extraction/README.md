@@ -4,4 +4,4 @@ This package handles extraction of translatable content from SVG documents, incl
 
 For detailed documentation, see:
 
-→ [Extraction Documentation](../../docs/refactor/extraction.md)
+→ [Extraction Documentation](../../docs/extraction.md)

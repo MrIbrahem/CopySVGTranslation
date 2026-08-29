@@ -4,4 +4,4 @@ This package detects and flattens nested structures in SVG documents to simplify
 
 For detailed documentation, see:
 
-→ [Nested Documentation](../../docs/refactor/nested.md)
+→ [Nested Documentation](../../docs/nested-structures.md)
