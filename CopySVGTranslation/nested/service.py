@@ -91,7 +91,6 @@ class NestedStructureService:
         Repair nested tags in a file and write the result to another file.
         """
         src_path = Path(str(source)) if source else None
-        out_path = Path(output) if output else src_path
 
         if not src_path or not src_path.exists():
             return RepairResult(
@@ -123,9 +122,12 @@ class NestedStructureService:
         result = self.repair_root(root, strategy)
 
         if result.success and save:
+            out_path = Path(output) if output else src_path
             # Write out
-            self._save_file(root, out_path)
+            if not out_path:
+                raise ValueError("new_path is None")
 
+            write_svg(root, out_path, config=self.config)
         return result
 
     def repair_root(
@@ -173,16 +175,6 @@ class NestedStructureService:
             )
 
         return result
-
-    def _save_file(
-        self,
-        root: etree._Element,
-        out_path: Path | str,
-    ) -> None:
-        if not out_path:
-            raise ValueError("new_path is None")
-
-        write_svg(root, out_path, config=self.config)
 
 
 __all__ = [
