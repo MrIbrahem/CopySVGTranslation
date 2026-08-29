@@ -50,7 +50,7 @@ class TestSvgDocumentLoad:
 
     def test_load_invalid_xml(self, tmp_path: Path):
         svg = _write_svg(tmp_path, "not xml <><>")
-        with pytest.raises(etree.XMLSyntaxError):
+        with pytest.raises(SvgStructureError):
             SvgDocument.load(svg)
 
     def test_load_with_config(self, tmp_path: Path):
@@ -90,7 +90,7 @@ class TestSvgDocumentConstruction:
     def test_constructor_none_root_raises(self):
         """An ElementTree with a None root should raise SvgStructureError."""
         # Create a tree with no root
-        tree = etree.ElementTree()
+        tree = etree.ElementTree()  # pyright: ignore[reportCallIssue]
         with pytest.raises(SvgStructureError):
             SvgDocument(tree)
 

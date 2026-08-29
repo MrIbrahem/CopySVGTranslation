@@ -5,10 +5,8 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from .io import SvgDocument
-
 from .config import TranslationConfig
-from .io.svg_writer import write_svg
+from .io import SvgDocument
 from .utils import are_switches_sorted, sort_switch_texts
 
 logger = logging.getLogger(__name__)
@@ -53,9 +51,10 @@ class SwitchOrderChecker:
 
         Returns True if the file was modified (i.e. it was not already sorted).
         """
-        doc = SvgDocument.load(svg_path, config=self.config)
+        doc: SvgDocument = SvgDocument.load(svg_path, config=self.config)
         root = doc.root
         tree = doc.tree
+
         if root is None or tree is None:
             return False
 
@@ -67,7 +66,7 @@ class SwitchOrderChecker:
             sort_switch_texts(elem)
 
         if save_path is not None:
-            write_svg(tree, save_path, config=self.config)
+            doc.save(savepath=save_path)
         return True
 
 

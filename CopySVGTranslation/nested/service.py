@@ -9,9 +9,8 @@ from pathlib import Path
 
 from lxml import etree
 
-from ..exceptions import SvgStructureError
-
 from ..config import TranslationConfig
+from ..exceptions import SvgStructureError
 from ..io import SvgDocument
 from ..io.svg_writer import write_svg
 from .detector import NestedTspanDetector
@@ -94,6 +93,7 @@ class NestedStructureService:
         Repair nested tags in a file and write the result to another file.
         """
         src_path = Path(str(source)) if source else None
+
         try:
             doc: SvgDocument = SvgDocument.load(src_path, config=self.config)
         except FileNotFoundError:
@@ -102,7 +102,7 @@ class NestedStructureService:
                 warnings=[f"Source file does not exist: {src_path}"],
             )
         except SvgStructureError as exc:
-            logger.error(f"Failed to parse SVG file {src_path}: {exc}")
+            logger.error(f"Failed to parse SVG file {src_path}: {exc.code}")
             return RepairResult.fail(
                 warnings=[f"Failed to parse source file: {src_path}"],
             )
@@ -169,6 +169,7 @@ class NestedStructureService:
             )
 
         return result
+
 
 __all__ = [
     "NestedStructureService",

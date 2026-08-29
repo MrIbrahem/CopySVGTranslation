@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 import re
+from pathlib import Path
+
 from lxml import etree
 
 from ..config import TranslationConfig

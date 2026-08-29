@@ -1,9 +1,10 @@
 # core/switch_node.py
 from __future__ import annotations
 
+import re
 from collections.abc import Iterator
 from dataclasses import dataclass
-import re
+
 from lxml import etree
 
 from .text_node import TextNode

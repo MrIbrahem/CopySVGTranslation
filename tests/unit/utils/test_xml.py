@@ -142,25 +142,18 @@ class TestSwitchSorted(TestSetup):
 
     def test_is_switch_sorted_when_sorted(self):
         _, switch = self._switch(
-            '<text systemLanguage="ar">Arabic</text>'
-            '<text systemLanguage="fr">French</text>'
-            '<text>Default</text>'
+            """<text systemLanguage="ar">Arabic</text><text systemLanguage="fr">French</text><text>Default</text>"""
         )
         assert is_switch_sorted(switch) is True
         assert are_switches_sorted(switch) is True
 
     def test_is_switch_sorted_when_fallback_first(self):
-        _, switch = self._switch(
-            '<text>Default</text>'
-            '<text systemLanguage="ar">Arabic</text>'
-        )
+        _, switch = self._switch("""<text>Default</text><text systemLanguage="ar">Arabic</text>""")
         assert is_switch_sorted(switch) is False
 
     def test_is_switch_sorted_when_lang_after_fallback(self):
         _, switch = self._switch(
-            '<text>Default</text>'
-            '<text systemLanguage="fr">French</text>'
-            '<text systemLanguage="ar">Arabic</text>'
+            """<text>Default</text><text systemLanguage="fr">French</text><text systemLanguage="ar">Arabic</text>"""
         )
         assert is_switch_sorted(switch) is False
 

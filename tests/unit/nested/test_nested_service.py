@@ -4,11 +4,11 @@ from pathlib import Path
 
 from lxml import etree
 
-from CopySVGTranslation.nested.service import NestedStructureService
 from CopySVGTranslation import (
     RepairResult,
     SVGTranslationService,
 )
+from CopySVGTranslation.nested.service import NestedStructureService
 from CopySVGTranslation.result import OperationResult
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -32,7 +32,6 @@ class TestNestedFromSVGTranslationService:
         assert res.success is True
         assert len(res.data) == 1
 
-
     def test_svg_translation_service_repair_nested(self, tmp_path: Path):
         src = tmp_path / "input.svg"
         dst = tmp_path / "output.svg"
@@ -52,14 +51,17 @@ class TestNestedFromSVGTranslationService:
         assert res_after.success is True
         assert len(res_after.data) == 0
 
+
 # -------------------
 # NestedStructureService.analyze_file
 # -------------------
+
 
 class TestAnalyzeFile:
     """
     Tests for NestedStructureService.analyze_file method.
     """
+
     def test_nested_structure_service_analyze(self, tmp_path: Path):
         src = tmp_path / "input.svg"
         src.write_text(
@@ -71,7 +73,6 @@ class TestAnalyzeFile:
         findings = service.analyze_file(src)
         assert len(findings) == 1
         assert "Bold" in findings[0]
-
 
     def test_nested_structure_service_ignores_link_wrapping_text_and_tspan(self, tmp_path: Path):
         """The clickable title structure from OWID SVGs must not be a false hit."""
@@ -92,6 +93,7 @@ class TestRapairFile:
     """
     Tests for NestedStructureService.repair_file method.
     """
+
     def test_nested_structure_service_ignores_link_wrapping_tspan(self, tmp_path: Path):
         """A valid link wrapper is not repairable nesting and must be ignored."""
         src = tmp_path / "input.svg"
@@ -110,7 +112,6 @@ class TestRapairFile:
         assert repair_result.len_tags_before_fix == 0
         assert repair_result.len_tags_after_fix == 0
         assert repair_result.len_tags_fixed == 0
-
 
     def test_nested_structure_service_detects_link_inside_tspan(self, tmp_path: Path):
         """A link inside text content remains repairable nested structure."""
@@ -132,7 +133,6 @@ class TestRapairFile:
         assert repair_result.len_tags_before_fix == 1
         assert repair_result.len_tags_after_fix == 0
         assert repair_result.len_tags_fixed == 1
-
 
     def test_nested_structure_service_repair_file(self, tmp_path: Path):
         src = tmp_path / "input.svg"
@@ -158,6 +158,7 @@ class TestRapairFile:
         assert len(tspans) > 0
         has_style = any("font-weight: 700;" in (t.get("style") or "") and t.text == "Bold" for t in tspans)
         assert has_style is True
+
 
 class TestRepairRoot:
     """
