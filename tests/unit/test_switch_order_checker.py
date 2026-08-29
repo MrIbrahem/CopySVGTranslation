@@ -136,8 +136,7 @@ class TestSortSwitches:
             checker.sort_switches(svg)
 
     def test_sort_raises_on_unparseable_content(self, tmp_path: Path):
-        # File exists but is not valid XML: sort_switches loads the file and
-        # propagates the parse error.
+        # File exists but is not valid XML: sort_switches loads the file and propagates the parse error.
         svg = tmp_path / "bad.svg"
         svg.write_text("<svg><switch>", encoding="utf-8")
         checker = SwitchOrderChecker(TranslationConfig())

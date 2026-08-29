@@ -47,13 +47,14 @@ class SVGTranslationInjector:
         )
 
     def _finalize_switches(self, root) -> None:
-        # Fix old <svg:switch> tags if present
-
         if not self.config.sort_switches:
             return
 
         for elem in root.findall(".//svg:switch", namespaces={"svg": SVG_NS}):
+            # Fix old <svg:switch> tags if present
             elem.tag = "switch"
+
+            # Sort <svg:text> tags inside <svg:switch> tags
             sort_switch_texts(elem)
 
     def inject(

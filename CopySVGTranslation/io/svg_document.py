@@ -88,12 +88,12 @@ class SvgDocument:
     # ------------------------------------------------------------------
     def save(
         self,
-        path: Path | str | None = None,
+        savepath: Path | str | None = None,
         *,
         pretty_print: bool | None = None,
         create_parents: bool | None = None,
     ) -> Path:
-        target = Path(path) if path is not None else self.path
+        target = Path(savepath) if savepath is not None else self.path
         if target is None:
             raise ValueError("No target path provided for save")
 
