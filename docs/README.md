@@ -22,6 +22,7 @@ subsystem in depth.
 -   [injection.md](injection.md) — applying a mapping to an SVG.
 -   [preparation.md](preparation.md) — the ordered `PreparationStep` pipeline that
     normalizes an arbitrary SVG.
+-   [titles.md](titles.md) — year-aware title templating and expansion.
 
 ## Maintenance operations
 
@@ -32,12 +33,12 @@ subsystem in depth.
 
 ## How the modules map to these docs
 
-| Package                                      | Primary doc                                                                  |
-| -------------------------------------------- | ---------------------------------------------------------------------------- |
-| `CopySVGTranslation/service.py`              | [architecture.md](architecture.md), [getting-started.md](getting-started.md) |
-| `CopySVGTranslation/extraction/`             | [extraction.md](extraction.md)                                               |
-| `CopySVGTranslation/injection/`              | [injection.md](injection.md)                                                 |
-| `CopySVGTranslation/preparation/`            | [preparation.md](preparation.md)                                             |
-| `CopySVGTranslation/nested/`                 | [nested-structures.md](nested-structures.md)                                 |
-| `CopySVGTranslation/switch_order_checker.py` | [switch-ordering.md](switch-ordering.md)                                     |
-| `CopySVGTranslation/core/`                   | [data-models.md](data-models.md)                                             |
+| Package                           | Primary doc                                                                  |
+| --------------------------------- | ---------------------------------------------------------------------------- |
+| `CopySVGTranslation/service.py`   | [architecture.md](architecture.md), [getting-started.md](getting-started.md) |
+| `CopySVGTranslation/extraction/`  | [extraction.md](extraction.md)                                               |
+| `CopySVGTranslation/injection/`   | [injection.md](injection.md)                                                 |
+| `CopySVGTranslation/preparation/` | [preparation.md](preparation.md)                                             |
+| `CopySVGTranslation/titles/`      | [titles.md](titles.md)                                                       |
+| `CopySVGTranslation/utils/`       | [architecture.md](architecture.md)                                           |
+| `CopySVGTranslation/io/`          | [architecture.md](architecture.md)                                           |

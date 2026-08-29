@@ -4,4 +4,4 @@ This package contains shared utility functions for text processing and XML/SVG m
 
 For detailed documentation, see:
 
-→ [Utils Documentation](../../docs/refactor/utils.md)
+→ [Architecture Documentation](../../docs/architecture.md)
