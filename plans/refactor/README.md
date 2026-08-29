@@ -537,9 +537,14 @@ class SVGTranslationService:
 
         # Merge warnings from extract_result into inject_result
         merged_warnings = extract_result.warnings + inject_result.warnings
-        return OperationResult(
-            success=inject_result.success,
-            data=inject_result.data,
+        if inject_result.success:
+            return OperationResult.ok(
+                data=inject_result.data,
+                stats=inject_result.stats,
+                warnings=merged_warnings,
+            )
+
+        return OperationResult.fail(
             stats=inject_result.stats,
             error=inject_result.error,
             error_code=inject_result.error_code,
