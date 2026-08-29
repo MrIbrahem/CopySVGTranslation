@@ -709,7 +709,7 @@ class TestExtractorInjectorE2E(TestSetup):
         assert extract_result.error is None
 
         # Inject
-        injector = SVGTranslationInjector()
+        injector = SVGTranslationInjector(TranslationConfig(sort_switches=False))
         inject_result = injector.inject(
             svg_path=target_svg,
             mapping=extract_result.to_json(),

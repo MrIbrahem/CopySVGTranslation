@@ -69,7 +69,11 @@ class TranslationConfig:
     prepare_before_extraction: bool = False
     """Run SvgPreparationPipeline before extraction to make non-prepared SVG text translatable."""
 
-    sort_switches: bool = False
+    sort_switches: bool = True
+    """
+    Sort <text> elements inside each <switch> so that elements without systemLanguage attribute come last.
+    NOTE: without sort_switches=True, files will not show translations in commons.wikimedia.org.
+    """
 
     # --- Logging / diagnostics ---
     collect_warnings: bool = True
