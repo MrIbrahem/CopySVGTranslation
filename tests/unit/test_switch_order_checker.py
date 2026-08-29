@@ -122,6 +122,7 @@ class TestSortSwitches:
 
         root = etree.parse(str(out)).getroot()
         switch = root.find(f".//{{{SVG_NS}}}switch")
+        assert switch is not None
         texts = switch.findall(f"{{{SVG_NS}}}text")
         assert texts[-1].get("systemLanguage") is None
 
@@ -130,8 +131,9 @@ class TestSortSwitches:
         checker = SwitchOrderChecker(TranslationConfig())
 
         # are_switches_sorted short-circuits to False, so sort_switches
-        # never opens the file and reports no modification.
-        assert checker.sort_switches(svg) is False
+        # attempts the load and surfaces FileNotFoundError.
+        with pytest.raises(FileNotFoundError):
+            checker.sort_switches(svg)
 
     def test_sort_raises_on_unparseable_content(self, tmp_path: Path):
         # File exists but is not valid XML: are_switches_sorted returns False,
@@ -140,5 +142,5 @@ class TestSortSwitches:
         svg.write_text("<svg><switch>", encoding="utf-8")
         checker = SwitchOrderChecker(TranslationConfig())
 
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             checker.sort_switches(svg)
