@@ -83,12 +83,14 @@ class SVGTranslationService:
             )
         try:
             resolved_output = self._resolve_output_path(output) if output else None
+
             result = self._nested.repair_file(
                 source=Path(svg_path),
                 output=resolved_output,
                 strategy=strategy or self.config.nested_strategy,
                 save=save,
             )
+
             if not result.success:
                 return OperationResult.fail(
                     error="; ".join(result.warnings) if result.warnings else "Repair failed",

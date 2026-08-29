@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-
+import re
 from lxml import etree
 
 from ..config import TranslationConfig
@@ -51,6 +51,8 @@ class SvgDocument:
         *,
         config: TranslationConfig | None = None,
     ) -> SvgDocument:
+        # if not path: raise FileNotFoundError(f"SVG file not found: {path}")
+
         path = Path(path)
         config = config or TranslationConfig()
 
@@ -60,13 +62,14 @@ class SvgDocument:
         parser = etree.XMLParser(
             remove_blank_text=config.remove_blank_text,
             resolve_entities=False,
+            no_network=True,
         )
 
         try:
             tree = etree.parse(str(path), parser)
         except (etree.XMLSyntaxError, OSError) as exc:
             logger.error("Failed to parse SVG %s: %s", path, exc)
-            raise
+            raise SvgStructureError(code="structure-error-bad-xml") from exc
 
         doc = cls(tree, path=path, config=config)
         doc._ensure_namespace()
@@ -77,7 +80,6 @@ class SvgDocument:
     # ------------------------------------------------------------------
     def _ensure_namespace(self) -> None:
         """Guarantee the document has a proper default SVG namespace."""
-        import re
 
         default_ns = self.root.nsmap.get(None)
         if default_ns is None or re.match(r"^(&[^;]+;)+$", str(default_ns)):

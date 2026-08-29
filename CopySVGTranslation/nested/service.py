@@ -9,7 +9,10 @@ from pathlib import Path
 
 from lxml import etree
 
+from ..exceptions import SvgStructureError
+
 from ..config import TranslationConfig
+from ..io import SvgDocument
 from ..io.svg_writer import write_svg
 from .detector import NestedTspanDetector
 from .flattener import NestedStrategy, NestedTspanFlattener
@@ -91,31 +94,29 @@ class NestedStructureService:
         Repair nested tags in a file and write the result to another file.
         """
         src_path = Path(str(source)) if source else None
-
-        if not src_path or not src_path.exists():
-            return RepairResult(
-                success=False,
-                len_tags_before_fix=0,
-                len_tags_after_fix=0,
+        try:
+            doc: SvgDocument = SvgDocument.load(src_path, config=self.config)
+        except FileNotFoundError:
+            logger.error(f"SVG file not found: {src_path}")
+            return RepairResult.fail(
                 warnings=[f"Source file does not exist: {src_path}"],
+            )
+        except SvgStructureError as exc:
+            logger.error(f"Failed to parse SVG file {src_path}: {exc}")
+            return RepairResult.fail(
+                warnings=[f"Failed to parse source file: {src_path}"],
             )
 
         # Parse source file
-        tree = self._get_tree(src_path)
+        tree = doc.tree
         if tree is None:
-            return RepairResult(
-                success=False,
-                len_tags_before_fix=0,
-                len_tags_after_fix=0,
+            return RepairResult.fail(
                 warnings=[f"Failed to parse source file: {src_path}"],
             )
         root = tree.getroot()
 
         if root is None:
-            return RepairResult(
-                success=False,
-                len_tags_before_fix=0,
-                len_tags_after_fix=0,
+            return RepairResult.fail(
                 warnings=["Empty SVG root"],
             )
 
@@ -136,10 +137,7 @@ class NestedStructureService:
         strategy: NestedStrategy | None = None,
     ) -> RepairResult:
         if root is None:
-            return RepairResult(
-                success=False,
-                len_tags_before_fix=0,
-                len_tags_after_fix=0,
+            return RepairResult.fail(
                 warnings=["Empty SVG root"],
             )
 
@@ -159,23 +157,18 @@ class NestedStructureService:
             # Count after fix
             len_after = len(self.detector.find_in_tree(root))
 
-            result = RepairResult(
-                success=True,
-                len_tags_before_fix=len_before,
-                len_tags_after_fix=len_after,
+            result = RepairResult.ok(
+                len_before=len_before,
+                len_after=len_after,
             )
 
         except Exception as exc:
             logger.error("Failed to repair: %s", exc)
-            result = RepairResult(
-                success=False,
-                len_tags_before_fix=0,
-                len_tags_after_fix=0,
+            result = RepairResult.fail(
                 warnings=[str(exc)],
             )
 
         return result
-
 
 __all__ = [
     "NestedStructureService",
