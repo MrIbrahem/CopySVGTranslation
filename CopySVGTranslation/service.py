@@ -266,7 +266,8 @@ class SVGTranslationService:
         )
 
     def check_switches_sorted(
-        self, svg_path: Path | str
+        self,
+        svg_path: Path | str,
     ) -> OperationResult[bool]:
         """Check whether every <switch> in the file is already sorted.
 
@@ -274,7 +275,8 @@ class SVGTranslationService:
         :meth:`sort_switches` to fix and re-upload to commons.
         """
         try:
-            return OperationResult.ok(data=self.switch_order_checker.are_switches_sorted(svg_path))
+            result = self.switch_order_checker.are_switches_sorted(svg_path)
+            return OperationResult.ok(data=result)
         except Exception as exc:
             return OperationResult.fail(
                 error=str(exc),
