@@ -1,0 +1,65 @@
+""""""
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+
+from .config import TranslationConfig
+from .io.svg_writer import write_svg
+from .preparation import SvgPreparationPipeline
+from .utils import are_switches_sorted, sort_switch_texts
+
+logger = logging.getLogger(__name__)
+SVG_NS = "http://www.w3.org/2000/svg"
+
+
+class SwitchOrderChecker:
+
+    def __init__(
+        self,
+        config: TranslationConfig,
+    ) -> None:
+        self.config = config
+        self.preparer = SvgPreparationPipeline(self.config)
+
+    def are_switches_sorted(self, svg_path: Path | str) -> bool:
+        """Return True if every <switch> in the file is already sorted.
+
+        Used as a pre-check: if False, the file can be fixed with
+        :meth:`sort_switches` and re-uploaded.
+        """
+        svg_path = Path(str(svg_path))
+        if not svg_path.exists():
+            logger.error(f"SVG file not found: {svg_path}")
+            return False
+        try:
+            tree, root = self.preparer.run(svg_path)
+        except Exception as exc:
+            logger.error("Failed to parse SVG file: %s", exc)
+            return False
+        if root is None:
+            return False
+        return are_switches_sorted(root)
+
+    def sort_switches(self, svg_path: Path | str, *, save_path: Path | None = None) -> bool:
+        """Sort every <switch> in the file in place and optionally save it.
+
+        Returns True if the file was modified (i.e. it was not already sorted).
+        """
+        if not self.are_switches_sorted(svg_path):
+            tree, root = self.preparer.run(Path(str(svg_path)))
+            if root is None or tree is None:
+                return False
+            for elem in root.findall(".//svg:switch", namespaces={"svg": SVG_NS}):
+                elem.tag = "switch"
+                sort_switch_texts(elem)
+            if save_path is not None:
+                write_svg(tree, save_path, config=self.config)
+            return True
+        return False
+
+
+__all__ = [
+    "SwitchOrderChecker",
+]

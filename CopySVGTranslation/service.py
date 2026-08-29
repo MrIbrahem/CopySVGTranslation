@@ -8,6 +8,8 @@ from typing import Any
 
 from lxml import etree
 
+from .switch_order_checker import SwitchOrderChecker
+
 from .config import TranslationConfig
 from .core.mapping import InjectorData, TranslationMapping
 from .extraction.extractor import SVGTranslationExtractor
@@ -35,6 +37,7 @@ class SVGTranslationService:
         self._extractor = SVGTranslationExtractor(self.config)
         self._injector = SVGTranslationInjector(self.config)
         self._mapping_store = MappingStore(self.config)
+        self.switch_order_checker = SwitchOrderChecker(self.config)
         self._nested = NestedStructureService(
             strategy=self.config.nested_strategy,
             also_fix_a=True,
@@ -256,6 +259,44 @@ class SVGTranslationService:
             error_code=inject_result.error_code,
             warnings=merged_warnings,
         )
+
+    def check_switches_sorted(
+        self, svg_path: Path | str
+    ) -> OperationResult[bool]:
+        """Check whether every <switch> in the file is already sorted.
+
+        Returns ``True`` when all switches are sorted. If ``False``, call
+        :meth:`sort_switches` to fix and re-upload to commons.
+        """
+        try:
+            return OperationResult.ok(data=self.switch_order_checker.are_switches_sorted(svg_path))
+        except Exception as exc:
+            return OperationResult.fail(
+                error=str(exc),
+                error_code=getattr(exc, "code", "check_sorted_error"),
+            )
+
+    def sort_switches(
+        self,
+        svg_path: Path | str,
+        *,
+        output: Path | str | None = None,
+    ) -> OperationResult[bool]:
+        """Sort every <switch> in the file and optionally save it.
+
+        Returns ``True`` if the file was modified (was not already sorted).
+        """
+        try:
+            resolved_output = self._resolve_output_path(output) if output else None
+            modified = self.switch_order_checker.sort_switches(
+                svg_path, save_path=resolved_output
+            )
+            return OperationResult.ok(data=modified)
+        except Exception as exc:
+            return OperationResult.fail(
+                error=str(exc),
+                error_code=getattr(exc, "code", "sort_switches_error"),
+            )
 
     def prepare_only(
         self,
