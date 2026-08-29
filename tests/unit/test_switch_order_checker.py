@@ -126,18 +126,18 @@ class TestSortSwitches:
         texts = switch.findall(f"{{{SVG_NS}}}text")
         assert texts[-1].get("systemLanguage") is None
 
-    def test_sort_returns_false_on_missing_file(self, tmp_path: Path):
+    def test_sort_raises_on_missing_file(self, tmp_path: Path):
         svg = tmp_path / "missing.svg"
         checker = SwitchOrderChecker(TranslationConfig())
 
-        # are_switches_sorted short-circuits to False, so sort_switches
-        # attempts the load and surfaces FileNotFoundError.
+        # sort_switches loads the file and surfaces FileNotFoundError
+        # when it is missing.
         with pytest.raises(FileNotFoundError):
             checker.sort_switches(svg)
 
     def test_sort_raises_on_unparseable_content(self, tmp_path: Path):
-        # File exists but is not valid XML: are_switches_sorted returns False,
-        # so sort_switches attempts the load and propagates the parse error.
+        # File exists but is not valid XML: sort_switches loads the file and
+        # propagates the parse error.
         svg = tmp_path / "bad.svg"
         svg.write_text("<svg><switch>", encoding="utf-8")
         checker = SwitchOrderChecker(TranslationConfig())
