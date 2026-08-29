@@ -5,9 +5,10 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
+from .io import SvgDocument
+
 from .config import TranslationConfig
 from .io.svg_writer import write_svg
-from .preparation import SvgPreparationPipeline
 from .utils import are_switches_sorted, sort_switch_texts
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,6 @@ class SwitchOrderChecker:
         config: TranslationConfig,
     ) -> None:
         self.config = config
-        self.preparer = SvgPreparationPipeline(self.config)
 
     def are_switches_sorted(self, svg_path: Path | str) -> bool:
         """Return True if every <switch> in the file is already sorted.
@@ -34,7 +34,9 @@ class SwitchOrderChecker:
             logger.error(f"SVG file not found: {svg_path}")
             return False
         try:
-            tree, root = self.preparer.run(svg_path)
+            doc = SvgDocument.load(svg_path, config=self.config)
+            tree = doc.tree
+            root = doc.root
         except Exception as exc:
             logger.error("Failed to parse SVG file: %s", exc)
             return False
@@ -48,12 +50,16 @@ class SwitchOrderChecker:
         Returns True if the file was modified (i.e. it was not already sorted).
         """
         if not self.are_switches_sorted(svg_path):
-            tree, root = self.preparer.run(Path(str(svg_path)))
+            doc = SvgDocument.load(svg_path, config=self.config)
+            tree = doc.tree
+            root = doc.root
             if root is None or tree is None:
                 return False
+
             for elem in root.findall(".//svg:switch", namespaces={"svg": SVG_NS}):
                 elem.tag = "switch"
                 sort_switch_texts(elem)
+
             if save_path is not None:
                 write_svg(tree, save_path, config=self.config)
             return True
