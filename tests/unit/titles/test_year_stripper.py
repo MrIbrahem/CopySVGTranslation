@@ -310,7 +310,7 @@ class TestAddTranslationsFromTitles:
         assert result is translations
 
 
-class TestAddTranslationsWithExtractorData:
+class TestAddTranslationsWithTranslationMapping:
 
     def test_adds_translations(self):
         data = {

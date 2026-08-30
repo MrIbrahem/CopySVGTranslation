@@ -62,13 +62,14 @@ def test_match_header_tags(temp_dir: Path):
     assert file is not None
 
 
-def test_extract_with_string_path_zz(fixtures_dir) -> None:
+def test_extract_svg_with_string_path(fixtures_dir) -> None:
     """extract should work with string paths."""
     source_path = str(fixtures_dir / "Parkinsons disease prevalence ihme, World, 1990.svg")
 
     service = SVGTranslationService()
     _result = service.extract(source_path)
     assert _result.success
+    assert _result.data is not None
     result = _result.data.to_json()
 
     assert result is not None
