@@ -45,42 +45,26 @@ class NestedStructureService:
         Detect nested tspan/a structures. Read-only.
         Returns a list of XML strings representing the nested elements found.
         """
-        path = Path(source)
-        if not path.exists():
-            logger.error("File does not exist: %s", path)
+        try:
+            doc: SvgDocument = SvgDocument.load(source, config=self.config)
+        except FileNotFoundError:
+            logger.error("File does not exist: %s", source)
+            return []
+        except SvgStructureError as exc:
+            logger.error(f"Failed to parse SVG file {source}: {exc.code}")
             return []
 
-        tree = self._get_tree(path, remove_blank_text=True)
+        tree = doc.tree
         if tree is None:
             return []
 
+        root = doc.root
+
         try:
-            root = tree.getroot()
-
-            if root is None:
-                return []
-
             return self.detector.find_in_tree_return_list(root)
         except (etree.XMLSyntaxError, OSError) as exc:
-            logger.error("Failed to parse %s: %s", path, exc)
+            logger.error("Failed to parse %s: %s", source, exc)
             return []
-
-    def _get_tree(
-        self,
-        path: Path | str,
-        remove_blank_text: bool = False,
-    ):
-        parser = etree.XMLParser(
-            remove_blank_text=remove_blank_text,
-            resolve_entities=False,
-            no_network=True,
-        )
-        try:
-            tree = etree.parse(str(path), parser)
-            return tree
-        except (etree.XMLSyntaxError, OSError) as exc:
-            logger.error(f"Failed to parse SVG file {path}: {exc}")
-            return None
 
     def repair_file(
         self,
