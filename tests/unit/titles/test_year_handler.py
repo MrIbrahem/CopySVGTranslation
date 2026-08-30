@@ -147,9 +147,13 @@ class TestBuildTemplatesNew:
     def test_skips_translation_without_year(self):
         handler = YearTitleHandler()
         mapping = TranslationMapping(new={"Text 2020": {"ar": "بدون سنة"}})
-        handler.build_templates(mapping)
+
+        data = handler.build_title_new_templates(mapping.new, set_key_with_empty_value=False)
         # Translation doesn't end with 2020, so it should be skipped
-        assert mapping.title_new == {}
+        assert data == {}
+
+        data1 = handler.build_title_new_templates(mapping.new, set_key_with_empty_value=True)
+        assert data1 == {"Text {year}": {}}
 
 
 class TestExpandForTexts:
@@ -232,7 +236,9 @@ class TestEnrichMappingForSwitch:
         assert mapping.new == original_new
 
 
-def make_new_title_translations(new: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
+def make_new_title_translations(
+    new: dict[str, dict[str, str]], set_key_with_empty_value: bool = True
+) -> dict[str, dict[str, str]]:
     """
     Extract valid title translations by verifying that all translations in a mapping
     end with the same 4-digit year as the key.
@@ -242,7 +248,7 @@ def make_new_title_translations(new: dict[str, dict[str, str]]) -> dict[str, dic
     year_handler = YearTitleHandler(config)
     mapping = TranslationMapping(new=new)
 
-    data = year_handler.build_title_new_templates(mapping.new)
+    data = year_handler.build_title_new_templates(mapping.new, set_key_with_empty_value=set_key_with_empty_value)
     if data:
         mapping.title_new.update(data)
 
@@ -434,6 +440,8 @@ class TestGetNewTitlesTranslationsNew:
             "medication, devices, and therapies can help manage symptoms and improve quality of life for those with parkinson's.": {},
         }
 
-        title_new = make_new_title_translations(new_data)
-
+        title_new = make_new_title_translations(new_data, set_key_with_empty_value=False)
         assert title_new == {}
+
+        title_new1 = make_new_title_translations(new_data, set_key_with_empty_value=True)
+        assert title_new1 == {"parkinson's disease prevalence, {year}": {}}

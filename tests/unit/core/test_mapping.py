@@ -260,3 +260,54 @@ class TestMerge:
             "meta": {},
             "error": "",
         }
+
+
+# ===========================================================================
+# TranslationMapping dataclass tests
+# ===========================================================================
+
+
+class TestTranslationMapping:
+    """Tests for the TranslationMapping dataclass."""
+
+    def test_default_values(self):
+        data = TranslationMapping()
+        assert data.new == {}
+        assert data.tspans_by_id == {}
+        assert data.title_new == {}
+        assert data.error is None
+
+    def test_to_json_returns_dict(self):
+        data = TranslationMapping()
+        result = data.to_json()
+        assert isinstance(result, dict)
+        assert "new" in result
+        assert "tspans_by_id" in result
+        assert "title_new" in result
+        assert "error" in result
+
+        assert result == {"new": {}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
+
+    def test_to_json_reflects_data(self):
+        data = TranslationMapping(
+            new={"hello": {"ar": "مرحبا"}},
+            tspans_by_id={"t0": "Hello"},
+            title_new={},
+            error="",
+        )
+        result = data.to_json()
+        assert result["new"] == {"hello": {"ar": "مرحبا"}}
+        assert result["tspans_by_id"] == {"t0": "Hello"}
+        assert result["title_new"] == {}
+
+    def test_to_json_error_field(self):
+        data = TranslationMapping(error="File not found")
+        result = data.to_json()
+        assert result["error"] == "File not found"
+
+    def test_fields_are_independent(self):
+        """Each instance should have independent mutable defaults."""
+        a = TranslationMapping()
+        b = TranslationMapping()
+        a.new["key"] = {"ar": "val"}
+        assert "key" not in b.new

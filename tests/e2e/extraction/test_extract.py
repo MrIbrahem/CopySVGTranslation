@@ -116,13 +116,31 @@ class TestExtractor:
                 """,
             encoding="utf-8",
         )
-        service = SVGTranslationService()
+        service = SVGTranslationService(TranslationConfig(set_key_with_empty_value=False))
         _result = service.extract(svg)
         assert _result.success
         assert _result.data is not None
         result = _result.data.to_json()
 
-        assert result == {"new": {"population 2020": {}}, "tspans_by_id": {}, "title_new": {}, "meta": {}, "error": ""}
+        assert result["new"] == {"population 2020": {}}
+
+        assert result == {
+            "new": {"population 2020": {}},
+            "tspans_by_id": {},
+            "title_new": {},
+            "meta": {},
+            "error": "",
+        }
+
+        # test set_key_with_empty_value = True
+        service1 = SVGTranslationService(TranslationConfig(set_key_with_empty_value=True))
+        _result = service1.extract(svg)
+        assert _result.data is not None
+        result2 = _result.data.to_json()
+
+        assert result2["new"] == {"population 2020": {}}
+
+        assert result2["title_new"] == {"population {year}": {}}
 
     def test_extract_empty_tspans(self, temp_dir):
         """Test extraction with empty tspan elements."""
