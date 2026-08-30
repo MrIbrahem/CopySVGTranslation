@@ -37,7 +37,7 @@ class TranslationConfig:
     create_lang_template: bool = False
     """Create a template for the language name in process_new_header_titles if replace_year_with_placeholder return empty value."""
 
-    set_key_with_empty_value: bool = False
+    set_key_with_empty_value: bool = True
     """Set empty dict values for title_new, example: "title_new": {"population {year}": {}}. """
 
     enable_year_titles: bool = True
