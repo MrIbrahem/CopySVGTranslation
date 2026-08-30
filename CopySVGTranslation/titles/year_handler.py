@@ -47,20 +47,6 @@ class YearTitleHandler:
 
         return ""
 
-    def bulid_lang_template(self, value: str, lang: str) -> str:
-        """
-        "dag": "Parkinson's doro yɔlibu biɛɣigu ni, yuuni 1990 puli ni",
-        "ca": "Prevalència de la malaltia de Parkinson",
-        """
-        if re.sub(r"\d{4}", "", value) == value:
-            return f"{value}, {{year}}"
-
-        if lang == "dag" and "," in value:
-            value = value.split(",", maxsplit=1)[0]
-            return self.bulid_lang_template(value, "")
-
-        return ""
-
     @staticmethod
     def replace_year_with_placeholder(text: str, year: str) -> str:
         """
@@ -82,47 +68,19 @@ class YearTitleHandler:
         """Replace '{year}' placeholder with a concrete year."""
         return template.replace("{year}", year)
 
-    # ------------------------------------------------------------------
-    # Extraction side
-    # ------------------------------------------------------------------
-
-    def process_header_titles(self, mapping: TranslationMapping) -> bool:
+    def bulid_lang_template(self, value: str, lang: str) -> str:
         """
-        Extract titles with years from mapping.meta['header'], template them,
-        strip their years, and merge the year-free translations into mapping.new.
-        Respects enable_year_titles (self.enabled) and config.create_lang_template.
-        Returns True if mapping.new was modified.
+        "dag": "Parkinson's doro yɔlibu biɛɣigu ni, yuuni 1990 puli ni",
+        "ca": "Prevalència de la malaltia de Parkinson",
         """
-        # if not self.enabled: return False
+        if re.sub(r"\d{4}", "", value) == value:
+            return f"{value}, {{year}}"
 
-        if not self.config.create_lang_template:
-            return False
+        if lang == "dag" and "," in value:
+            value = value.split(",", maxsplit=1)[0]
+            return self.bulid_lang_template(value, "")
 
-        header = mapping.meta.get("header", {})
-        if not header:
-            return False
-
-        extra_titles_new = self.build_title_new_templates(header, create_lang_template=True)
-
-        if not extra_titles_new:
-            return False
-
-        # Create new object with new titles, so we don't modify the original title_new or overwrite it
-        new_object = TranslationMapping.from_any({"title_new": extra_titles_new})
-
-        changed = merge_year_free_into_new(new_object)
-
-        if not changed:
-            return False
-
-        # Capture the destination state before merging
-        before_new = copy.deepcopy(mapping.new)
-
-        # Merge translations per-key, preserving existing language translations
-        mapping.merge(new_object, merge_keys=["new"])
-
-        # Return True only when the merge adds or changes destination entries
-        return before_new != mapping.new
+        return ""
 
     def build_templates(self, mapping: TranslationMapping) -> None:
         """
@@ -281,6 +239,48 @@ class YearTitleHandler:
             key = source.lower() if case_insensitive else source
             working.new.setdefault(key, {}).update(trans)
         return working
+
+    # ------------------------------------------------------------------
+    # Extraction side
+    # ------------------------------------------------------------------
+
+    def process_header_titles(self, mapping: TranslationMapping) -> bool:
+        """
+        Extract titles with years from mapping.meta['header'], template them,
+        strip their years, and merge the year-free translations into mapping.new.
+        Respects enable_year_titles (self.enabled) and config.create_lang_template.
+        Returns True if mapping.new was modified.
+        """
+        # if not self.enabled: return False
+
+        if not self.config.create_lang_template:
+            return False
+
+        header = mapping.meta.get("header", {})
+        if not header:
+            return False
+
+        extra_titles_new = self.build_title_new_templates(header, create_lang_template=True)
+
+        if not extra_titles_new:
+            return False
+
+        # Create new object with new titles, so we don't modify the original title_new or overwrite it
+        new_object = TranslationMapping.from_any({"title_new": extra_titles_new})
+
+        changed = merge_year_free_into_new(new_object)
+
+        if not changed:
+            return False
+
+        # Capture the destination state before merging
+        before_new = copy.deepcopy(mapping.new)
+
+        # Merge translations per-key, preserving existing language translations
+        mapping.merge(new_object, merge_keys=["new"])
+
+        # Return True only when the merge adds or changes destination entries
+        return before_new != mapping.new
 
 __all__ = [
     "YearTitleHandler",
