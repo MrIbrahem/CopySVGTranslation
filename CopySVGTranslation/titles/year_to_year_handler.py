@@ -62,7 +62,7 @@ class YearTitleHandlerNew:
 
         return ""
 
-    def extend_translations(
+    def _extend_translations(
         self,
         one_year_translations: dict[str, str],
     ) -> dict[str, str]:
@@ -164,13 +164,13 @@ class YearTitleHandlerNew:
         data = {}
         for map in en_keys_to_work:
             translations = mapping.new[map.source]
-            sub_source = map.source.replace("{year1} to {year2}", "{year}")
+            sub_source = map.source_template.replace("{year1} to {year2}", "{year}")
 
             templated: dict[str, str] = {}
 
             if sub_source in mapping.title_new:
                 sub_data = {x:v for x, v in mapping.title_new[sub_source].items() if x not in translations}
-                templated = self.extend_translations(sub_data)
+                templated = self._extend_translations(sub_data)
 
             if translations:
                 for lang, value in translations.items():

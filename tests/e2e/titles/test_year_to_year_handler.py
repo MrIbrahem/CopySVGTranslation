@@ -196,7 +196,7 @@ class TestWhatTODODone:
 
     def test_extend_translations_diff(self):
         title_new = {"ar": "إنتاج النبيذ، {year}"}
-        result = self.service.extend_translations(title_new)
+        result = self.service._extend_translations(title_new)
 
         assert result == {"ar": "إنتاج النبيذ، {year1} إلى {year2}"}
 
