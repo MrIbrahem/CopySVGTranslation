@@ -88,6 +88,7 @@ def sort_switch_children(
     for t in texts_sorted:
         switch.append(t)
 
+
 def is_switch_sorted(switch: etree._Element) -> bool:
     """Return True if the <text> children of a single <switch> are in sorted order.
 

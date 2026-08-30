@@ -6,7 +6,6 @@ from CopySVGTranslation.core.mapping import InjectorData
 from CopySVGTranslation.utils.xml import extract_root_languages
 
 
-
 def write_svg(tmp_path: Path, content: str) -> Path:
     svg_path = tmp_path / "sample.svg"
     svg_path.write_text(textwrap.dedent(content), encoding="utf-8")
