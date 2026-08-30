@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from pathlib import Path
 
 from lxml import etree
@@ -51,6 +52,32 @@ class SvgDocument:
         *,
         config: TranslationConfig | None = None,
     ) -> SvgDocument:
+        """
+        Load an SVG document from a specified file path.
+
+        Args:
+            path (Path | str): The path to the SVG file to be loaded.
+            config (TranslationConfig | None, optional): An optional translation
+                configuration object. If None, a default TranslationConfig is
+                used. Defaults to None.
+
+        Returns:
+            SvgDocument: The loaded SVG document instance.
+
+        Raises:
+            FileNotFoundError: If the specified path does not exist.
+            SvgStructureError: If the SVG file contains invalid XML syntax or
+                cannot be parsed due to an OS error.
+
+        Note:
+            The XML parser is configured with `resolve_entities=False` and
+            `no_network=True` for security. Blank text removal is controlled
+            by the `config.remove_blank_text` setting.
+        """
+
+        if not path:
+            raise FileNotFoundError(f"SVG file not found: {path}")
+
         path = Path(path)
         config = config or TranslationConfig()
 
@@ -60,13 +87,14 @@ class SvgDocument:
         parser = etree.XMLParser(
             remove_blank_text=config.remove_blank_text,
             resolve_entities=False,
+            no_network=True,
         )
 
         try:
             tree = etree.parse(str(path), parser)
         except (etree.XMLSyntaxError, OSError) as exc:
             logger.error("Failed to parse SVG %s: %s", path, exc)
-            raise
+            raise SvgStructureError(code="structure-error-bad-xml") from exc
 
         doc = cls(tree, path=path, config=config)
         doc._ensure_namespace()
@@ -76,8 +104,9 @@ class SvgDocument:
     # Namespace helper
     # ------------------------------------------------------------------
     def _ensure_namespace(self) -> None:
-        """Guarantee the document has a proper default SVG namespace."""
-        import re
+        """
+        Guarantee the document has a proper default SVG namespace.
+        """
 
         default_ns = self.root.nsmap.get(None)
         if default_ns is None or re.match(r"^(&[^;]+;)+$", str(default_ns)):
@@ -88,12 +117,12 @@ class SvgDocument:
     # ------------------------------------------------------------------
     def save(
         self,
-        path: Path | str | None = None,
+        savepath: Path | str | None = None,
         *,
         pretty_print: bool | None = None,
         create_parents: bool | None = None,
     ) -> Path:
-        target = Path(path) if path is not None else self.path
+        target = Path(savepath) if savepath is not None else self.path
         if target is None:
             raise ValueError("No target path provided for save")
 

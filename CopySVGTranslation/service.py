@@ -8,8 +8,6 @@ from typing import Any
 
 from lxml import etree
 
-from .switch_order_checker import SwitchOrderChecker
-
 from .config import TranslationConfig
 from .core.mapping import InjectorData, TranslationMapping
 from .extraction.extractor import SVGTranslationExtractor
@@ -19,6 +17,7 @@ from .io.output_paths import resolve_svg_output_path
 from .io.svg_writer import write_svg
 from .nested import NestedStructureService
 from .result import OperationResult
+from .switch_order_checker import SwitchOrderChecker
 
 logger = logging.getLogger(__name__)
 
@@ -83,12 +82,14 @@ class SVGTranslationService:
             )
         try:
             resolved_output = self._resolve_output_path(output) if output else None
+
             result = self._nested.repair_file(
                 source=Path(svg_path),
                 output=resolved_output,
                 strategy=strategy or self.config.nested_strategy,
                 save=save,
             )
+
             if not result.success:
                 return OperationResult.fail(
                     error="; ".join(result.warnings) if result.warnings else "Repair failed",
@@ -295,9 +296,7 @@ class SVGTranslationService:
         """
         try:
             resolved_output = self._resolve_output_path(output) if output else None
-            modified = self.switch_order_checker.sort_switches(
-                svg_path, save_path=resolved_output
-            )
+            modified = self.switch_order_checker.sort_switches(svg_path, save_path=resolved_output)
             return OperationResult.ok(data=modified)
         except Exception as exc:
             return OperationResult.fail(

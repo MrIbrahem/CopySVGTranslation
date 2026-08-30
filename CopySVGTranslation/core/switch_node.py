@@ -1,6 +1,7 @@
 # core/switch_node.py
 from __future__ import annotations
 
+import re
 from collections.abc import Iterator
 from dataclasses import dataclass
 
@@ -57,7 +58,6 @@ class SwitchNode:
         def sort_key(n: TextNode):
             lang = n.language or "fallback"
             # Prefer numeric part of trsvg IDs when present
-            import re
 
             m = re.search(r"trsvg(\d+)", n.id or "")
             num = int(m.group(1)) if m else 10**9

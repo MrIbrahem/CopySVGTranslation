@@ -5,10 +5,8 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from .io import SvgDocument
-
 from .config import TranslationConfig
-from .io.svg_writer import write_svg
+from .io import SvgDocument
 from .utils import are_switches_sorted, sort_switch_texts
 
 logger = logging.getLogger(__name__)
@@ -53,21 +51,23 @@ class SwitchOrderChecker:
 
         Returns True if the file was modified (i.e. it was not already sorted).
         """
-        if not self.are_switches_sorted(svg_path):
-            doc = SvgDocument.load(svg_path, config=self.config)
-            tree = doc.tree
-            root = doc.root
-            if root is None or tree is None:
-                return False
+        doc: SvgDocument = SvgDocument.load(svg_path, config=self.config)
+        root = doc.root
+        tree = doc.tree
 
-            for elem in root.findall(".//svg:switch", namespaces={"svg": SVG_NS}):
-                elem.tag = "switch"
-                sort_switch_texts(elem)
+        if root is None or tree is None:
+            return False
 
-            if save_path is not None:
-                write_svg(tree, save_path, config=self.config)
-            return True
-        return False
+        # Already correctly ordered -> nothing to do (load once, no second parse).
+        if are_switches_sorted(root):
+            return False
+
+        for elem in root.findall(".//svg:switch", namespaces={"svg": SVG_NS}):
+            sort_switch_texts(elem)
+
+        if save_path is not None:
+            doc.save(savepath=save_path)
+        return True
 
 
 __all__ = [

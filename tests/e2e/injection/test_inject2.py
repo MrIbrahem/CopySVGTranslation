@@ -87,7 +87,9 @@ class Testinject:
         # write to file
         tree.write(str(file), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
-        _service = SVGTranslationService(TranslationConfig(sort_switches=False, overwrite_translations=True, pretty_print=True))
+        _service = SVGTranslationService(
+            TranslationConfig(sort_switches=False, overwrite_translations=True, pretty_print=True)
+        )
         _result = _service.inject(
             svg_path=file,
             mapping=data,

@@ -11,7 +11,7 @@ from lxml import etree
 from ..config import TranslationConfig
 from ..core import SwitchNode, TextNode
 from ..core.mapping import TranslationMapping
-from ..exceptions import SvgIOError, SvgParseError
+from ..exceptions import SvgIOError, SvgParseError, SvgStructureError
 from ..io.svg_document import SvgDocument
 from ..titles import YearTitleHandler
 from ..utils.text import normalize_text
@@ -150,8 +150,8 @@ class SVGTranslationExtractor:
         except FileNotFoundError as exc:
             logger.error(f"SVG file not found: {path}")
             raise SvgIOError(f"SVG file not found: {path}") from exc
-        except (etree.XMLSyntaxError, OSError) as exc:
-            logger.error(f"Failed to parse SVG file {path}: {exc}")
+        except SvgStructureError as exc:
+            logger.error(f"Failed to parse SVG file {path}: {exc.code}")
             raise SvgParseError(f"Failed to parse SVG file: {exc}") from exc
 
         return self.extract_from_root(doc.root)
