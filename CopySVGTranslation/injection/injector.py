@@ -46,7 +46,7 @@ class SVGTranslationInjector:
             YearTitleHandler(self.config),
         )
 
-    def _finalize_switches(self, root) -> None:
+    def _finalize_switches(self, root: etree._Element) -> None:
         if not self.config.sort_switches:
             return
 

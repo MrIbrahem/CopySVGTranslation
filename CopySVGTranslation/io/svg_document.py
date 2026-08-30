@@ -52,7 +52,31 @@ class SvgDocument:
         *,
         config: TranslationConfig | None = None,
     ) -> SvgDocument:
-        # if not path: raise FileNotFoundError(f"SVG file not found: {path}")
+        """
+        Load an SVG document from a specified file path.
+
+        Args:
+            path (Path | str): The path to the SVG file to be loaded.
+            config (TranslationConfig | None, optional): An optional translation
+                configuration object. If None, a default TranslationConfig is
+                used. Defaults to None.
+
+        Returns:
+            SvgDocument: The loaded SVG document instance.
+
+        Raises:
+            FileNotFoundError: If the specified path does not exist.
+            SvgStructureError: If the SVG file contains invalid XML syntax or
+                cannot be parsed due to an OS error.
+
+        Note:
+            The XML parser is configured with `resolve_entities=False` and
+            `no_network=True` for security. Blank text removal is controlled
+            by the `config.remove_blank_text` setting.
+        """
+
+        if not path:
+            raise FileNotFoundError(f"SVG file not found: {path}")
 
         path = Path(path)
         config = config or TranslationConfig()
@@ -80,7 +104,9 @@ class SvgDocument:
     # Namespace helper
     # ------------------------------------------------------------------
     def _ensure_namespace(self) -> None:
-        """Guarantee the document has a proper default SVG namespace."""
+        """
+        Guarantee the document has a proper default SVG namespace.
+        """
 
         default_ns = self.root.nsmap.get(None)
         if default_ns is None or re.match(r"^(&[^;]+;)+$", str(default_ns)):

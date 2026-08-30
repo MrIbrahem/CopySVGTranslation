@@ -66,7 +66,7 @@ class NestedTspanDetector:
 
         return self.find_in_tree_return_list(root)
 
-    def find_in_tree_return_list(self, root) -> list[str]:
+    def find_in_tree_return_list(self, root: etree._Element) -> list[str]:
         nested = self.find_in_tree(root)
         return [
             etree.tostring(
