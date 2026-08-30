@@ -13,7 +13,7 @@ from ..exceptions import (
     SvgNestedTspanError,
     SvgStructureError,
 )
-from ..io.svg_writer import write_svg
+from ..io import SvgDocument
 from ..preparation import SvgPreparationPipeline
 from ..result import InjectorStats
 from ..titles import YearTitleHandler
@@ -142,7 +142,8 @@ class SVGTranslationInjector:
                 return result
 
             try:
-                write_svg(tree, save_path, config=self.config)
+                doc = SvgDocument(tree=tree, path=save_path, config=self.config)
+                doc.save()
             except OSError as e:
                 logger.error(f"Failed writing {str(save_path)}: {e}")
                 result.error.label = f"Failed writing {str(save_path)}: {e}"

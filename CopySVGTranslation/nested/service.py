@@ -12,7 +12,6 @@ from lxml import etree
 from ..config import TranslationConfig
 from ..exceptions import SvgStructureError
 from ..io import SvgDocument
-from ..io.svg_writer import write_svg
 from .detector import NestedTspanDetector
 from .flattener import NestedStrategy, NestedTspanFlattener
 from .objects import RepairResult
@@ -105,7 +104,12 @@ class NestedStructureService:
             if not out_path:
                 raise ValueError("new_path is None")
 
-            write_svg(root, out_path, config=self.config)
+            doc = SvgDocument(
+                tree=etree.ElementTree(root),
+                path=out_path,
+                config=self.config,
+            )
+            doc.save()
         return result
 
     def repair_root(

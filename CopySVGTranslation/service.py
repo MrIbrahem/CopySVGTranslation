@@ -12,9 +12,9 @@ from .config import TranslationConfig
 from .core.mapping import InjectorData, TranslationMapping
 from .extraction.extractor import SVGTranslationExtractor
 from .injection.injector import SVGTranslationInjector
+from .io import SvgDocument
 from .io.mapping_store import MappingStore
 from .io.output_paths import resolve_svg_output_path
-from .io.svg_writer import write_svg
 from .nested import NestedStructureService
 from .result import OperationResult
 from .switch_order_checker import SwitchOrderChecker
@@ -321,7 +321,8 @@ class SVGTranslationService:
             tree = self._injector.prepare(svg_path)
             if output:
                 resolved_output = self._resolve_output_path(output)
-                write_svg(tree, resolved_output, config=self.config)
+                doc = SvgDocument(tree=tree, path=resolved_output, config=self.config)
+                doc.save()
             return OperationResult.ok(data=tree)
         except Exception as exc:
             return OperationResult.fail(
