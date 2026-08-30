@@ -18,7 +18,7 @@ from ..preparation import SvgPreparationPipeline
 from ..result import InjectorStats
 from ..titles import YearTitleHandler
 from ..utils import sort_switch_texts
-from ..utils.xml import tree_languages
+from ..utils.xml import extract_root_languages
 from .id_manager import IdManager
 from .switch_processor import SwitchProcessor
 from .translation_applier import TranslationApplier
@@ -112,7 +112,7 @@ class SVGTranslationInjector:
         result.tree = tree
 
         # 2. Snapshot languages before
-        before_languages = tree_languages(tree)
+        before_languages = extract_root_languages(root)
         result.inject_stats.languages_before = sorted(before_languages)
 
         # 3. Seed IdManager with existing IDs
@@ -131,7 +131,7 @@ class SVGTranslationInjector:
         self._finalize_switches(root)
 
         # 6. Languages after + stats
-        after_languages = tree_languages(tree)
+        after_languages = extract_root_languages(root)
         self._update_data(result.inject_stats, before_languages, after_languages)
 
         if save:

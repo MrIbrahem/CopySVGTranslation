@@ -12,7 +12,6 @@ from .xml import (
     sort_switch_children,
     sort_switch_texts,
     svg_tag,
-    tree_languages,
     xpath_svg,
 )
 
@@ -31,7 +30,6 @@ __all__ = [
     "xpath_svg",
     "collect_ids",
     "extract_root_languages",
-    "tree_languages",
     "sort_switch_children",
     "sort_switch_texts",
     "is_switch_sorted",

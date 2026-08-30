@@ -1,4 +1,3 @@
-# ruff: noqa: F401
 """
 Unit tests for CopySVGTranslation/injection/xml.py module.
 
@@ -24,7 +23,6 @@ from CopySVGTranslation.utils.xml import (
     sort_switch_children,
     sort_switch_texts,
     svg_tag,
-    tree_languages,
     xpath_svg,
 )
 
@@ -61,9 +59,7 @@ class TestElementsUtils:
         )
 
         root = etree.fromstring(svg)
-        tree = etree.ElementTree(root)
 
-        assert sorted(tree_languages(tree)) == ["en", "fr"]
         assert sorted(extract_root_languages(root)) == ["en", "fr"]
 
 
@@ -71,12 +67,6 @@ class TestExtractRootLanguages:
     """Tests for extract_root_languages function."""
 
     def test_extract_root_languages(self): ...
-
-
-class TestTreeLangs:
-    """Tests for tree_languages function."""
-
-    def test_tree_langs(self): ...
 
 
 class TestSortSwitchTexts(TestSetup):

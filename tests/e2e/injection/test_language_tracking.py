@@ -3,9 +3,8 @@ from pathlib import Path
 
 from CopySVGTranslation import SVGTranslationService
 from CopySVGTranslation.core.mapping import InjectorData
-from CopySVGTranslation.utils.xml import (
-    tree_languages,
-)
+from CopySVGTranslation.utils.xml import extract_root_languages
+
 
 
 def write_svg(tmp_path: Path, content: str) -> Path:
@@ -33,10 +32,12 @@ def test_inject_tracks_new_languages(tmp_path):
 
     assert result.success
     assert isinstance(result.data, InjectorData)
-    tree = result.data.tree
     stats = result.data.inject_stats.to_json()
 
-    after_languages = tree_languages(tree)
+    tree = result.data.tree
+    assert tree is not None
+    root = tree.getroot()
+    after_languages = extract_root_languages(root)
 
     assert after_languages == {"ar", "fr"}
     assert stats["all_languages_count"] == 2
@@ -91,4 +92,8 @@ def test_file_langs_handles_element_tree(tmp_path):
 
     assert result.success
     tree = result.data.tree
-    assert tree_languages(tree) == {"ar"}
+    assert tree is not None
+
+    root = tree.getroot()
+    after_languages = extract_root_languages(root)
+    assert after_languages == {"ar"}

@@ -54,15 +54,12 @@ class NestedStructureService:
             logger.error(f"Failed to parse SVG file {source}: {exc.code}")
             return []
 
-        tree = doc.tree
-        if tree is None:
+        if doc.tree is None:
             return []
 
-        root = doc.root
-
         try:
-            return self.detector.find_in_tree_return_list(root)
-        except (etree.XMLSyntaxError, OSError) as exc:
+            return self.detector.find_in_tree_return_list(doc.root)
+        except Exception as exc:
             logger.error("Failed to parse %s: %s", source, exc)
             return []
 
@@ -91,18 +88,14 @@ class NestedStructureService:
                 warnings=[f"Failed to parse source file: {src_path}"],
             )
 
-        # Parse source file
-        tree = doc.tree
-        if tree is None:
+        if doc.tree is None:
             return RepairResult.fail(
                 warnings=[f"Failed to parse source file: {src_path}"],
             )
-        root = tree.getroot()
+        root = doc.root
 
         if root is None:
-            return RepairResult.fail(
-                warnings=["Empty SVG root"],
-            )
+            return RepairResult.fail(warnings=["Empty SVG root"])
 
         result = self.repair_root(root, strategy)
 

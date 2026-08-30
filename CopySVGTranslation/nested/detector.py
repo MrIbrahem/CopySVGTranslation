@@ -5,7 +5,12 @@ from pathlib import Path
 
 from lxml import etree
 
+from ..config import TranslationConfig
+from ..exceptions import SvgStructureError
+from ..io import SvgDocument
+
 logger = logging.getLogger(__name__)
+
 SVG_NS = "http://www.w3.org/2000/svg"
 
 
@@ -31,6 +36,7 @@ class NestedTspanDetector:
         Return all tspan elements that have element children.
         """
         result: list[etree._Element] = []
+
         # Find all <tspan> elements
         tspans = root.findall(f".//{{{SVG_NS}}}tspan")
         for tspan in tspans:
@@ -38,6 +44,7 @@ class NestedTspanDetector:
             element_children = [c for c in tspan if isinstance(c.tag, str)]
             if element_children:
                 result.append(tspan)
+
         return result
 
     def find_in_file(self, source_file: Path | str) -> list[str]:
@@ -45,23 +52,18 @@ class NestedTspanDetector:
         Parse a file and return serialised representations of nested tspans.
         Returns an empty list on parse errors.
         """
-        path = Path(source_file)
-        if not path.exists():
-            logger.error("File does not exist: %s", path)
+        try:
+            config = TranslationConfig(remove_blank_text=True)
+            doc: SvgDocument = SvgDocument.load(source_file, config=config)
+        except FileNotFoundError:
+            logger.error("File does not exist: %s", source_file)
+            return []
+        except SvgStructureError as exc:
+            logger.error(f"Failed to parse SVG file {source_file}: {exc.code}")
             return []
 
-        try:
-            parser = etree.XMLParser(
-                remove_blank_text=True,
-                resolve_entities=False,
-                no_network=True,
-            )
-            tree = etree.parse(str(path), parser)
-            root = tree.getroot()
-            if root is None:
-                return []
-        except (etree.XMLSyntaxError, OSError) as exc:
-            logger.error("Failed to parse %s: %s", path, exc)
+        root = doc.root
+        if doc.tree is None or root is None:
             return []
 
         return self.find_in_tree_return_list(root)

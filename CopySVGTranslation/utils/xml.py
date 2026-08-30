@@ -88,27 +88,6 @@ def sort_switch_children(
     for t in texts_sorted:
         switch.append(t)
 
-
-def tree_languages(tree: etree._ElementTree | None) -> set[str]:
-    """
-    Return the set of systemLanguage values present in the tree.
-    """
-    if tree is None:
-        return set()
-    try:
-        root = tree.getroot()
-
-    except (etree.XMLSyntaxError, OSError):
-        logger.exception(f"Error parsing SVG file: {tree}")
-
-    if root is None:
-        return set()
-
-    languages = extract_root_languages(root)
-
-    return languages
-
-
 def is_switch_sorted(switch: etree._Element) -> bool:
     """Return True if the <text> children of a single <switch> are in sorted order.
 
@@ -186,6 +165,5 @@ __all__ = [
     "sort_switch_children",
     "sort_switch_texts",
     "svg_tag",
-    "tree_languages",
     "xpath_svg",
 ]
