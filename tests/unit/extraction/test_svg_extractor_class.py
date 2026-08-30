@@ -32,6 +32,7 @@ def _write_svg(tmp_path: Path, inner: str, name: str = "test.svg") -> Path:
     p.write_text(_wrap_svg(inner), encoding="utf-8")
     return p
 
+
 # ===========================================================================
 # SVGTranslationExtractor constructor tests
 # ===========================================================================

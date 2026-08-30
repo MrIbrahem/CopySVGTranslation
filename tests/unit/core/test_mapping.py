@@ -266,6 +266,7 @@ class TestMerge:
 # TranslationMapping dataclass tests
 # ===========================================================================
 
+
 class TestTranslationMapping:
     """Tests for the TranslationMapping dataclass."""
 
@@ -310,4 +311,3 @@ class TestTranslationMapping:
         b = TranslationMapping()
         a.new["key"] = {"ar": "val"}
         assert "key" not in b.new
-

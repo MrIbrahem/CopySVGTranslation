@@ -141,7 +141,10 @@ class YearTitleHandler:
             mapping.title_new.update(data)
 
     def build_title_new_templates(
-        self, mapping_new: dict[str, Any], create_lang_template: bool = False
+        self,
+        mapping_new: dict[str, Any],
+        create_lang_template: bool = False,
+        set_key_with_empty_value: bool | None = None,
     ) -> dict[str, Any]:
         """
         Extract valid title translations by verifying that all translations in a mapping
@@ -163,6 +166,9 @@ class YearTitleHandler:
         Returns:
             A dictionary mapping base title -> { language -> title with `{year}` }.
         """
+        if set_key_with_empty_value is None:
+            set_key_with_empty_value = self.config.set_key_with_empty_value
+
         data = {}
         for source, translations in list(mapping_new.items()):
             year = self.match_year(source)
@@ -184,9 +190,10 @@ class YearTitleHandler:
                 if value_template:
                     templated[lang] = value_template
 
-            if templated:
+            if templated or set_key_with_empty_value:
                 data[source_template] = templated
                 logger.debug("Title template: %r → %s", source_template, list(templated))
+
         return data
 
     # ------------------------------------------------------------------
