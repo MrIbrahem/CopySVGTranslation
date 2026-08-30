@@ -38,10 +38,13 @@ class YearTitleHandler:
         text = text.strip()
         if len(text) < 4:
             return ""
+
         if text[-4:].isdigit():
             return text[-4:]
+
         if text[:4].isdigit():
             return text[:4]
+
         return ""
 
     def bulid_lang_template(self, value: str, lang: str) -> str:
@@ -171,10 +174,15 @@ class YearTitleHandler:
 
         data = {}
         for source, translations in list(mapping_new.items()):
+            source = source.strip()
+
+            if not source or source.isdigit():
+                continue
+
             year = self.match_year(source)
 
             # if not year:
-            if not source or source == year or not year.isdigit():
+            if not year.isdigit():
                 continue
 
             source_template = self.replace_year_with_placeholder(source, year)
@@ -273,7 +281,6 @@ class YearTitleHandler:
             key = source.lower() if case_insensitive else source
             working.new.setdefault(key, {}).update(trans)
         return working
-
 
 __all__ = [
     "YearTitleHandler",
