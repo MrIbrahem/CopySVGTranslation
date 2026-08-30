@@ -5,8 +5,10 @@ from pathlib import Path
 import pytest
 
 from CopySVGTranslation.config import TranslationConfig
+from CopySVGTranslation.core.mapping import TranslationMapping
 from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor
 from CopySVGTranslation.io.svg_document import SvgDocument
+from CopySVGTranslation.titles.year_to_year_handler import YearTitleHandlerNew
 
 
 def _wrap_svg(inner: str) -> str:
@@ -153,25 +155,85 @@ class TestExamples(TestSetup):
         assert "test, {year}" not in result
         assert result["wine production, {year}"] == {"af": "Wynproduksie, {year}", "ar": "إنتاج النبيذ، {year}"}
 
-
-class TestWhatTODO(TestSetup):
-    @pytest.fixture(autouse=True)
-    def setup_todo(self):
+    def test_set_key_with_empty_value(self):
         new = {
             "test, 2012": {},
             "wine production, 1961": {"af": "Wynproduksie, 1961", "ar": "إنتاج النبيذ، 1961"},
             "wine production, 1961 to 2023": {},
         }
-        self.result = self.service.year_handler.build_title_new_templates(
+        result = self.service.year_handler.build_title_new_templates(
             new,
             create_lang_template=True,
             set_key_with_empty_value=True,
         )
+        assert "test, {year}" in result
+        assert result["test, {year}"] == {}
+
+
+class TestWhatTODODone:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        new = {
+            "test, 2012": {},
+            "wine production, 1961": {"af": "Wynproduksie, 1961", "ar": "إنتاج النبيذ، 1961"},
+            "wine production, 1961 to 2023": {"ar": "إنتاج النبيذ، 1961 إلى 2023"},
+        }
+        self.service = YearTitleHandlerNew()
+        self.mapping = TranslationMapping(new=new)
+        self.result = self.service.build_title_new_templates_year1_to_year2(
+            self.mapping,
+            set_key_with_empty_value=True,
+        )
+
+    def test_match_years(self):
+        year1, year2 = self.service.match_years("wine production, 1961 to 2023")
+        assert year1 == "1961"
+        assert year2 == "2023"
+
+    def test_set_year1_to_year2_done(self):
+        assert "wine production, {year1} to {year2}" in self.result
+        assert self.result["wine production, {year1} to {year2}"] == {"ar": "إنتاج النبيذ، {year1} إلى {year2}"}
+
+    def test_extend_translations_diff(self):
+        title_new = {"ar": "إنتاج النبيذ، {year}"}
+        result = self.service.extend_translations(title_new)
+
+        assert result == {"ar": "إنتاج النبيذ، {year1} إلى {year2}"}
+
+
+class TestWhatTODO:
+
+    @pytest.fixture(autouse=True)
+    def setup_todo(self):
+        self.service = YearTitleHandlerNew(TranslationConfig(set_key_with_empty_value=True, enable_year_titles=True))
 
     @pytest.mark.todo
-    def test_set_key_with_empty_value(self):
-        assert self.result["test, {year}"] == {}
+    def test_translation_mapping_years(self):
+        new = {
+            "wine production, 1961 to 2023": {},
+        }
+        title_new = {
+            "wine production, {year}": {"ar": "إنتاج النبيذ، {year}"}
+        }
+        mapping = TranslationMapping(title_new=title_new, new=new)
+
+        data = self.service.build_title_new_templates_year1_to_year2(mapping)
+
+        assert "wine production, {year1} to {year2}" in data
+        assert data["wine production, {year1} to {year2}"] == {"ar": "إنتاج النبيذ، {year1} إلى {year2}"}
 
     @pytest.mark.todo
     def test_set_year1_to_year2(self):
-        assert self.result["wine production, {year1} to {year2}"] == {"ar": "إنتاج النبيذ، {year1} إلى {year2}"}
+        new = {
+            "wine production, 1961 to 2023": {},
+        }
+        title_new = {
+            "wine production, {year}": {"ar": "إنتاج النبيذ، {year}"}
+        }
+        mapping = TranslationMapping(title_new=title_new, new=new)
+
+        self.service.build_templates(mapping)
+        assert "wine production, {year1} to {year2}" in mapping.title_new
+        assert mapping.new == { "wine production, 1961 to 2023": {}}, "new diff"
+
+        assert mapping.title_new["wine production, {year1} to {year2}"] == {"ar": "إنتاج النبيذ، {year1} إلى {year2}"}, "title_new diff"
