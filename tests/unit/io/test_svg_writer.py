@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import sys
 import stat
+import sys
 from pathlib import Path
 
 import pytest
@@ -55,6 +55,7 @@ def test_write_svg_accepts_root_and_atomically_replaces_existing_file(tmp_path: 
     assert "updated" in content
     assert content.startswith("<?xml")
     assert list(tmp_path.glob(f".{target.name}.*.tmp")) == []
+
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not support file mode")
 def test_write_svg_preserves_existing_file_permissions(tmp_path: Path) -> None:

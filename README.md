@@ -3,11 +3,7 @@
 [![PyPI Version](https://img.shields.io/pypi/v/CopySVGTranslation.svg?style=flat-square)](https://pypi.org/project/CopySVGTranslation/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg?style=flat-square)](https://www.python.org/downloads/)
 
-**Extract multilingual text from SVG files and inject translations into other SVGs.**
-
-CopySVGTranslation works with SVG documents that use `<switch>` elements and `systemLanguage` attributes. The public entry point, `SVGTranslationService`, coordinates extraction, injection, preparation, nested-structure repair, and JSON mapping I/O through one consistent result type.
-
----
+CopySVGTranslation is a Python library that extracts multilingual text from SVG files and injects translations into other SVGs. It works with SVG documents that use `<switch>` elements and `systemLanguage` attributes — the SVG standard mechanism for internationalization. Rather than manipulating raw XML yourself, you interact with a single facade class, `SVGTranslationService`, which orchestrates extraction, injection, preparation, nested-structure repair, and JSON mapping I/O through one consistent result type: `OperationResult`.
 
 ## Features
 
@@ -16,6 +12,7 @@ CopySVGTranslation works with SVG documents that use `<switch>` elements and `sy
 -   Prepare SVGs by normalizing structure, IDs, and language tags before translation work.
 -   Inspect and repair nested `<tspan>` / `<a>` structures independently of extraction and injection.
 -   Save and load JSON translation mappings.
+-   Check whether `<switch>` elements are correctly ordered and fix them in place (`check_switches_sorted` / `sort_switches`). On Wikimedia Commons, files with an out-of-order fallback `<text>` (one lacking `systemLanguage`) will not display translations, so this is the check to run before re-uploading.
 -   Configure matching, overwrite, output, and nested-node behavior in `TranslationConfig`.
 -   Receive uniform `OperationResult` objects instead of unhandled lower-level errors when using the service facade.
 
@@ -121,6 +118,8 @@ else:
 ---
 
 ## Extract Translations
+
+**Extract multilingual text from SVG files and inject translations into other SVGs.**
 
 Use `extract()` to collect the translations already present in a multilingual SVG. It accepts either a `str` or `pathlib.Path`.
 
@@ -304,62 +303,15 @@ When `output` is supplied, the prepared document is written to that path. When i
 
 Nested `<tspan>` and `<a>` nodes may require special handling. These operations are deliberately separate from `extract()` and `inject()`, so you can inspect or repair a document before proceeding.
 
-### Analyze without modification
+Read: [docs/nested-structures.md](docs/nested-structures.md) for full reference — including `analyze_nested()`, `repair_nested()` usage, strategies, and `RepairResult` fields.
 
-`analyze_nested()` is read-only and returns XML snippets describing nested structures.
+---
 
-```python
-result = service.analyze_nested("diagram.svg")
+## Check and Fix Switch Ordering
 
-if result.success:
-    if result.data:
-        print("Nested structures found:")
-        for finding in result.data:
-            print(finding)
-    else:
-        print("No nested structures found.")
-```
+For translations to render on Wikimedia Commons, every `<switch>` must keep its fallback `<text>` (the one without a `systemLanguage` attribute) **last** among its `<text>` children.
 
-### Repair and save
-
-`repair_nested()` uses the configured strategy by default. Because its default is `save=True`, provide an output path unless you explicitly set `save=False`.
-
-```python
-from CopySVGTranslation import SVGTranslationService, TranslationConfig
-
-service = SVGTranslationService(
-    TranslationConfig(nested_strategy="preserve_style"),
-)
-result = service.repair_nested(
-    "diagram.svg",
-    output="repaired/diagram.svg",
-)
-
-if result.success:
-    repair = result.data
-    print(f"Nested tags fixed: {repair.len_tags_fixed}")
-    print(f"Before: {repair.len_tags_before_fix}")
-    print(f"After: {repair.len_tags_after_fix}")
-```
-
-To repair only in memory, disable saving explicitly.
-
-```python
-result = service.repair_nested(
-    "diagram.svg",
-    strategy="flatten",
-    save=False,
-)
-```
-
-| Strategy              | Behavior                                                                     |
-| --------------------- | ---------------------------------------------------------------------------- |
-| `raise`               | Stops when nested `<tspan>` structures are encountered. This is the default. |
-| `flatten`             | Concatenates nested text into a single `<tspan>`.                            |
-| `preserve_style`      | Converts nested styled spans to sibling spans while retaining styling.       |
-| `split_nested_tspans` | Alias behavior for `preserve_style`.                                         |
-
-`RepairResult` reports `len_tags_before_fix`, `len_tags_after_fix`, the derived `len_tags_fixed`, and any warnings.
+Read [docs/switch-ordering.md](docs/switch-ordering.md) for full reference — including `check_switches_sorted()` and `sort_switches()` usage, the `output=` parameter, and in-memory-only reordering.
 
 ---
 

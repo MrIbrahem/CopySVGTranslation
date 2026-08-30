@@ -14,3 +14,5 @@ poetry.lock
 *.7z
 *.zip
 *.rar
+/example
+_README.md

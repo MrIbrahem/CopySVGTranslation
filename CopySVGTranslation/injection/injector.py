@@ -13,12 +13,12 @@ from ..exceptions import (
     SvgNestedTspanError,
     SvgStructureError,
 )
-from ..io.svg_writer import write_svg
+from ..io import SvgDocument
 from ..preparation import SvgPreparationPipeline
 from ..result import InjectorStats
 from ..titles import YearTitleHandler
 from ..utils import sort_switch_texts
-from ..utils.xml import tree_languages
+from ..utils.xml import extract_root_languages
 from .id_manager import IdManager
 from .switch_processor import SwitchProcessor
 from .translation_applier import TranslationApplier
@@ -46,14 +46,15 @@ class SVGTranslationInjector:
             YearTitleHandler(self.config),
         )
 
-    def _finalize_switches(self, root) -> None:
-        # Fix old <svg:switch> tags if present
-
+    def _finalize_switches(self, root: etree._Element) -> None:
         if not self.config.sort_switches:
             return
 
         for elem in root.findall(".//svg:switch", namespaces={"svg": SVG_NS}):
+            # Fix old <svg:switch> tags if present
             elem.tag = "switch"
+
+            # Sort <svg:text> tags inside <svg:switch> tags
             sort_switch_texts(elem)
 
     def inject(
@@ -111,7 +112,7 @@ class SVGTranslationInjector:
         result.tree = tree
 
         # 2. Snapshot languages before
-        before_languages = tree_languages(tree)
+        before_languages = extract_root_languages(root)
         result.inject_stats.languages_before = sorted(before_languages)
 
         # 3. Seed IdManager with existing IDs
@@ -130,7 +131,7 @@ class SVGTranslationInjector:
         self._finalize_switches(root)
 
         # 6. Languages after + stats
-        after_languages = tree_languages(tree)
+        after_languages = extract_root_languages(root)
         self._update_data(result.inject_stats, before_languages, after_languages)
 
         if save:
@@ -141,7 +142,8 @@ class SVGTranslationInjector:
                 return result
 
             try:
-                write_svg(tree, save_path, config=self.config)
+                doc = SvgDocument(tree=tree, path=save_path, config=self.config)
+                doc.save()
             except OSError as e:
                 logger.error(f"Failed writing {str(save_path)}: {e}")
                 result.error.label = f"Failed writing {str(save_path)}: {e}"

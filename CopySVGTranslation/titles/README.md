@@ -4,4 +4,4 @@ This package handles title-related processing, including year handling in SVG ti
 
 For detailed documentation, see:
 
-→ [Titles Documentation](../../docs/refactor/titles.md)
+→ [Titles Documentation](../../docs/titles.md)

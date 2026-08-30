@@ -12,11 +12,12 @@ from .config import TranslationConfig
 from .core.mapping import InjectorData, TranslationMapping
 from .extraction.extractor import SVGTranslationExtractor
 from .injection.injector import SVGTranslationInjector
+from .io import SvgDocument
 from .io.mapping_store import MappingStore
 from .io.output_paths import resolve_svg_output_path
-from .io.svg_writer import write_svg
 from .nested import NestedStructureService
 from .result import OperationResult
+from .switch_order_checker import SwitchOrderChecker
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ class SVGTranslationService:
         self._extractor = SVGTranslationExtractor(self.config)
         self._injector = SVGTranslationInjector(self.config)
         self._mapping_store = MappingStore(self.config)
+        self.switch_order_checker = SwitchOrderChecker(self.config)
         self._nested = NestedStructureService(
             strategy=self.config.nested_strategy,
             also_fix_a=True,
@@ -80,12 +82,14 @@ class SVGTranslationService:
             )
         try:
             resolved_output = self._resolve_output_path(output) if output else None
+
             result = self._nested.repair_file(
                 source=Path(svg_path),
                 output=resolved_output,
                 strategy=strategy or self.config.nested_strategy,
                 save=save,
             )
+
             if not result.success:
                 return OperationResult.fail(
                     error="; ".join(result.warnings) if result.warnings else "Repair failed",
@@ -248,14 +252,57 @@ class SVGTranslationService:
 
         # Merge warnings from extract_result into inject_result
         merged_warnings = extract_result.warnings + inject_result.warnings
-        return OperationResult(
-            success=inject_result.success,
-            data=inject_result.data,
+        if inject_result.success:
+            return OperationResult.ok(
+                data=inject_result.data,
+                stats=inject_result.stats,
+                warnings=merged_warnings,
+            )
+
+        return OperationResult.fail(
             stats=inject_result.stats,
             error=inject_result.error,
             error_code=inject_result.error_code,
             warnings=merged_warnings,
         )
+
+    def check_switches_sorted(
+        self,
+        svg_path: Path | str,
+    ) -> OperationResult[bool]:
+        """Check whether every <switch> in the file is already sorted.
+
+        Returns ``True`` when all switches are sorted. If ``False``, call
+        :meth:`sort_switches` to fix and re-upload to commons.
+        """
+        try:
+            result = self.switch_order_checker.are_switches_sorted(svg_path)
+            return OperationResult.ok(data=result)
+        except Exception as exc:
+            return OperationResult.fail(
+                error=str(exc),
+                error_code=getattr(exc, "code", "check_sorted_error"),
+            )
+
+    def sort_switches(
+        self,
+        svg_path: Path | str,
+        *,
+        output: Path | str | None = None,
+    ) -> OperationResult[bool]:
+        """Sort every <switch> in the file and optionally save it.
+
+        Returns ``True`` if the file was modified (was not already sorted).
+        """
+        try:
+            resolved_output = self._resolve_output_path(output) if output else None
+            modified = self.switch_order_checker.sort_switches(svg_path, save_path=resolved_output)
+            return OperationResult.ok(data=modified)
+        except Exception as exc:
+            return OperationResult.fail(
+                error=str(exc),
+                error_code=getattr(exc, "code", "sort_switches_error"),
+            )
 
     def prepare_only(
         self,
@@ -274,7 +321,8 @@ class SVGTranslationService:
             tree = self._injector.prepare(svg_path)
             if output:
                 resolved_output = self._resolve_output_path(output)
-                write_svg(tree, resolved_output, config=self.config)
+                doc = SvgDocument(tree=tree, path=resolved_output, config=self.config)
+                doc.save()
             return OperationResult.ok(data=tree)
         except Exception as exc:
             return OperationResult.fail(

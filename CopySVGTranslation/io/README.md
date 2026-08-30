@@ -4,4 +4,4 @@ This package provides input/output utilities for SVG documents and mapping stora
 
 For detailed documentation, see:
 
-→ [IO Documentation](../../docs/refactor/io.md)
+→ [IO Documentation](../../docs/architecture.md)

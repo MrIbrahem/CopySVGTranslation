@@ -3,29 +3,36 @@
 ## 1. Completed Requirements
 
 ### Primary Requirement
+
 > **TODO**: use `config.fallback_to_default_text` to fallback if lang not in mapping or `mapping[lang]` is empty — fix this issue in `test_missing_translation_for_a_tspan_falls_back_to_empty_string`.
 
 ### User Clarification
+
 > "I don't want `<tspan id="s2-ar">world</tspan>` in switch_string if `fallback_to_default_text=False`"
 
 This established two distinct behaviors:
-- **`fallback_to_default_text=False` (default):** When a translation is missing or empty for a tspan, **remove** that tspan from the cloned language node entirely. Do not keep the original/default text.
-- **`fallback_to_default_text=True`:** When a translation is missing or empty for a tspan, **use the source (default) text** as the translation value.
+
+-   **`fallback_to_default_text=False` (default):** When a translation is missing or empty for a tspan, **remove** that tspan from the cloned language node entirely. Do not keep the original/default text.
+-   **`fallback_to_default_text=True`:** When a translation is missing or empty for a tspan, **use the source (default) text** as the translation value.
 
 ---
 
 ## 2. Technical Decisions
 
 ### Decision 1: Empty/whitespace-only translations are treated as missing
+
 In `switch_processor.py`, the check `trans is not None` was changed to `trans is not None and trans.strip() != ""`. This ensures that mapping entries like `{"ar": ""}` or `{"ar": "  "}` are treated the same as a missing key, allowing `config.fallback_to_default_text` to kick in.
 
 ### Decision 2: Remove untranslated tspans from cloned nodes
+
 In `translation_applier.py`, when a tspan has no valid translation (and fallback is not active), the tspan is **removed from the parent element** rather than left with its original deep-copied text. This prevents the output from containing untranslated tspans like `<tspan id="s2-ar">world</tspan>` when `fallback_to_default_text=False`.
 
 ### Decision 3: Two separate tests cover both behaviors
+
 Instead of one test, two companion tests were written:
-- `test_missing_translation_for_a_tspan_falls_back_to_empty_string` — verifies tspan is **omitted** when `fallback_to_default_text=False`
-- `test_missing_translation_for_a_tspan_falls_back_to_default_text` — verifies tspan contains **original source text** when `fallback_to_default_text=True`
+
+-   `test_missing_translation_for_a_tspan_falls_back_to_empty_string` — verifies tspan is **omitted** when `fallback_to_default_text=False`
+-   `test_missing_translation_for_a_tspan_falls_back_to_default_text` — verifies tspan contains **original source text** when `fallback_to_default_text=True`
 
 ---
 
@@ -185,18 +192,19 @@ assert tspans == []
 
 ## 4. Errors Encountered and Fixes
 
-| Error | Root Cause | Fix |
-|-------|-----------|-----|
-| **Test failed**: `<tspan id="s2-ar">world</tspan>` present in output | Deep-clone of default node preserved original tspan text when no translation existed | Added tspan removal logic in `translation_applier.py` for tspans without valid translations |
-| **Test failed**: `test_insert_missing_translation_fills_nothing` — `IndexError: list index out of range` | The applier test expected the tspan to still exist with original text, but the new behavior removes it | Updated the applier test to assert `tspans == []` instead of checking `tspans[0].text` |
-| **First attempt at edit failed**: `Could not find the exact text` | The test file had already been partially modified from a previous edit in the same session, so the old text no longer matched exactly | Read the current file state and used the actual content for the edit |
-| **Original test `test_missing_translation_for_a_tspan_falls_back_to_empty_string` was failing** (starting point) | The test expected `<tspan id="s2-ar">world</tspan>` to NOT be in the output, but the deep-cloned node preserved original text | Full fix across `switch_processor.py` + `translation_applier.py` as described above |
+| Error                                                                                                            | Root Cause                                                                                                                            | Fix                                                                                         |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **Test failed**: `<tspan id="s2-ar">world</tspan>` present in output                                             | Deep-clone of default node preserved original tspan text when no translation existed                                                  | Added tspan removal logic in `translation_applier.py` for tspans without valid translations |
+| **Test failed**: `test_insert_missing_translation_fills_nothing` — `IndexError: list index out of range`         | The applier test expected the tspan to still exist with original text, but the new behavior removes it                                | Updated the applier test to assert `tspans == []` instead of checking `tspans[0].text`      |
+| **First attempt at edit failed**: `Could not find the exact text`                                                | The test file had already been partially modified from a previous edit in the same session, so the old text no longer matched exactly | Read the current file state and used the actual content for the edit                        |
+| **Original test `test_missing_translation_for_a_tspan_falls_back_to_empty_string` was failing** (starting point) | The test expected `<tspan id="s2-ar">world</tspan>` to NOT be in the output, but the deep-cloned node preserved original text         | Full fix across `switch_processor.py` + `translation_applier.py` as described above         |
 
 ---
 
 ## 5. Current Project State
 
 ### Test Results
+
 ```
 ================ 668 passed, 2 skipped, 1 deselected in 1.59s =================
 ```
@@ -205,18 +213,20 @@ All 668 tests pass with zero failures. The 2 skipped tests and 1 deselected test
 
 ### Behavior Summary
 
-| Scenario | `fallback_to_default_text=False` (default) | `fallback_to_default_text=True` |
-|----------|-------------------------------------------|--------------------------------|
-| Translation exists | Use translated text | Use translated text |
-| Translation is empty string `""` | **Remove** the tspan | Use source/default text |
-| Translation key missing from mapping | **Remove** the tspan | Use source/default text |
-| Lang not in mapping at all | **Remove** the tspan | Use source/default text |
+| Scenario                             | `fallback_to_default_text=False` (default) | `fallback_to_default_text=True` |
+| ------------------------------------ | ------------------------------------------ | ------------------------------- |
+| Translation exists                   | Use translated text                        | Use translated text             |
+| Translation is empty string `""`     | **Remove** the tspan                       | Use source/default text         |
+| Translation key missing from mapping | **Remove** the tspan                       | Use source/default text         |
+| Lang not in mapping at all           | **Remove** the tspan                       | Use source/default text         |
 
 ### Files Modified (4 files)
+
 1. `CopySVGTranslation/injection/switch_processor.py` — empty-string validation
 2. `CopySVGTranslation/injection/translation_applier.py` — tspan removal for missing translations
 3. `tests/unit/injection/test_switch_processor.py` — two companion tests + helper update
 4. `tests/unit/injection/test_translation_applier.py` — updated expectation for tspan removal
 
 ### `TranslationConfig.fallback_to_default_text` field
+
 Already existed in `CopySVGTranslation/config.py` with default value `False`. No changes were needed to the config file itself — only the processor and applier now correctly honor this flag.

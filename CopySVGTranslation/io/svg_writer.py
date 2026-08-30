@@ -35,6 +35,7 @@ def write_svg(
     existing_mode = stat.S_IMODE(target.stat().st_mode) if target.exists() else None
 
     should_create_parents = config.create_parents if create_parents is None else create_parents
+
     if should_create_parents:
         target.parent.mkdir(parents=True, exist_ok=True)
 

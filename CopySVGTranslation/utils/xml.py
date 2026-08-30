@@ -89,24 +89,46 @@ def sort_switch_children(
         switch.append(t)
 
 
-def tree_languages(tree: etree._ElementTree | None) -> set[str]:
-    """
-    Return the set of systemLanguage values present in the tree.
-    """
-    if tree is None:
-        return set()
-    try:
-        root = tree.getroot()
+def is_switch_sorted(switch: etree._Element) -> bool:
+    """Return True if the <text> children of a single <switch> are in sorted order.
 
-    except (etree.XMLSyntaxError, OSError):
-        logger.exception(f"Error parsing SVG file: {tree}")
+    "Sorted" matches the invariant enforced by :func:`sort_switch_texts`:
+    every <text> that has a ``systemLanguage`` must come before any <text>
+    that does not (the fallback text must be last).
+    """
+    if switch is None:
+        return True
 
+    seen_fallback = False
+    for child in switch:
+        if not is_svg_element(child, "text"):
+            continue
+        has_lang = child.get("systemLanguage") is not None
+        if not has_lang:
+            seen_fallback = True
+        elif seen_fallback:
+            # A language text appears after a fallback text -> not sorted.
+            return False
+    return True
+
+
+def are_switches_sorted(root: etree._Element | None) -> bool:
+    """Return True if every <switch> in the tree is sorted (see :func:`is_switch_sorted`).
+
+    Accepts either a root element containing switches, or a single <switch>
+    element. Returns True when there is nothing to sort.
+    """
     if root is None:
-        return set()
+        return True
 
-    languages = extract_root_languages(root)
+    if is_svg_element(root, "switch"):
+        return is_switch_sorted(root)
 
-    return languages
+    switches = root.xpath(".//svg:switch", namespaces={"svg": SVG_NS})
+    if not switches:
+        return True
+
+    return all(is_switch_sorted(s) for s in switches)
 
 
 def sort_switch_texts(elem):
@@ -134,8 +156,15 @@ def sort_switch_texts(elem):
 
 
 __all__ = [
-    "sort_switch_children",
+    "are_switches_sorted",
+    "collect_ids",
     "extract_root_languages",
-    "tree_languages",
+    "findall_svg",
+    "is_svg_element",
+    "is_switch_sorted",
+    "local_name",
+    "sort_switch_children",
     "sort_switch_texts",
+    "svg_tag",
+    "xpath_svg",
 ]
