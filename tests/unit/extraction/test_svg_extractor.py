@@ -4,14 +4,9 @@ Unit tests for CopySVGTranslation/extraction/extractor.py module.
 Functions to test: extract
 """
 
-from pathlib import Path
-
-import pytest
 
 from CopySVGTranslation.config import TranslationConfig
 from CopySVGTranslation.extraction.extractor import SVGTranslationExtractor
-
-SVG_NS = "http://www.w3.org/2000/svg"
 
 TSPANS_BY_ID_DATA = {
     "trsvg1": "Parkinson's disease prevalence, 1990",
@@ -70,54 +65,6 @@ NEW_DATA = {
         "dag": "Tilahi valibu bee zahimbu kpatuɣa mini tibbu soya din pahi nyɛla din tooi soŋsim baligi doro ŋɔ nahingbana ka kpaŋsi alaafee biɛɣigu n ti niro ŋun mali Parkinson's doro ŋɔ."
     },
 }
-
-def _wrap_svg(inner: str, width: int = 100, height: int = 100) -> str:
-    return f'<svg xmlns="{SVG_NS}" version="1.1" width="{width}" height="{height}">{inner}</svg>'
-
-
-def _write_svg(tmp_dir: Path, inner_svg: str, name: str = "test.svg", width: int = 100, height: int = 100) -> Path:
-    p = tmp_dir / name
-    p.write_text(_wrap_svg(inner_svg, width, height), encoding="utf-8")
-    return p
-
-
-@pytest.mark.todo
-def test_match_header_tags(temp_dir: Path):
-    text = """
-        <g class="HeaderView" id="header">
-            <a href="https://ourworldindata.org/grapher/parkinsons-disease-prevalence-ihme?time=1990&amp;overlay=download-vis"
-                id="title"
-                style="font-family: &quot;Playfair Display&quot;, Georgia, &quot;Times New Roman&quot;, &quot;Liberation Serif&quot;, serif;">
-                <switch>
-                <text fill="#2d2e2d" font-size="25.00" font-weight="normal" id="trsvg19-dag" systemLanguage="dag" x="16.0"
-                    y="40.3">
-                    <tspan id="trsvg1-dag" x="16" y="40.25">Parkinson's doro yɔlibu biɛɣigu ni, yuuni 1990
-                    puli ni</tspan>
-                </text>
-                <text fill="#2d2e2d" font-size="25.00" font-weight="600" id="trsvg19" x="16.0" y="40.3">
-                    <tspan id="trsvg1" x="16" y="40.25">Parkinson's disease prevalence, 1990</tspan>
-                </text>
-                </switch>
-            </a>
-            <g class="markdown-text-wrap" id="subtitle">
-                <switch style="font-size: 15px; line-height: 1.2;">
-                <text fill="#5b5b5b" id="trsvg20-dag" style="font-size: 15px; line-height: 1.2;" systemLanguage="dag" x="16.0"
-                    y="66.5">
-                    <tspan id="trsvg2-dag" x="16" y="66.5">Salo kalinli ban daa mali Parkinson's doro ŋɔ
-                    daadam 100,000 kalinli li.</tspan>
-                </text>
-                <text fill="#5b5b5b" id="trsvg20" style="font-size: 15px; line-height: 1.2;" x="16.0" y="66.5">
-                    <tspan id="trsvg2" x="16" y="66.5">Estimated number of people with Parkinson's disease¹
-                    per 100,000 people.</tspan>
-                </text>
-                </switch>
-            </g>
-        </g>
-    """
-
-    file = _write_svg(temp_dir, text, name="testx.svg")
-    assert file is not None
-
 
 def test_extract_svg_with_string_path(fixtures_dir) -> None:
     """extract should work with string paths."""
